@@ -2,12 +2,20 @@ name: CI
 
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
+
+# A branch with a pull request open was running the whole suite twice, once
+# for the push and once for the pull request, on two separate runners.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    # the suite takes about three minutes; this only catches a genuine hang
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7

@@ -5,7 +5,7 @@
 
 import { el } from '../lib/dom';
 import { pick } from '../lib/random';
-import { say } from '../lib/speech';
+import { describeVoice, englishVoices, onlyCompactVoices, say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import { chip, confetti } from '../ui/components';
@@ -152,10 +152,56 @@ export function mount(root: HTMLElement): () => void {
       })),
   );
 
+  /* ── which voice reads the words ────────────────────────────────────── */
+
+  const voiceRow = el('div', { class: 'row' });
+
+  function drawVoices(): void {
+    const voices = englishVoices();
+    voiceRow.replaceChildren(el('span', { class: 'lbl', text: 'Reading voice' }));
+    if (!voices.length) {
+      voiceRow.append(el('span', { class: 'tag', text: 'This device has no English voice installed, so words are shown but not spoken.' }));
+      return;
+    }
+
+    const select = el('select', { 'aria-label': 'Which voice reads the words' },
+      el('option', { value: '', text: 'Best available (' + describeVoice(voices[0]) + ')' }),
+      ...voices.map((v) => el('option', {
+        value: v.voiceURI,
+        text: describeVoice(v),
+        selected: settings().voiceURI === v.voiceURI ? 'selected' : undefined,
+      })),
+    );
+    select.addEventListener('change', () => {
+      updateSettings({ voiceURI: select.value || null });
+      say('rain, sheep, quick');
+    });
+
+    voiceRow.append(select, el('button', {
+      class: 'btn ghost small', type: 'button', text: '🔊 Try it',
+      on: { click: () => say('rain, sheep, quick') },
+    }));
+
+    /* Apple installs only its basic voices. The better ones are a free
+       download, but nothing a web page does can trigger it — so say where. */
+    if (onlyCompactVoices()) {
+      voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
+        text: 'These are the basic voices. For a much clearer one on an iPad: Settings › Accessibility › Spoken Content › Voices › English, then download an Enhanced or Premium voice. It will appear here.' }));
+    }
+  }
+
+  drawVoices();
+  /* voices arrive asynchronously on most browsers, and late on iOS */
+  try {
+    window.speechSynthesis?.addEventListener?.('voiceschanged', drawVoices);
+  } catch {
+    /* no speech here; the row already says so */
+  }
+
   const week = el('div', { class: 'week' },
     el('h2', { text: "This week's sounds" }),
     summary,
-    levelRow, soundRow, toggleRow,
+    levelRow, soundRow, toggleRow, voiceRow,
   );
 
   /* a small piece of fun: one sound gets to be today's, and says hello */

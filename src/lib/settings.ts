@@ -7,7 +7,7 @@
 
 import type { Level } from '../content/index';
 import { read, write } from './storage';
-import { setSpeechEnabled } from './speech';
+import { setPreferredVoice, setSpeechEnabled } from './speech';
 import { setSfxEnabled } from './sfx';
 
 export interface Settings {
@@ -19,6 +19,8 @@ export interface Settings {
   mergeTh: boolean;
   speech: boolean;
   sfx: boolean;
+  /** a voice the parent picked by hand; null means choose the best installed */
+  voiceURI: string | null;
 }
 
 const DEFAULTS: Settings = {
@@ -27,6 +29,7 @@ const DEFAULTS: Settings = {
   mergeTh: false,
   speech: true,
   sfx: true,
+  voiceURI: null,
 };
 
 let current: Settings = { ...DEFAULTS, ...read<Partial<Settings>>('settings', {}) };
@@ -34,6 +37,7 @@ const listeners = new Set<(s: Settings) => void>();
 
 setSpeechEnabled(current.speech);
 setSfxEnabled(current.sfx);
+setPreferredVoice(current.voiceURI);
 
 export const settings = (): Settings => current;
 
@@ -42,6 +46,7 @@ export function updateSettings(patch: Partial<Settings>): void {
   write('settings', current);
   if (patch.speech !== undefined) setSpeechEnabled(patch.speech);
   if (patch.sfx !== undefined) setSfxEnabled(patch.sfx);
+  if (patch.voiceURI !== undefined) setPreferredVoice(patch.voiceURI);
   for (const fn of listeners) fn(current);
 }
 
