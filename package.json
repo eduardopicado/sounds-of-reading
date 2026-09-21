@@ -1,0 +1,23 @@
+{
+  "name": "sounds-of-reading",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "validate:content": "vitest run tests/content.spec.ts",
+    "test": "vitest run tests/content.spec.ts && playwright test",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
+    "an-array-of-english-words": "^2.0.0",
+    "typescript": "^5.9.0",
+    "vite": "^8.3.0",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^3.2.0"
+  }
+}
