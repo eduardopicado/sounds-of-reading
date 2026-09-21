@@ -49,6 +49,24 @@ npm test                 # the content test, then Playwright
 and every path in it is relative, so it can be dropped on GitHub Pages,
 Cloudflare Pages, Netlify or a folder without changing anything.
 
+## Deploying
+
+`.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every
+push to the default branch. It runs the content test first, so a bad word
+cannot reach a child even if someone pushes one.
+
+Set it up once: **Settings → Pages → Source → GitHub Actions**. After that the
+app is at `https://eduardopicado.github.io/sounds-of-reading/` and every push
+updates it.
+
+The URL is public but unlisted — there is no login, because there is nothing
+to log in to and nothing stored anywhere but the child's own device. Share it
+with the school friends as it is.
+
+To add it to an iPad: open the URL in Safari, tap Share, then **Add to Home
+Screen**. It then runs full screen with no browser bar, and keeps working with
+no signal.
+
 ## The content file
 
 Everything the games say lives in `src/content/words.ts`. Adding a word means
