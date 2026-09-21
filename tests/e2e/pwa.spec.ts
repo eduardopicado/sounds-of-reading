@@ -95,6 +95,69 @@ test.describe('speech', () => {
     expect(real[real.length - 1].voice).toBe('Karen');
   });
 
+  test('picks the enhanced voice over the compact one of the same name', async ({ page }) => {
+    await page.addInitScript(() => {
+      /* exactly what an iPad looks like once a better Karen is downloaded:
+         two voices with the same name, told apart only by their identifier */
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Karen', lang: 'en-AU', localService: true, default: false, voiceURI: 'com.apple.voice.enhanced.en-AU.Karen' },
+        { name: 'Daniel', lang: 'en-GB', localService: true, default: false, voiceURI: 'com.apple.voice.premium.en-GB.Daniel' },
+      ];
+      const spoken: { text: string; lang: string; voice: string }[] = [];
+      (window as unknown as { __spoken: unknown }).__spoken = spoken;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: { name: string; lang: string; voiceURI: string } | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: (u: { text: string; lang: string; voice?: { voiceURI: string } }) =>
+            spoken.push({ text: u.text, lang: u.lang, voice: u.voice?.voiceURI ?? '' }),
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+
+    await page.goto('/#/word-builder');
+    await page.locator('.rack .tile').first().click();
+    const spoken = await page.evaluate(() => (window as unknown as { __spoken: { voice: string }[] }).__spoken);
+    const last = spoken.filter((s) => s.voice).pop();
+    /* enhanced Karen beats compact Karen, and Australian beats a premium Brit */
+    expect(last?.voice).toBe('com.apple.voice.enhanced.en-AU.Karen');
+  });
+
+  test('offers every installed English voice, and says where to get better ones', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Daniel', lang: 'en-GB', localService: true, default: false, voiceURI: 'com.apple.voice.compact.en-GB.Daniel' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/');
+    const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
+    expect(options.join(' | ')).toContain('Karen (en-AU)');
+    expect(options.join(' | ')).toContain('Daniel (en-GB)');
+    /* nothing a web page does can install a voice, so it explains where to */
+    await expect(page.locator('.week .tag', { hasText: 'Spoken Content' })).toBeVisible();
+  });
+
   test('survives a browser where touching speechSynthesis throws', async ({ page }) => {
     const watch = watchPage(page);
     await page.addInitScript(() => {

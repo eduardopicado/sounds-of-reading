@@ -52,11 +52,11 @@ Cloudflare Pages, Netlify or a folder without changing anything.
 ## Deploying
 
 `.github/workflows/deploy.yml` builds and publishes to GitHub Pages on every
-push to the default branch. It runs the content test first, so a bad word
-cannot reach a child even if someone pushes one.
+push to `main`. It runs the content test first, so a bad word cannot reach a
+child even if someone pushes one.
 
-Set it up once: **Settings → Pages → Source → GitHub Actions**. After that the
-app is at `https://eduardopicado.github.io/sounds-of-reading/` and every push
+Set up once: **Settings → Pages → Source → GitHub Actions**. The app is at
+`https://eduardopicado.github.io/sounds-of-reading/` and every merge to `main`
 updates it.
 
 The URL is public but unlisted — there is no login, because there is nothing
@@ -114,6 +114,29 @@ only uses letters the child has actually been taught.
 
 `tools/regen-silly.ts` rebuilds those lists when a sound is added, proposing
 only non-words that are pronounceable and contain the grapheme.
+
+## The reading voice
+
+Speech uses the browser's own engine, so nothing is fetched and it works with
+no signal. Which voice you get is up to the device, and on Apple hardware that
+is worth knowing about: each voice ships in three tiers and **only the worst is
+installed by default**. They are told apart by identifier, not name, so an iPad
+can list two voices called Karen that sound nothing alike:
+
+```
+com.apple.voice.compact.en-AU.Karen     preinstalled, robotic
+com.apple.voice.enhanced.en-AU.Karen    much better, a free download
+com.apple.voice.premium.en-AU.Karen     best, a free download
+```
+
+The app ranks by accent first — an Australian child is learning Australian
+vowels — then by tier, then by whether the voice works offline. "This week's
+sounds" has a picker listing everything installed, with a Try it button.
+
+No web page can install a voice, and Siri's voices are not available to the web
+at all. To get a better one on an iPad: **Settings › Accessibility › Spoken
+Content › Voices › English**, then download an Enhanced or Premium voice. It
+appears in the picker straight away.
 
 ## Design rules
 

@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [main, claude/phase-1-games-pwa-22picd]
+    branches: [main]
   workflow_dispatch:
 
 # Pages needs these; nothing here can write to the repository.
