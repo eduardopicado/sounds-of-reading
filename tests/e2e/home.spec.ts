@@ -89,3 +89,29 @@ test.describe("this week's sounds", () => {
     await expect(page.locator('.week .chip').filter({ hasText: /^th$/ })).toBeVisible();
   });
 });
+
+test.describe('sticker book', () => {
+  test('finishing a round wins a sticker that lands in the book', async ({ page }) => {
+    const watch = watchPage(page);
+    await page.goto('/');
+    await expect(page.locator('.tray .empty', { hasText: 'first sticker' })).toBeVisible();
+
+    await page.goto('/#/word-builder');
+    const tiles = page.locator('.rack .tile');
+    for (let i = 0, n = await tiles.count(); i < n; i += 1) {
+      await tiles.nth(i).click({ timeout: 5000 }).catch(() => undefined);
+      await page.waitForTimeout(70);
+    }
+    await expect(page.locator('.overlay.show')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.overlay .prize')).not.toBeEmpty();
+    const won = await page.locator('.overlay .prize').textContent();
+
+    await page.goto('/');
+    await expect(page.locator('.sticker')).toHaveCount(1);
+    await expect(page.locator('.sticker')).toHaveText(won!);
+
+    await page.getByRole('button', { name: 'Start a new sticker book' }).click();
+    await expect(page.locator('.sticker')).toHaveCount(0);
+    noProblems(watch);
+  });
+});

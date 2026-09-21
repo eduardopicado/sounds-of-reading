@@ -14,7 +14,8 @@ import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { read, write } from '../lib/storage';
 import { realWords, sound, type Sound, type Word } from '../content/index';
-import { createSetup, topbar } from '../ui/components';
+import { confetti, createSetup, topbar } from '../ui/components';
+import { award } from '../lib/stickers';
 
 const POSITIONS = ['front', 'right', 'back', 'left', 'top', 'bottom'] as const;
 /** where the cube has to stop for each face to be the one looking at you */
@@ -158,6 +159,13 @@ export function mount(root: HTMLElement): () => void {
     tally[entry.sound.id][good ? 'good' : 'bad'] += 1;
     saveTally();
     if (good) sfx.right(); else { sfx.tap(); say(entry.word.text); }
+    /* every tenth word read for a sound earns its sticker */
+    const t = tally[entry.sound.id];
+    if ((t.good + t.bad) % 10 === 0) {
+      award([entry.sound.id]);
+      sfx.win();
+      confetti(16);
+    }
     drawBars();
   }
 

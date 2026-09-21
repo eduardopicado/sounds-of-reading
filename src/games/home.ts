@@ -9,6 +9,7 @@ import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import { chip, confetti } from '../ui/components';
+import { clearStickers, stickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 
 export interface Tile { path: string; name: string; emoji: string; what: string; tone: string }
@@ -123,6 +124,34 @@ export function mount(root: HTMLElement): () => void {
     );
   }
 
+  /* the sticker book: the one thing that joins the seven games together */
+  const book = el('div', { class: 'sticker-book' });
+  function drawBook(): void {
+    const earned = stickers();
+    if (!earned.length) {
+      book.replaceChildren(el('span', { class: 'empty', text: 'Finish a round in any game to win your first sticker.' }));
+      return;
+    }
+    book.replaceChildren();
+    /* newest last, so the one just won lands at the end */
+    for (const sticker of earned.slice(-24)) {
+      let label = sticker.sound;
+      try { label = sound(sticker.sound).label; } catch { /* a removed sound */ }
+      book.append(el('span', { class: 'sticker', text: sticker.face, title: label, 'aria-label': `${label} sticker` }));
+    }
+  }
+  drawBook();
+
+  const bookTray = el('div', { class: 'tray' },
+    el('h2', {}, 'Your stickers'),
+    book,
+    el('div', { class: 'row', style: { marginTop: '10px' } },
+      el('button', {
+        class: 'btn ghost small', type: 'button', text: 'Start a new sticker book',
+        on: { click: () => { clearStickers(); drawBook(); } },
+      })),
+  );
+
   const week = el('div', { class: 'week' },
     el('h2', { text: "This week's sounds" }),
     summary,
@@ -135,7 +164,6 @@ export function mount(root: HTMLElement): () => void {
   const starBtn = el('button', {
     class: 'btn', type: 'button',
     vars: { '--mustard': star.tones.light, '--mustard-dark': star.tones.deep },
-    'aria-label': `Today's sound is ${star.label} as in ${star.asIn}`,
   }, `Today's sound: ${star.label} · ${star.asIn}`);
   starBtn.addEventListener('click', () => {
     say(star.asIn);
@@ -150,6 +178,7 @@ export function mount(root: HTMLElement): () => void {
     ),
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } }, starBtn),
     tiles,
+    bookTray,
     week,
   );
 

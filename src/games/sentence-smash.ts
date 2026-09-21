@@ -13,6 +13,7 @@ import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { phrases, sound, type Phrase, type Slot } from '../content/index';
 import { createSetup, topbar } from '../ui/components';
+import { award } from '../lib/stickers';
 
 const ORDER: Slot[] = ['who', 'did', 'what', 'where'];
 const NAMES: Record<Slot, string> = { who: 'Who?', did: 'Did what?', what: 'To what?', where: 'Where?' };
@@ -156,6 +157,7 @@ export function mount(root: HTMLElement): () => void {
     );
     savedList.append(row);
     sfx.right();
+    award(ORDER.map((slot) => chosen[slot]!.sound));
   });
 
   savedList.replaceChildren(el('span', { class: 'empty', text: 'Build one and tap Keep it.' }));

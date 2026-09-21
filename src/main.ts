@@ -40,5 +40,5 @@ function unlockOnFirstTap(): void {
 watchVoices();
 unlockOnFirstTap();
 
-const app = document.querySelector<HTMLElement>('#app');
+const app = document.querySelector<HTMLElement>('main#app');
 if (app) startRouter(app, routes);

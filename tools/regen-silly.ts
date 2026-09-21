@@ -44,7 +44,15 @@ const LEGAL_PAIRS = new Set(['st', 'nd', 'nt', 'nk', 'mp', 'sk', 'lt', 'lp', 'ft
   /* the doubled endings the program teaches: nn, ss, ll, ff, zz, then gg bb tt rr pp dd mm */
   'nn', 'pp', 'tt', 'dd', 'mm', 'rr', 'gg', 'bb']);
 /* codas a child at level 1-3 could actually blend */
-const EARLY_CODAS = ['b', 'd', 'g', 'k', 'm', 'n', 'p', 't', 'f', 'l', 's', 'st', 'nd', 'nk', 'mp', 'sk', 'lt', 'ft', 'nt', 'ck', 'ss', 'll', 'ff', 'nn', 'pp', 'tt', 'dd', 'mm', 'rr', 'gg', 'bb'];
+const EARLY_CODAS = ['b', 'd', 'g', 'k', 'm', 'n', 'p', 't', 'f', 'l', 's', 'st', 'nd', 'nk', 'mp', 'sk', 'lt', 'ft', 'nt', 'ck'];
+/* A doubled ending is a grapheme in its own right, and the program teaches
+   them one at a time — so a level 1 silly word may end in nn but not in pp,
+   which a child does not meet until level 4. */
+const DOUBLES_BY_LEVEL: Record<number, string[]> = {
+  1: ['nn'],
+  2: ['nn', 'ss'],
+  3: ['nn', 'ss', 'll', 'ff', 'zz'],
+};
 
 function sayable(w: string, sp = ''): boolean {
   if (w.length < 2 || w.length > 9) return false;
@@ -137,7 +145,10 @@ function candidatesFor(s: SoundSpec): string[] {
     const pool = LETTERS_BY_LEVEL[s.level];
     const cons = pool.filter((c) => !VOWELS.includes(c));
     const vows = pool.filter((c) => VOWELS.includes(c));
-    const codas = EARLY_CODAS.filter((c) => [...c].every((ch) => pool.includes(ch)));
+    const codas = [
+      ...EARLY_CODAS.filter((c) => [...c].every((ch) => pool.includes(ch))),
+      ...DOUBLES_BY_LEVEL[s.level],
+    ];
     if (VOWELS.includes(sp)) {
       for (const c1 of cons) for (const co of codas) out.push(c1 + sp + co);
     } else {

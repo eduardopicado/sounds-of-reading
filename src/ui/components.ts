@@ -196,12 +196,14 @@ export interface OverlayOptions {
 
 export interface Overlay {
   node: HTMLElement;
-  show: (text: string) => void;
+  /** `sticker` is the emoji just earned, shown big above the message */
+  show: (text: string, sticker?: string | null) => void;
   hide: () => void;
 }
 
 export function winOverlay(o: OverlayOptions): Overlay {
   const text = el('p', {});
+  const prize = el('div', { class: 'prize', hidden: 'hidden' });
   const actions = el('div', { class: 'actions' },
     el('button', {
       class: 'btn', type: 'button', text: o.againLabel ?? 'Play again',
@@ -211,12 +213,14 @@ export function winOverlay(o: OverlayOptions): Overlay {
     el('button', { class: 'btn ghost on-paper', type: 'button', text: 'Pick another game', on: { click: () => go('home') } }),
   );
   const node = el('div', { class: 'overlay' },
-    el('div', { class: 'overlay-card' }, el('h3', { text: o.title }), text, actions),
+    el('div', { class: 'overlay-card' }, prize, el('h3', { text: o.title }), text, actions),
   );
   return {
     node,
-    show: (message: string) => {
+    show: (message: string, sticker?: string | null) => {
       text.textContent = message;
+      prize.hidden = !sticker;
+      prize.textContent = sticker ?? '';
       node.classList.add('show');
       sfx.win();
       confetti();

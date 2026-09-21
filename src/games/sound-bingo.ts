@@ -12,6 +12,7 @@ import { sfx } from '../lib/sfx';
 import { setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Word } from '../content/index';
 import { createSetup, topbar, winOverlay } from '../ui/components';
+import { award } from '../lib/stickers';
 
 interface Cell {
   word?: Word;
@@ -202,7 +203,9 @@ export function mount(root: HTMLElement): () => void {
     won = true;
     callBtn.disabled = true;
     say('Bingo! Well done!');
-    window.setTimeout(() => win.show(`You filled ${what} in ${calls} words.`), 450);
+    const practised = cells.filter((c) => c.marked && c.word).map((c) => c.word!.sound);
+    const prize = award(practised)?.face;
+    window.setTimeout(() => win.show(`You filled ${what} in ${calls} words.`, prize), 450);
   }
 
   callBtn.addEventListener('click', call);

@@ -273,3 +273,21 @@ select {
   .wrap { max-width: 980px; }
   h1 { font-size: clamp(24px, 3.4vw, 34px); }
 }
+
+/* the sticker a round just earned, and the book it goes into */
+.overlay-card .prize {
+  font-size: 64px; line-height: 1; margin-bottom: 4px;
+  animation: prize .6s cubic-bezier(.2, 1.7, .4, 1);
+}
+@keyframes prize {
+  0% { transform: scale(0) rotate(-40deg); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+.sticker-book { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.sticker {
+  font-size: 26px; line-height: 1;
+  width: 42px; height: 42px; display: grid; place-items: center;
+  border-radius: 12px; background: rgba(255, 246, 231, .12);
+  animation: pop .3s cubic-bezier(.2, 1.6, .4, 1);
+}
+.sticker.fresh { background: var(--mustard); }

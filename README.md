@@ -18,11 +18,16 @@ once opened, and nothing ever leaves the device.
 | **Real or Silly?** | Reads a word with no help, then decides whether it is a word at all. |
 | **Sentence Smash** | Picks a phrase from each of four rows and hears the silly sentence read back. |
 
+Finishing a round anywhere wins a sticker for the sound it practised, and the
+stickers collect in a book on the home screen. It is the only thing that keeps
+score, and there is nothing to lose — every game is completable and no answer
+is ever marked with a red X.
+
 ## The sounds
 
 The school's eight-level program, from `s a t p i n` up to `aw air are ear eer
 ore dge tch`, plus `ph` from the class sound sheet. 78 sounds a child can
-practise, 1100 real words, 770 silly ones, 50 word families and 170 sentence
+practise, 1100 real words, 750 silly ones, 50 word families and 170 sentence
 phrases.
 
 Levels are cumulative, so every word carries the level a child needs to decode
@@ -105,18 +110,31 @@ only non-words that are pronounceable and contain the grapheme.
   Every game is completable.
 - 48px minimum tap targets, `prefers-reduced-motion` respected, rounds of two
   to five minutes.
+- Sound effects are synthesised with WebAudio rather than loaded, so there is
+  nothing to fetch and nothing to cache. Both speech and effects can be turned
+  off on the home screen.
 
 ## Tests
 
 - `tests/content.spec.ts` — the content test above.
 - `tests/e2e/` — Playwright: loading, a full round of each game, changing
-  settings, the win screen, offline after first load, speech falling back to
-  `en-AU`, and the app surviving both blocked `localStorage` and a browser
-  where touching `speechSynthesis` throws. Every test asserts zero console
-  errors and no request to any other domain.
+  settings, the win screen, the sticker book, offline after first load, speech
+  falling back to `en-AU`, and the app surviving both blocked `localStorage`
+  and a browser where touching `speechSynthesis` throws. Every test asserts
+  zero console errors and no request to any other domain.
+- `tests/e2e/a11y.spec.ts` — axe against WCAG 2.1 AA on all eight screens.
 
 They run on three viewports: an iPad at 820×1180 and 1180×820, and a 375px
 phone.
+
+Lighthouse is not a dependency, but the build is kept clean against it:
+
+```sh
+npm run build && npx vite preview --port 4173 &
+npx lighthouse http://localhost:4173/ --only-categories=accessibility,best-practices,performance
+```
+
+Last run: accessibility 100, best practices 100, performance 99.
 
 ## Background
 

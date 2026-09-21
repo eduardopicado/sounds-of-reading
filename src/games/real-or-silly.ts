@@ -14,7 +14,8 @@ import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
 import { realWords, sillyWords, sound, type Word } from '../content/index';
-import { createSetup, counter, scoreLine, topbar } from '../ui/components';
+import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
+import { award } from '../lib/stickers';
 
 export function mount(root: HTMLElement): () => void {
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -46,8 +47,9 @@ export function mount(root: HTMLElement): () => void {
   const answers = el('div', { class: 'answers' }, realBtn, sillyBtn);
 
   const resultList = el('ul', {});
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', { text: 'How it went' }), resultList,
+    el('h2', {}, 'How it went ', prize), resultList,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
   );
@@ -153,8 +155,12 @@ export function mount(root: HTMLElement): () => void {
       if (entry.usedHelp) li.append(el('span', { class: 'mk', text: 'heard it' }));
       resultList.append(li);
     }
+    const sticker = award(log.map((entry) => entry.word.sound));
+    prize.hidden = !sticker;
+    prize.textContent = sticker?.face ?? '';
     results.hidden = false;
     sfx.win();
+    confetti();
     say(right === log.length ? 'Perfect!' : 'Good reading!');
   }
 

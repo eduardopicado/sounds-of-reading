@@ -12,6 +12,7 @@ import { sfx } from '../lib/sfx';
 import { setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
 import { createSetup, counter, scoreLine, topbar, winOverlay } from '../ui/components';
+import { award } from '../lib/stickers';
 
 interface Card {
   pairId: number;
@@ -67,6 +68,7 @@ export function mount(root: HTMLElement): () => void {
   let matched = 0;
   let moves = 0;
   let target = 0;
+  let practised: string[] = [];
 
   function chooseWords(mode: string): { soundId: string; a: Word; b?: Word }[] {
     const filter = setup.filter();
@@ -126,6 +128,7 @@ export function mount(root: HTMLElement): () => void {
     deck = shuffle(deck);
 
     first = null; busy = false; matched = 0; moves = 0;
+    practised = [];
     target = picks.length;
     found.set(0); flips.set(0); totalEl.textContent = String(target);
     rail.replaceChildren(el('span', { class: 'empty', text: 'Match a pair to collect its sound.' }));
@@ -165,13 +168,14 @@ export function mount(root: HTMLElement): () => void {
         first?.node.classList.add('done');
         second.node.classList.add('done');
         collect(card.soundId);
+        practised.push(card.soundId);
         matched += 1;
         found.set(matched);
         sfx.right();
         first = null; busy = false;
         if (matched === target) {
           window.setTimeout(() => {
-            win.show(`You found all ${target} pairs in ${moves} flips.`);
+            win.show(`You found all ${target} pairs in ${moves} flips.`, award(practised)?.face);
             say('Well done!');
           }, 350);
         }

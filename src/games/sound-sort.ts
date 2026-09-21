@@ -9,8 +9,9 @@ import { shuffle, spreadAcross } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
-import { realWords, sound, type Sound, type Word } from '../content/index';
-import { createSetup, counter, scoreLine, topbar } from '../ui/components';
+import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
+import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
+import { award } from '../lib/stickers';
 
 /** contrasts worth offering: two spellings of one sound, or a set taught together */
 const NAMED_SETS: { id: string; label: string; sounds: string[] }[] = [
@@ -56,8 +57,9 @@ export function mount(root: HTMLElement): () => void {
   const stage = el('div', { class: 'stage' }, hand);
   const bins = el('div', { class: 'bins' });
   const resultList = el('ul', {});
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', { text: 'How it went' }), resultList,
+    el('h2', {}, 'How it went ', prize), resultList,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
   );
@@ -117,7 +119,14 @@ export function mount(root: HTMLElement): () => void {
   function start(): void {
     binSounds = currentBins();
     const levels = setup.filter().levels;
-    const groups = binSounds.map((s) => realWords({ sounds: [s.id], levels }));
+    /* the picture tells him which word it is, so he can get on with finding
+       the sound in it — prefer words that have one, and only fall back when a
+       bin would otherwise run short */
+    const groups = binSounds.map((s) => {
+      const all = realWords({ sounds: [s.id], levels });
+      const withPicture = picturable(all);
+      return withPicture.length >= 6 ? withPicture : [...withPicture, ...all.filter((w) => !w.picture)];
+    });
     const wanted = Number(lenSel.value);
     queue = shuffle(spreadAcross(groups.filter((g) => g.length), wanted));
 
@@ -196,8 +205,12 @@ export function mount(root: HTMLElement): () => void {
       if (!entry.firstTry) li.append(el('span', { class: 'mk', text: 'retry' }));
       resultList.append(li);
     }
+    const sticker = award(log.map((entry) => entry.word.sound));
+    prize.hidden = !sticker;
+    prize.textContent = sticker?.face ?? '';
     results.hidden = false;
     sfx.win();
+    confetti();
     say(firstTry === log.length ? 'Perfect sorting!' : 'Nice work!');
   }
 

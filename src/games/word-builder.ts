@@ -15,6 +15,7 @@ import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { buildWord, families, familySpans, sound, type FamilySpec } from '../content/index';
 import { createSetup, topbar, winOverlay } from '../ui/components';
+import { award } from '../lib/stickers';
 
 interface Tile { part: string; real: boolean }
 
@@ -173,7 +174,8 @@ export function mount(root: HTMLElement): () => void {
       foundEl.textContent = String(found.size);
       if (found.size === family.real.length) {
         window.setTimeout(() => {
-          win.show(`You built all ${family!.real.length} real words in the ${family!.kind === 'rime' ? '-' + family!.fixed : family!.fixed + '-'} family.`);
+          const name = family!.kind === 'rime' ? '-' + family!.fixed : family!.fixed + '-';
+          win.show(`You built all ${family!.real.length} real words in the ${name} family.`, award([family!.sound])?.face);
           say('Brilliant!');
         }, 500);
       }
