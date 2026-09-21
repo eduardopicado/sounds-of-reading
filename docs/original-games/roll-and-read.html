@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Roll &amp; Read — ai/ay · ee/ea · sh · ng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#10403E; --deep-2:#0B302F; --paper:#FFF6E7; --ink:#14312F;
+    --mustard:#F3B229; --tomato:#E4572E; --mint:#79D3B0; --plum:#8367A8; --sky:#3D8FCB;
+    --display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+    --reading:'Andika','Comic Sans MS','Segoe UI',system-ui,sans-serif;
+    --radius:18px;
+    --s:132px;
+  }
+  @media(max-width:400px){ :root{ --s:112px } }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 50% 4%, rgba(243,178,41,.18), transparent 42%),
+      radial-gradient(circle at 6% 96%, rgba(121,211,176,.14), transparent 45%),
+      var(--deep);
+    color:var(--paper);font-family:var(--reading);min-height:100vh;
+    padding:16px 14px 26px;-webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:620px;margin:0 auto}
+  header{text-align:center;margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(30px,8vw,46px);line-height:.95;margin:0;letter-spacing:-.5px}
+  h1 .swash{color:var(--mustard);position:relative;display:inline-block}
+  h1 .swash::after{content:"";position:absolute;left:2%;right:2%;bottom:-2px;height:5px;border-radius:99px;background:var(--tomato)}
+  .tag{font-size:13px;opacity:.72;margin:8px 0 0}
+
+  .panel{background:rgba(255,246,231,.06);border:1px solid rgba(255,246,231,.14);border-radius:var(--radius);padding:12px;margin:14px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lbl{font-family:var(--display);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.65;width:100%;margin-bottom:2px}
+  select{font-family:var(--reading);font-size:15px;padding:8px 10px;border-radius:12px;border:2px solid rgba(255,246,231,.3);background:var(--deep-2);color:var(--paper)}
+  .btn{font-family:var(--display);font-weight:800;font-size:16px;padding:10px 20px;border-radius:99px;border:none;cursor:pointer;background:var(--mustard);color:var(--deep-2);box-shadow:0 4px 0 #C98F14;transition:transform .08s,box-shadow .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C98F14}
+  .btn:disabled{opacity:.45;box-shadow:none;cursor:default}
+  .btn.ghost{background:transparent;color:var(--paper);border:2px solid rgba(255,246,231,.3);box-shadow:none}
+  button:focus-visible,select:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+
+  /* ---- the die (signature) ---- */
+  .dice-area{display:grid;place-items:center;height:calc(var(--s)*1.9);margin:6px 0 4px;perspective:900px}
+  .dice-hint,#rollBtn{position:relative;z-index:2}
+  .cube{
+    width:var(--s);height:var(--s);position:relative;transform-style:preserve-3d;
+    transition:transform 1.15s cubic-bezier(.25,.9,.3,1);
+    transform:rotateX(-18deg) rotateY(0deg);
+    cursor:pointer;
+  }
+  .cube .face{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--reading);font-weight:700;
+    font-size:calc(var(--s)*.36);
+    background:var(--paper);color:var(--ink);
+    border-radius:16px;border:3px solid rgba(20,49,47,.15);
+    box-shadow:inset 0 -10px 0 rgba(20,49,47,.08);
+    backface-visibility:hidden;
+  }
+  .f-front {transform:translateZ(calc(var(--s)/2))}
+  .f-back  {transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+  .f-right {transform:rotateY(90deg)  translateZ(calc(var(--s)/2))}
+  .f-left  {transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+  .f-top   {transform:rotateX(90deg)  translateZ(calc(var(--s)/2))}
+  .f-bottom{transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+  .dice-hint{font-size:13px;opacity:.6;margin-top:12px;text-align:center;min-height:1.2em}
+
+  /* ---- word cards ---- */
+  .words{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+  .wcard{
+    display:flex;align-items:center;gap:10px;
+    background:var(--paper);color:var(--ink);
+    border-radius:16px;padding:10px 12px;
+    box-shadow:0 4px 0 rgba(0,0,0,.28);
+    border-left:8px solid var(--wc,var(--mustard));
+    animation:slide .3s cubic-bezier(.2,1.3,.4,1) backwards;
+  }
+  .wcard:nth-child(2){animation-delay:.07s}
+  .wcard:nth-child(3){animation-delay:.14s}
+  .wcard:nth-child(4){animation-delay:.21s}
+  .wcard:nth-child(5){animation-delay:.28s}
+  @keyframes slide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .wcard .w{
+    flex:1;font-family:var(--reading);font-weight:700;
+    font-size:clamp(24px,7vw,32px);letter-spacing:.4px;text-align:left;
+    background:none;border:none;color:inherit;cursor:pointer;padding:2px 0;
+  }
+  .wcard .w i{font-style:normal;color:var(--wc);border-bottom:4px solid var(--wc)}
+  .wcard.plain .w i{color:inherit;border-bottom:none}
+  .mini{
+    font-size:20px;line-height:1;padding:9px 12px;border-radius:12px;border:2px solid rgba(20,49,47,.18);
+    background:transparent;cursor:pointer;transition:transform .08s,background .12s;
+  }
+  .mini:active{transform:scale(.92)}
+  .wcard.got{background:#DFF3E7}
+  .wcard.got .ok{background:var(--mint);border-color:transparent}
+  .wcard.tricky{background:#FBE6DE}
+  .wcard.tricky .no{background:var(--tomato);border-color:transparent}
+
+  /* ---- tally ---- */
+  .tally{margin-top:16px;padding:12px;border-radius:var(--radius);background:rgba(255,246,231,.06);border:1px dashed rgba(255,246,231,.22)}
+  .tally h2{font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;opacity:.6;margin:0 0 10px}
+  .bars{display:flex;flex-direction:column;gap:7px}
+  .bar{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:700}
+  .bar .k{width:34px;text-align:center;border-radius:8px;padding:2px 0;color:var(--deep-2)}
+  .bar .track{flex:1;height:14px;border-radius:99px;background:rgba(255,246,231,.12);overflow:hidden;display:flex}
+  .bar .good{background:var(--mint);transition:width .3s}
+  .bar .bad{background:var(--tomato);transition:width .3s}
+  .bar .n{width:60px;text-align:right;font-size:12px;opacity:.7;font-weight:600}
+  .tally .none{font-size:14px;opacity:.45}
+
+  @media (prefers-reduced-motion: reduce){
+    .cube{transition:transform .2s}
+    .wcard{animation:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Roll &amp; <span class="swash">Read</span></h1>
+    <p class="tag">Roll the die. Read the words out loud.</p>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <span class="lbl">Set up</span>
+      <select id="count" aria-label="Words per roll">
+        <option value="1">1 word</option>
+        <option value="3" selected>3 words</option>
+        <option value="5">5 words</option>
+      </select>
+      <select id="hint" aria-label="Underline the sound">
+        <option value="on" selected>Underline the sound</option>
+        <option value="off">Plain words</option>
+      </select>
+      <select id="dieSet" aria-label="Which sounds on the die">
+        <option value="vowels" selected>Die: ai ay ee ea sh ng</option>
+        <option value="digraphs">Die: sh ch th th wh ng</option>
+        <option value="trickies">Die: qu wh ph g c ch</option>
+      </select>
+      <button class="btn ghost" id="reset">Clear tally</button>
+    </div>
+  </div>
+
+  <div class="dice-area">
+    <div class="cube" id="cube" role="button" tabindex="0" aria-label="Roll the sound die">
+      <div class="face f-front">ai</div>
+      <div class="face f-right">ay</div>
+      <div class="face f-back">ee</div>
+      <div class="face f-left">ea</div>
+      <div class="face f-top">sh</div>
+      <div class="face f-bottom">ng</div>
+    </div>
+  </div>
+  <div class="dice-hint" id="diceHint">Tap the die to roll</div>
+  <div style="text-align:center;margin-top:10px">
+    <button class="btn" id="rollBtn">Roll the die</button>
+  </div>
+
+  <div class="words" id="words"></div>
+
+  <div class="tally">
+    <h2>How the sounds are going</h2>
+    <div class="bars" id="bars"><span class="none">Roll a few times and this fills in.</span></div>
+  </div>
+</div>
+
+<script>
+/* show any real error on the page, since the console may only say "Script error." */
+window.addEventListener('error', e => {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#E4572E;color:#fff;font:13px/1.4 monospace;padding:10px 12px;border-radius:12px;white-space:pre-wrap';
+  box.textContent = 'ERROR: ' + (e.message || 'unknown') + '\nline ' + (e.lineno || '?') + ':' + (e.colno || '?');
+  document.body.appendChild(box);
+});
+window.addEventListener('unhandledrejection', e => {
+  const box = document.createElement('div');
+  box.style.cssText = 'position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#E4572E;color:#fff;font:13px/1.4 monospace;padding:10px 12px;border-radius:12px;white-space:pre-wrap';
+  box.textContent = 'PROMISE ERROR: ' + (e.reason && e.reason.message ? e.reason.message : e.reason);
+  document.body.appendChild(box);
+});
+</script>
+<script>
+const COLORS = {ai:'#E4572E', ay:'#F3B229', ee:'#3D8FCB', ea:'#79D3B0', sh:'#8367A8', ng:'#3FA796',
+  ch:'#C6421F', thv:'#3D8FCB', thu:'#2F6FA0', qu:'#C05780', wh:'#5C8A3A', ph:'#D4772E', gs:'#9B6BC4', cs:'#0E8C8C'};
+const LABELS = {ai:'ai', ay:'ay', ee:'ee', ea:'ea', sh:'sh', ng:'ng', ch:'ch',
+  thv:'th', thu:'th', qu:'qu', wh:'wh', ph:'ph', gs:'g', cs:'c'};
+const POSITIONS = ['front','right','back','left','top','bottom'];
+let FACES = [];
+function setDie(setName){
+  const keys = DIE_SETS[setName] || DIE_SETS.vowels;
+  FACES = keys.map((k,i)=>({k, pos:POSITIONS[i], color:COLORS[k]}));
+  POSITIONS.forEach((p,i)=>{
+    const el = cube.querySelector('.f-'+p);
+    if(el) el.textContent = LABELS[FACES[i].k];
+  });
+  tally={}; FACES.forEach(f=>{ tally[f.k]={good:0,bad:0}; refillPool(f.k); });
+}
+const REST = {
+  front :{x:-18, y:0},
+  right :{x:-18, y:-90},
+  back  :{x:-18, y:-180},
+  left  :{x:-18, y:90},
+  top   :{x:-108, y:0},   // -90 - 18
+  bottom:{x:72,  y:0}     //  90 - 18
+};
+const WORDS = {
+  ai:['rain','train','snail','nail','chain','paint','tail','sail','main','plain','afraid','waiting'],
+  ay:['day','play','tray','hay','crayon','spray','clay','stay','away','today','birthday','always'],
+  ee:['bee','tree','sheep','feet','queen','cheese','three','green','sleep','street','between','asleep'],
+  ea:['sea','leaf','peas','meat','beach','seal','bean','teacher','dream','clean','speak','eating'],
+  sh:['ship','fish','shell','shoe','shark','brush','shirt','shed','shop','wish','crash','finish'],
+  ng:['ring','king','song','wing','swing','string','strong','sing','long','bring','morning','something'],
+  ch:['chair','chip','chin','cheese','church','lunch','bench','chick','chop','chest','branch','children'],
+  thv:['them','this','that','then','they','with','mother','father','brother','feather','weather','other'],
+  thu:['thin','thick','think','thumb','three','path','moth','bath','teeth','cloth','thing','birthday'],
+  qu :['queen','quick','quiet','quiz','quilt','squid','square','quack','question','squash'],
+  wh :['wheel','whale','white','when','where','which','whisk','whip','wheat','whisper'],
+  ph :['phone','photo','dolphin','elephant','graph','alphabet','trophy','phantom'],
+  gs :['giant','magic','gem','cage','page','giraffe','orange','bridge','huge','gentle'],
+  cs :['circle','city','pencil','ice','mice','race','face','dance','celery','cent']
+};
+
+/* the die only has six faces, so the user picks which six */
+const DIE_SETS = {
+  vowels   :['ai','ay','ee','ea','sh','ng'],
+  digraphs :['sh','ch','thv','thu','wh','ng'],
+  trickies :['qu','wh','ph','gs','cs','ch']
+};
+
+const cube=document.getElementById('cube'), rollBtn=document.getElementById('rollBtn');
+const diceHint=document.getElementById('diceHint'), wordsEl=document.getElementById('words');
+const barsEl=document.getElementById('bars');
+
+let spins=0, rolling=false, pools={}, tally={};
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+function refillPool(k){ pools[k] = shuffle(WORDS[k].slice()); }
+
+const PATTERN = {thv:'th', thu:'th', gs:'g', cs:'c'};
+function mark(word,key){
+  const k = PATTERN[key] || key;
+  const i=word.indexOf(k);
+  return i<0 ? word : word.slice(0,i)+'<i>'+k+'</i>'+word.slice(i+k.length);
+}
+function say(t){
+  try{
+    if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang='en-GB'; u.rate=.72; u.pitch=1.1;
+    speechSynthesis.speak(u);
+  }catch(e){ /* speech blocked in this context — the game still works silently */ }
+}
+
+function roll(){
+  if(rolling) return;
+  rolling=true; rollBtn.disabled=true;
+  wordsEl.innerHTML='';
+  diceHint.textContent='rolling…';
+
+  const face = FACES[Math.floor(Math.random()*FACES.length)];
+  const rest = REST[face.pos];
+  spins++;
+  const extraX = 360*(1+Math.floor(Math.random()*2));
+  const extraY = 360*(2+Math.floor(Math.random()*2));
+  cube.style.transform = `rotateX(${rest.x - extraX}deg) rotateY(${rest.y - extraY}deg)`;
+
+  setTimeout(()=>{
+    rolling=false; rollBtn.disabled=false;
+    diceHint.textContent = `Read these ${LABELS[face.k]} words out loud`;
+    showWords(face);
+    say(LABELS[face.k]);
+  }, 1200);
+}
+
+function showWords(face){
+  const n=+document.getElementById('count').value;
+  const underline = document.getElementById('hint').value==='on';
+  if(pools[face.k].length < n) refillPool(face.k);
+  const picks = pools[face.k].splice(0,n);
+
+  picks.forEach(w=>{
+    const card=document.createElement('div');
+    card.className='wcard'+(underline?'':' plain');
+    card.style.setProperty('--wc',face.color);
+    card.innerHTML=`
+      <button class="w">${mark(w,face.k)}</button>
+      <button class="mini ok" title="Read it" aria-label="Read it">✅</button>
+      <button class="mini no" title="Tricky" aria-label="Tricky one">🔁</button>`;
+    const [wordBtn, okBtn, noBtn] = card.querySelectorAll('button');
+    wordBtn.addEventListener('click',()=>say(w));
+    okBtn.addEventListener('click',()=>score(card,face.k,true));
+    noBtn.addEventListener('click',()=>score(card,face.k,false));
+    wordsEl.appendChild(card);
+  });
+}
+
+function score(card,k,good){
+  if(card.dataset.scored) return;
+  card.dataset.scored='1';
+  card.classList.add(good?'got':'tricky');
+  tally[k][good?'good':'bad']++;
+  if(!good) say(card.querySelector('.w').textContent);
+  drawBars();
+}
+
+function drawBars(){
+  const used = FACES.filter(f=>tally[f.k].good+tally[f.k].bad>0);
+  if(!used.length){ barsEl.innerHTML='<span class="none">Roll a few times and this fills in.</span>'; return; }
+  barsEl.innerHTML='';
+  used.forEach(f=>{
+    const t=tally[f.k], total=t.good+t.bad;
+    const row=document.createElement('div');
+    row.className='bar';
+    row.innerHTML=`
+      <span class="k" style="background:${f.color}">${LABELS[f.k]}</span>
+      <span class="track">
+        <span class="good" style="width:${t.good/total*100}%"></span>
+        <span class="bad"  style="width:${t.bad/total*100}%"></span>
+      </span>
+      <span class="n">${t.good}/${total}</span>`;
+    barsEl.appendChild(row);
+  });
+}
+
+document.getElementById('dieSet').addEventListener('change',e=>{
+  setDie(e.target.value);
+  wordsEl.innerHTML=''; drawBars();
+  diceHint.textContent='Tap the die to roll';
+});
+rollBtn.addEventListener('click',roll);
+cube.addEventListener('click',roll);
+cube.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); roll(); }});
+document.getElementById('reset').addEventListener('click',()=>{
+  setDie(document.getElementById('dieSet').value);
+  wordsEl.innerHTML=''; drawBars();
+  diceHint.textContent='Tap the die to roll';
+});
+document.getElementById('hint').addEventListener('change',()=>{
+  const underline=document.getElementById('hint').value==='on';
+  document.querySelectorAll('.wcard').forEach(c=>c.classList.toggle('plain',!underline));
+});
+
+setDie('vowels');
+</script>
+</body>
+</html>

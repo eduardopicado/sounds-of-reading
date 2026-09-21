@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sentence Smash</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#10403E; --deep-2:#0B302F; --paper:#FFF6E7; --ink:#14312F;
+    --mustard:#F3B229; --tomato:#E4572E; --mint:#79D3B0; --plum:#8367A8; --sky:#3D8FCB;
+    --display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+    --reading:'Andika','Comic Sans MS','Segoe UI',system-ui,sans-serif;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 30% 0%, rgba(131,103,168,.20), transparent 45%),
+      radial-gradient(circle at 95% 90%, rgba(121,211,176,.14), transparent 45%),
+      var(--deep);
+    color:var(--paper);font-family:var(--reading);min-height:100vh;
+    padding:16px 14px 26px;-webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:640px;margin:0 auto}
+  header{text-align:center;margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,7.5vw,44px);line-height:.95;margin:0;letter-spacing:-.5px}
+  h1 .swash{color:var(--mustard);position:relative;display:inline-block}
+  h1 .swash::after{content:"";position:absolute;left:2%;right:2%;bottom:-2px;height:5px;border-radius:99px;background:var(--tomato)}
+  .tag{font-size:14px;opacity:.9;margin:8px 0 0}
+
+  .panel{background:rgba(255,246,231,.06);border:1px solid rgba(255,246,231,.14);border-radius:var(--radius);padding:12px;margin:12px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lbl{font-family:var(--display);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.9;width:100%;margin-bottom:2px}
+  select{font-family:var(--reading);font-size:15px;padding:8px 10px;border-radius:12px;border:2px solid rgba(255,246,231,.3);background:var(--deep-2);color:var(--paper)}
+  .btn{font-family:var(--display);font-weight:800;font-size:16px;padding:10px 20px;border-radius:99px;border:none;cursor:pointer;background:var(--mustard);color:var(--deep-2);box-shadow:0 4px 0 #C98F14;transition:transform .08s,box-shadow .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C98F14}
+  .btn:disabled{opacity:.4;box-shadow:none;cursor:default}
+  .btn.ghost{background:transparent;color:var(--paper);border:2px solid rgba(255,246,231,.3);box-shadow:none}
+  button:focus-visible,select:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+
+  /* ---- the sentence strip (signature) ---- */
+  .strip{
+    background:var(--paper);color:var(--ink);border-radius:20px;
+    padding:16px 12px 12px;box-shadow:0 6px 0 rgba(0,0,0,.3);
+    border-bottom:8px solid var(--mustard);
+    min-height:130px;display:flex;flex-direction:column;justify-content:center;gap:10px;
+  }
+  .sentence{
+    display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;
+    font-family:var(--reading);font-weight:700;
+    font-size:clamp(19px,5.2vw,28px);line-height:1.25;
+  }
+  .slot{
+    padding:3px 10px;border-radius:10px;
+    border:3px dashed rgba(20,49,47,.42);
+    color:rgba(20,49,47,.62);font-size:.8em;font-weight:700;
+  }
+  .slot.filled{
+    border-style:solid;border-color:transparent;
+    background:var(--sc,rgba(20,49,47,.07));color:var(--ink);font-size:1em;
+    box-shadow:inset 4px 0 0 var(--scs,rgba(20,49,47,.3));
+    animation:pop .28s cubic-bezier(.2,1.6,.4,1);
+  }
+  .slot i{font-style:normal;color:var(--ink);border-bottom:5px solid var(--mk,var(--tomato));box-shadow:inset 0 -11px 0 -1px var(--mkw,rgba(228,87,46,.28))}
+  .dot{font-weight:800}
+  @keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .strip.read{animation:bounce .45s}
+  @keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}}
+  .strip-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .strip-actions .btn{font-size:14px;padding:8px 15px}
+  .strip-actions .btn.ghost{color:var(--ink);border-color:rgba(20,49,47,.28)}
+
+  /* ---- column pickers ---- */
+  .cols{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+  .col{
+    border-radius:var(--radius);padding:10px;
+    background:rgba(255,246,231,.06);border:1px solid rgba(255,246,231,.14);
+  }
+  .col h3{
+    font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;
+    letter-spacing:1.2px;opacity:.95;font-size:13px;margin:0 0 8px;display:flex;align-items:center;gap:8px;color:var(--cc);
+  }
+  .col h3 .pip{width:12px;height:12px;border-radius:99px;background:var(--cc)}
+  .opts{display:flex;flex-wrap:wrap;gap:7px}
+  .opt{
+    font-family:var(--reading);font-weight:700;font-size:clamp(14px,3.8vw,17px);
+    padding:8px 13px;border-radius:12px;border:none;cursor:pointer;
+    background:var(--paper);color:var(--ink);
+    box-shadow:0 3px 0 rgba(0,0,0,.4);transition:transform .08s,box-shadow .08s;
+  }
+  .opt:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+  .opt.picked{background:var(--cc);color:var(--deep-2)}
+  .opt i{font-style:normal;color:var(--ink);border-bottom:4px solid var(--mk);box-shadow:inset 0 -9px 0 -1px var(--mkw,rgba(228,87,46,.28))}
+  .opt.picked i{color:var(--deep-2);border-bottom-color:var(--deep-2);box-shadow:inset 0 -9px 0 -1px rgba(11,48,47,.22)}
+
+  /* ---- saved ---- */
+  .saved{margin-top:16px;padding:12px;border-radius:var(--radius);background:rgba(255,246,231,.06);border:1px dashed rgba(255,246,231,.22)}
+  .saved h2{font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;opacity:.85;margin:0 0 8px}
+  .savedList{display:flex;flex-direction:column;gap:6px}
+  .savedList .empty{font-size:14px;opacity:.7}
+  .sv{
+    display:flex;align-items:center;gap:8px;
+    background:var(--paper);color:var(--ink);border-radius:12px;padding:8px 11px;
+    font-size:15px;font-weight:700;animation:pop .3s cubic-bezier(.2,1.6,.4,1);
+  }
+  .sv span{flex:1}
+  .sv button{background:transparent;border:none;color:var(--ink);font-size:17px;cursor:pointer;opacity:.75;padding:2px 6px}
+  .sv button:active{opacity:1}
+
+  @media(min-width:520px){ .cols{grid-template-columns:1fr 1fr} }
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sentence <span class="swash">Smash</span></h1>
+    <p class="tag">Pick a word from each row. Read your silly sentence out loud.</p>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <span class="lbl">Set up</span>
+      <select id="sound" aria-label="Which sounds"></select>
+      <select id="hint" aria-label="Underline the sound">
+        <option value="on" selected>Underline the sound</option>
+        <option value="off">Plain words</option>
+      </select>
+      <button class="btn ghost" id="fresh">New words</button>
+    </div>
+  </div>
+
+  <div class="strip" id="strip">
+    <div class="sentence" id="sentence"></div>
+    <div class="strip-actions">
+      <button class="btn" id="readBtn">🔊 Read my sentence</button>
+      <button class="btn ghost" id="surpriseBtn">🎲 Surprise me</button>
+      <button class="btn ghost" id="keepBtn">⭐ Keep it</button>
+    </div>
+  </div>
+
+  <div class="cols" id="cols"></div>
+
+  <div class="saved">
+    <h2>Sentences you kept</h2>
+    <div class="savedList" id="savedList"><span class="empty">Build one and tap Keep it.</span></div>
+  </div>
+</div>
+
+<script>
+window.addEventListener('error', e => {
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#E4572E;color:#fff;font:13px/1.4 monospace;padding:10px;border-radius:12px;white-space:pre-wrap';
+  b.textContent='ERROR: '+(e.message||'?')+'\nline '+(e.lineno||'?');
+  document.body.appendChild(b);
+});
+</script>
+<script>
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const pickOne=a=>a[Math.floor(Math.random()*a.length)];
+
+/* the school's digraph set, plus the vowel teams already being practised */
+const SOUNDS = {
+  sh :{label:'sh',            color:'#8367A8', pats:['sh']},
+  ch :{label:'ch',            color:'#E4572E', pats:['ch']},
+  thv:{label:'th (them)',     color:'#2E77AE', pats:['th']},
+  thu:{label:'th (thin)',     color:'#2F6FA0', pats:['th']},
+  qu :{label:'qu',            color:'#C05780', pats:['qu']},
+  ng :{label:'ng',            color:'#2A7F71', pats:['ng']},
+  wh :{label:'wh',            color:'#5C8A3A', pats:['wh']},
+  ph :{label:'ph',            color:'#B25D18', pats:['ph']},
+  gs :{label:'g (gent)',      color:'#7B4CA8', pats:['g']},
+  cs :{label:'c (circle)',    color:'#0E8C8C', pats:['c']},
+  ai :{label:'ai / ay',       color:'#C0431F', pats:['ai','ay']},
+  ee :{label:'ee / ea',       color:'#2E77AE', pats:['ee','ea']}
+};
+
+/* every phrase is tagged with the sound it practises */
+const PARTS = {
+  who:[
+    ['the shark','sh'],['a sheep','sh'],['the shopkeeper','sh'],['a fish','sh'],
+    ['the chicken','ch'],['a chimp','ch'],['the chef','ch'],
+    ['their mother','thv'],['that brother','thv'],['this teacher','thv'],
+    ['three thin moths','thu'],['a thumb','thu'],
+    ['the queen','qu'],['a quiet squid','qu'],['the quiz master','qu'],
+    ['the king','ng'],['a singing frog','ng'],['a strong king','ng'],
+    ['the whale','wh'],['a white wheel','wh'],
+    ['an elephant','ph'],['a dolphin','ph'],['my phone','ph'],
+    ['a giant','gs'],['a giraffe','gs'],['the gentle gerbil','gs'],
+    ['a mouse in the city','cs'],['a circle of mice','cs'],['my pencil','cs'],
+    ['the train','ai'],['a snail','ai'],
+    ['the sheepdog','ee'],['a seal','ee'],['the teacher','ee']
+  ],
+  did:[
+    ['washed','sh'],['squashed','sh'],['pushed','sh'],
+    ['chased','ch'],['munched','ch'],['chopped','ch'],
+    ['bothered','thv'],['tickled','thu'],['thumped','thu'],
+    ['quacked at','qu'],['squeezed','qu'],['quickly grabbed','qu'],
+    ['sang to','ng'],['flung','ng'],['stung','ng'],
+    ['whispered to','wh'],['whacked','wh'],['whizzed past','wh'],
+    ['photographed','ph'],['phoned','ph'],
+    ['gently hugged','gs'],['juggled','gs'],
+    ['danced with','cs'],['raced','cs'],['traced','cs'],
+    ['painted','ai'],['sailed past','ai'],
+    ['ate','ee'],['cleaned','ee'],['dreamed about','ee']
+  ],
+  what:[
+    ['a shiny shell','sh'],['some fish','sh'],['a shoe','sh'],
+    ['a cheese chip','ch'],['a bunch of chips','ch'],
+    ['the other feather','thv'],['a thick thorn','thu'],['three teeth','thu'],
+    ['a squeaky quilt','qu'],['the quiz','qu'],
+    ['a long string','ng'],['a swinging ring','ng'],
+    ['a whisker','wh'],['the whole wheelbarrow','wh'],
+    ['a photo','ph'],['the alphabet','ph'],
+    ['a huge orange','gs'],['a magic gem','gs'],
+    ['a slice of ice','cs'],['a pencil case','cs'],
+    ['a rusty chain','ai'],['a paint tray','ai'],
+    ['some green peas','ee'],['a leaf','ee'],['three sheep','ee']
+  ],
+  where:[
+    ['in the shed','sh'],['on a ship','sh'],
+    ['in the church','ch'],['on a chair','ch'],
+    ['with them','thv'],['in the bath','thu'],['on a thin path','thu'],
+    ['in the square','qu'],
+    ['while singing','ng'],['in the morning','ng'],
+    ['in a whirlwind','wh'],['when nobody looked','wh'],
+    ['in the phone box','ph'],
+    ['in a cage','gs'],['on the bridge','gs'],
+    ['in the city','cs'],['in a circle','cs'],
+    ['on the train','ai'],['every day','ai'],
+    ['at the beach','ee'],['by the tree','ee']
+  ]
+};
+const COLNAMES = {who:'Who?', did:'Did what?', what:'To what?', where:'Where?'};
+const COLCOLOR = {who:'#E8A317', did:'#3FA07A', what:'#2E77AE', where:'#8B5FB0'};
+
+const stripEl=document.getElementById('strip'), sentenceEl=document.getElementById('sentence');
+const colsEl=document.getElementById('cols'), savedList=document.getElementById('savedList');
+const soundSel=document.getElementById('sound'), hintSel=document.getElementById('hint');
+
+const ORDER=['who','did','what','where'];
+let choice={who:null,did:null,what:null,where:null};
+let options={};
+
+/* fill the sound dropdown */
+(function(){
+  const o=document.createElement('option');
+  o.value='all'; o.textContent='All sounds'; o.selected=true;
+  soundSel.appendChild(o);
+  Object.entries(SOUNDS).forEach(([k,s])=>{
+    const opt=document.createElement('option');
+    opt.value=k; opt.textContent=s.label;
+    soundSel.appendChild(opt);
+  });
+})();
+
+function say(t){
+  try{
+    if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang='en-GB'; u.rate=.75; u.pitch=1.1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* underline the target pattern in the first word that contains it */
+function mark(phrase, key){
+  if(hintSel.value==='off') return phrase;
+  const s=SOUNDS[key]; if(!s) return phrase;
+  for(const p of s.pats){
+    const i=phrase.indexOf(p);
+    if(i>-1) return phrase.slice(0,i)+'<i>'+p+'</i>'+phrase.slice(i+p.length);
+  }
+  return phrase;
+}
+
+function build(){
+  const want=soundSel.value;
+  options={};
+  ORDER.forEach(col=>{
+    let pool = PARTS[col].filter(([,k]) => want==='all' || k===want);
+    if(pool.length < 3) pool = PARTS[col];        // fall back if a sound is thin here
+    options[col] = shuffle(pool).slice(0, 6);
+  });
+  choice={who:null,did:null,what:null,where:null};
+  drawCols();
+  drawSentence();
+}
+
+function drawCols(){
+  colsEl.innerHTML='';
+  ORDER.forEach(col=>{
+    const box=document.createElement('div');
+    box.className='col';
+    box.style.setProperty('--cc',COLCOLOR[col]);
+    box.innerHTML=`<h3><span class="pip"></span>${COLNAMES[col]}</h3><div class="opts"></div>`;
+    const opts=box.querySelector('.opts');
+    options[col].forEach(([phrase,key])=>{
+      const b=document.createElement('button');
+      b.className='opt';
+      b.style.setProperty('--mk',SOUNDS[key].color);
+      b.style.setProperty('--mkw',SOUNDS[key].color+'40');
+      b.innerHTML=mark(phrase,key);
+      b.setAttribute('aria-label',phrase);
+      if(choice[col] && choice[col][0]===phrase) b.classList.add('picked');
+      b.addEventListener('click',()=>{
+        choice[col]=[phrase,key];
+        say(phrase);
+        drawCols(); drawSentence();
+      });
+      opts.appendChild(b);
+    });
+    colsEl.appendChild(box);
+  });
+}
+
+function drawSentence(){
+  sentenceEl.innerHTML='';
+  ORDER.forEach(col=>{
+    const span=document.createElement('span');
+    if(choice[col]){
+      const [phrase,key]=choice[col];
+      span.className='slot filled';
+      span.style.setProperty('--sc',COLCOLOR[col]+'55');
+      span.style.setProperty('--scs',COLCOLOR[col]);
+      span.style.setProperty('--mk',SOUNDS[key].color);
+      span.style.setProperty('--mkw',SOUNDS[key].color+'40');
+      span.innerHTML=mark(phrase,key);
+    }else{
+      span.className='slot';
+      span.textContent=COLNAMES[col];
+    }
+    sentenceEl.appendChild(span);
+  });
+  if(ORDER.every(c=>choice[c])){
+    const dot=document.createElement('span');
+    dot.className='dot'; dot.textContent='!';
+    sentenceEl.appendChild(dot);
+  }
+}
+
+function fullSentence(){
+  if(!ORDER.every(c=>choice[c])) return null;
+  return ORDER.map(c=>choice[c][0]).join(' ')+'!';
+}
+
+document.getElementById('readBtn').addEventListener('click',()=>{
+  const s=fullSentence();
+  if(!s){ say('Pick one word from every row first'); return; }
+  stripEl.classList.remove('read'); void stripEl.offsetWidth; stripEl.classList.add('read');
+  say(s);
+});
+
+document.getElementById('surpriseBtn').addEventListener('click',()=>{
+  ORDER.forEach(col=>{ choice[col]=pickOne(options[col]); });
+  drawCols(); drawSentence();
+  const s=fullSentence(); if(s) say(s);
+});
+
+document.getElementById('keepBtn').addEventListener('click',()=>{
+  const s=fullSentence();
+  if(!s) return;
+  const empty=savedList.querySelector('.empty'); if(empty) empty.remove();
+  const row=document.createElement('div');
+  row.className='sv';
+  row.innerHTML=`<span>${s}</span>`;
+  const play=document.createElement('button');
+  play.textContent='🔊'; play.setAttribute('aria-label','Read it again');
+  play.addEventListener('click',()=>say(s));
+  const del=document.createElement('button');
+  del.textContent='✕'; del.setAttribute('aria-label','Remove');
+  del.addEventListener('click',()=>{
+    row.remove();
+    if(!savedList.querySelector('.sv')) savedList.innerHTML='<span class="empty">Build one and tap Keep it.</span>';
+  });
+  row.appendChild(play); row.appendChild(del);
+  savedList.appendChild(row);
+});
+
+document.getElementById('fresh').addEventListener('click',build);
+soundSel.addEventListener('change',build);
+hintSel.addEventListener('change',()=>{ drawCols(); drawSentence(); });
+
+build();
+</script>
+</body>
+</html>

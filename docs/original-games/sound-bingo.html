@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sound Bingo — ai/ay · ee/ea · sh · ng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#10403E; --deep-2:#0B302F; --paper:#FFF6E7; --ink:#14312F;
+    --mustard:#F3B229; --tomato:#E4572E; --mint:#79D3B0; --plum:#8367A8; --sky:#3D8FCB;
+    --display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+    --reading:'Andika','Comic Sans MS','Segoe UI',system-ui,sans-serif;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 88% 6%, rgba(121,211,176,.16), transparent 42%),
+      radial-gradient(circle at 8% 94%, rgba(243,178,41,.14), transparent 45%),
+      var(--deep);
+    color:var(--paper);font-family:var(--reading);min-height:100vh;
+    padding:16px 14px 26px;-webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:600px;margin:0 auto}
+  header{text-align:center;margin-bottom:12px}
+  h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(30px,8vw,46px);line-height:.95;margin:0;letter-spacing:-.5px;
+  }
+  h1 .swash{color:var(--mustard);position:relative;display:inline-block}
+  h1 .swash::after{content:"";position:absolute;left:2%;right:2%;bottom:-2px;height:5px;border-radius:99px;background:var(--tomato)}
+  .tag{font-size:13px;opacity:.72;margin:8px 0 0}
+
+  .panel{
+    background:rgba(255,246,231,.06);border:1px solid rgba(255,246,231,.14);
+    border-radius:var(--radius);padding:12px;margin:14px 0;
+  }
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .row + .row{margin-top:10px}
+  .lbl{
+    font-family:var(--display);font-weight:600;font-size:12px;text-transform:uppercase;
+    letter-spacing:1.2px;opacity:.65;width:100%;margin-bottom:2px;
+  }
+  .chip{
+    font-family:var(--reading);font-weight:700;font-size:15px;padding:8px 14px;border-radius:99px;
+    cursor:pointer;border:2px solid currentColor;background:transparent;color:var(--paper);
+    opacity:.5;transition:opacity .15s,transform .1s,background .15s;
+  }
+  .chip:hover{opacity:.8}
+  .chip[aria-pressed="true"]{opacity:1;background:currentColor}
+  .chip[aria-pressed="true"] span{color:var(--deep-2);font-weight:700}
+  .chip:active{transform:scale(.96)}
+  .chip:focus-visible,button:focus-visible,select:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+  select{
+    font-family:var(--reading);font-size:15px;padding:8px 10px;border-radius:12px;
+    border:2px solid rgba(255,246,231,.3);background:var(--deep-2);color:var(--paper);
+  }
+  .btn{
+    font-family:var(--display);font-weight:800;font-size:16px;padding:10px 20px;border-radius:99px;
+    border:none;cursor:pointer;background:var(--mustard);color:var(--deep-2);box-shadow:0 4px 0 #C98F14;
+    transition:transform .08s,box-shadow .08s;
+  }
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C98F14}
+  .btn.ghost{background:transparent;color:var(--paper);border:2px solid rgba(255,246,231,.3);box-shadow:none}
+  .btn.ghost:active{transform:scale(.97)}
+  .btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+
+  /* ---- caller (signature) ---- */
+  .caller{
+    background:var(--paper);color:var(--ink);border-radius:var(--radius);
+    padding:16px;text-align:center;border-bottom:8px solid var(--callcolor,var(--mustard));
+    margin-bottom:14px;
+  }
+  .caller .pic{font-size:clamp(46px,15vw,72px);line-height:1;min-height:1.1em}
+  .caller .hint{font-family:var(--display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:1.2px;opacity:.55}
+  .caller .reveal{
+    font-family:var(--reading);font-weight:700;font-size:clamp(20px,6vw,28px);
+    min-height:1.3em;letter-spacing:.3px;
+  }
+  .caller .reveal i{font-style:normal;color:var(--callcolor,var(--tomato));border-bottom:4px solid var(--callcolor,var(--tomato))}
+  .caller .reveal.hidden{color:transparent;text-shadow:0 0 12px rgba(20,49,47,.35)}
+  .caller-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .caller-actions .btn{font-size:15px;padding:9px 16px}
+  .caller-actions .btn.ghost{color:var(--ink);border-color:rgba(20,49,47,.3)}
+  .pop{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+  @keyframes pop{from{transform:scale(.4) rotate(-8deg);opacity:0}to{transform:scale(1);opacity:1}}
+
+  /* ---- card ---- */
+  .card-grid{display:grid;gap:8px}
+  .cell{
+    aspect-ratio:1/1;border-radius:14px;border:none;cursor:pointer;padding:4px;
+    background:var(--paper);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--reading);font-weight:700;
+    font-size:clamp(13px,3.6vw,19px);text-align:center;word-break:break-word;
+    box-shadow:0 4px 0 rgba(0,0,0,.28);
+    border-bottom:5px solid var(--sound,#ccc);
+    transition:transform .1s;
+  }
+  .cell i{font-style:normal;color:var(--sound,#333);border-bottom:3px solid var(--sound,#333)}
+  .cell.free{background:var(--mustard);font-size:26px;border-bottom-color:#C98F14}
+  .cell.marked{position:relative;background:var(--mint);box-shadow:0 2px 0 rgba(0,0,0,.2);transform:translateY(2px)}
+  .cell.marked::after{
+    content:"";position:absolute;inset:0;border-radius:14px;
+    background:radial-gradient(circle, rgba(16,64,62,.22) 38%, transparent 40%);
+  }
+  .cell.nope{animation:shake .35s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .cell.win{background:var(--mustard);border-bottom-color:var(--tomato)}
+
+  .called{
+    margin-top:14px;padding:12px;border-radius:var(--radius);
+    background:rgba(255,246,231,.06);border:1px dashed rgba(255,246,231,.22);
+  }
+  .called h2{
+    font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;
+    letter-spacing:1.2px;opacity:.6;margin:0 0 8px;
+  }
+  .called .list{display:flex;flex-wrap:wrap;gap:6px;min-height:30px;align-items:center}
+  .called .empty{font-size:14px;opacity:.45}
+  .tokn{font-family:var(--reading);font-weight:700;font-size:14px;padding:4px 11px;border-radius:99px;color:var(--deep-2)}
+
+  .win-overlay{position:fixed;inset:0;display:none;place-items:center;background:rgba(11,48,47,.9);backdrop-filter:blur(4px);z-index:20;padding:20px}
+  .win-overlay.show{display:grid}
+  .win-card{background:var(--paper);color:var(--ink);border-radius:24px;padding:28px 24px;text-align:center;max-width:340px;width:100%;border-bottom:10px solid var(--mustard)}
+  .win-card h3{font-family:var(--display);font-weight:800;font-size:32px;margin:0 0 6px}
+  .win-card p{margin:0 0 18px;font-size:16px}
+
+  @media (prefers-reduced-motion: reduce){ .pop,.cell.nope{animation:none} }
+
+  @media print{
+    body{background:#fff;color:#000;padding:0}
+    .panel,.caller,.called,.win-overlay,header .tag{display:none !important}
+    h1{color:#000}
+    h1 .swash{color:#000}
+    .cell{box-shadow:none;border:2px solid #000;background:#fff}
+    .cell.free{background:#eee}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Sound <span class="swash">Bingo</span></h1>
+    <p class="tag">Listen to the word. Find it on your card. Tap it.</p>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <span class="lbl">Sounds in play</span>
+      <button class="chip" data-sound="ai" aria-pressed="true"><span>ai / ay</span></button>
+      <button class="chip" data-sound="ee" aria-pressed="true"><span>ee / ea</span></button>
+      <button class="chip" data-sound="sh" aria-pressed="true"><span>sh</span></button>
+      <button class="chip" data-sound="ng" aria-pressed="true"><span>ng</span></button>
+      <button class="chip" data-sound="ch" aria-pressed="false"><span>ch</span></button>
+      <button class="chip" data-sound="thv" aria-pressed="false"><span>th (them)</span></button>
+      <button class="chip" data-sound="thu" aria-pressed="false"><span>th (thin)</span></button>
+      <button class="chip" data-sound="qu" aria-pressed="false"><span>qu</span></button>
+      <button class="chip" data-sound="wh" aria-pressed="false"><span>wh</span></button>
+      <button class="chip" data-sound="ph" aria-pressed="false"><span>ph</span></button>
+      <button class="chip" data-sound="gs" aria-pressed="false"><span>g (gent)</span></button>
+      <button class="chip" data-sound="cs" aria-pressed="false"><span>c (circle)</span></button>
+    </div>
+    <div class="row">
+      <span class="lbl">Set up</span>
+      <select id="size" aria-label="Card size">
+        <option value="3" selected>3 × 3 card</option>
+        <option value="4">4 × 4 card</option>
+      </select>
+      <select id="goal" aria-label="How to win">
+        <option value="line" selected>Win on a line</option>
+        <option value="full">Win on a full card</option>
+      </select>
+      <button class="btn" id="newCard">New card</button>
+      <button class="btn ghost" id="print">Print card</button>
+    </div>
+  </div>
+
+  <div class="caller" id="caller">
+    <div class="hint" id="callerHint">Ready when you are</div>
+    <div class="pic" id="callerPic">🎲</div>
+    <div class="reveal hidden" id="callerWord"></div>
+    <div class="caller-actions">
+      <button class="btn" id="callBtn">Call a word</button>
+      <button class="btn ghost" id="repeatBtn" disabled>🔊 Again</button>
+      <button class="btn ghost" id="showBtn" disabled>Show the word</button>
+    </div>
+  </div>
+
+  <div class="card-grid" id="grid"></div>
+
+  <div class="called">
+    <h2>Words called</h2>
+    <div class="list" id="calledList"><span class="empty">No words yet.</span></div>
+  </div>
+</div>
+
+<div class="win-overlay" id="winOverlay">
+  <div class="win-card">
+    <h3>Bingo!</h3>
+    <p id="winText"></p>
+    <button class="btn" id="again">New card</button>
+  </div>
+</div>
+
+<script>
+const SOUNDS = {
+  ai:{label:'ai / ay',color:'#E4572E',spellings:['ai','ay'],words:[
+    {w:'rain',p:'🌧️'},{w:'train',p:'🚂'},{w:'snail',p:'🐌'},{w:'nail',p:'🔩'},{w:'chain',p:'⛓️'},
+    {w:'paint',p:'🎨'},{w:'tail',p:'🐕'},{w:'day',p:'☀️'},{w:'play',p:'⚽'},{w:'tray',p:'🍽️'},
+    {w:'hay',p:'🌾'},{w:'crayon',p:'🖍️'}]},
+  ee:{label:'ee / ea',color:'#3D8FCB',spellings:['ee','ea'],words:[
+    {w:'bee',p:'🐝'},{w:'tree',p:'🌳'},{w:'sheep',p:'🐑'},{w:'feet',p:'🦶'},{w:'queen',p:'👑'},
+    {w:'cheese',p:'🧀'},{w:'three',p:'3️⃣'},{w:'sea',p:'🌊'},{w:'leaf',p:'🍃'},{w:'peas',p:'🫛'},
+    {w:'meat',p:'🥩'},{w:'beach',p:'🏖️'}]},
+  sh:{label:'sh',color:'#8367A8',spellings:['sh'],words:[
+    {w:'ship',p:'🚢'},{w:'fish',p:'🐟'},{w:'shell',p:'🐚'},{w:'shoe',p:'👟'},{w:'shark',p:'🦈'},
+    {w:'brush',p:'🪥'},{w:'shirt',p:'👕'},{w:'shed',p:'🏚️'}]},
+  ng:{label:'ng',color:'#3FA796',spellings:['ng'],words:[
+    {w:'ring',p:'💍'},{w:'king',p:'🤴'},{w:'song',p:'🎵'},{w:'wing',p:'🪽'},{w:'swing',p:'🛝'},
+    {w:'string',p:'🧵'},{w:'strong',p:'💪'},{w:'sing',p:'🎤'}]},
+  ch:{ label:'ch', color:'#E4572E', spellings:['ch'], words:[{w:'chair',p:'🪑'},{w:'chip',p:'🍟'},{w:'chin',p:'😀'},{w:'cheese',p:'🧀'},{w:'church',p:'⛪'},{w:'lunch',p:'🍱'},{w:'bench',p:'🪑'},{w:'chick',p:'🐤'},{w:'chop',p:'🪓'},{w:'chest',p:'🧰'}]},
+  thv:{ label:'th (them)', color:'#3D8FCB', spellings:['th'], words:[{w:'them',p:'👥'},{w:'this',p:'👉'},{w:'that',p:'👈'},{w:'then',p:'⏭️'},{w:'they',p:'👫'},{w:'with',p:'🤝'},{w:'mother',p:'👩'},{w:'father',p:'👨'},{w:'brother',p:'👦'},{w:'feather',p:'🪶'}]},
+  thu:{ label:'th (thin)', color:'#2F6FA0', spellings:['th'], words:[{w:'thin',p:'📏'},{w:'thick',p:'📚'},{w:'think',p:'💭'},{w:'thumb',p:'👍'},{w:'three',p:'3️⃣'},{w:'path',p:'🛤️'},{w:'moth',p:'🦋'},{w:'bath',p:'🛁'},{w:'teeth',p:'🦷'},{w:'cloth',p:'🧵'}]},
+  qu:{ label:'qu', color:'#C05780', spellings:['qu'], words:[{w:'queen',p:'👑'},{w:'quick',p:'⚡'},{w:'quiet',p:'🤫'},{w:'quiz',p:'❓'},{w:'quilt',p:'🛏️'},{w:'squid',p:'🦑'},{w:'square',p:'⬛'},{w:'quack',p:'🦆'}]},
+  wh:{ label:'wh', color:'#5C8A3A', spellings:['wh'], words:[{w:'wheel',p:'🎡'},{w:'whale',p:'🐋'},{w:'white',p:'⬜'},{w:'when',p:'⏰'},{w:'where',p:'📍'},{w:'which',p:'🤔'},{w:'whisk',p:'🥄'},{w:'whip',p:'🌀'}]},
+  ph:{ label:'ph', color:'#D4772E', spellings:['ph'], words:[{w:'phone',p:'📱'},{w:'photo',p:'📷'},{w:'dolphin',p:'🐬'},{w:'elephant',p:'🐘'},{w:'graph',p:'📈'},{w:'alphabet',p:'🔤'},{w:'phantom',p:'👻'},{w:'trophy',p:'🏆'}]},
+  gs:{ label:'g (gent)', color:'#9B6BC4', spellings:['g'], words:[{w:'giant',p:'🗿'},{w:'magic',p:'✨'},{w:'gem',p:'💎'},{w:'cage',p:'🐦'},{w:'page',p:'📄'},{w:'giraffe',p:'🦒'},{w:'orange',p:'🍊'},{w:'bridge',p:'🌉'},{w:'huge',p:'🐘'},{w:'gentle',p:'🕊️'}]},
+  cs:{ label:'c (circle)', color:'#0E8C8C', spellings:['c'], words:[{w:'circle',p:'⭕'},{w:'city',p:'🏙️'},{w:'pencil',p:'✏️'},{w:'ice',p:'🧊'},{w:'mice',p:'🐭'},{w:'race',p:'🏁'},{w:'face',p:'😊'},{w:'dance',p:'💃'},{w:'celery',p:'🥬'},{w:'cent',p:'🪙'}]}
+};
+
+const grid = document.getElementById('grid');
+const calledList = document.getElementById('calledList');
+const callerPic = document.getElementById('callerPic');
+const callerWord = document.getElementById('callerWord');
+const callerHint = document.getElementById('callerHint');
+const caller = document.getElementById('caller');
+const callBtn = document.getElementById('callBtn');
+const repeatBtn = document.getElementById('repeatBtn');
+const showBtn = document.getElementById('showBtn');
+const winOverlay = document.getElementById('winOverlay');
+const winText = document.getElementById('winText');
+
+let active=['ai','ee','sh','ng'];
+let size=3, cells=[], queue=[], current=null, calledCount=0, won=false;
+
+const shuffle = a => a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+function mark(word,spellings){
+  for(const s of spellings){const i=word.indexOf(s); if(i>-1) return word.slice(0,i)+'<i>'+s+'</i>'+word.slice(i+s.length);}
+  return word;
+}
+function say(t){
+  try{ if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t); u.lang='en-GB'; u.rate=.75; u.pitch=1.1; speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function build(){
+  size = +document.getElementById('size').value;
+  if(active.length===0) active=['ai'];
+  const need = size*size - (size===3?1:0);   // 3×3 keeps a free centre
+
+  let pool=[];
+  active.forEach(k=> SOUNDS[k].words.forEach(o=> pool.push({...o,key:k})));
+  pool = shuffle(pool).slice(0,need);
+  if(pool.length < need){                       // top up if few sounds selected
+    const extra = shuffle(Object.keys(SOUNDS).flatMap(k=>SOUNDS[k].words.map(o=>({...o,key:k}))));
+    for(const e of extra){ if(pool.length>=need) break; if(!pool.find(p=>p.w===e.w)) pool.push(e); }
+  }
+
+  cells=[]; grid.innerHTML='';
+  grid.style.gridTemplateColumns = `repeat(${size},1fr)`;
+  const freeIndex = size===3 ? 4 : -1;
+  let pi=0;
+  for(let i=0;i<size*size;i++){
+    const btn=document.createElement('button');
+    btn.className='cell';
+    if(i===freeIndex){
+      btn.classList.add('free','marked');
+      btn.textContent='⭐';
+      btn.setAttribute('aria-label','Free space');
+      cells.push({free:true,marked:true,el:btn});
+    }else{
+      const c=pool[pi++];
+      const s=SOUNDS[c.key];
+      btn.style.setProperty('--sound',s.color);
+      btn.innerHTML = mark(c.w,s.spellings);
+      btn.setAttribute('aria-label',c.w);
+      const cell={...c,marked:false,el:btn};
+      btn.addEventListener('click',()=>tap(cell));
+      cells.push(cell);
+    }
+    grid.appendChild(btn);
+  }
+
+  queue = shuffle(cells.filter(c=>!c.free));
+  current=null; calledCount=0; won=false;
+  calledList.innerHTML='<span class="empty">No words yet.</span>';
+  callerPic.textContent='🎲'; callerWord.innerHTML=''; callerWord.classList.add('hidden');
+  callerHint.textContent='Ready when you are';
+  caller.style.setProperty('--callcolor','var(--mustard)');
+  callBtn.disabled=false; repeatBtn.disabled=true; showBtn.disabled=true;
+  winOverlay.classList.remove('show');
+}
+
+function call(){
+  if(!queue.length || won) return;
+  current = queue.pop();
+  calledCount++;
+  const s=SOUNDS[current.key];
+  caller.style.setProperty('--callcolor',s.color);
+  callerHint.textContent='Find this word on your card';
+  callerPic.textContent=current.p;
+  callerPic.classList.remove('pop'); void callerPic.offsetWidth; callerPic.classList.add('pop');
+  callerWord.innerHTML = mark(current.w,s.spellings);
+  callerWord.classList.add('hidden');
+  repeatBtn.disabled=false; showBtn.disabled=false;
+  say(current.w);
+
+  const empty=calledList.querySelector('.empty'); if(empty) empty.remove();
+  const t=document.createElement('span');
+  t.className='tokn'; t.style.background=s.color; t.textContent=current.w;
+  calledList.appendChild(t);
+
+  if(!queue.length) callBtn.disabled=true;
+}
+
+function tap(cell){
+  if(won || cell.marked) return;
+  const wasCalled = calledList.querySelectorAll('.tokn');
+  const called = [...wasCalled].some(t=>t.textContent===cell.w);
+  if(!called){
+    cell.el.classList.remove('nope'); void cell.el.offsetWidth; cell.el.classList.add('nope');
+    return;
+  }
+  cell.marked=true;
+  cell.el.classList.add('marked');
+  say(cell.w);
+  checkWin();
+}
+
+function lines(){
+  const out=[];
+  for(let r=0;r<size;r++) out.push([...Array(size)].map((_,c)=>r*size+c));
+  for(let c=0;c<size;c++) out.push([...Array(size)].map((_,r)=>r*size+c));
+  out.push([...Array(size)].map((_,i)=>i*size+i));
+  out.push([...Array(size)].map((_,i)=>i*size+(size-1-i)));
+  return out;
+}
+
+function checkWin(){
+  const goal=document.getElementById('goal').value;
+  if(goal==='full'){
+    if(cells.every(c=>c.marked)){ cells.forEach(c=>c.el.classList.add('win')); finish('the whole card'); }
+    return;
+  }
+  for(const line of lines()){
+    if(line.every(i=>cells[i].marked)){
+      line.forEach(i=>cells[i].el.classList.add('win'));
+      finish('a line'); return;
+    }
+  }
+}
+
+function finish(what){
+  won=true; callBtn.disabled=true;
+  winText.textContent = `You filled ${what} in ${calledCount} words.`;
+  say('Bingo! Well done!');
+  setTimeout(()=>winOverlay.classList.add('show'),500);
+}
+
+document.querySelectorAll('.chip').forEach(chip=>{
+  const key=chip.dataset.sound;
+  chip.style.color=SOUNDS[key].color;
+  chip.addEventListener('click',()=>{
+    const on=chip.getAttribute('aria-pressed')==='true';
+    if(on && active.length===1) return;
+    chip.setAttribute('aria-pressed',String(!on));
+    active=[...document.querySelectorAll('.chip')].filter(c=>c.getAttribute('aria-pressed')==='true').map(c=>c.dataset.sound);
+    build();
+  });
+});
+document.getElementById('size').addEventListener('change',build);
+document.getElementById('goal').addEventListener('change',build);
+document.getElementById('newCard').addEventListener('click',build);
+document.getElementById('again').addEventListener('click',build);
+document.getElementById('print').addEventListener('click',()=>window.print());
+callBtn.addEventListener('click',call);
+repeatBtn.addEventListener('click',()=>{ if(current) say(current.w); });
+showBtn.addEventListener('click',()=>{
+  callerWord.classList.toggle('hidden');
+  showBtn.textContent = callerWord.classList.contains('hidden') ? 'Show the word' : 'Hide the word';
+});
+
+build();
+</script>
+</body>
+</html>

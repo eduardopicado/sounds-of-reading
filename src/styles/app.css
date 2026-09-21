@@ -1,0 +1,275 @@
+@import './fonts.css';
+
+/*  The look is the prototypes' — deep green, cream paper, mustard buttons with
+    a solid drop shadow — collected into one place instead of seven.
+
+    The rule that matters most: colour identifies a sound, it never carries
+    text. A grapheme keeps dark ink and gains a thick underline plus a
+    translucent wash. Sentence Smash shipped mustard-on-cream letters once and
+    was unreadable; .gr below is the fix, used by every game. */
+
+:root {
+  --deep: #10403E;
+  --deep-2: #0B302F;
+  --deep-3: #072220;
+  --paper: #FFF6E7;
+  --ink: #14312F;
+  --mustard: #F3B229;
+  --mustard-dark: #C98F14;
+  --tomato: #E4572E;
+  --mint: #79D3B0;
+  --mint-dark: #4FAF8A;
+  --green: #1E8A5F;
+
+  --display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --reading: 'Andika', 'Comic Sans MS', 'Segoe UI', system-ui, sans-serif;
+
+  --radius: 18px;
+  --tap: 48px;
+  --gutter: 16px;
+
+  /* on paper, cream-on-deep text needs to stay above 4.5:1 */
+  --on-deep: #FFF6E7;
+  --on-deep-soft: rgba(255, 246, 231, .78);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  overscroll-behavior-y: none;
+}
+
+body {
+  background:
+    radial-gradient(circle at 12% 6%, rgba(121, 211, 176, .16), transparent 42%),
+    radial-gradient(circle at 88% 94%, rgba(243, 178, 41, .14), transparent 45%),
+    var(--deep);
+  background-attachment: fixed;
+  color: var(--on-deep);
+  font-family: var(--reading);
+  font-size: 17px;
+  line-height: 1.35;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* launched from the home screen there is no browser chrome, so respect the
+   notch and home indicator ourselves */
+.app {
+  min-height: 100dvh;
+  padding:
+    calc(env(safe-area-inset-top, 0px) + 12px)
+    calc(env(safe-area-inset-right, 0px) + var(--gutter))
+    calc(env(safe-area-inset-bottom, 0px) + 28px)
+    calc(env(safe-area-inset-left, 0px) + var(--gutter));
+}
+
+.wrap { max-width: 720px; margin: 0 auto; }
+.wrap.wide { max-width: 880px; }
+
+/* ── type ─────────────────────────────────────────────────────────────── */
+
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(26px, 6.4vw, 40px);
+  line-height: .98;
+  margin: 0;
+  letter-spacing: -.5px;
+}
+h1 .swash { color: var(--mustard); position: relative; display: inline-block; }
+h1 .swash::after {
+  content: ""; position: absolute; left: 2%; right: 2%; bottom: -2px;
+  height: 5px; border-radius: 99px; background: var(--tomato);
+}
+.tag { font-size: 14px; color: var(--on-deep-soft); margin: 6px 0 0; }
+.lbl {
+  font-family: var(--display); font-weight: 600; font-size: 12px;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--on-deep-soft); width: 100%; margin: 0 0 6px;
+}
+
+/* ── header ───────────────────────────────────────────────────────────── */
+
+.topbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.topbar .titles { flex: 1; min-width: 0; text-align: center; }
+.icon-btn {
+  flex: none;
+  width: var(--tap); height: var(--tap);
+  display: grid; place-items: center;
+  font-size: 22px; line-height: 1;
+  border-radius: 16px; cursor: pointer;
+  background: rgba(255, 246, 231, .1);
+  border: 2px solid rgba(255, 246, 231, .28);
+  color: var(--on-deep);
+}
+.icon-btn:active { transform: scale(.94); }
+.icon-btn[aria-pressed="true"] { background: var(--mustard); border-color: var(--mustard); color: var(--deep-2); }
+
+/* ── panels and controls ──────────────────────────────────────────────── */
+
+.panel {
+  background: rgba(255, 246, 231, .07);
+  border: 1px solid rgba(255, 246, 231, .16);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 12px 0;
+}
+.panel[hidden] { display: none; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row + .row { margin-top: 12px; }
+
+.chip {
+  font-family: var(--reading); font-weight: 700; font-size: 15px;
+  min-height: 40px; padding: 8px 14px; border-radius: 99px; cursor: pointer;
+  border: 2px solid var(--tone, var(--paper));
+  background: transparent; color: var(--on-deep);
+  transition: background .15s, transform .1s, color .15s;
+}
+.chip:active { transform: scale(.96); }
+.chip[aria-pressed="true"] { background: var(--tone, var(--mustard)); color: var(--deep-2); }
+.chip .sub { font-size: 12px; opacity: .75; margin-left: 5px; font-weight: 400; }
+.chip[aria-pressed="true"] .sub { opacity: .8; }
+
+select {
+  font-family: var(--reading); font-size: 16px;
+  min-height: var(--tap); padding: 8px 12px; border-radius: 14px;
+  border: 2px solid rgba(255, 246, 231, .32);
+  background: var(--deep-2); color: var(--on-deep);
+}
+
+.btn {
+  font-family: var(--display); font-weight: 800; font-size: 17px;
+  min-height: var(--tap); padding: 10px 22px;
+  border-radius: 99px; border: none; cursor: pointer;
+  background: var(--mustard); color: var(--deep-2);
+  box-shadow: 0 4px 0 var(--mustard-dark);
+  transition: transform .08s, box-shadow .08s;
+}
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--mustard-dark); }
+.btn.ghost {
+  background: transparent; color: var(--on-deep);
+  border: 2px solid rgba(255, 246, 231, .32); box-shadow: none;
+}
+.btn.ghost:active { transform: scale(.97); box-shadow: none; }
+.btn.small { font-size: 15px; padding: 8px 16px; min-height: 40px; }
+.btn:disabled { opacity: .42; cursor: default; box-shadow: none; transform: none; }
+.btn.on-paper.ghost { color: var(--ink); border-color: rgba(20, 49, 47, .3); }
+
+:focus-visible { outline: 3px solid var(--mustard); outline-offset: 2px; }
+
+/* ── the grapheme mark ────────────────────────────────────────────────── */
+
+.gr {
+  font-style: normal;
+  font-weight: inherit;
+  color: inherit;                      /* never the sound colour */
+  border-bottom: .16em solid var(--deep);
+  background: linear-gradient(var(--wash), var(--wash));
+  background-size: 100% .62em;
+  background-position: 0 88%;
+  background-repeat: no-repeat;
+  padding-bottom: .04em;
+  border-radius: 2px;
+}
+
+/* ── paper surfaces ───────────────────────────────────────────────────── */
+
+.paper {
+  background: var(--paper); color: var(--ink);
+  border-radius: 20px;
+  box-shadow: 0 6px 0 rgba(0, 0, 0, .3);
+}
+
+.score {
+  display: flex; gap: 18px; justify-content: center; align-items: baseline;
+  font-family: var(--display); font-weight: 600; font-size: 15px;
+  color: var(--on-deep-soft); margin: 4px 0 12px; flex-wrap: wrap;
+}
+.score b { font-size: 22px; font-weight: 800; color: var(--mustard); }
+
+.tray {
+  margin-top: 16px; padding: 12px;
+  border-radius: var(--radius);
+  background: rgba(255, 246, 231, .07);
+  border: 1px dashed rgba(255, 246, 231, .24);
+}
+.tray h2 {
+  font-family: var(--display); font-size: 12px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--on-deep-soft); margin: 0 0 8px;
+}
+.tray .empty { font-size: 14px; color: var(--on-deep-soft); }
+.tokens { display: flex; flex-wrap: wrap; gap: 7px; min-height: 34px; align-items: center; }
+.tokn {
+  font-family: var(--reading); font-weight: 700; font-size: 15px;
+  padding: 5px 12px; border-radius: 99px;
+  background: var(--tone, var(--mint)); color: var(--deep-2);
+  animation: pop .32s cubic-bezier(.2, 1.6, .4, 1);
+}
+
+/* ── overlays ─────────────────────────────────────────────────────────── */
+
+.overlay {
+  position: fixed; inset: 0; z-index: 30;
+  display: none; place-items: center; padding: 20px;
+  background: rgba(7, 34, 32, .92);
+  backdrop-filter: blur(4px);
+}
+.overlay.show { display: grid; }
+.overlay-card {
+  background: var(--paper); color: var(--ink);
+  border-radius: 24px; padding: 28px 24px; text-align: center;
+  max-width: 360px; width: 100%;
+  border-bottom: 10px solid var(--mustard);
+  animation: rise .3s cubic-bezier(.2, 1.3, .4, 1);
+}
+.overlay-card h3 { font-family: var(--display); font-weight: 800; font-size: 32px; margin: 0 0 6px; }
+.overlay-card p { margin: 0 0 18px; font-size: 17px; }
+.overlay-card .actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+
+/* ── animation ────────────────────────────────────────────────────────── */
+
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes rise { from { transform: translateY(18px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-14px); } }
+@keyframes slide { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.shake { animation: shake .4s; }
+.bounce { animation: bounce .42s; }
+
+/* confetti: a handful of paper squares, nothing heavy */
+.confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; overflow: hidden; }
+.confetti i {
+  position: absolute; top: -12px; width: 10px; height: 14px; border-radius: 2px;
+  animation: fall var(--dur, 2.4s) linear var(--delay, 0s) forwards;
+}
+@keyframes fall {
+  to { transform: translateY(110vh) rotate(var(--spin, 540deg)); opacity: .2; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+  .confetti { display: none; }
+}
+
+/* ── landscape on a tablet: keep the game above the fold ──────────────── */
+@media (orientation: landscape) and (min-width: 700px) {
+  .wrap { max-width: 980px; }
+  h1 { font-size: clamp(24px, 3.4vw, 34px); }
+}

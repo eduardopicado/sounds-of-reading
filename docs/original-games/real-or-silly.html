@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real or Silly? — ai/ay · ee/ea · sh · ng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Andika:wght@400;700&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#10403E; --deep-2:#0B302F; --paper:#FFF6E7; --ink:#14312F;
+    --mustard:#F3B229; --tomato:#E4572E; --mint:#79D3B0; --plum:#8367A8; --sky:#3D8FCB;
+    --green:#1E8A5F;
+    --display:'Baloo 2','Trebuchet MS',system-ui,sans-serif;
+    --reading:'Andika','Comic Sans MS','Segoe UI',system-ui,sans-serif;
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:
+      radial-gradient(circle at 80% 2%, rgba(61,143,203,.18), transparent 44%),
+      radial-gradient(circle at 5% 98%, rgba(228,87,46,.14), transparent 45%),
+      var(--deep);
+    color:var(--paper);font-family:var(--reading);min-height:100vh;
+    padding:16px 14px 26px;-webkit-tap-highlight-color:transparent;
+  }
+  .wrap{max-width:600px;margin:0 auto}
+  header{text-align:center;margin-bottom:8px}
+  h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,7.5vw,44px);line-height:.95;margin:0;letter-spacing:-.5px}
+  h1 .swash{color:var(--mustard);position:relative;display:inline-block}
+  h1 .swash::after{content:"";position:absolute;left:2%;right:2%;bottom:-2px;height:5px;border-radius:99px;background:var(--tomato)}
+  .tag{font-size:13px;opacity:.72;margin:8px 0 0}
+
+  .panel{background:rgba(255,246,231,.06);border:1px solid rgba(255,246,231,.14);border-radius:var(--radius);padding:12px;margin:12px 0}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .lbl{font-family:var(--display);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;opacity:.65;width:100%;margin-bottom:2px}
+  select{font-family:var(--reading);font-size:15px;padding:8px 10px;border-radius:12px;border:2px solid rgba(255,246,231,.3);background:var(--deep-2);color:var(--paper)}
+  .btn{font-family:var(--display);font-weight:800;font-size:16px;padding:10px 20px;border-radius:99px;border:none;cursor:pointer;background:var(--mustard);color:var(--deep-2);box-shadow:0 4px 0 #C98F14;transition:transform .08s,box-shadow .08s}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #C98F14}
+  .btn.ghost{background:transparent;color:var(--paper);border:2px solid rgba(255,246,231,.3);box-shadow:none}
+  button:focus-visible,select:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+
+  .score{display:flex;gap:16px;justify-content:center;align-items:baseline;font-family:var(--display);font-weight:600;font-size:14px;opacity:.85;margin:2px 0 10px}
+  .score b{font-size:21px;font-weight:800;color:var(--mustard)}
+  .streak{color:var(--mustard)}
+
+  /* ---- word stage ---- */
+  .stage{
+    background:var(--paper);color:var(--ink);border-radius:22px;
+    padding:20px 14px 16px;text-align:center;
+    box-shadow:0 6px 0 rgba(0,0,0,.3);
+    border-bottom:8px solid var(--edge,rgba(20,49,47,.2));
+    min-height:190px;display:flex;flex-direction:column;justify-content:center;gap:8px;
+  }
+  .stage .reveal{font-size:clamp(34px,11vw,52px);line-height:1;min-height:1.1em}
+  .theword{
+    font-family:var(--reading);font-weight:700;
+    font-size:clamp(34px,10vw,50px);letter-spacing:1px;
+  }
+  .theword i{font-style:normal;color:var(--edge);border-bottom:5px solid var(--edge)}
+  .verdict{font-family:var(--display);font-weight:800;font-size:19px;min-height:1.5em}
+  .verdict.good{color:var(--green)}
+  .verdict.bad{color:var(--tomato)}
+  .verdict.idle{color:rgba(20,49,47,.45);font-weight:600;font-size:14px}
+  .stage.shake{animation:shake .4s}
+  .stage.bounce{animation:bounce .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+  @keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+
+  .helpRow{margin-top:8px;text-align:center}
+  .helpRow .btn{font-size:14px;padding:8px 15px;color:var(--paper)}
+
+  /* ---- answer buttons ---- */
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .ans{
+    font-family:var(--display);font-weight:800;font-size:clamp(17px,4.6vw,21px);
+    padding:20px 10px;border-radius:20px;border:none;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+    color:var(--deep-2);transition:transform .08s,box-shadow .08s,opacity .15s;
+  }
+  .ans .em{font-size:30px;line-height:1}
+  .ans.real{background:var(--mint);box-shadow:0 5px 0 #4FAF8A}
+  .ans.silly{background:var(--mustard);box-shadow:0 5px 0 #C98F14}
+  .ans:active{transform:translateY(4px)}
+  .ans.real:active{box-shadow:0 1px 0 #4FAF8A}
+  .ans.silly:active{box-shadow:0 1px 0 #C98F14}
+  .ans:disabled{opacity:.4;cursor:default}
+
+  /* ---- results ---- */
+  .results{display:none;margin-top:16px;padding:14px;border-radius:var(--radius);background:rgba(255,246,231,.06);border:1px dashed rgba(255,246,231,.22)}
+  .results.show{display:block}
+  .results h2{font-family:var(--display);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;opacity:.6;margin:0 0 10px}
+  .results ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:7px}
+  .results li{font-weight:700;font-size:15px;padding:5px 12px;border-radius:10px;background:rgba(121,211,176,.2)}
+  .results li.miss{background:rgba(228,87,46,.28)}
+  .results li .mk{opacity:.65;font-size:11px;margin-left:5px}
+  .results .again{margin-top:14px}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Real or <span class="swash">Silly?</span></h1>
+    <p class="tag">Read the word. Is it a real word, or a made-up one?</p>
+  </header>
+
+  <div class="panel">
+    <div class="row">
+      <span class="lbl">Set up</span>
+      <select id="sound" aria-label="Which sounds">
+        <option value="all" selected>All sounds</option>
+        <option value="ai">ai / ay</option>
+        <option value="ee">ee / ea</option>
+        <option value="sh">sh</option>
+        <option value="ng">ng</option>
+        <option value="ch">ch</option>
+        <option value="thv">th (them)</option>
+        <option value="thu">th (thin)</option>
+        <option value="qu">qu</option>
+        <option value="wh">wh</option>
+        <option value="ph">ph</option>
+        <option value="gs">soft g (gent)</option>
+        <option value="cs">soft c (circle)</option>
+      </select>
+      <select id="len" aria-label="How many words">
+        <option value="8">8 words</option>
+        <option value="12" selected>12 words</option>
+        <option value="16">16 words</option>
+      </select>
+      <button class="btn ghost" id="restart">Start over</button>
+    </div>
+  </div>
+
+  <div class="score">
+    <span>Word <b id="pos">1</b> of <span id="total">12</span></span>
+    <span>Right <b id="right">0</b></span>
+    <span class="streak" id="streakBox" style="visibility:hidden">🔥 <b id="streak">0</b></span>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="reveal" id="reveal"></div>
+    <div class="theword" id="theword">ready?</div>
+    <div class="verdict idle" id="verdict">Read it out loud, then choose</div>
+  </div>
+
+  <div class="helpRow">
+    <button class="btn ghost" id="helpBtn">🔊 Sound it out for me</button>
+  </div>
+
+  <div class="answers">
+    <button class="ans real" id="realBtn"><span class="em">✅</span>Real word</button>
+    <button class="ans silly" id="sillyBtn"><span class="em">🤪</span>Silly word</button>
+  </div>
+
+  <div class="results" id="results">
+    <h2>How it went</h2>
+    <ul id="resultList"></ul>
+    <button class="btn again" id="playAgain">Play again</button>
+  </div>
+</div>
+
+<script>
+window.addEventListener('error', e => {
+  const b=document.createElement('div');
+  b.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99;background:#E4572E;color:#fff;font:13px/1.4 monospace;padding:10px;border-radius:12px;white-space:pre-wrap';
+  b.textContent='ERROR: '+(e.message||'?')+'\nline '+(e.lineno||'?');
+  document.body.appendChild(b);
+});
+</script>
+<script>
+const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+
+/* silly words are deliberately far from any real word, so nothing is unfair */
+const BANK = {
+  ai:{ color:'#E4572E', spellings:['ai','ay'],
+    real:[['rain','🌧️'],['train','🚂'],['snail','🐌'],['nail','🔩'],['chain','⛓️'],['paint','🎨'],
+          ['tail','🐕'],['sail','⛵'],['day','☀️'],['play','⚽'],['tray','🍽️'],['hay','🌾'],
+          ['clay','🏺'],['spray','💦']],
+    silly:['zain','shain','kain','dail','gaim','praint','snaid','chail','zay','blay','snay','glay'] },
+  ee:{ color:'#3D8FCB', spellings:['ee','ea'],
+    real:[['bee','🐝'],['tree','🌳'],['sheep','🐑'],['feet','🦶'],['queen','👑'],['cheese','🧀'],
+          ['three','3️⃣'],['sea','🌊'],['leaf','🍃'],['peas','🫛'],['meat','🥩'],['beach','🏖️'],
+          ['seal','🦭'],['green','🟢']],
+    silly:['mee','kee','gree','blee','shee','dreep','sneep','cleep','zeat','geat','dreach','gleat'] },
+  sh:{ color:'#8367A8', spellings:['sh'],
+    real:[['ship','🚢'],['fish','🐟'],['shell','🐚'],['shoe','👟'],['shark','🦈'],['brush','🪥'],
+          ['shirt','👕'],['shop','🏪'],['wish','⭐'],['crash','💥']],
+    silly:['shig','shup','shom','shen','shib','vish','gish','blish','dush','crish'] },
+  ng:{ color:'#3FA796', spellings:['ng'],
+    real:[['ring','💍'],['king','🤴'],['song','🎵'],['wing','🪽'],['swing','🛝'],['string','🧵'],
+          ['strong','💪'],['sing','🎤'],['long','📏'],['bring','🎁']],
+    silly:['ving','dring','plong','cheng','blong','shing','tring','drang','flong','skang'] },
+  ch:{ color:'#C6421F', spellings:['ch'],
+    real:[['chair','🪑'],['chip','🍟'],['chin','😀'],['cheese','🧀'],['church','⛪'],['lunch','🍱'],
+          ['bench','🪑'],['chick','🐤'],['chop','🪓'],['chest','🧰']],
+    silly:['chog','chib','chum','vench','zach','glench','shrunch','chep','blench','chid'] },
+  thv:{ color:'#3D8FCB', spellings:['th'],
+    real:[['them','👥'],['this','👉'],['that','👈'],['then','⏭️'],['they','👫'],['with','🤝'],
+          ['mother','👩'],['father','👨'],['brother','👦'],['feather','🪶']],
+    silly:['thog','thib','vether','zother','thum','glith','thep','drith','plather','thiv'] },
+  thu:{ color:'#2F6FA0', spellings:['th'],
+    real:[['thin','📏'],['thick','📚'],['think','💭'],['thumb','👍'],['three','3️⃣'],['path','🛤️'],
+          ['moth','🦋'],['bath','🛁'],['teeth','🦷'],['cloth','🧵']],
+    silly:['thog','vith','zath','thub','glith','thup','drath','sploth','thig','frith'] },
+  qu:{ color:'#C05780', spellings:['qu'],
+    real:[['queen','👑'],['quick','⚡'],['quiet','🤫'],['quiz','❓'],['quilt','🛏️'],['squid','🦑'],
+          ['square','⬛'],['quack','🦆']],
+    silly:['quog','quib','quem','zuck','quan','vquid','quop','glquz'] },
+  wh:{ color:'#5C8A3A', spellings:['wh'],
+    real:[['wheel','🎡'],['whale','🐋'],['white','⬜'],['when','⏰'],['where','📍'],['which','🤔'],
+          ['whisk','🥄'],['whip','🌀']],
+    silly:['whog','whib','vhale','zhen','whup','glwhi','whad','drwhe'] },
+  ph:{ color:'#D4772E', spellings:['ph'],
+    real:[['phone','📱'],['photo','📷'],['dolphin','🐬'],['elephant','🐘'],['graph','📈'],
+          ['alphabet','🔤'],['trophy','🏆'],['phantom','👻']],
+    silly:['phog','phib','vophy','zaph','phum','glaph','phed','drophin'] },
+  gs:{ color:'#9B6BC4', spellings:['g'],
+    real:[['giant','🗿'],['magic','✨'],['gem','💎'],['cage','🐦'],['page','📄'],['giraffe','🦒'],
+          ['orange','🍊'],['bridge','🌉'],['huge','🐘'],['gentle','🕊️']],
+    silly:['gim','vage','zoge','gep','glunge','dridge','gomp','plage'] },
+  cs:{ color:'#0E8C8C', spellings:['c'],
+    real:[['circle','⭕'],['city','🏙️'],['pencil','✏️'],['ice','🧊'],['mice','🐭'],['race','🏁'],
+          ['face','😊'],['dance','💃'],['celery','🥬'],['cent','🪙']],
+    silly:['cim','voce','zace','cep','glice','drence','comp','plice'] }
+};
+
+const stage=document.getElementById('stage'), revealEl=document.getElementById('reveal');
+const wordEl=document.getElementById('theword'), verdict=document.getElementById('verdict');
+const posEl=document.getElementById('pos'), totalEl=document.getElementById('total');
+const rightEl=document.getElementById('right'), streakEl=document.getElementById('streak');
+const streakBox=document.getElementById('streakBox');
+const realBtn=document.getElementById('realBtn'), sillyBtn=document.getElementById('sillyBtn');
+const helpBtn=document.getElementById('helpBtn');
+const results=document.getElementById('results'), resultList=document.getElementById('resultList');
+
+let queue=[], current=null, idx=0, right=0, streak=0, log=[], busy=false, usedHelp=false;
+
+function say(t, slow){
+  try{
+    if(!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t);
+    u.lang='en-GB'; u.rate=slow?0.5:0.75; u.pitch=1.1;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function mark(word,spellings){
+  for(const s of spellings){
+    const i=word.indexOf(s);
+    if(i>-1) return word.slice(0,i)+'<i>'+s+'</i>'+word.slice(i+s.length);
+  }
+  return word;
+}
+
+function build(){
+  const pick=document.getElementById('sound').value;
+  const n=+document.getElementById('len').value;
+  const keys = pick==='all' ? Object.keys(BANK) : [pick];
+
+  const reals=[], sillies=[];
+  keys.forEach(k=>{
+    const b=BANK[k];
+    b.real.forEach(([w,p])=>reals.push({w,p,key:k,real:true}));
+    b.silly.forEach(w=>sillies.push({w,p:'🤪',key:k,real:false}));
+  });
+
+  const half=Math.ceil(n/2);
+  queue = shuffle([...shuffle(reals).slice(0,half), ...shuffle(sillies).slice(0,n-half)]);
+
+  idx=0; right=0; streak=0; log=[]; busy=false;
+  posEl.textContent=1; totalEl.textContent=queue.length; rightEl.textContent=0;
+  streakBox.style.visibility='hidden';
+  results.classList.remove('show'); resultList.innerHTML='';
+  realBtn.disabled=false; sillyBtn.disabled=false; helpBtn.disabled=false;
+  stage.style.display='';
+  document.querySelector('.answers').style.display='';
+  document.querySelector('.helpRow').style.display='';
+  next();
+}
+
+function next(){
+  if(idx>=queue.length){ finish(); return; }
+  current=queue[idx]; usedHelp=false;
+  posEl.textContent=idx+1;
+  stage.style.setProperty('--edge','rgba(20,49,47,.2)');
+  revealEl.textContent='';
+  wordEl.textContent=current.w;              // no highlight yet — he has to decode it
+  verdict.className='verdict idle';
+  verdict.textContent='Read it out loud, then choose';
+  busy=false;
+}
+
+function answer(saidReal){
+  if(busy||!current) return;
+  busy=true;
+  const correct = saidReal===current.real;
+  const b=BANK[current.key];
+
+  stage.style.setProperty('--edge', b.color);
+  wordEl.innerHTML = mark(current.w, b.spellings);
+  revealEl.textContent = current.real ? current.p : '🤪';
+  stage.classList.remove('shake','bounce'); void stage.offsetWidth;
+  stage.classList.add(correct?'bounce':'shake');
+
+  if(correct){
+    right++; rightEl.textContent=right;
+    streak++;
+    verdict.className='verdict good';
+    verdict.textContent = current.real ? `Yes — ${current.w} is a real word!` : `Right — ${current.w} isn't a word!`;
+  }else{
+    streak=0;
+    verdict.className='verdict bad';
+    verdict.textContent = current.real ? `${current.w} IS a real word.` : `${current.w} is a made-up word.`;
+  }
+  streakEl.textContent=streak;
+  streakBox.style.visibility = streak>=2 ? 'visible' : 'hidden';
+
+  say(current.w);
+  log.push({...current, correct, usedHelp});
+  idx++;
+  setTimeout(next, 1600);
+}
+
+function finish(){
+  current=null;
+  stage.style.display='none';
+  document.querySelector('.answers').style.display='none';
+  document.querySelector('.helpRow').style.display='none';
+  resultList.innerHTML='';
+  log.forEach(o=>{
+    const li=document.createElement('li');
+    li.style.color=BANK[o.key].color;
+    li.innerHTML = mark(o.w, BANK[o.key].spellings)
+      + (o.correct?'':'<span class="mk">missed</span>')
+      + (o.usedHelp?'<span class="mk">heard it</span>':'');
+    if(!o.correct) li.classList.add('miss');
+    resultList.appendChild(li);
+  });
+  results.classList.add('show');
+  say(right===log.length ? 'Perfect!' : 'Good reading!');
+}
+
+realBtn.addEventListener('click',()=>answer(true));
+sillyBtn.addEventListener('click',()=>answer(false));
+helpBtn.addEventListener('click',()=>{ if(current&&!busy){ usedHelp=true; say(current.w,true); } });
+document.getElementById('sound').addEventListener('change',build);
+document.getElementById('len').addEventListener('change',build);
+document.getElementById('restart').addEventListener('click',build);
+document.getElementById('playAgain').addEventListener('click',build);
+
+build();
+</script>
+</body>
+</html>
