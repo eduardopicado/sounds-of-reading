@@ -43,7 +43,8 @@ const ACCENT_RANK: [RegExp, number][] = [
   [/^en/i, 4],
 ];
 
-export type Quality = 'premium' | 'enhanced' | 'compact' | 'unknown' | 'retro' | 'novelty';
+export type Quality =
+  | 'premium' | 'enhanced' | 'compact' | 'super-compact' | 'unknown' | 'retro' | 'novelty';
 
 /**
  * Apple puts the tier in the identifier; other engines name theirs in words.
@@ -53,6 +54,13 @@ export type Quality = 'premium' | 'enhanced' | 'compact' | 'unknown' | 'retro' |
  * no tier marker at all — the Eloquence set (com.apple.eloquence.*), which is
  * the retro speech engine, and the novelty voices (Bubbles, Zarvox and
  * friends) — so anything unmarked must rank below compact, never above it.
+ *
+ * "super-compact" is the exception that has to be tested first: it is the
+ * cut-down voice iOS keeps for low memory, it sounds worse than compact, and
+ * its identifier ends in the word "compact" — so a plain substring check reads
+ * it as the better tier. An iPad really does offer both
+ * com.apple.voice.compact.en-US.Samantha and ...super-compact..., and calling
+ * them the same tier let the dedupe below drop whichever came first.
  */
 export function qualityOf(voice: SpeechSynthesisVoice): Quality {
   const id = `${voice.voiceURI} ${voice.name}`.toLowerCase();
@@ -60,12 +68,14 @@ export function qualityOf(voice: SpeechSynthesisVoice): Quality {
   if (id.includes('enhanced') || id.includes('neural') || id.includes('natural')) return 'enhanced';
   if (id.includes('eloquence')) return 'retro';
   if (id.includes('com.apple.speech.synthesis.voice.')) return 'novelty';
+  if (/super[-_ ]?compact/.test(id)) return 'super-compact';
   if (id.includes('compact')) return 'compact';
   return 'unknown';
 }
 
 const QUALITY_RANK: Record<Quality, number> = {
-  premium: 0, enhanced: 1, compact: 2, unknown: 3, retro: 4, novelty: 5,
+  premium: 0, enhanced: 1, compact: 2, 'super-compact': 3,
+  unknown: 4, retro: 5, novelty: 6,
 };
 
 /** English voices this device actually has, best first */
@@ -155,12 +165,14 @@ export function setSpeechEnabled(on: boolean): void {
 }
 
 /**
- * iOS stays silent until speech has been started inside a real gesture — and,
- * less obviously, it does not admit to having the good voices until then
- * either. Before the first speak(), getVoices() lists only the preinstalled
- * set, so a Karen Enhanced the parent downloaded is simply absent. After the
- * unlock the list grows, but nothing fires to say so on every version, so we
- * re-read it a few times and tell anyone listening when it changes.
+ * iOS stays silent until speech has been started inside a real gesture, so
+ * the first tap in the app starts an empty utterance to open the gate.
+ *
+ * The list of voices can also arrive late, and `voiceschanged` does not fire
+ * everywhere, so we re-read it a few times afterwards and tell anyone
+ * listening if it changed. That is a cheap hedge against slow loading, not a
+ * way to summon a downloaded voice: an iPad with Karen Enhanced installed
+ * still never offered her to the page, unlock or no unlock.
  */
 export function unlockSpeech(): void {
   if (unlocked) return;
@@ -217,7 +229,20 @@ export function cancelSpeech(): void {
 export interface SayOptions {
   /** slower, for "sound it out for me" */
   slow?: boolean;
+  /** speak through this exact voice instead of the chosen one, for #/voices,
+   *  where every row has to be audibly itself rather than the app's pick */
+  voiceURI?: string;
   onEnd?: () => void;
+}
+
+function voiceByURI(uri: string): SpeechSynthesisVoice | null {
+  const synth = engine();
+  if (!synth) return null;
+  try {
+    return synth.getVoices().find((v) => v.voiceURI === uri) ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export function say(text: string, options: SayOptions = {}): void {
@@ -227,16 +252,22 @@ export function say(text: string, options: SayOptions = {}): void {
   try {
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    cached ??= chooseVoice();
+    let voice: SpeechSynthesisVoice | null;
+    if (options.voiceURI) {
+      voice = voiceByURI(options.voiceURI);
+    } else {
+      cached ??= chooseVoice();
+      voice = cached;
+    }
     /* Setting .voice can throw on its own in some engines. Losing the voice is
        survivable — losing the whole utterance is not — so it gets its own try,
        and lang still carries the accent we want. */
     try {
-      if (cached) u.voice = cached;
+      if (voice) u.voice = voice;
     } catch {
       /* fall back to lang alone */
     }
-    u.lang = cached?.lang ?? 'en-AU';
+    u.lang = voice?.lang ?? 'en-AU';
     /* Apple's voices warble below about 0.8 and sound synthetic above a pitch
        of 1, so stay inside that. Sounding it out is meant to be slow. */
     u.rate = options.slow ? 0.45 : 0.9;
@@ -276,6 +307,7 @@ const QUALITY_LABEL: Record<Quality, string> = {
   premium: ' — premium, clearest',
   enhanced: ' — enhanced, clearer',
   compact: ' — standard',
+  'super-compact': ' — standard, lower detail',
   unknown: '',
   retro: ' — retro, robotic',
   novelty: ' — novelty, just for fun',

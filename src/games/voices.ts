@@ -32,7 +32,7 @@ export function mount(root: HTMLElement): () => void {
         el('div', { style: { fontSize: '13px' }, text: `read as: ${v.quality} · ${v.local ? 'on device' : 'needs network'}` }),
       );
       const tryIt = el('button', { class: 'btn ghost on-paper small', type: 'button', text: '🔊 Hear it' });
-      tryIt.addEventListener('click', () => say('rain, sheep, quick'));
+      tryIt.addEventListener('click', () => say('rain, sheep, quick', { voiceURI: v.uri }));
       row.append(tryIt);
       list.append(row);
     }
@@ -55,7 +55,7 @@ export function mount(root: HTMLElement): () => void {
     summary,
     list,
     el('p', { class: 'tag', style: { marginTop: '16px' },
-      text: 'Tap a game first if this looks short — some devices only reveal their voices once speech has started.' }),
+      text: 'This is the whole list the browser hands the page. A voice downloaded in Settings only appears here if the browser chooses to offer it, which it does not always do.' }),
   ));
 
   return stop;

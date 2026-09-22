@@ -224,6 +224,73 @@ test.describe('speech', () => {
     await expect(page.locator('.wrap')).toContainText('com.apple.speech.synthesis.voice.Albert');
   });
 
+  test('a super-compact voice never passes for the compact one of the same name', async ({ page }) => {
+    await page.addInitScript(() => {
+      /* straight off the iPad: one Samantha in each of these two tiers. The
+         cut-down one ends in the word "compact", so a substring check called
+         them the same voice and quietly dropped one of them. */
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Samantha', lang: 'en-US', localService: true, default: false, voiceURI: 'com.apple.voice.super-compact.en-US.Samantha' },
+        { name: 'Samantha', lang: 'en-US', localService: true, default: false, voiceURI: 'com.apple.voice.compact.en-US.Samantha' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/#/voices');
+    await expect(page.locator('.wrap')).toContainText('read as: super-compact');
+
+    await page.goto('/');
+    const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
+    const samanthas = options.filter((o) => o.includes('Samantha'));
+    /* both survive, and the parent can tell which is which */
+    expect(samanthas).toHaveLength(2);
+    expect(samanthas.filter((o) => o.includes('lower detail'))).toHaveLength(1);
+    /* the better one is offered first */
+    expect(samanthas[0]).not.toContain('lower detail');
+  });
+
+  test('each diagnostics row speaks in its own voice', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Albert', lang: 'en-US', localService: false, default: false, voiceURI: 'com.apple.speech.synthesis.voice.Albert' },
+      ];
+      const spoken: { voice: string }[] = [];
+      (window as unknown as { __spoken: unknown }).__spoken = spoken;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: { voiceURI: string } | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: (u: { voice?: { voiceURI: string } }) => spoken.push({ voice: u.voice?.voiceURI ?? '' }),
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/#/voices');
+    /* the second row is the one the app would never choose on its own, which
+       is exactly why its button has to speak as itself */
+    await page.locator('.paper').nth(1).getByRole('button', { name: 'Hear it' }).click();
+    const spoken = await page.evaluate(() => (window as unknown as { __spoken: { voice: string }[] }).__spoken);
+    expect(spoken.pop()?.voice).toBe('com.apple.speech.synthesis.voice.Albert');
+  });
+
   test('never picks a retro or novelty voice over the ordinary one', async ({ page }) => {
     await page.addInitScript(() => {
       /* what an iPad really lists: the Siri-family compact voice alongside the
