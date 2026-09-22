@@ -173,6 +173,57 @@ test.describe('speech', () => {
     expect(options.join(' | ')).toContain('enhanced, clearer');
   });
 
+  test('lists a repeated voice once', async ({ page }) => {
+    await page.addInitScript(() => {
+      /* an iPad really does offer the same Samantha twice */
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Samantha', lang: 'en-US', localService: true, default: false, voiceURI: 'com.apple.voice.compact.en-US.Samantha' },
+        { name: 'Samantha', lang: 'en-US', localService: true, default: false, voiceURI: 'com.apple.ttsbundle.Samantha-compact' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/');
+    const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
+    /* "Best available" plus Karen plus one Samantha */
+    expect(options).toHaveLength(3);
+    expect(options.filter((o) => o.includes('Samantha'))).toHaveLength(1);
+  });
+
+  test('the diagnostics screen prints the identifier each tier is read from', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Albert', lang: 'en-US', localService: true, default: false, voiceURI: 'com.apple.speech.synthesis.voice.Albert' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/#/voices');
+    await expect(page.locator('.wrap')).toContainText('2 English voices');
+    /* the identifier is the whole point of the screen */
+    await expect(page.locator('.wrap')).toContainText('com.apple.voice.compact.en-AU.Karen');
+    await expect(page.locator('.wrap')).toContainText('read as: compact');
+    await expect(page.locator('.wrap')).toContainText('read as: novelty');
+    /* duplicates are NOT collapsed here — this screen shows the raw truth */
+    await expect(page.locator('.wrap')).toContainText('com.apple.speech.synthesis.voice.Albert');
+  });
+
   test('never picks a retro or novelty voice over the ordinary one', async ({ page }) => {
     await page.addInitScript(() => {
       /* what an iPad really lists: the Siri-family compact voice alongside the
