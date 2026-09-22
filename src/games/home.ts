@@ -5,7 +5,7 @@
 
 import { el } from '../lib/dom';
 import { pick } from '../lib/random';
-import { describeVoice, englishVoices, onlyCompactVoices, say } from '../lib/speech';
+import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import { chip, confetti } from '../ui/components';
@@ -191,12 +191,10 @@ export function mount(root: HTMLElement): () => void {
   }
 
   drawVoices();
-  /* voices arrive asynchronously on most browsers, and late on iOS */
-  try {
-    window.speechSynthesis?.addEventListener?.('voiceschanged', drawVoices);
-  } catch {
-    /* no speech here; the row already says so */
-  }
+  /* Voices arrive asynchronously everywhere, and on iOS the downloaded ones
+     only appear once the first tap has unlocked speech — so this redraws
+     whenever the list actually grows, not just at load. */
+  const stopWatchingVoices = onVoicesChanged(drawVoices);
 
   const week = el('div', { class: 'week' },
     el('h2', { text: "This week's sounds" }),
@@ -230,5 +228,5 @@ export function mount(root: HTMLElement): () => void {
 
   draw();
   root.append(node);
-  return () => undefined;
+  return stopWatchingVoices;
 }
