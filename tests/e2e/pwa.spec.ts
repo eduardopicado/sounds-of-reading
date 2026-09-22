@@ -257,6 +257,30 @@ test.describe('speech', () => {
     expect(samanthas[0]).not.toContain('lower detail');
   });
 
+  test('the diagnostics screen can be reached without an address bar', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    /* Added to the home screen the app runs standalone: no address bar, and
+       it always launches at start_url, so a typed #/voices cannot get there.
+       The only way in is from the grown-ups' panel. */
+    await page.goto('/');
+    await page.getByRole('link', { name: 'Which voices?' }).click();
+    await expect(page.locator('.wrap')).toContainText('offered to this page');
+    await expect(page.locator('.wrap')).toContainText('com.apple.voice.compact.en-AU.Karen');
+  });
+
   test('each diagnostics row speaks in its own voice', async ({ page }) => {
     await page.addInitScript(() => {
       const voices = [
