@@ -363,3 +363,24 @@
   .cell { box-shadow: none; border: 2px solid #000; background: #fff; }
   .cell.free { background: #eee; }
 }
+
+/* ── Same Sound, Two Ways ──────────────────────────────────────────────── */
+
+/* the slot where the missing spelling goes. It has to read as "something
+   belongs here" rather than as a dash, so it is a tinted well the width of
+   two letters, sitting on the reading baseline. */
+.word .gap {
+  display: inline-block; min-width: 1.9em; height: .95em; vertical-align: -.08em;
+  border-bottom: 4px solid var(--mustard);
+  background: rgba(255, 246, 231, .14); border-radius: 6px 6px 0 0;
+}
+
+/* only two choices, so they can be bigger and squarer than a sort bin */
+.choices .bin { min-height: 92px; justify-content: center; border-style: solid; }
+.choices .bin .name { font-size: 28px; letter-spacing: .02em; }
+
+/* the rule, shown only once he has missed — advice, not a scolding */
+.rule {
+  text-align: center; margin: 10px auto 0; max-width: 34ch;
+  color: var(--on-deep); opacity: .92;
+}
