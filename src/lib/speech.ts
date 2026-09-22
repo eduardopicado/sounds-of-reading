@@ -23,6 +23,8 @@ let unlocked = false;
 let enabled = true;
 /** a voice the parent chose by hand, which beats anything we would rank */
 let preferredURI: string | null = null;
+const voiceListeners = new Set<() => void>();
+let lastSignature = '';
 
 function engine(): SpeechSynthesis | null {
   try {
@@ -41,18 +43,30 @@ const ACCENT_RANK: [RegExp, number][] = [
   [/^en/i, 4],
 ];
 
-export type Quality = 'premium' | 'enhanced' | 'standard' | 'compact';
+export type Quality = 'premium' | 'enhanced' | 'compact' | 'unknown' | 'retro' | 'novelty';
 
-/** Apple puts the tier in the identifier; other engines name theirs in words. */
+/**
+ * Apple puts the tier in the identifier; other engines name theirs in words.
+ *
+ * "compact" sounds like the worst of the bunch and is not: it is the ordinary
+ * Siri-family voice and the sensible baseline. The genuinely poor ones carry
+ * no tier marker at all — the Eloquence set (com.apple.eloquence.*), which is
+ * the retro speech engine, and the novelty voices (Bubbles, Zarvox and
+ * friends) — so anything unmarked must rank below compact, never above it.
+ */
 export function qualityOf(voice: SpeechSynthesisVoice): Quality {
   const id = `${voice.voiceURI} ${voice.name}`.toLowerCase();
   if (id.includes('premium')) return 'premium';
   if (id.includes('enhanced') || id.includes('neural') || id.includes('natural')) return 'enhanced';
+  if (id.includes('eloquence')) return 'retro';
+  if (id.includes('com.apple.speech.synthesis.voice.')) return 'novelty';
   if (id.includes('compact')) return 'compact';
-  return 'standard';
+  return 'unknown';
 }
 
-const QUALITY_RANK: Record<Quality, number> = { premium: 0, enhanced: 1, standard: 2, compact: 3 };
+const QUALITY_RANK: Record<Quality, number> = {
+  premium: 0, enhanced: 1, compact: 2, unknown: 3, retro: 4, novelty: 5,
+};
 
 /** English voices this device actually has, best first */
 export function englishVoices(): SpeechSynthesisVoice[] {
@@ -90,11 +104,22 @@ export function setPreferredVoice(uri: string | null): void {
   cached = null;
 }
 
-/** true when every English voice installed is one of Apple's compact ones,
- *  which is the case on a device where nobody has downloaded a better one */
+/**
+ * True when nothing better than a compact voice is installed — the state of a
+ * device where nobody has downloaded one.
+ *
+ * This asks whether any voice is enhanced or premium rather than whether every
+ * voice is compact: a single Eloquence voice in the list, which iOS ships by
+ * default, would otherwise silence the hint on exactly the devices that need
+ * it most.
+ */
 export function onlyCompactVoices(): boolean {
   const voices = englishVoices();
-  return voices.length > 0 && voices.every((v) => qualityOf(v) === 'compact');
+  if (!voices.length) return false;
+  return !voices.some((v) => {
+    const q = qualityOf(v);
+    return q === 'enhanced' || q === 'premium';
+  });
 }
 
 export function setSpeechEnabled(on: boolean): void {
@@ -102,7 +127,14 @@ export function setSpeechEnabled(on: boolean): void {
   if (!on) cancelSpeech();
 }
 
-/** iOS stays silent until speech has been started inside a real gesture */
+/**
+ * iOS stays silent until speech has been started inside a real gesture — and,
+ * less obviously, it does not admit to having the good voices until then
+ * either. Before the first speak(), getVoices() lists only the preinstalled
+ * set, so a Karen Enhanced the parent downloaded is simply absent. After the
+ * unlock the list grows, but nothing fires to say so on every version, so we
+ * re-read it a few times and tell anyone listening when it changes.
+ */
 export function unlockSpeech(): void {
   if (unlocked) return;
   const synth = engine();
@@ -112,9 +144,39 @@ export function unlockSpeech(): void {
     u.volume = 0;
     synth.speak(u);
     unlocked = true;
+    for (const delay of [0, 250, 750, 2000]) window.setTimeout(rescanVoices, delay);
   } catch {
     /* stays locked; the next tap tries again */
   }
+}
+
+/** a cheap fingerprint of the voice list, to spot it growing */
+function signature(): string {
+  const synth = engine();
+  if (!synth) return '';
+  try {
+    return synth.getVoices().map((v) => v.voiceURI).join('|');
+  } catch {
+    return '';
+  }
+}
+
+/** re-reads the voice list and notifies listeners only if it actually changed */
+export function rescanVoices(): void {
+  const next = signature();
+  if (next === lastSignature) return;
+  lastSignature = next;
+  cached = null;
+  for (const fn of voiceListeners) {
+    try { fn(); } catch { /* a listener must not break speech */ }
+  }
+}
+
+/** called whenever the set of installed voices changes, including after the
+ *  first tap on iOS reveals the downloaded ones */
+export function onVoicesChanged(fn: () => void): () => void {
+  voiceListeners.add(fn);
+  return () => voiceListeners.delete(fn);
 }
 
 export function cancelSpeech(): void {
@@ -167,8 +229,9 @@ export function watchVoices(): void {
   const synth = engine();
   if (!synth) return;
   try {
+    lastSignature = signature();
     cached = chooseVoice();
-    synth.addEventListener('voiceschanged', () => { cached = chooseVoice(); });
+    synth.addEventListener('voiceschanged', rescanVoices);
   } catch {
     /* ignore */
   }
@@ -180,8 +243,16 @@ export function currentVoice(): SpeechSynthesisVoice | null {
   return cached;
 }
 
-export const describeVoice = (v: SpeechSynthesisVoice): string => {
-  const quality = qualityOf(v);
-  const suffix = quality === 'compact' ? ' — basic' : quality === 'standard' ? '' : ` — ${quality}`;
-  return `${v.name} (${v.lang})${suffix}`;
+/* Every voice says what it is. Calling the ordinary one "basic" read as a
+   warning and made the retro voices look like the better choice. */
+const QUALITY_LABEL: Record<Quality, string> = {
+  premium: ' — premium, clearest',
+  enhanced: ' — enhanced, clearer',
+  compact: ' — standard',
+  unknown: '',
+  retro: ' — retro, robotic',
+  novelty: ' — novelty, just for fun',
 };
+
+export const describeVoice = (v: SpeechSynthesisVoice): string =>
+  `${v.name} (${v.lang})${QUALITY_LABEL[qualityOf(v)]}`;

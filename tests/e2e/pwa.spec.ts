@@ -134,6 +134,105 @@ test.describe('speech', () => {
     expect(last?.voice).toBe('com.apple.voice.enhanced.en-AU.Karen');
   });
 
+  test('finds the downloaded voice that iOS only reveals after the first tap', async ({ page }) => {
+    await page.addInitScript(() => {
+      /* iOS hides enhanced and premium voices from getVoices() until speech has
+         been started inside a real gesture, and fires nothing to announce it */
+      const hidden = { name: 'Karen', lang: 'en-AU', localService: true, default: false, voiceURI: 'com.apple.voice.enhanced.en-AU.Karen' };
+      const shown = [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' }];
+      let spokenOnce = false;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: { voiceURI: string } | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => (spokenOnce ? [...shown, hidden] : shown),
+          speak: () => { spokenOnce = true; },
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+
+    await page.goto('/');
+    const picker = page.getByLabel('Which voice reads the words');
+    /* before any tap only the preinstalled voice is on offer */
+    await expect(picker.locator('option')).toHaveCount(2);
+
+    /* the first tap unlocks speech, and the list has to be read again */
+    await page.locator('.tile-link').first().click();
+    await page.goBack();
+    await expect(picker.locator('option')).toHaveCount(3, { timeout: 10_000 });
+    const options = await picker.locator('option').allTextContents();
+    expect(options.join(' | ')).toContain('enhanced, clearer');
+  });
+
+  test('never picks a retro or novelty voice over the ordinary one', async ({ page }) => {
+    await page.addInitScript(() => {
+      /* what an iPad really lists: the Siri-family compact voice alongside the
+         Eloquence set and a novelty voice, none of which carry a tier marker */
+      const voices = [
+        { name: 'Grandma', lang: 'en-AU', localService: true, default: false, voiceURI: 'com.apple.eloquence.en-AU.Grandma' },
+        { name: 'Zarvox', lang: 'en-AU', localService: true, default: false, voiceURI: 'com.apple.speech.synthesis.voice.Zarvox' },
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+      ];
+      const spoken: { voice: string }[] = [];
+      (window as unknown as { __spoken: unknown }).__spoken = spoken;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: { voiceURI: string } | null = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: (u: { voice?: { voiceURI: string } }) => spoken.push({ voice: u.voice?.voiceURI ?? '' }),
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+
+    await page.goto('/#/word-builder');
+    await page.locator('.rack .tile').first().click();
+    const spoken = await page.evaluate(() => (window as unknown as { __spoken: { voice: string }[] }).__spoken);
+    expect(spoken.filter((s) => s.voice).pop()?.voice).toBe('com.apple.voice.compact.en-AU.Karen');
+  });
+
+  test('still offers to find a better voice when only retro ones sit alongside compact', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Reed', lang: 'en-AU', localService: true, default: false, voiceURI: 'com.apple.eloquence.en-AU.Reed' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/');
+    /* an Eloquence voice in the list must not be mistaken for "already better" */
+    await expect(page.locator('.week .tag', { hasText: 'Spoken Content' })).toBeVisible();
+    const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
+    expect(options.join(' | ')).toContain('Karen (en-AU) — standard');
+    expect(options.join(' | ')).toContain('Reed (en-AU) — retro, robotic');
+  });
+
   test('offers every installed English voice, and says where to get better ones', async ({ page }) => {
     await page.addInitScript(() => {
       const voices = [
