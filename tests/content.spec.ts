@@ -6,8 +6,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
-  REAL_WORDS, SILLY_WORDS, buildWord, familySpans, sound,
+  REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
 } from '../src/content/index';
+import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
@@ -173,5 +174,55 @@ describe('sentence phrases', () => {
   it('no phrase contains a blocked word', () => {
     const bad = ALL_PHRASES.filter((p) => p.text.split(/\s+/).some(blocked));
     expect(bad.map((p) => p.text)).toEqual([]);
+  });
+});
+
+describe('spelling contrasts', () => {
+  const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as Level[];
+
+  it('every pair has enough words on both sides to play with', () => {
+    for (const c of CONTRASTS) {
+      for (const id of [c.middle, c.end]) {
+        const usable = realWords({ sounds: [id], levels: LEVELS }).filter((w) => obeysRule(w, c));
+        expect(usable.length, `${c.label} — ${id}`).toBeGreaterThan(7);
+      }
+    }
+  });
+
+  /* The game only ever asks about a word the rule gets right, so the child is
+     never marked wrong for applying what he has just been taught. This is the
+     check that keeps that true as words.ts grows. */
+  it('the rule it teaches is the rule the words follow', () => {
+    for (const c of CONTRASTS) {
+      const asked = realWords({ sounds: [c.middle, c.end], levels: LEVELS }).filter((w) => obeysRule(w, c));
+      const wrong = asked.filter((w) => {
+        const span = contrastSpan(w);
+        if (!span) return true;
+        const atEnd = span.at + span.len === w.text.length;
+        return w.sound === c.end ? !atEnd : atEnd;
+      });
+      expect(wrong.map((w) => w.text), c.label).toEqual([]);
+    }
+  });
+
+  /* The words the rule would get wrong are real and must stay in the app for
+     every other game — they are only kept out of this one. If this list ever
+     empties, the exclusion has silently stopped working. */
+  it('still recognises the words that break the rule', () => {
+    const broken: string[] = [];
+    for (const c of CONTRASTS) {
+      for (const w of realWords({ sounds: [c.middle, c.end], levels: LEVELS })) {
+        if (!obeysRule(w, c)) broken.push(w.text);
+      }
+    }
+    expect(broken.sort()).toEqual(
+      ['always', 'bowl', 'crayon', 'loyal', 'oyster', 'royal', 'voyage'],
+    );
+  });
+
+  it('leaves out the pairs that have no rule behind them', () => {
+    const ids = CONTRASTS.flatMap((c) => [c.middle, c.end]);
+    /* ee/ea and ie/igh both sit mid-word: there is nothing to teach */
+    for (const id of ['ee', 'ea', 'ie', 'igh']) expect(ids).not.toContain(id);
   });
 });

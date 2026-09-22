@@ -320,3 +320,85 @@ test.describe('Sentence Smash', () => {
     }
   });
 });
+
+/** the answer is hidden by design, so try one spelling then the other */
+async function spellOne(page: Page): Promise<void> {
+  const before = await page.locator('.score b').first().textContent();
+  await page.locator('.choices .bin').first().click();
+  await page.waitForTimeout(950);
+  if ((await page.locator('.score b').first().textContent()) === before) {
+    await page.locator('.choices .bin').nth(1).click();
+    await page.waitForTimeout(1200);
+  }
+}
+
+test.describe('Same Sound, Two Ways', () => {
+  test('spells a full round, with the letters missing until answered', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'same-sound');
+    await openSetup(page);
+    await page.getByLabel('How many words').selectOption('8');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+
+    /* the point of the game: the spelling is not on screen to copy */
+    await expect(page.locator('.hand .word .gap')).toHaveCount(1);
+    await expect(page.locator('.hand .word .gr')).toHaveCount(0);
+    /* exactly two ways to spell it, never more */
+    await expect(page.locator('.choices .bin')).toHaveCount(2);
+
+    for (let i = 0; i < 24 && !(await page.locator('.results:not([hidden])').count()); i += 1) {
+      await spellOne(page);
+    }
+
+    await expect(page.locator('.results')).toBeVisible();
+    await expect(page.locator('.results li')).toHaveCount(8);
+    /* the review shows the finished words with the sound lit up */
+    expect(await page.locator('.results li .gr').count()).toBeGreaterThan(0);
+    noProblems(watch);
+  });
+
+  test('a wrong guess is answered with the rule, not just a buzz', async ({ page }) => {
+    await openGame(page, 'same-sound');
+    await expect(page.locator('.rule')).toBeHidden();
+
+    /* Keep choosing the left-hand spelling. Words alternate between the two,
+       so before long it is the wrong one — and a correct pick has to be given
+       its 820ms to move on, or the next click lands while the game is busy
+       and is swallowed. */
+    for (let i = 0; i < 10 && (await page.locator('.rule').isHidden()); i += 1) {
+      await page.locator('.choices .bin').first().click();
+      await page.waitForTimeout(950);
+    }
+    await expect(page.locator('.rule')).toContainText('In the middle of a word');
+    await expect(page.locator('.rule')).toContainText('At the end');
+  });
+
+  test('says the word, since hearing it is the only clue', async ({ page }) => {
+    await page.addInitScript(() => {
+      const spoken: string[] = [];
+      (window as unknown as { __said: unknown }).__said = spoken;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: unknown = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.super-compact.en-AU.Karen' }],
+          speak: (u: { text: string }) => spoken.push(u.text),
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await openGame(page, 'same-sound');
+    const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+    /* whatever word came up, it was spoken — with the gap on screen the child
+       has nothing else to go on */
+    expect(said.filter((s) => s.length > 1).length).toBeGreaterThan(0);
+  });
+});

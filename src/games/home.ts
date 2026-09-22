@@ -1,4 +1,4 @@
-/* The home screen: seven tiles, and the one place a parent sets up the week.
+/* The home screen: eight tiles, and the one place a parent sets up the week.
  *
  * The child can read simple words, so each tile says what it is as well as
  * showing a picture. Nothing here needs an adult to explain it. */
@@ -22,6 +22,7 @@ export const TILES: Tile[] = [
   { path: 'roll-and-read', name: 'Roll & Read', emoji: '🎲', what: 'Roll it, read it out loud', tone: '#A87FD1' },
   { path: 'real-or-silly', name: 'Real or Silly?', emoji: '🤪', what: 'Is it a word or not?', tone: '#EF7A5A' },
   { path: 'sentence-smash', name: 'Sentence Smash', emoji: '💥', what: 'Build a silly sentence', tone: '#2FB5B5' },
+  { path: 'same-sound', name: 'Same Sound, Two Ways', emoji: '🪞', what: 'Hear it, then spell it', tone: '#C77DBB' },
 ];
 
 export function mount(root: HTMLElement): () => void {
@@ -124,7 +125,7 @@ export function mount(root: HTMLElement): () => void {
     );
   }
 
-  /* the sticker book: the one thing that joins the seven games together */
+  /* the sticker book: the one thing that joins the eight games together */
   const book = el('div', { class: 'sticker-book' });
   function drawBook(): void {
     const earned = stickers();
