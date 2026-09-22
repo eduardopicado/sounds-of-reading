@@ -182,6 +182,14 @@ export function mount(root: HTMLElement): () => void {
       on: { click: () => say('rain, sheep, quick') },
     }));
 
+    /* The way in to #/voices. Added from the home screen it is a standalone
+       app with no address bar, so a typed hash route cannot be reached at
+       all — and the app always launches at start_url. This sits in the
+       grown-ups' panel, which a child has no reason to be in. */
+    voiceRow.append(el('a', {
+      class: 'btn ghost small', href: '#/voices', text: 'Which voices?',
+    }));
+
     /* Apple installs only its basic voices. The better ones are a free
        download, but nothing a web page does can trigger it — so say where. */
     if (onlyCompactVoices()) {
