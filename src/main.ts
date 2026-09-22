@@ -12,6 +12,7 @@ import * as wordBuilder from './games/word-builder';
 import * as rollAndRead from './games/roll-and-read';
 import * as realOrSilly from './games/real-or-silly';
 import * as sentenceSmash from './games/sentence-smash';
+import * as voices from './games/voices';
 
 const routes: Route[] = [
   { path: 'home', mount: home.mount },
@@ -22,6 +23,8 @@ const routes: Route[] = [
   { path: 'roll-and-read', mount: rollAndRead.mount },
   { path: 'real-or-silly', mount: realOrSilly.mount },
   { path: 'sentence-smash', mount: sentenceSmash.mount },
+  /* diagnostics, linked from nowhere — see src/games/voices.ts */
+  { path: 'voices', mount: voices.mount },
 ];
 
 /* iOS keeps speech and audio locked until they are started inside a real

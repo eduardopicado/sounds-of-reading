@@ -73,9 +73,36 @@ export function englishVoices(): SpeechSynthesisVoice[] {
   const synth = engine();
   if (!synth) return [];
   try {
-    return synth.getVoices()
+    const ranked = synth.getVoices()
       .filter((v) => ACCENT_RANK.some(([re]) => re.test(v.lang)))
       .sort((a, b) => score(a) - score(b));
+    /* iOS lists the same voice twice — an iPad shows two Samanthas that are
+       indistinguishable to a parent. Collapse anything matching in name,
+       accent and tier, keeping the better-ranked one. Two tiers of the same
+       name stay apart, because choosing between them is the whole point. */
+    const seen = new Set<string>();
+    return ranked.filter((v) => {
+      const key = `${v.name}|${v.lang}|${qualityOf(v)}`.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch {
+    return [];
+  }
+}
+
+/** every English voice with the details behind it, for the diagnostics screen */
+export function voiceReport(): { name: string; lang: string; uri: string; local: boolean; quality: Quality }[] {
+  const synth = engine();
+  if (!synth) return [];
+  try {
+    return synth.getVoices()
+      .filter((v) => ACCENT_RANK.some(([re]) => re.test(v.lang)))
+      .map((v) => ({
+        name: v.name, lang: v.lang, uri: v.voiceURI,
+        local: v.localService, quality: qualityOf(v),
+      }));
   } catch {
     return [];
   }

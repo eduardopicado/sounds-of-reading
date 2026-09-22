@@ -186,7 +186,7 @@ export function mount(root: HTMLElement): () => void {
        download, but nothing a web page does can trigger it — so say where. */
     if (onlyCompactVoices()) {
       voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
-        text: 'These are the basic voices. For a much clearer one on an iPad: Settings › Accessibility › Spoken Content › Voices › English, then download an Enhanced or Premium voice. It will appear here.' }));
+        text: 'These are the standard voices. An iPad can download clearer ones under Settings › Accessibility › Spoken Content › Voices › English — though Safari does not always offer a downloaded voice to a web page, so it may not appear here even once installed.' }));
     }
   }
 
