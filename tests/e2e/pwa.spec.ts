@@ -257,10 +257,10 @@ test.describe('speech', () => {
     expect(samanthas[0]).not.toContain('lower detail');
   });
 
-  test('the diagnostics screen can be reached without an address bar', async ({ page }) => {
+  test('the diagnostics screen stays out of the way but still opens', async ({ page }) => {
     await page.addInitScript(() => {
       const voices = [
-        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.super-compact.en-AU.Karen' },
       ];
       Object.defineProperty(window, 'speechSynthesis', {
         configurable: true,
@@ -272,13 +272,38 @@ test.describe('speech', () => {
         },
       });
     });
-    /* Added to the home screen the app runs standalone: no address bar, and
-       it always launches at start_url, so a typed #/voices cannot get there.
-       The only way in is from the grown-ups' panel. */
+    /* Nothing on the home screen points at it — the question it was built to
+       answer is answered, so a child has no route in. It is still there for
+       a device that behaves differently, opened by URL in Safari. */
     await page.goto('/');
-    await page.getByRole('link', { name: 'Which voices?' }).click();
+    await expect(page.getByRole('link', { name: 'Which voices?' })).toHaveCount(0);
+
+    await page.goto('/#/voices');
     await expect(page.locator('.wrap')).toContainText('offered to this page');
-    await expect(page.locator('.wrap')).toContainText('com.apple.voice.compact.en-AU.Karen');
+    await expect(page.locator('.wrap')).toContainText('com.apple.voice.super-compact.en-AU.Karen');
+  });
+
+  test('does not send a parent after a download that cannot help', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.super-compact.en-AU.Karen' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => voices,
+          speak: () => undefined,
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await page.goto('/');
+    /* An iPad with three Karens installed still offers this page one, so the
+       hint must not read as an errand: no path to follow, no promise. It may
+       still name Settings, to say that going there will not help. */
+    await expect(page.locator('.week')).not.toContainText('Spoken Content');
+    await expect(page.locator('.week')).toContainText('does not change this list');
   });
 
   test('each diagnostics row speaks in its own voice', async ({ page }) => {
@@ -369,13 +394,13 @@ test.describe('speech', () => {
     });
     await page.goto('/');
     /* an Eloquence voice in the list must not be mistaken for "already better" */
-    await expect(page.locator('.week .tag', { hasText: 'Spoken Content' })).toBeVisible();
+    await expect(page.locator('.week .tag', { hasText: 'does not change this list' })).toBeVisible();
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     expect(options.join(' | ')).toContain('Karen (en-AU) — standard');
     expect(options.join(' | ')).toContain('Reed (en-AU) — retro, robotic');
   });
 
-  test('offers every installed English voice, and says where to get better ones', async ({ page }) => {
+  test('offers every installed English voice, and says better ones cannot be had', async ({ page }) => {
     await page.addInitScript(() => {
       const voices = [
         { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
@@ -396,7 +421,7 @@ test.describe('speech', () => {
     expect(options.join(' | ')).toContain('Karen (en-AU)');
     expect(options.join(' | ')).toContain('Daniel (en-GB)');
     /* nothing a web page does can install a voice, so it explains where to */
-    await expect(page.locator('.week .tag', { hasText: 'Spoken Content' })).toBeVisible();
+    await expect(page.locator('.week .tag', { hasText: 'does not change this list' })).toBeVisible();
   });
 
   test('survives a browser where touching speechSynthesis throws', async ({ page }) => {

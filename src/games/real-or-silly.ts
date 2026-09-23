@@ -136,6 +136,9 @@ export function mount(root: HTMLElement): () => void {
     streakN.textContent = String(streak);
     streakBox.style.visibility = streak >= 2 ? 'visible' : 'hidden';
 
+    /* he has answered, and the verdict above already says in words whether
+       it is real — so a recording here tells him nothing new, and gives him
+       the clear voice exactly where it is a reward */
     say(word.text);
     log.push({ word, correct, usedHelp });
     index += 1;
@@ -169,7 +172,9 @@ export function mount(root: HTMLElement): () => void {
   helpBtn.addEventListener('click', () => {
     if (busy || index >= queue.length) return;
     usedHelp = true;
-    say(queue[index].text, { slow: true });
+    /* this one speaks BEFORE he commits, so it must sound the same for a
+       real word and a made-up one — see deviceVoiceOnly in speech.ts */
+    say(queue[index].text, { slow: true, deviceVoiceOnly: true });
   });
 
   root.append(node);

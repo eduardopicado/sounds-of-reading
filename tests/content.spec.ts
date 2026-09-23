@@ -9,6 +9,8 @@ import {
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
 } from '../src/content/index';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
+import { clipId } from '../src/lib/clip-id';
+import { wanted } from '../tools/make-audio';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
@@ -224,5 +226,39 @@ describe('spelling contrasts', () => {
     const ids = CONTRASTS.flatMap((c) => [c.middle, c.end]);
     /* ee/ea and ie/igh both sit mid-word: there is nothing to teach */
     for (const id of ['ee', 'ea', 'ie', 'igh']) expect(ids).not.toContain(id);
+  });
+});
+
+describe('recorded audio', () => {
+  /* One word playing another word's recording is the sort of fault nobody
+     reports and everybody notices, so the ids are checked for collisions
+     across every string the app actually speaks. */
+  it('gives every spoken string its own clip id', () => {
+    const byId = new Map<string, string>();
+    const clash: string[] = [];
+    for (const text of wanted()) {
+      const id = clipId(text);
+      const other = byId.get(id);
+      if (other) clash.push(`${text} / ${other}`);
+      byId.set(id, text);
+    }
+    expect(clash).toEqual([]);
+  });
+
+  it('records real words and never made-up ones', () => {
+    const list = new Set(wanted());
+    const silly = SILLY_WORDS.filter((w) => list.has(w.text.toLowerCase()));
+    expect(silly.map((w) => w.text)).toEqual([]);
+    /* and the real ones really are all there */
+    const missing = REAL_WORDS.filter((w) => !list.has(w.text.toLowerCase()));
+    expect(missing.map((w) => w.text)).toEqual([]);
+  });
+
+  it('is the same id in the tool and in the app', () => {
+    /* the generator and the browser must agree or every word silently falls
+       back to the device voice */
+    expect(clipId('rain')).toBe(clipId(' Rain '));
+    expect(clipId('rain')).not.toBe(clipId('rayn'));
+    expect(clipId('rain')).toMatch(/^[0-9a-f]{8}$/);
   });
 });

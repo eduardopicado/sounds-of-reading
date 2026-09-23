@@ -183,19 +183,13 @@ export function mount(root: HTMLElement): () => void {
       on: { click: () => say('rain, sheep, quick') },
     }));
 
-    /* The way in to #/voices. Added from the home screen it is a standalone
-       app with no address bar, so a typed hash route cannot be reached at
-       all — and the app always launches at start_url. This sits in the
-       grown-ups' panel, which a child has no reason to be in. */
-    voiceRow.append(el('a', {
-      class: 'btn ghost small', href: '#/voices', text: 'Which voices?',
-    }));
-
-    /* Apple installs only its basic voices. The better ones are a free
-       download, but nothing a web page does can trigger it — so say where. */
+    /* We used to send the parent to Settings to download a better voice.
+       An iPad with three Karens installed offers this page exactly one, the
+       super-compact build, so that errand does not work — it just costs
+       several hundred megabytes. Say what is true instead. */
     if (onlyCompactVoices()) {
       voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
-        text: 'These are the standard voices. An iPad can download clearer ones under Settings › Accessibility › Spoken Content › Voices › English — though Safari does not always offer a downloaded voice to a web page, so it may not appear here even once installed.' }));
+        text: 'These are the only voices Safari offers a web page. Downloading better ones in Settings does not change this list, so the words a child reads are recorded in advance instead.' }));
     }
   }
 

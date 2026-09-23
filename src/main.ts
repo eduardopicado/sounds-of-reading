@@ -3,6 +3,7 @@ import './styles/games.css';
 
 import { startRouter, type Route } from './lib/router';
 import { unlockSpeech, watchVoices } from './lib/speech';
+import { loadClips } from './lib/audio';
 import { unlockSfx } from './lib/sfx';
 import * as home from './games/home';
 import * as memoryMatch from './games/sound-match';
@@ -43,6 +44,8 @@ function unlockOnFirstTap(): void {
 }
 
 watchVoices();
+/* recorded words if this build shipped any; harmless and silent if not */
+void loadClips();
 unlockOnFirstTap();
 
 const app = document.querySelector<HTMLElement>('main#app');

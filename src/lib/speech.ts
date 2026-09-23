@@ -18,6 +18,8 @@
  * even reaching for the object is inside a try. On iOS nothing is spoken until
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
+import { hasClip, playClip } from './audio';
+
 let cached: SpeechSynthesisVoice | null = null;
 let unlocked = false;
 let enabled = true;
@@ -229,6 +231,19 @@ export function cancelSpeech(): void {
 export interface SayOptions {
   /** slower, for "sound it out for me" */
   slow?: boolean;
+  /**
+   * Never use a recording, even where one exists.
+   *
+   * For anything spoken BEFORE the child has answered. Real words have clips
+   * and made-up ones never will, so the two sound audibly different — and in
+   * Real or Silly, "sound it out for me" speaks the word while he is still
+   * deciding. He could tell real from made-up by which voice came out,
+   * without reading a thing.
+   *
+   * After he has answered there is nothing left to give away, so the clip is
+   * used there and he gets the clear voice as the reward.
+   */
+  deviceVoiceOnly?: boolean;
   /** speak through this exact voice instead of the chosen one, for #/voices,
    *  where every row has to be audibly itself rather than the app's pick */
   voiceURI?: string;
@@ -247,6 +262,19 @@ function voiceByURI(uri: string): SpeechSynthesisVoice | null {
 
 export function say(text: string, options: SayOptions = {}): void {
   if (!enabled || !text) { options.onEnd?.(); return; }
+  /* a recording where we shipped one, the device voice everywhere else. The
+     diagnostics screen asks for a named voice, so it always gets the real
+     thing rather than a clip that would sound the same in every row. */
+  if (!options.deviceVoiceOnly && !options.voiceURI && hasClip(text)) {
+    cancelSpeech();
+    void playClip(text, { slow: options.slow, onEnd: options.onEnd })
+      .then((played) => { if (!played) speakAloud(text, options); });
+    return;
+  }
+  speakAloud(text, options);
+}
+
+function speakAloud(text: string, options: SayOptions): void {
   const synth = engine();
   if (!synth) { options.onEnd?.(); return; }
   try {
