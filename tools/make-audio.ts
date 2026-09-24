@@ -24,7 +24,7 @@ import { mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
-  ALL_FAMILIES, ALL_PHRASES, PRACTICE_SOUNDS, REAL_WORDS, buildWord,
+  ALL_FAMILIES, ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS, buildWord,
 } from '../src/content/index';
 import { clipId, speakable } from '../src/lib/clip-id';
 
@@ -46,6 +46,9 @@ export function wanted(): string[] {
   /* only f.real — f.silly is the made-up half of each family */
   for (const f of ALL_FAMILIES) for (const part of f.real) add(buildWord(f, part));
   for (const s of PRACTICE_SOUNDS) { add(s.label); add(s.asIn); }
+  /* tricky words are spoken too, and being irregular is exactly why a
+     recording beats the device voice on them */
+  for (const w of ALL_SIGHT_WORDS) add(w.text);
   for (const line of UI_LINES) add(line);
 
   return [...out].sort();

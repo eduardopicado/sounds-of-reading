@@ -384,3 +384,13 @@
   text-align: center; margin: 10px auto 0; max-width: 34ch;
   color: var(--on-deep); opacity: .92;
 }
+
+/* ── Tricky Words ──────────────────────────────────────────────────────── */
+
+/* the word being remembered. It has to be the biggest thing on screen for
+   the second or so it is there, because that look is the whole game. */
+.tricky-word { letter-spacing: .01em; }
+
+/* what is left once the word goes. A dimmed question mark rather than an
+   empty box, so the space still reads as "the word was here". */
+.tricky-word.gone { opacity: .35; }

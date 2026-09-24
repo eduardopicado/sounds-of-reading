@@ -402,3 +402,85 @@ test.describe('Same Sound, Two Ways', () => {
     expect(said.filter((s) => s.length > 1).length).toBeGreaterThan(0);
   });
 });
+
+/** the answer is hidden on purpose, so try each choice until one lands */
+async function pickTricky(page: Page): Promise<void> {
+  const before = await page.locator('.score b').first().textContent();
+  for (let i = 0; i < 4; i += 1) {
+    await page.locator('.choices .bin').nth(i).click();
+    await page.waitForTimeout(1050);
+    if ((await page.locator('.score b').first().textContent()) !== before) return;
+  }
+}
+
+test.describe('Tricky Words', () => {
+  test('hides the word, then finds it again through to the win screen', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'tricky-words');
+    await openSetup(page);
+    await page.getByLabel('How many words').selectOption('6');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+
+    /* the look: the word is there to be read */
+    await expect(page.locator('.tricky-word')).not.toHaveClass(/gone/);
+    /* four choices, never more — and one of them is the word */
+    await expect(page.locator('.choices .bin')).toHaveCount(4);
+    /* then it goes, which is what makes this different from reading it */
+    await expect(page.locator('.tricky-word')).toHaveClass(/gone/, { timeout: 4000 });
+    await expect(page.locator('.wrap')).toContainText('Which one was it?');
+
+    for (let i = 0; i < 24 && !(await page.locator('.results:not([hidden])').count()); i += 1) {
+      await pickTricky(page);
+    }
+
+    await expect(page.locator('.results')).toBeVisible();
+    await expect(page.locator('.results li')).toHaveCount(6);
+    /* the review shows which letters were the liars */
+    expect(await page.locator('.results li .gr').count()).toBeGreaterThan(0);
+    noProblems(watch);
+  });
+
+  test('brings the word back after a miss and leaves it there', async ({ page }) => {
+    await openGame(page, 'tricky-words');
+    await expect(page.locator('.tricky-word')).toHaveClass(/gone/, { timeout: 4000 });
+
+    /* keep picking the left-hand choice until one is wrong */
+    for (let i = 0; i < 8 && (await page.locator('.tricky-word.gone').count()); i += 1) {
+      await page.locator('.choices .bin').first().click();
+      await page.waitForTimeout(1100);
+    }
+    /* whichever way it went, the word is readable again — after a miss it
+       stays, and after a win it is shown with its tricky letters lit */
+    await expect(page.locator('.tricky-word')).not.toHaveClass(/gone/);
+  });
+
+  test('says nothing until the word has been found', async ({ page }) => {
+    await page.addInitScript(() => {
+      const spoken: string[] = [];
+      (window as unknown as { __said: unknown }).__said = spoken;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1;
+        voice: unknown = null;
+        onend: (() => void) | null = null;
+        onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.super-compact.en-AU.Karen' }],
+          speak: (u: { text: string }) => spoken.push(u.text),
+          cancel: () => undefined,
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await openGame(page, 'tricky-words');
+    await expect(page.locator('.tricky-word')).toHaveClass(/gone/, { timeout: 4000 });
+    /* Saying the word would turn this into listening, which Bingo already
+       does — here the only clue is what he saw. */
+    const said = await page.evaluate(() => (window as unknown as { __said: string[] }).__said);
+    expect(said.filter((s) => s.length > 1)).toEqual([]);
+  });
+});
