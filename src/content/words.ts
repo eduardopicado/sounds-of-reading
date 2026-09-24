@@ -564,6 +564,34 @@ export const PHRASES: Record<Slot, string> = {
   ].join(' | '),
 };
 
+/*  Tricky words — the ones you cannot sound out.
+ *
+ *  Every other list in this file is decodable: work through the letters and
+ *  the word comes out. These do not play fair. "said" should rhyme with paid,
+ *  "was" should rhyme with gas, "one" should start like only. A child who
+ *  tries to sound them out gets them wrong, so they have to be known on sight.
+ *
+ *  Brackets mark the part that misbehaves, not a sound being practised:
+ *  s[ai]d, w[a]s, c[oul]d. That is what the game lights up once he has found
+ *  the word, so he learns which bit to distrust rather than just that the
+ *  whole word is odd.
+ *
+ *  Only genuinely irregular words are here. "went" and "from" look like
+ *  sight words on a classroom list and are perfectly decodable by level 3 —
+ *  telling a child to memorise those is teaching him to stop reading. The
+ *  content test checks every entry has a bracketed part for that reason.
+ *
+ *  These are the highest-frequency irregular words in English, in rough order
+ *  of how often a child meets them. A school running its own list — Magic 100
+ *  Words, the Oxford Wordlist — should replace these sets with that one; the
+ *  games read whatever is here.  */
+export const SIGHT_WORDS: Record<string, string> = {
+  'Set 1': 'th[e] | w[a]s | s[ai]d | y[ou] | [a]re | th[ey] | h[a]ve | [o]ne | c[o]me | s[o]me | wh[a]t | w[e]re',
+  'Set 2': 'th[ere] | th[ei]r | wh[ere] | [wh]o | d[oe]s | d[o]ne | [a]ny | m[a]ny | ag[ai]n | fr[ie]nd | p[eo]ple | [o]nce',
+  'Set 3': 'c[oul]d | sh[oul]d | w[oul]d | w[a]ter | w[or]k | w[or]d | l[o]ve | m[o]ve | g[i]ve | l[i]ve | h[ere] | [o]ther',
+  'Set 4': 'm[o]ther | f[a]ther | bec[au]se | b[ee]n | [k]now | [w]rite | s[ch]ool | [s]ure | p[u]t | p[u]sh | t[w]o | [eye]',
+};
+
 /*  Words never to show a six-year-old, whatever a word list says about them.
  *  Checked against every real word, silly word, family build and phrase. */
 export const BLOCKLIST: string[] = [

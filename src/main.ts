@@ -14,6 +14,7 @@ import * as rollAndRead from './games/roll-and-read';
 import * as realOrSilly from './games/real-or-silly';
 import * as sentenceSmash from './games/sentence-smash';
 import * as sameSound from './games/same-sound';
+import * as trickyWords from './games/tricky-words';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -26,6 +27,7 @@ const routes: Route[] = [
   { path: 'real-or-silly', mount: realOrSilly.mount },
   { path: 'sentence-smash', mount: sentenceSmash.mount },
   { path: 'same-sound', mount: sameSound.mount },
+  { path: 'tricky-words', mount: trickyWords.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

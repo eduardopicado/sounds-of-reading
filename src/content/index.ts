@@ -6,11 +6,11 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS,
   type SoundSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
-import { ContentError, resolveSpans, type Span } from './spans';
+import { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export type { Level, Slot, SoundSpec, FamilySpec };
 export { LEVELS, BLOCKLIST };
@@ -28,6 +28,21 @@ export interface Word {
   sound: string;
   spans: Span[];
   real: boolean;
+}
+
+/**
+ * A word that cannot be sounded out, and the part of it that misbehaves.
+ *
+ * Deliberately not a Word: a Word carries the sound it practises, and a
+ * tricky word practises no sound at all — the whole point is that the letters
+ * lie. Forcing one into the other would mean inventing a sound for "said".
+ */
+export interface SightWord {
+  text: string;
+  /** the letters that do not say what they should */
+  spans: Span[];
+  /** which set it was taught in, for the parent to choose between */
+  set: string;
 }
 
 export interface Phrase {
@@ -78,6 +93,23 @@ export const PRACTICE_SOUNDS: Sound[] = ALL_SOUNDS.filter((s) => s.practice);
 
 export const REAL_WORDS: Word[] = PRACTICE_SOUNDS.flatMap((s) => parseWordList(s.words ?? '', s, true));
 export const SILLY_WORDS: Word[] = PRACTICE_SOUNDS.flatMap((s) => parseWordList(s.silly ?? '', s, false));
+
+export const ALL_SIGHT_WORDS: SightWord[] = Object.entries(SIGHT_WORDS).flatMap(([set, raw]) =>
+  raw.split('|').map((chunk) => {
+    const marked = chunk.trim();
+    if (!marked) throw new ContentError(`${set}: empty entry in the tricky word list`);
+    /* unmark, not resolveSpans: the brackets here mark the letters that lie,
+       and there is no sound they are supposed to be spelling */
+    const { text, spans } = unmark(marked);
+    if (!spans.length) {
+      throw new ContentError(`${set}: "${text}" has no bracketed part — if nothing about it is irregular, it is a word to sound out, not one to memorise`);
+    }
+    return { text, spans, set };
+  }),
+);
+
+/** the sets a parent can choose between, in the order they are taught */
+export const SIGHT_SETS: string[] = Object.keys(SIGHT_WORDS);
 
 export const ALL_FAMILIES: FamilySpec[] = FAMILIES;
 

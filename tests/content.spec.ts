@@ -7,6 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
+  ALL_SIGHT_WORDS, SIGHT_SETS,
 } from '../src/content/index';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -260,5 +261,43 @@ describe('recorded audio', () => {
     expect(clipId('rain')).toBe(clipId(' Rain '));
     expect(clipId('rain')).not.toBe(clipId('rayn'));
     expect(clipId('rain')).toMatch(/^[0-9a-f]{8}$/);
+  });
+});
+
+describe('tricky words', () => {
+  it('is a real English word, every one of them', () => {
+    const unknown = ALL_SIGHT_WORDS.filter((w) => !isRealWord(w.text));
+    expect(unknown.map((w) => w.text)).toEqual([]);
+  });
+
+  /* A word with nothing bracketed has nothing irregular about it, which means
+     it can be sounded out — and telling a child to memorise a word he could
+     read is teaching him to stop reading. The loader throws; this says why. */
+  it('marks the part that misbehaves in every word', () => {
+    const plain = ALL_SIGHT_WORDS.filter((w) => !w.spans.length);
+    expect(plain.map((w) => w.text)).toEqual([]);
+  });
+
+  it('marks letters that are really in the word', () => {
+    const wrong = ALL_SIGHT_WORDS.filter((w) =>
+      w.spans.some((s) => s.at < 0 || s.at + s.len > w.text.length));
+    expect(wrong.map((w) => w.text)).toEqual([]);
+  });
+
+  it('never lists the same word twice', () => {
+    const seen = new Set<string>();
+    const twice = ALL_SIGHT_WORDS.filter((w) => !seen.has(w.text) ? (seen.add(w.text), false) : true);
+    expect(twice.map((w) => w.text)).toEqual([]);
+  });
+
+  it('has enough words in every set to fill a round of four choices', () => {
+    for (const set of SIGHT_SETS) {
+      const here = ALL_SIGHT_WORDS.filter((w) => w.set === set);
+      expect(here.length, set).toBeGreaterThan(3);
+    }
+  });
+
+  it('shows no blocked word', () => {
+    expect(ALL_SIGHT_WORDS.filter((w) => blocked(w.text)).map((w) => w.text)).toEqual([]);
   });
 });
