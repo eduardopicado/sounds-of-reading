@@ -111,6 +111,27 @@ export const ALL_SIGHT_WORDS: SightWord[] = Object.entries(SIGHT_WORDS).flatMap(
 /** the sets a parent can choose between, in the order they are taught */
 export const SIGHT_SETS: string[] = Object.keys(SIGHT_WORDS);
 
+/**
+ * Could a child reasonably read this word as having the sound?
+ *
+ * Used to keep a word out of a "not this sound" pile. Deliberately generous:
+ * any word that merely contains one of the sound's spellings counts, even
+ * where those letters say something else, because a wrong answer that a
+ * careful reader could argue was right is a trap, not a test. "bed" is never
+ * a dodge word when the sound is e. Split digraphs (a_e) match with one or two
+ * consonants between their letters, so "shake" counts for a_e.
+ *
+ * Not for highlighting — that always uses the explicit positions.
+ */
+export function mightContain(text: string, target: Sound): boolean {
+  const t = text.toLowerCase();
+  return target.spellings.some((sp) => {
+    if (!sp.includes('_')) return t.includes(sp);
+    const [a, b] = sp.split('_');
+    return new RegExp(`${a}[b-df-hj-np-tv-z]{1,2}${b}`).test(t);
+  });
+}
+
 export const ALL_FAMILIES: FamilySpec[] = FAMILIES;
 
 /** what a family build spells out: onset + rime, either way round */

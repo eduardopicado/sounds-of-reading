@@ -13,6 +13,9 @@ const PAGES = [
   ['Roll & Read', '/#/roll-and-read'],
   ['Real or Silly?', '/#/real-or-silly'],
   ['Sentence Smash', '/#/sentence-smash'],
+  ['Same Sound, Two Ways', '/#/same-sound'],
+  ['Tricky Words', '/#/tricky-words'],
+  ['Sound Rocket', '/#/sound-rocket'],
 ] as const;
 
 for (const [name, path] of PAGES) {

@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
-  ALL_SIGHT_WORDS, SIGHT_SETS,
+  ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
 } from '../src/content/index';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -299,5 +299,36 @@ describe('tricky words', () => {
 
   it('shows no blocked word', () => {
     expect(ALL_SIGHT_WORDS.filter((w) => blocked(w.text)).map((w) => w.text)).toEqual([]);
+  });
+});
+
+describe('dodge words', () => {
+  /* In Sound Rocket a word without the sound costs a shield. If a dodge word
+     secretly had the sound, a child would be punished for reading correctly. */
+  it('recognises a sound hiding inside another sound\'s word', () => {
+    expect(mightContain('bed', sound('e'))).toBe(true);
+    expect(mightContain('fish', sound('sh'))).toBe(true);
+    expect(mightContain('chip', sound('sh'))).toBe(false);
+  });
+
+  it('sees split digraphs through the consonant between', () => {
+    expect(mightContain('shake', sound('a-e'))).toBe(true);
+    expect(mightContain('snake', sound('a-e'))).toBe(true);
+    expect(mightContain('shack', sound('a-e'))).toBe(false);
+  });
+
+  /* The filter is generous, and for a sound like e it throws out a lot. Every
+     sound the game can offer must still leave plenty to dodge, or the round
+     would be nothing but targets. */
+  it('leaves enough dodge words for every sound the game can offer', () => {
+    const all = [1, 2, 3, 4, 5, 6, 7, 8] as Level[];
+    const thin: string[] = [];
+    for (const target of ALL_PRACTICE) {
+      if (realWords({ sounds: [target.id], levels: all }).length < 6) continue;
+      const others = ALL_PRACTICE.filter((s) => s.id !== target.id).map((s) => s.id);
+      const dodges = realWords({ sounds: others, levels: all }).filter((w) => !mightContain(w.text, target));
+      if (dodges.length < 40) thin.push(`${target.id}: ${dodges.length}`);
+    }
+    expect(thin).toEqual([]);
   });
 });

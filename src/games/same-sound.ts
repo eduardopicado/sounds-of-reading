@@ -147,7 +147,8 @@ export function mount(root: HTMLElement): () => void {
     if (!span) { wordEl.textContent = word.text; return; }
     wordEl.append(
       document.createTextNode(word.text.slice(0, span.at)),
-      el('span', { class: 'gap', 'aria-label': 'missing letters' }),
+      /* role img, or the label is ignored: a plain span has no name to give */
+      el('span', { class: 'gap', role: 'img', 'aria-label': 'missing letters' }),
       document.createTextNode(word.text.slice(span.at + span.len)),
     );
   }

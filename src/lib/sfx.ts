@@ -81,6 +81,22 @@ export const sfx = {
     { hz: 784, at: 0.26, for: 0.16 },
     { hz: 1047, at: 0.39, for: 0.34 },
   ]),
+  /** a quick upward sweep — something caught in flight */
+  zap: () => play([
+    { hz: 700, at: 0, for: 0.06, type: 'square', gain: 0.06 },
+    { hz: 1050, at: 0.05, for: 0.1, type: 'square', gain: 0.05 },
+  ]),
+  /** a thud and a rattle — a shield taking a hit */
+  crack: () => play([
+    { hz: 140, at: 0, for: 0.12, type: 'sawtooth', gain: 0.09 },
+    { hz: 95, at: 0.08, for: 0.16, type: 'sawtooth', gain: 0.07 },
+  ]),
+  /** three falling notes for a round that is over */
+  over: () => play([
+    { hz: 494, at: 0, for: 0.18, type: 'triangle' },
+    { hz: 392, at: 0.18, for: 0.18, type: 'triangle' },
+    { hz: 294, at: 0.36, for: 0.34, type: 'triangle' },
+  ]),
   /** the tumble of the die */
   roll: () => play([
     { hz: 300, at: 0, for: 0.05, type: 'square', gain: 0.05 },
