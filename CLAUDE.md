@@ -20,7 +20,6 @@ the prototypes it came from are in `docs/original-games/`.
 - Keep single-storey a/g letterforms (Andika) for anything the child reads.
 - Speech: `en-AU` voice, falling back to `en-GB`; every speech call wrapped in
   try/catch; unlocked on the first tap for iOS.
-- Kind feedback only: no losing states, every game completable.
 - Test at iPad Safari sizes (820×1180 both ways) and 375px wide. Zero console
   errors.
 - Run the content test before committing any content change.
