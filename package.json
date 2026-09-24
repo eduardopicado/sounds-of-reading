@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "validate:content": "vitest run tests/content.spec.ts",
     "test": "vitest run tests/content.spec.ts && playwright test",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "make:audio": "npx tsx tools/make-audio.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

@@ -5,3 +5,6 @@ test-results/
 playwright-report/
 *.local
 .DS_Store
+
+# generated recordings — reproducible from words.ts, too big to commit
+public/audio/*.m4a
