@@ -2,7 +2,7 @@
  *
  * Finishing a round earns a sticker for the sound that was practised most in
  * it, and the stickers collect on the home screen. It is the one thing that
- * joins the nine games together and gives a reason to come back — without
+ * joins the ten games together and gives a reason to come back — without
  * scores, streaks against anyone else, or anything to lose.
  *
  * Kept in localStorage, so it is gone if a browser blocks storage. That is

@@ -32,7 +32,7 @@ test.describe('progressive web app', () => {
 
     await context.setOffline(true);
     await page.reload();
-    await expect(page.locator('.tiles .tile-link')).toHaveCount(9);
+    await expect(page.locator('.tiles .tile-link')).toHaveCount(10);
 
     /* and a game still works, fonts and all */
     await page.locator('.tile-link[data-game="word-builder"]').click();
@@ -47,7 +47,7 @@ test.describe('progressive web app', () => {
   test('asks the network for nothing but itself', async ({ page }) => {
     const watch = watchPage(page);
     await page.goto('/');
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket']) {
       await page.goto('/#/' + path);
       await page.waitForTimeout(250);
     }

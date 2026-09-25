@@ -484,3 +484,107 @@ test.describe('Tricky Words', () => {
     expect(said.filter((s) => s.length > 1)).toEqual([]);
   });
 });
+
+/** steer the rocket under the lowest word of the kind asked for.
+ *
+ *  Positions are read in one evaluate, not word by word: words are caught and
+ *  drift off screen all the time, and a locator for a word that vanished
+ *  between listing and measuring waits for it until the test times out. */
+async function steerUnder(page: Page, target: boolean): Promise<void> {
+  const aim = await page.evaluate((want) => {
+    const sky = document.querySelector('.rk-sky')?.getBoundingClientRect();
+    if (!sky) return null;
+    let lowest: DOMRect | null = null;
+    for (const d of document.querySelectorAll(`.rk-drop[data-target="${want}"]:not(.caught):not(.bad)`)) {
+      const r = d.getBoundingClientRect();
+      if (!lowest || r.y > lowest.y) lowest = r;
+    }
+    return lowest ? { x: lowest.x + lowest.width / 2, y: sky.y + sky.height - 40 } : null;
+  }, target);
+  if (aim) await page.mouse.move(aim.x, aim.y);
+}
+
+test.describe('Sound Rocket', () => {
+  test('words drift down, and catching one with the sound scores and lights it up', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'sound-rocket');
+    await page.getByRole('button', { name: /Launch/ }).click();
+
+    /* the words move: the same word is lower a moment later */
+    const first = page.locator('.rk-drop').first();
+    await expect(first).toBeVisible();
+    const y1 = (await first.boundingBox())!.y;
+    await page.waitForTimeout(600);
+    expect((await first.boundingBox())!.y).toBeGreaterThan(y1);
+
+    for (let i = 0; i < 80 && (await page.locator('.rk-score b').textContent()) === '0'; i += 1) {
+      await steerUnder(page, true);
+      await page.waitForTimeout(200);
+    }
+    await expect(page.locator('.rk-score b')).toHaveText('1');
+    /* what was caught is a word with the sound, and the letters that make the
+       sound are marked from their real positions. No shield count here: on
+       the way across, the rocket can rightly clip a dodge word that is just
+       as low, and the round-ending test covers what shields do. */
+    await expect(page.locator('.rk-drop.caught[data-target="true"] .gr')).toHaveCount(1);
+    noProblems(watch);
+  });
+
+  test('three wrong catches end the round, and going again starts fresh', async ({ page }) => {
+    await openGame(page, 'sound-rocket');
+    await page.getByRole('button', { name: /Launch/ }).click();
+
+    /* catch one first, so the round ends with a score worth keeping */
+    for (let i = 0; i < 80 && (await page.locator('.rk-score b').textContent()) === '0'; i += 1) {
+      await steerUnder(page, true);
+      await page.waitForTimeout(200);
+    }
+    await expect(page.locator('.rk-score b')).toHaveText('1');
+
+    for (let i = 0; i < 200 && !(await page.locator('.rk-overlay:not([hidden])').count()); i += 1) {
+      await steerUnder(page, false);
+      await page.waitForTimeout(200);
+    }
+    /* steering at dodge words can sweep up another target on the way, so the
+       final score is read rather than assumed */
+    const score = (await page.locator('.rk-score b').textContent()) ?? '';
+    expect(Number(score)).toBeGreaterThan(0);
+    await expect(page.locator('.rk-overlay')).toContainText('New best');
+    await expect(page.locator('.rk-overlay')).toContainText(`You caught ${score}`);
+    await expect(page.locator('.rk-shields .on')).toHaveCount(0);
+
+    /* the best is kept on the device, per sound */
+    await expect(page.locator('.rk-best')).toHaveText(`Best ${score}`);
+
+    await page.getByRole('button', { name: /Go again/ }).click();
+    await expect(page.locator('.rk-overlay')).toBeHidden();
+    await expect(page.locator('.rk-score b')).toHaveText('0');
+    await expect(page.locator('.rk-shields .on')).toHaveCount(3);
+    await expect(page.locator('.rk-best')).toHaveText(`Best ${score}`);
+  });
+
+  test('pause stops the words where they are', async ({ page }) => {
+    await openGame(page, 'sound-rocket');
+    await page.getByRole('button', { name: /Launch/ }).click();
+    const first = page.locator('.rk-drop').first();
+    await expect(first).toBeVisible();
+
+    await page.getByRole('button', { name: 'Pause' }).click();
+    await expect(page.locator('.rk-overlay')).toContainText('Paused');
+    const y1 = (await first.boundingBox())!.y;
+    await page.waitForTimeout(800);
+    expect((await first.boundingBox())!.y).toBe(y1);
+
+    await page.getByRole('button', { name: /Carry on/ }).first().click();
+    await page.waitForTimeout(600);
+    expect((await first.boundingBox())!.y).toBeGreaterThan(y1);
+  });
+
+  test('opening setup mid-flight pauses rather than playing on underneath', async ({ page }) => {
+    await openGame(page, 'sound-rocket');
+    await page.getByRole('button', { name: /Launch/ }).click();
+    await expect(page.locator('.rk-drop').first()).toBeVisible();
+    await openSetup(page);
+    await expect(page.locator('.rk-overlay')).toContainText('Paused');
+  });
+});

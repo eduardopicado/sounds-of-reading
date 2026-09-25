@@ -1,5 +1,5 @@
 /* The pieces every game is built from: the header, the setup panel, chips,
- * the win overlay. One copy, so the nine games cannot drift apart the way the
+ * the win overlay. One copy, so the ten games cannot drift apart the way the
  * prototypes did. */
 
 import { el, prefersReducedMotion } from '../lib/dom';
