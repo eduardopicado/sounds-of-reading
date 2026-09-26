@@ -413,11 +413,39 @@ async function pickTricky(page: Page): Promise<void> {
   }
 }
 
+/** turn one tricky word set on and every other one off */
+async function onlySightSet(page: Page, name: string): Promise<void> {
+  const chips = page.locator('.panel .chip');
+  const wanted = chips.filter({ hasText: new RegExp(`^${name}$`) });
+  if ((await wanted.getAttribute('aria-pressed')) !== 'true') await wanted.click();
+  for (let i = 0; i < 10; i += 1) {
+    const other = chips.filter({ hasNotText: new RegExp(`^${name}$`) }).and(page.locator('[aria-pressed="true"]'));
+    if (!(await other.count())) break;
+    await other.first().click();
+  }
+  await expect(page.locator('.panel .chip[aria-pressed="true"]')).toHaveCount(1);
+}
+
 test.describe('Tricky Words', () => {
+  test("starts on the school's sets up to the child's level", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('sor:settings', JSON.stringify({ levels: [2, 3] }));
+    });
+    await openGame(page, 'tricky-words');
+    await openSetup(page);
+    const on = page.locator('.panel .chip[aria-pressed="true"]');
+    /* sight words build up like the sounds do; the extra set waits to be asked for */
+    await expect(on).toHaveText(['Level 1', 'Level 2', 'Level 3']);
+    await expect(page.locator('.panel .chip', { hasText: 'More' })).toHaveAttribute('aria-pressed', 'false');
+  });
+
   test('hides the word, then finds it again through to the win screen', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'tricky-words');
     await openSetup(page);
+    /* level 8 alone: all but one of its words have letters to light up, so
+       the review below always has some to show */
+    await onlySightSet(page, 'Level 8');
     await page.getByLabel('How many words').selectOption('6');
     await page.getByRole('button', { name: 'Set up this game' }).click();
 

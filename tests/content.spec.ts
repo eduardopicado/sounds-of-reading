@@ -266,16 +266,22 @@ describe('recorded audio', () => {
 
 describe('tricky words', () => {
   it('is a real English word, every one of them', () => {
-    const unknown = ALL_SIGHT_WORDS.filter((w) => !isRealWord(w.text));
+    /* on the school list, and too short for the dictionary to hold as words */
+    const abbreviations = new Set(['ok', 'Mr', 'Mrs']);
+    const unknown = ALL_SIGHT_WORDS.filter((w) => !isRealWord(w.text) && !abbreviations.has(w.text));
     expect(unknown.map((w) => w.text)).toEqual([]);
   });
 
-  /* A word with nothing bracketed has nothing irregular about it, which means
-     it can be sounded out — and telling a child to memorise a word he could
-     read is teaching him to stop reading. The loader throws; this says why. */
-  it('marks the part that misbehaves in every word', () => {
-    const plain = ALL_SIGHT_WORDS.filter((w) => !w.spans.length);
-    expect(plain.map((w) => w.text)).toEqual([]);
+  /* A word with nothing bracketed has nothing irregular about it, so it is
+     only a sight word until its sounds are taught. It has to contain a sound
+     taught at its level or later — otherwise he could already sound it out,
+     and telling a child to memorise a word he can read is teaching him to
+     stop reading. A word outside the school's levels has no such excuse. */
+  it('leaves a word unmarked only while its sounds are still to come', () => {
+    const readable = ALL_SIGHT_WORDS
+      .filter((w) => !w.spans.length)
+      .filter((w) => w.level === null || !ALL_SOUNDS.some((s) => s.level >= (w.level ?? 9) && mightContain(w.text, s)));
+    expect(readable.map((w) => `${w.text} (${w.set})`)).toEqual([]);
   });
 
   it('marks letters that are really in the word', () => {
