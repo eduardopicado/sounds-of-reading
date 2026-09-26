@@ -453,9 +453,13 @@ test.describe('Tricky Words', () => {
     await expect(page.locator('.tricky-word')).not.toHaveClass(/gone/);
     /* four choices, never more — and one of them is the word */
     await expect(page.locator('.choices .bin')).toHaveCount(4);
+    /* but not yet tappable: with the word still up he could match letters
+       to letters without remembering anything */
+    await expect(page.locator('.choices .bin').first()).toBeHidden();
     /* then it goes, which is what makes this different from reading it */
     await expect(page.locator('.tricky-word')).toHaveClass(/gone/, { timeout: 4000 });
     await expect(page.locator('.wrap')).toContainText('Which one was it?');
+    await expect(page.locator('.choices .bin').first()).toBeVisible();
 
     for (let i = 0; i < 24 && !(await page.locator('.results:not([hidden])').count()); i += 1) {
       await pickTricky(page);
@@ -533,6 +537,24 @@ async function steerUnder(page: Page, target: boolean): Promise<void> {
 }
 
 test.describe('Sound Rocket', () => {
+  /* the rocket lives at the bottom of the sky, so a sky taller than the
+     screen hides it — on an iPhone, under Safari's address bar. 560 tall is
+     a small phone with Safari's toolbars showing. */
+  for (const height of [0, 560]) {
+    test(`the whole sky fits on screen${height ? ` at ${height}px tall` : ''}`, async ({ page }) => {
+      if (height) await page.setViewportSize({ width: page.viewportSize()?.width ?? 375, height });
+      await openGame(page, 'sound-rocket');
+      const fits = await page.evaluate(() => {
+        const r = document.querySelector('.rk-sky')?.getBoundingClientRect();
+        return r ? { bottom: Math.round(r.bottom), screen: window.innerHeight, tall: Math.round(r.height) } : null;
+      });
+      expect(fits).not.toBeNull();
+      expect(fits!.bottom).toBeLessThanOrEqual(fits!.screen);
+      /* and still a sky worth playing in */
+      expect(fits!.tall).toBeGreaterThanOrEqual(300);
+    });
+  }
+
   test('words drift down, and catching one with the sound scores and lights it up', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'sound-rocket');
