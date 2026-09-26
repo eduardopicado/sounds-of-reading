@@ -2,8 +2,10 @@
  *
  * Every other game rewards sounding a word out. These are the words where
  * that fails: "said" does not rhyme with paid, "one" does not start like
- * only. They have to be known on sight, which is a different skill — not
- * decoding faster, but not decoding at all.
+ * only — or where it cannot work yet, because the school needs "went" before
+ * it teaches w. The list is the school's own. Either way the word has to be
+ * known on sight, which is a different skill — not decoding faster, but not
+ * decoding at all.
  *
  * So the word is shown, then taken away, and he picks it out of four that
  * look like it. A word he has to sound out cannot be found that way, because
@@ -32,6 +34,7 @@ import { marked, setMarked } from '../lib/highlight';
 import { ALL_SIGHT_WORDS, SIGHT_SETS, type SightWord } from '../content/index';
 import { tonesFor } from '../lib/colour';
 import { chip, confetti, counter, scoreLine, topbar } from '../ui/components';
+import { settings } from '../lib/settings';
 
 /* Tricky words practise no sound, so there is no sound's colour to borrow.
    One tone stands for "this is the bit that lies", everywhere in the game. */
@@ -68,8 +71,23 @@ function distractors(target: SightWord, pool: SightWord[]): SightWord[] {
     .map((x) => x.w);
 }
 
+/**
+ * The school's sets up to the child's level, since sight words build up the
+ * same way the sounds do: a level 5 child is still meeting the level 1 words.
+ * The extra set outside the school list waits until a parent turns it on.
+ */
+function startingSets(): string[] {
+  const levels = settings().levels;
+  const upTo = levels.length ? Math.max(...levels) : 8;
+  const sets = SIGHT_SETS.filter((name) => {
+    const level = ALL_SIGHT_WORDS.find((w) => w.set === name)?.level;
+    return level != null && level <= upTo;
+  });
+  return sets.length ? sets : SIGHT_SETS.slice(0, 1);
+}
+
 export function mount(root: HTMLElement): () => void {
-  let chosen: string[] = [...SIGHT_SETS];
+  let chosen: string[] = startingSets();
 
   const setRow = el('div', { class: 'row' });
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -125,7 +143,7 @@ export function mount(root: HTMLElement): () => void {
   const node = el('div', { class: 'wrap' },
     topbar({
       title: 'Tricky', swash: 'Words',
-      tagline: 'Words you cannot sound out. Look hard, then find it again.',
+      tagline: 'Words to know on sight. Look hard, then find it again.',
       onSetup: (open) => { panel.hidden = !open; },
     }),
     panel,

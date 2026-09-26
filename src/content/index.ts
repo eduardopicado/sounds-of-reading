@@ -39,10 +39,12 @@ export interface Word {
  */
 export interface SightWord {
   text: string;
-  /** the letters that do not say what they should */
+  /** the letters that do not say what they should — none for a word that is only early */
   spans: Span[];
   /** which set it was taught in, for the parent to choose between */
   set: string;
+  /** the school level that teaches it; null for a word from outside the school list */
+  level: Level | null;
 }
 
 export interface Phrase {
@@ -94,22 +96,21 @@ export const PRACTICE_SOUNDS: Sound[] = ALL_SOUNDS.filter((s) => s.practice);
 export const REAL_WORDS: Word[] = PRACTICE_SOUNDS.flatMap((s) => parseWordList(s.words ?? '', s, true));
 export const SILLY_WORDS: Word[] = PRACTICE_SOUNDS.flatMap((s) => parseWordList(s.silly ?? '', s, false));
 
-export const ALL_SIGHT_WORDS: SightWord[] = Object.entries(SIGHT_WORDS).flatMap(([set, raw]) =>
-  raw.split('|').map((chunk) => {
+export const ALL_SIGHT_WORDS: SightWord[] = SIGHT_WORDS.flatMap(({ name, level, words }) =>
+  words.split('|').map((chunk) => {
     const marked = chunk.trim();
-    if (!marked) throw new ContentError(`${set}: empty entry in the tricky word list`);
+    if (!marked) throw new ContentError(`${name}: empty entry in the tricky word list`);
     /* unmark, not resolveSpans: the brackets here mark the letters that lie,
-       and there is no sound they are supposed to be spelling */
+       and there is no sound they are supposed to be spelling. No brackets is
+       allowed — see the note above SIGHT_WORDS — and the content test checks
+       such a word really is ahead of its level. */
     const { text, spans } = unmark(marked);
-    if (!spans.length) {
-      throw new ContentError(`${set}: "${text}" has no bracketed part — if nothing about it is irregular, it is a word to sound out, not one to memorise`);
-    }
-    return { text, spans, set };
+    return { text, spans, set: name, level };
   }),
 );
 
 /** the sets a parent can choose between, in the order they are taught */
-export const SIGHT_SETS: string[] = Object.keys(SIGHT_WORDS);
+export const SIGHT_SETS: string[] = SIGHT_WORDS.map((s) => s.name);
 
 /**
  * Could a child reasonably read this word as having the sound?

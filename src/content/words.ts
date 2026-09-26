@@ -564,33 +564,49 @@ export const PHRASES: Record<Slot, string> = {
   ].join(' | '),
 };
 
-/*  Tricky words — the ones you cannot sound out.
+/*  Tricky words — the ones he cannot sound out yet.
  *
  *  Every other list in this file is decodable: work through the letters and
- *  the word comes out. These do not play fair. "said" should rhyme with paid,
- *  "was" should rhyme with gas, "one" should start like only. A child who
- *  tries to sound them out gets them wrong, so they have to be known on sight.
+ *  the word comes out. These do not, or not yet, so they are learned on sight.
  *
- *  Brackets mark the part that misbehaves, not a sound being practised:
- *  s[ai]d, w[a]s, c[oul]d. That is what the game lights up once he has found
- *  the word, so he learns which bit to distrust rather than just that the
- *  whole word is odd.
+ *  The eight levels are the school's own sight word list (Decodable Readers
+ *  Australia, the same eight levels as LEVELS above), word for word. They come
+ *  in two kinds:
  *
- *  Only genuinely irregular words are here. "went" and "from" look like
- *  sight words on a classroom list and are perfectly decodable by level 3 —
- *  telling a child to memorise those is teaching him to stop reading. The
- *  content test checks every entry has a bracketed part for that reason.
+ *  Words that never play fair. "said" should rhyme with paid, "was" with gas.
+ *  Brackets mark the part that misbehaves — s[ai]d, w[a]s, c[oul]d — and the
+ *  game lights that part up once he has found the word, so he learns which bit
+ *  to distrust rather than just that the whole word is odd. The marks follow
+ *  an Australian voice: l[a]st and b[a]ll, because that a is not the a in ant.
  *
- *  These are the highest-frequency irregular words in English, in rough order
- *  of how often a child meets them. A school running its own list — Magic 100
- *  Words, the Oxford Wordlist — should replace these sets with that one; the
- *  games read whatever is here.  */
-export const SIGHT_WORDS: Record<string, string> = {
-  'Set 1': 'th[e] | w[a]s | s[ai]d | y[ou] | [a]re | th[ey] | h[a]ve | [o]ne | c[o]me | s[o]me | wh[a]t | w[e]re',
-  'Set 2': 'th[ere] | th[ei]r | wh[ere] | [wh]o | d[oe]s | d[o]ne | [a]ny | m[a]ny | ag[ai]n | fr[ie]nd | p[eo]ple | [o]nce',
-  'Set 3': 'c[oul]d | sh[oul]d | w[oul]d | w[a]ter | w[or]k | w[or]d | l[o]ve | m[o]ve | g[i]ve | l[i]ve | h[ere] | [o]ther',
-  'Set 4': 'm[o]ther | f[a]ther | bec[au]se | b[ee]n | [k]now | [w]rite | s[ch]ool | [s]ure | p[u]t | p[u]sh | t[w]o | [eye]',
-};
+ *  Words that are only early. "went" is on the level 2 list and w is taught
+ *  at level 3, so for a term he needs it by sight; after that he can read it.
+ *  These have no brackets, since nothing about them lies. The content test
+ *  holds them to that: an unbracketed word must contain a sound that is not
+ *  taught before its level, or it is a word he could already sound out and
+ *  has no business being memorised.
+ *
+ *  "More" is not from the school. It is the common irregular words the school
+ *  list leaves out, kept for when he has the rest.  */
+export interface SightSetSpec {
+  /** what the parent sees on the chip */
+  name: string;
+  /** the level the school teaches these at; null for a set that is not the school's */
+  level: Level | null;
+  words: string;
+}
+
+export const SIGHT_WORDS: SightSetSpec[] = [
+  { name: 'Level 1', level: 1, words: '[a] | th[e] | on | and | n[o] | i[s] | m[e] | sh[e] | with | had | a[s] | ha[s] | [of] | hi[s] | lots | int[o] | [I] | t[o]' },
+  { name: 'Level 2', level: 2, words: 'd[o] | for | g[o] | h[e] | her | w[a]s | ont[o] | off | y[ou] | yes | from | went | that | this | wh[a]t' },
+  { name: 'Level 3', level: 3, words: 'b[e] | m[y] | p[u]t | when | then | or | them | th[ey] | [a]re | h[a]ve | y[our] | too | w[a]nt | w[e] | s[o]' },
+  { name: 'Level 4', level: 4, words: 'how | [a]ll | [wh]o | d[oe]s | th[ei]r | h[ere] | th[ere] | [o]ne | g[oe]s | m[o]st | like | d[o]ing | s[o]me | l[i]ve' },
+  { name: 'Level 5', level: 5, words: 'b[y] | say | [ok] | w[e]re | out | [oh] | these | m[a]ny | b[e]ing | [o]ther | g[o]ing | wh[ere] | herself | p[eo]ple' },
+  { name: 'Level 6', level: 6, words: 'c[o]me | make | g[i]ve | use | [a]ls[o] | [a]g[o] | c[oul]d | our | [a]ny | wh[y] | [a]bout | c[a]ll | [o]nly | more | t[o]day | sh[oul]d | s[ai]d | [Mr]' },
+  { name: 'Level 7', level: 7, words: 'und[o] | w[oul]d | [k]now | c[a]lled | [a]lways | c[o]ming | bec[o]me | [a]nything' },
+  { name: 'Level 8', level: 8, words: '[Mrs] | b[a]ll | b[a]lls | w[or]k | w[or]d | l[a]st | l[o]ve | f[u]ll | p[u]ll | y[our]self | t[w]o | [o]nce | an[o]ther | t[o]gether | s[o]me[o]ne | years | s[ch]ools | w[ea]ther | s[o]mething' },
+  { name: 'More', level: null, words: 'ag[ai]n | bec[au]se | b[ee]n | d[o]ne | [eye] | f[a]ther | fr[ie]nd | m[o]ther | m[o]ve | p[u]sh | s[ch]ool | [s]ure | w[a]ter | [w]rite' },
+];
 
 /*  Words never to show a six-year-old, whatever a word list says about them.
  *  Checked against every real word, silly word, family build and phrase. */
