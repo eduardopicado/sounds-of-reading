@@ -185,7 +185,11 @@ export function mount(root: HTMLElement): () => void {
     askEl.hidden = true;
     /* Someone who has already missed it keeps the word. The game degrades
        into plain matching rather than into guessing. */
-    if (tries > 0) return;
+    if (tries > 0) { choices.classList.remove('waiting'); return; }
+    /* The choices wait until the word has gone. With both on screen at once
+       he can match letters to letters without remembering anything — which
+       is exactly what he did, tapping before the word had time to leave. */
+    choices.classList.add('waiting');
     /* a longer look when the device asks for less movement — the point is
        the memory, not the hurry */
     const ms = prefersReducedMotion() ? LOOK_MS * 1.5 : LOOK_MS;
@@ -193,6 +197,7 @@ export function mount(root: HTMLElement): () => void {
       wordEl.classList.add('gone');
       wordEl.textContent = '?';
       askEl.hidden = false;
+      choices.classList.remove('waiting');
     }, ms);
   }
 
@@ -221,7 +226,7 @@ export function mount(root: HTMLElement): () => void {
   }
 
   function choose(picked: SightWord, btn: HTMLElement): void {
-    if (busy || !current) return;
+    if (busy || !current || choices.classList.contains('waiting')) return;
     tries += 1;
     const word = current;
 
@@ -259,6 +264,7 @@ export function mount(root: HTMLElement): () => void {
     window.clearTimeout(hideTimer);
     hand.style.display = 'none';
     askEl.hidden = true;
+    choices.classList.remove('waiting');
     choices.replaceChildren();
     resultList.replaceChildren();
     for (const entry of log) {

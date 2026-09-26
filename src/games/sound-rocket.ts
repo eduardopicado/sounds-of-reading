@@ -118,7 +118,9 @@ export function mount(root: HTMLElement): () => void {
     topbar({
       title: 'Sound', swash: 'Rocket',
       tagline: 'Catch the words with the sound. Dodge the rest.',
-      onSetup: (open) => { setup.open(open); if (open && state === 'playing') pause(); },
+      /* the panel pushes the sky down while it is open; fit it again once
+         it has gone, so the sky is sized for the screen he plays on */
+      onSetup: (open) => { setup.open(open); if (open && state === 'playing') pause(); if (!open) measure(); },
     }),
     setup.node,
     hud,
@@ -149,7 +151,20 @@ export function mount(root: HTMLElement): () => void {
   const ROCKET_W = 64;
   const ROCKET_H = 64;
 
+  /* The sky runs from wherever the header leaves it to the bottom of what is
+     actually visible. A fixed share of vh overshoots on an iPhone: Safari
+     sizes vh as if its toolbar were hidden, so the bottom of the sky — where
+     the rocket lives — sat under the address bar. svh is the height with the
+     toolbars showing, and the safe-area inset keeps it off the home bar when
+     it runs from the home screen. A browser without svh ignores this and
+     keeps the stylesheet's height. */
+  function fit(): void {
+    const top = Math.round(sky.getBoundingClientRect().top + window.scrollY);
+    sky.style.height = `clamp(300px, calc(100svh - ${top}px - env(safe-area-inset-bottom, 0px) - 12px), 820px)`;
+  }
+
   function measure(): void {
+    fit();
     const r = sky.getBoundingClientRect();
     skyW = r.width;
     skyH = r.height;
@@ -425,6 +440,8 @@ export function mount(root: HTMLElement): () => void {
   fillTargets();
   measure();
   reset();
+  /* the reading font can arrive after the first layout and move the sky */
+  void document.fonts?.ready.then(() => { if (sky.isConnected) measure(); });
 
   return () => {
     stop();

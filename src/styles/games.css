@@ -395,6 +395,10 @@
    empty box, so the space still reads as "the word was here". */
 .tricky-word.gone { opacity: .35; }
 
+/* the choices while the word is still up. Hidden, not removed, so nothing
+   below them jumps when they arrive. */
+.choices.waiting { visibility: hidden; }
+
 /* ── Sound Rocket ──────────────────────────────────────────────────────── */
 
 .rk-hud {
@@ -420,7 +424,8 @@
    of scrolling the page out from under it */
 .rk-sky {
   position: relative; overflow: hidden;
-  height: clamp(360px, 68vh, 820px);
+  /* the fallback; the game fits it to the visible screen once it has laid out */
+  height: clamp(300px, 68vh, 820px);
   border-radius: var(--radius);
   background:
     radial-gradient(1.5px 1.5px at 20% 30%, rgba(255, 255, 255, .7), transparent),
