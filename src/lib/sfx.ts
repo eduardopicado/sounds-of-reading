@@ -65,6 +65,39 @@ function play(notes: Note[]): void {
   }
 }
 
+/**
+ * A burst of filtered noise: the nearest thing to a crowd that three lines
+ * of Web Audio can make. Band-passed so it is a roar and not a hiss, and
+ * swelled in and out so it never clicks.
+ */
+function noise(seconds: number, peak: number): void {
+  if (!enabled) return;
+  const ac = audio();
+  if (!ac) return;
+  try {
+    const length = Math.floor(ac.sampleRate * seconds);
+    const buffer = ac.createBuffer(1, length, ac.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i += 1) data[i] = Math.random() * 2 - 1;
+    const source = ac.createBufferSource();
+    source.buffer = buffer;
+    const band = ac.createBiquadFilter();
+    band.type = 'bandpass';
+    band.frequency.value = 900;
+    band.Q.value = 0.6;
+    const vol = ac.createGain();
+    const now = ac.currentTime;
+    vol.gain.setValueAtTime(0.0001, now);
+    vol.gain.exponentialRampToValueAtTime(peak, now + seconds * 0.25);
+    vol.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
+    source.connect(band).connect(vol).connect(ac.destination);
+    source.start(now);
+    source.stop(now + seconds + 0.02);
+  } catch {
+    /* no crowd, still a goal */
+  }
+}
+
 export const sfx = {
   /** a bright rising third */
   right: () => play([{ hz: 660, at: 0, for: 0.12 }, { hz: 880, at: 0.09, for: 0.18 }]),
@@ -97,6 +130,21 @@ export const sfx = {
     { hz: 392, at: 0.18, for: 0.18, type: 'triangle' },
     { hz: 294, at: 0.36, for: 0.34, type: 'triangle' },
   ]),
+  /** boot on ball: a low, short thump */
+  kick: () => play([
+    { hz: 120, at: 0, for: 0.08, gain: 0.3 },
+    { hz: 70, at: 0.02, for: 0.12, gain: 0.2 },
+  ]),
+  /** the referee: two short blasts */
+  whistle: () => play([
+    { hz: 2200, at: 0, for: 0.12, gain: 0.06 },
+    { hz: 2300, at: 0.17, for: 0.28, gain: 0.06 },
+  ]),
+  /** a goal or a save: the crowd, and the rising third on top */
+  cheer: () => {
+    noise(1.3, 0.22);
+    play([{ hz: 660, at: 0.05, for: 0.12 }, { hz: 880, at: 0.14, for: 0.2 }]);
+  },
   /** the tumble of the die */
   roll: () => play([
     { hz: 300, at: 0, for: 0.05, type: 'square', gain: 0.05 },

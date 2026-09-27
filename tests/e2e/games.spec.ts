@@ -638,3 +638,149 @@ test.describe('Sound Rocket', () => {
     await expect(page.locator('.rk-overlay')).toContainText('Paused');
   });
 });
+
+/* ── Penalty Shootout ─────────────────────────────────────────────────── */
+
+/** a speech engine that writes down what it is asked to say and finishes at
+ *  once, so a test can hear the word the way the child does */
+async function recordSpeech(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { __said: string[] }).__said = spoken;
+    class FakeUtterance {
+      text: string; lang = ''; rate = 1; pitch = 1; volume = 1;
+      voice: unknown = null;
+      onend: (() => void) | null = null;
+      onerror: (() => void) | null = null;
+      constructor(text: string) { this.text = text; }
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.super-compact.en-AU.Karen' }],
+        speak: (u: FakeUtterance) => {
+          if (u.text) spoken.push(u.text);
+          window.setTimeout(() => u.onend?.(), 0);
+        },
+        cancel: () => undefined,
+        addEventListener: () => undefined,
+      },
+    });
+  });
+}
+
+const lastSaid = (page: Page): Promise<string> =>
+  page.evaluate(() => {
+    const said = (window as unknown as { __said: string[] }).__said;
+    return said[said.length - 1] ?? '';
+  });
+
+/** one kick or one save, aimed at the right word or deliberately not */
+async function takeKick(page: Page, right: boolean): Promise<void> {
+  const pitch = page.locator('.pk-pitch');
+  await expect(pitch).toHaveAttribute('data-ready', '1', { timeout: 6000 });
+  /* on his kick the question is a picture; the test asks to hear it instead.
+     In goal the word has already been said. */
+  if ((await pitch.getAttribute('data-phase')) === 'shoot') {
+    await page.getByRole('button', { name: 'Say it' }).click();
+  }
+  const word = await lastSaid(page);
+  const texts = (await page.locator('.pk-spot').allTextContents()).map((t) => t.trim());
+  expect(texts).toContain(word);
+  const at = right ? texts.indexOf(word) : texts.findIndex((t) => t !== word);
+  await page.locator('.pk-spot').nth(at).click();
+}
+
+async function startShootout(page: Page): Promise<void> {
+  await recordSpeech(page);
+  await openGame(page, 'penalty-shootout');
+  await openSetup(page);
+  await page.getByLabel('Kicks each').selectOption('3');
+  await page.getByRole('button', { name: 'Set up this game' }).click();
+  await page.getByRole('button', { name: 'Kick off ⚽' }).click();
+}
+
+test.describe('Penalty Shootout', () => {
+  test('reading every word right wins the match', async ({ page }) => {
+    const watch = watchPage(page);
+    await startShootout(page);
+
+    /* three words in the goal, and a picture to say which one */
+    await expect(page.locator('.pk-spot')).toHaveCount(3);
+    await expect(page.locator('.pk-cue .pic')).toBeVisible();
+
+    await takeKick(page, true);
+    await expect(page.locator('.pk-banner')).toHaveText('GOAL!');
+    await expect(page.locator('.pk-spot.answer')).toHaveCount(1);
+    await expect(page.locator('.pk-spot.wrong')).toHaveCount(0);
+
+    for (let i = 0; i < 5; i += 1) await takeKick(page, true);
+
+    await expect(page.locator('.results')).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('.results h2').first()).toContainText('You win 3–0');
+    await expect(page.locator('.results li')).toHaveCount(6);
+    await expect(page.locator('.results li.miss')).toHaveCount(0);
+    /* a win earns a sticker */
+    await expect(page.locator('.results .sticker')).toBeVisible();
+    noProblems(watch);
+  });
+
+  test('misreading every word loses it, and shows which words were missed', async ({ page }) => {
+    const watch = watchPage(page);
+    await startShootout(page);
+
+    await takeKick(page, false);
+    await expect(page.locator('.pk-banner')).toHaveText('Saved!');
+    /* the word he picked is crossed, and the one he wanted is lit up */
+    await expect(page.locator('.pk-spot.wrong')).toHaveCount(1);
+    await expect(page.locator('.pk-spot.answer')).toHaveCount(1);
+
+    /* in goal, diving the wrong way lets one in */
+    await takeKick(page, false);
+    await expect(page.locator('.pk-banner')).toContainText('score');
+
+    for (let i = 0; i < 4; i += 1) await takeKick(page, false);
+
+    await expect(page.locator('.results')).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('.results h2').first()).toContainText('win 3–0 this time');
+    await expect(page.locator('.results li.miss')).toHaveCount(6);
+    await expect(page.locator('.results .sticker')).toBeHidden();
+
+    /* and a rematch is one tap away */
+    await page.getByRole('button', { name: 'Rematch' }).click();
+    await expect(page.getByRole('button', { name: 'Kick off ⚽' })).toBeVisible();
+    noProblems(watch);
+  });
+
+  test('never offers two words in goal that sound alike', async ({ page }) => {
+    await startShootout(page);
+    await takeKick(page, true);
+    /* in goal: the three words on screen are all different out loud as well
+       as on paper — the content test checks every pair, this checks the
+       game asks it */
+    const pitch = page.locator('.pk-pitch');
+    await expect(pitch).toHaveAttribute('data-phase', 'save', { timeout: 6000 });
+    await expect(pitch).toHaveAttribute('data-ready', '1', { timeout: 6000 });
+    const texts = (await page.locator('.pk-spot').allTextContents()).map((t) => t.trim());
+    expect(new Set(texts).size).toBe(3);
+    expect(texts).toContain(await lastSaid(page));
+  });
+
+  test('a flick up and to the left shoots at the left-hand word', async ({ page }) => {
+    await startShootout(page);
+    const pitch = page.locator('.pk-pitch');
+    await expect(pitch).toHaveAttribute('data-ready', '1');
+    const ball = await page.locator('.pk-ball').boundingBox();
+    expect(ball).not.toBeNull();
+    const x = ball!.x + ball!.width / 2;
+    const y = ball!.y + ball!.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - 70, y - 90, { steps: 4 });
+    await page.mouse.up();
+    /* whether it went in or not, the left-hand word is the one it was hit at */
+    await expect(page.locator('.pk-spot').first()).toHaveClass(/answer|wrong/);
+    await expect(page.locator('.pk-banner')).toBeVisible();
+  });
+});

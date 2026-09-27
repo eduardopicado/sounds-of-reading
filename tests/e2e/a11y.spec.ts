@@ -16,6 +16,7 @@ const PAGES = [
   ['Same Sound, Two Ways', '/#/same-sound'],
   ['Tricky Words', '/#/tricky-words'],
   ['Sound Rocket', '/#/sound-rocket'],
+  ['Penalty Shootout', '/#/penalty-shootout'],
 ] as const;
 
 for (const [name, path] of PAGES) {
@@ -33,6 +34,18 @@ for (const [name, path] of PAGES) {
     expect(summary).toEqual([]);
   });
 }
+
+/* the shootout's first screen is the kick-off; the pitch it covers is only
+   checked once the match is under way */
+test('Penalty Shootout mid-match has no accessibility violations', async ({ page }) => {
+  await page.goto('/#/penalty-shootout');
+  await page.getByRole('button', { name: 'Kick off ⚽' }).click();
+  await expect(page.locator('.pk-pitch[data-ready="1"]')).toBeVisible();
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .analyze();
+  expect(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.slice(0, 3).map((n) => n.html.slice(0, 120)) }))).toEqual([]);
+});
 
 test('every control can be reached and named', async ({ page }) => {
   await page.goto('/#/bingo');

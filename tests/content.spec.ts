@@ -8,7 +8,10 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
+  SOUNDS_ALIKE, soundsAlike,
 } from '../src/content/index';
+import { editDistance, nearWords } from '../src/content/near-words';
+import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
@@ -336,5 +339,123 @@ describe('dodge words', () => {
       if (dodges.length < 40) thin.push(`${target.id}: ${dodges.length}`);
     }
     expect(thin).toEqual([]);
+  });
+});
+
+/* ── words that sound alike ─────────────────────────────────────────────── */
+
+const ARPA_VOWEL = /^(AA|AE|AH|AO|AW|AY|EH|ER|EY|IH|IY|OW|OY|UH|UW)$/;
+
+/**
+ * A word's pronunciation as an Australian says it, from the CMU dictionary.
+ *
+ * CMU is American, and one difference matters here: an r after a vowel is
+ * silent in Australia, so saw and sore are the same word out loud. That r is
+ * dropped. The vowel of "car" is kept apart from the vowel of "cod", which
+ * American English merges, so the two do not come out as twins by mistake.
+ * Only the main pronunciation is used, since the regional ones (when said as
+ * "win") would make twins no Australian child hears.
+ */
+function sayAustralian(word: string): string | null {
+  const us = (CMU as Record<string, string>)[word.toLowerCase()];
+  if (!us) return null;
+  const ph = us.replace(/[0-9]/g, '').split(' ');
+  const out: string[] = [];
+  for (let i = 0; i < ph.length; i += 1) {
+    const x = ph[i];
+    const afterVowel = i > 0 && ARPA_VOWEL.test(ph[i - 1]);
+    const beforeVowel = i + 1 < ph.length && ARPA_VOWEL.test(ph[i + 1]);
+    if (x === 'R' && afterVowel && !beforeVowel) {
+      if (out[out.length - 1] === 'AA') out[out.length - 1] = 'AR';
+      continue;
+    }
+    /* a final unstressed -er is a plain schwa: tuna and tuner */
+    out.push(x === 'ER' && i === ph.length - 1 ? 'AH' : x);
+  }
+  return out.join(' ');
+}
+
+describe('words that sound alike', () => {
+  it('knows the Australian twins the American dictionary would miss', () => {
+    expect(sayAustralian('saw')).toBe(sayAustralian('sore'));
+    expect(sayAustralian('car')).not.toBe(sayAustralian('cod'));
+    expect(sayAustralian('win')).not.toBe(sayAustralian('when'));
+  });
+
+  /* A game that says a word and asks him to find it written has no right
+     answer if its twin is on screen too. This names any pair missing. */
+  it('lists every pair of real words that are said the same way', () => {
+    const byVoice = new Map<string, Set<string>>();
+    for (const w of REAL_WORDS) {
+      const key = sayAustralian(w.text);
+      if (!key) continue;
+      byVoice.set(key, (byVoice.get(key) ?? new Set()).add(w.text.toLowerCase()));
+    }
+    const missing: string[] = [];
+    for (const twins of byVoice.values()) {
+      const list = [...twins];
+      for (let i = 0; i < list.length; i += 1) {
+        for (let j = i + 1; j < list.length; j += 1) {
+          if (!soundsAlike(list[i], list[j])) missing.push(`${list[i]} ${list[j]}`);
+        }
+      }
+    }
+    expect(missing, 'add these to SOUNDS_ALIKE').toEqual([]);
+  });
+
+  it('lists only words that are in the content', () => {
+    const known = new Set(REAL_WORDS.map((w) => w.text.toLowerCase()));
+    const stray = SOUNDS_ALIKE.flatMap((line) => line.split(/\s+/)).filter((w) => w && !known.has(w));
+    expect(stray).toEqual([]);
+  });
+});
+
+/* ── Penalty Shootout ───────────────────────────────────────────────────── */
+
+describe('penalty shootout', () => {
+  /* Every word is tried as the answer, with only the words at or below its
+     own level to choose lookalikes from: the smallest pool the game can ever
+     be working with. */
+  const upTo = (level: Level): Level[] => ([1, 2, 3, 4, 5, 6, 7, 8] as Level[]).filter((n) => n <= level);
+
+  it('counts letter changes the way a reader would', () => {
+    expect(editDistance('fish', 'dish')).toBe(1);
+    expect(editDistance('fish', 'fist')).toBe(1);
+    expect(editDistance('ship', 'shop')).toBe(1);
+    expect(editDistance('cat', 'sun')).toBe(3);
+  });
+
+  it('always finds two words to put in the goal beside the answer', () => {
+    const short = REAL_WORDS.filter((w) => nearWords(w, realWords({ levels: upTo(w.level) }), 2, { picture: !!w.picture }).length < 2);
+    expect(short.map((w) => `${w.text} (level ${w.level})`)).toEqual([]);
+  });
+
+  it('never puts a word in the goal that sounds like the answer', () => {
+    const twins: string[] = [];
+    for (const w of REAL_WORDS) {
+      for (const other of nearWords(w, REAL_WORDS, 2)) {
+        if (soundsAlike(w.text, other.text)) twins.push(`${w.text} / ${other.text}`);
+      }
+    }
+    expect(twins).toEqual([]);
+    /* and the pairs the list exists for really are kept apart */
+    const pair = REAL_WORDS.find((w) => w.text === 'pair');
+    if (pair) expect(nearWords(pair, REAL_WORDS, 50).map((w) => w.text)).not.toContain('pear');
+  });
+
+  it('never puts a second word with the same picture in the goal', () => {
+    const clash: string[] = [];
+    for (const w of REAL_WORDS.filter((x) => x.picture)) {
+      for (const other of nearWords(w, REAL_WORDS, 2, { picture: true })) {
+        if (other.picture === w.picture) clash.push(`${w.text} / ${other.text} ${w.picture}`);
+      }
+    }
+    expect(clash).toEqual([]);
+  });
+
+  it('never offers the answer twice', () => {
+    const doubled = REAL_WORDS.filter((w) =>
+      nearWords(w, REAL_WORDS, 2).some((o) => o.text.toLowerCase() === w.text.toLowerCase()));
+    expect(doubled.map((w) => w.text)).toEqual([]);
   });
 });

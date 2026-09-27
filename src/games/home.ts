@@ -25,6 +25,7 @@ export const TILES: Tile[] = [
   { path: 'same-sound', name: 'Same Sound, Two Ways', emoji: '🪞', what: 'Hear it, then spell it', tone: '#C77DBB' },
   { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A' },
   { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF' },
+  { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E' },
 ];
 
 export function mount(root: HTMLElement): () => void {
@@ -127,7 +128,7 @@ export function mount(root: HTMLElement): () => void {
     );
   }
 
-  /* the sticker book: the one thing that joins the ten games together */
+  /* the sticker book: the one thing that joins the games together */
   const book = el('div', { class: 'sticker-book' });
   function drawBook(): void {
     const earned = stickers();

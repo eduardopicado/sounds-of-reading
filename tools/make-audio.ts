@@ -30,10 +30,11 @@ import { clipId, speakable } from '../src/lib/clip-id';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 
-/** the eight lines the app says to the child that are not words from content */
+/** the lines the app says to the child that are not words from content */
 const UI_LINES = [
   'Well done!', 'Bingo! Well done!', 'Brilliant!', 'Perfect!', 'Good reading!',
   'Perfect sorting!', 'Nice work!', 'Pick one word from every row first',
+  'You win!', 'What a match!', 'Good game!',
 ];
 
 /** every real thing the app speaks — no made-up words anywhere in here */

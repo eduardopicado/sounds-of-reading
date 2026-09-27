@@ -52,7 +52,10 @@ tests/e2e/             Playwright
 Edit `src/content/words.ts`, then `npm run validate:content`. The test checks
 every real word against an English dictionary, every silly word against it the
 other way round, every Word Builder build both ways, the blocklist, the
-grapheme positions, and the colour contrast. If it fails it names the word.
+grapheme positions, and the colour contrast. It also checks every pair of real
+words that sound the same with an Australian accent is listed in
+`SOUNDS_ALIKE` (Penalty Shootout says a word and must never offer its twin).
+If it fails it names the word.
 
 `tools/regen-silly.ts` rebuilds the silly word lists from scratch when a sound
 is added; it only ever proposes non-words that are pronounceable and contain

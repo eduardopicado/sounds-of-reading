@@ -6,14 +6,14 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE,
   type SoundSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
 import { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export type { Level, Slot, SoundSpec, FamilySpec };
-export { LEVELS, BLOCKLIST };
+export { LEVELS, BLOCKLIST, SOUNDS_ALIKE };
 export { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export interface Sound extends SoundSpec {
@@ -188,6 +188,21 @@ export const families = (f: Filter = {}): FamilySpec[] =>
 /** practice sounds that survive a filter, in level order */
 export const soundsFor = (f: Filter = {}): Sound[] =>
   PRACTICE_SOUNDS.filter((s) => inSounds(s.id, f.sounds) && inLevels(s.level, f.levels));
+
+/* every word mapped to the words it sounds exactly like */
+const TWINS = new Map<string, Set<string>>();
+for (const line of SOUNDS_ALIKE) {
+  const group = line.toLowerCase().split(/\s+/).filter(Boolean);
+  for (const w of group) {
+    const twins = TWINS.get(w) ?? new Set<string>();
+    for (const other of group) if (other !== w) twins.add(other);
+    TWINS.set(w, twins);
+  }
+}
+
+/** would a child hearing one of these words have no way to tell it from the other? */
+export const soundsAlike = (a: string, b: string): boolean =>
+  TWINS.get(a.toLowerCase())?.has(b.toLowerCase()) ?? false;
 
 /** words with a picture, for the games that show one */
 export const picturable = (words: Word[]): Word[] => words.filter((w) => !!w.picture);

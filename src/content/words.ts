@@ -608,6 +608,21 @@ export const SIGHT_WORDS: SightSetSpec[] = [
   { name: 'More', level: null, words: 'ag[ai]n | bec[au]se | b[ee]n | d[o]ne | [eye] | f[a]ther | fr[ie]nd | m[o]ther | m[o]ve | p[u]sh | s[ch]ool | [s]ure | w[a]ter | [w]rite' },
 ];
 
+/*  Words that sound exactly like another word in these lists, said with an
+ *  Australian accent. A game that says a word and asks him to find it written
+ *  can never offer both halves of a pair: "pair" called, with pair and pear
+ *  in the goal, has no right answer.
+ *
+ *  The content test works these out from a pronouncing dictionary, with the
+ *  r after a vowel left silent the way it is here (so saw and sore would be
+ *  a pair), and names any pair that is missing. Add words freely; it will say
+ *  if one of them needs a line here.  */
+export const SOUNDS_ALIKE: string[] = [
+  'bare bear', 'be bee', 'dew due', 'hair hare', 'hew hue', 'knew new',
+  'knight night', 'pair pear', 'plain plane', 'read red', 'stair stare',
+  'wear where', 'which witch',
+];
+
 /*  Words never to show a six-year-old, whatever a word list says about them.
  *  Checked against every real word, silly word, family build and phrase. */
 export const BLOCKLIST: string[] = [
