@@ -11,6 +11,7 @@ import {
   SOUNDS_ALIKE, soundsAlike,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
+import { pieces } from '../src/content/graphemes';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -457,5 +458,60 @@ describe('penalty shootout', () => {
     const doubled = REAL_WORDS.filter((w) =>
       nearWords(w, REAL_WORDS, 2).some((o) => o.text.toLowerCase() === w.text.toLowerCase()));
     expect(doubled.map((w) => w.text)).toEqual([]);
+  });
+});
+
+/* ── Pass and Shoot ─────────────────────────────────────────────────────── */
+
+describe('pass and shoot', () => {
+  const cut = (text: string) => {
+    const w = REAL_WORDS.find((x) => x.text === text);
+    return w ? pieces(w)?.map((p) => p.text).join(' ') ?? null : undefined;
+  };
+
+  it('cuts a word into the letters of each sound, longest spelling first', () => {
+    expect(cut('ship')).toBe('sh i p');
+    expect(cut('light')).toBe('l igh t');
+    expect(cut('queen')).toBe('qu ee n');
+    expect(cut('duck')).toBe('d u ck');
+    expect(cut('catch')).toBe('c a tch');
+  });
+
+  /* a player can hold one sound, and a word of two syllables or a split
+     spelling would need a guess to cut, so the game never gets one */
+  it('leaves out what it cannot cut without guessing', () => {
+    expect(cut('cake')).toBeNull();
+    expect(cut('country')).toBeNull();
+  });
+
+  it('puts every letter of the word on exactly one player, in order', () => {
+    const broken = REAL_WORDS.filter((w) => {
+      const p = pieces(w);
+      return p && p.map((x) => x.text).join('') !== w.text.toLowerCase();
+    });
+    expect(broken.map((w) => w.text)).toEqual([]);
+  });
+
+  it('keeps the sound the content marks as one piece, never re-cut', () => {
+    const recut = REAL_WORDS.filter((w) => {
+      const p = pieces(w);
+      if (!p) return false;
+      const target = p.filter((x) => x.target);
+      return target.length !== 1 || target[0].at !== w.spans[0].at || target[0].text.length !== w.spans[0].len;
+    });
+    expect(recut.map((w) => w.text)).toEqual([]);
+  });
+
+  /* five players across a phone is the most that stays readable */
+  it('never needs more than five players', () => {
+    const long = REAL_WORDS.filter((w) => (pieces(w)?.length ?? 0) > 5);
+    expect(long.map((w) => w.text)).toEqual([]);
+  });
+
+  it('has words with pictures to play at every level', () => {
+    for (const level of [1, 2, 3, 4, 5, 6, 7, 8] as Level[]) {
+      const usable = REAL_WORDS.filter((w) => w.level === level && w.picture && pieces(w));
+      expect(usable.length, `level ${level}`).toBeGreaterThanOrEqual(8);
+    }
   });
 });

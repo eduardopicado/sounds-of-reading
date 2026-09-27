@@ -26,6 +26,7 @@ export const TILES: Tile[] = [
   { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A' },
   { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF' },
   { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E' },
+  { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A' },
 ];
 
 export function mount(root: HTMLElement): () => void {

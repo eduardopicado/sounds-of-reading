@@ -39,6 +39,8 @@ npm test                 # content test, then the Playwright suite
 src/content/words.ts   the content file — sounds, words, families, phrases
 src/content/index.ts   loads it into typed data with explicit positions
 src/content/spans.ts   works out which letters carry a sound; refuses to guess
+src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Shoot)
+src/content/near-words.ts the nearest real words, for wrong answers that need reading
 src/lib/               speech, sound effects, storage, settings, colour, router
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/games/             one file per game, plus home.ts
