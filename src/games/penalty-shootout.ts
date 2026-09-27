@@ -29,21 +29,13 @@ import { award } from '../lib/stickers';
 import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { nearWords } from '../content/near-words';
 import { confetti, createSetup, topbar } from '../ui/components';
+import { read, write } from '../lib/storage';
+import { TEAMS, YOU, kit, label, player, teamById, type Team } from './teams';
 
 type Phase = 'kickoff' | 'shoot' | 'save' | 'over';
 
 interface Kick { word: Word; phase: 'shoot' | 'save'; ok: boolean }
 
-/* the other team, from the bush. Emoji faces, because the keeper and the
-   striker have to be someone and a six-year-old knows who a koala is */
-const RIVALS = [
-  { name: 'Kangaroos', face: '🦘' },
-  { name: 'Koalas', face: '🐨' },
-  { name: 'Crocs', face: '🐊' },
-  { name: 'Sharks', face: '🦈' },
-  { name: 'Owls', face: '🦉' },
-  { name: 'Penguins', face: '🐧' },
-];
 
 /** after the kicks each, how many sudden-death rounds before it is called a draw */
 const SUDDEN_DEATH = 5;
@@ -58,8 +50,30 @@ export function mount(root: HTMLElement): () => void {
     el('option', { value: '5', text: '5 kicks each', selected: 'selected' }),
   );
   kicksSel.addEventListener('change', () => newMatch());
+
+  /* who he plays for, and who against. Both are remembered on this device:
+     a boy who supports Palmeiras supports Palmeiras every time. */
+  const teamOptions = (first?: HTMLOptionElement) => [
+    ...(first ? [first] : []),
+    el('optgroup', { label: 'Countries' },
+      ...TEAMS.filter((t) => t.kind === 'country').map((t) => el('option', { value: t.id, text: label(t) }))),
+    el('optgroup', { label: 'Clubs' },
+      ...TEAMS.filter((t) => t.kind === 'club').map((t) => el('option', { value: t.id, text: label(t) }))),
+  ];
+  const ourSel = el('select', { 'aria-label': 'Your team' },
+    ...teamOptions(el('option', { value: YOU.id, text: label(YOU) })));
+  const theirSel = el('select', { 'aria-label': 'Play against' },
+    ...teamOptions(el('option', { value: 'any', text: 'Anyone' })));
+  ourSel.value = teamById(read<string>('shootout-team', YOU.id))?.id ?? YOU.id;
+  theirSel.value = teamById(read<string>('shootout-rival', 'any'))?.id ?? 'any';
+  ourSel.addEventListener('change', () => { write('shootout-team', ourSel.value); newMatch(); });
+  theirSel.addEventListener('change', () => { write('shootout-rival', theirSel.value); newMatch(); });
+
   const setup = createSetup({
-    extra: [el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), kicksSel)],
+    extra: [
+      el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'Teams' }), ourSel, theirSel),
+      el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), kicksSel),
+    ],
     onChange: () => newMatch(),
   });
 
@@ -69,9 +83,10 @@ export function mount(root: HTMLElement): () => void {
   const theirDots = el('span', { class: 'pk-dots' });
   const ourScore = el('b', { text: '0' });
   const theirScore = el('b', { text: '0' });
+  const ourName = el('span', { class: 'pk-name' });
   const theirName = el('span', { class: 'pk-name' });
   const board = el('div', { class: 'pk-board' },
-    el('div', { class: 'pk-team' }, el('span', { class: 'pk-name', text: '⭐ You' }), ourDots, ourScore),
+    el('div', { class: 'pk-team' }, ourName, ourDots, ourScore),
     el('div', { class: 'pk-team' }, theirName, theirDots, theirScore),
   );
 
@@ -145,7 +160,8 @@ export function mount(root: HTMLElement): () => void {
   let current: Word | null = null;
   let options: Word[] = [];
   let busy = false;
-  let rival = pick(RIVALS);
+  let us: Team = YOU;
+  let rival: Team = YOU;
   let shootBag: Word[] = [];
   let saveBag: Word[] = [];
   let timers: number[] = [];
@@ -263,8 +279,8 @@ export function mount(root: HTMLElement): () => void {
     const word = draw(shootBag, shootWords);
     current = word;
     setSpots(word, nearWords(word, lookalikes(), 2, { picture: true }));
-    keeper.textContent = rival.face;
-    taker.textContent = '🏃';
+    keeper.replaceChildren(player(rival, 84, 'keeper'));
+    taker.replaceChildren(player(us, 64, 'kicker'));
     ball.classList.add('mine');
     cueText.textContent = 'Your kick! Shoot at';
     cuePic.textContent = word.picture ?? '';
@@ -283,8 +299,8 @@ export function mount(root: HTMLElement): () => void {
     current = word;
     const heard = listening();
     setSpots(word, nearWords(word, lookalikes(), 2, { picture: !heard }));
-    keeper.textContent = '🧤';
-    taker.textContent = rival.face;
+    keeper.replaceChildren(player(us, 84, 'keeper'));
+    taker.replaceChildren(player(rival, 64, 'kicker'));
     ball.classList.remove('mine');
     if (heard) {
       cueText.textContent = `You're in goal! Listen, then dive to the word.`;
@@ -340,7 +356,7 @@ export function mount(root: HTMLElement): () => void {
       reveal(answer, i);
       drawBoard();
       if (kind === 'shoot') showBanner(right ? 'GOAL!' : 'Saved!', right);
-      else showBanner(right ? 'SAVED!' : `${rival.name} score`, right);
+      else showBanner(right ? 'SAVED!' : `${rival.short} score`, right);
       if (right) sfx.cheer();
       else sfx.wrong();
       /* said now, once it can only confirm */
@@ -370,8 +386,14 @@ export function mount(root: HTMLElement): () => void {
     rounds = 0; ours = []; theirs = []; log = [];
     current = null; busy = false;
     shootBag = []; saveBag = [];
-    rival = pick(RIVALS.filter((r) => r !== rival));
-    theirName.textContent = `${rival.face} ${rival.name}`;
+    us = teamById(ourSel.value) ?? YOU;
+    /* a named opponent if he chose one, and never his own side */
+    const chosen = teamById(theirSel.value);
+    rival = chosen && chosen !== us
+      ? chosen
+      : pick(TEAMS.filter((t) => t !== YOU && t !== us && t !== rival));
+    ourName.replaceChildren(kit(us, 24), el('span', { class: 'pk-label', text: label(us, true) }));
+    theirName.replaceChildren(kit(rival, 24), el('span', { class: 'pk-label', text: label(rival, true) }));
     drawBoard();
 
     const none = shootWords().length === 0;
@@ -387,11 +409,15 @@ export function mount(root: HTMLElement): () => void {
     banner.hidden = true;
     resetBall();
     resetKeeper();
-    keeper.textContent = rival.face;
-    taker.textContent = '';
+    keeper.replaceChildren(player(rival, 84, 'keeper'));
+    taker.replaceChildren();
     for (const btn of spots) { btn.textContent = ''; btn.className = 'pk-spot'; btn.disabled = true; }
     spotRow.classList.add('waiting');
-    matchup.textContent = `⭐ You v ${rival.face} ${rival.name}`;
+    matchup.replaceChildren(
+      el('span', { class: 'pk-side' }, kit(us, 44), label(us)),
+      el('span', { class: 'pk-v', text: 'v' }),
+      el('span', { class: 'pk-side' }, kit(rival, 44), label(rival)),
+    );
     kickoff.hidden = false;
   }
 
@@ -415,7 +441,7 @@ export function mount(root: HTMLElement): () => void {
     pitch.hidden = true;
     resultTitle.textContent = won
       ? `You win ${a}–${b}! 🏆`
-      : level ? `${a}–${b}. Still level, so you share the cup!` : `The ${rival.name} win ${b}–${a} this time`;
+      : level ? `${a}–${b}. Still level, so you share the cup!` : `${rival.name} win ${b}–${a} this time`;
     resultList.replaceChildren();
     for (const kick of log) {
       const s = sound(kick.word.sound);
