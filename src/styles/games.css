@@ -477,3 +477,127 @@
 @media (prefers-reduced-motion: reduce) {
   .rk-sky.shake, .rk-rocket.boost, .rk-drop.caught, .rk-drop.bad { animation: none; }
 }
+
+/* ── Penalty Shootout ──────────────────────────────────────────────────── */
+
+/* the scoreboard: one row a team, a dot a kick, the way it is on telly */
+.pk-board { display: grid; gap: 6px; margin: 4px 0 12px; }
+.pk-team {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--display); font-weight: 700; font-size: 17px;
+}
+.pk-team .pk-name { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pk-team b { font-size: 26px; color: var(--mustard); min-width: 1.2em; text-align: right; }
+/* sudden death adds dots, so they wrap rather than push the score off screen */
+.pk-dots { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; max-width: 62%; }
+.pk-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 14px; line-height: 1;
+  background: rgba(255, 246, 231, .14); color: var(--ink);
+}
+.pk-dot.goal { background: var(--mint); }
+.pk-dot.miss { background: #F2B8A6; }
+
+.pk-cue {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: 10px 14px; min-height: 64px; margin-bottom: 10px; text-align: center;
+  font-family: var(--display); font-weight: 700; font-size: clamp(17px, 4.4vw, 22px);
+}
+.pk-cue[hidden] { display: none; }
+.pk-cue .pic {
+  font-size: 46px; line-height: 1.1; padding: 4px 14px;
+  background: var(--paper); border-radius: 16px;
+}
+
+/* mown stripes, and the goal at the far end */
+.pk-pitch {
+  position: relative; overflow: hidden;
+  display: grid; justify-items: center;
+  padding: 14px 12px 16px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+  user-select: none; -webkit-user-select: none;
+}
+.pk-pitch[hidden] { display: none; }
+
+.pk-goal {
+  position: relative; width: min(100%, 580px);
+  padding: 10px 8px 76px;
+  border: 6px solid #FFFFFF; border-bottom: none; border-radius: 6px 6px 0 0;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, .16) 0 2px, transparent 2px 14px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, .16) 0 2px, transparent 2px 14px),
+    rgba(0, 0, 0, .14);
+}
+.pk-spots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* before kick-off there are no words yet; the space is kept so nothing moves */
+.pk-spots.waiting { visibility: hidden; }
+.pk-spot {
+  min-height: 64px; min-width: 0; padding: 6px 4px;
+  border: 4px solid transparent; border-radius: 14px;
+  background: var(--paper); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: clamp(22px, 6vw, 34px); line-height: 1.1;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .25); cursor: pointer;
+}
+/* a long word shrinks rather than breaks: a word split over two lines is
+   two things to read */
+.pk-spot.long { font-size: clamp(17px, 4.6vw, 30px); }
+.pk-spot:disabled { cursor: default; }
+.pk-spot:not(:disabled):active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, .25); }
+.pk-spot.answer { border-color: var(--mint-dark); }
+.pk-spot.wrong { border-color: var(--tomato); }
+
+/* keepers stand on the line, below the words, and dive by translate and
+   rotate — see dive() in penalty-shootout.ts */
+.pk-keeper {
+  position: absolute; left: 50%; bottom: 4px;
+  width: 64px; height: 64px; margin-left: -32px;
+  font-size: 52px; line-height: 64px; text-align: center;
+  transition: translate .38s ease-out, rotate .38s ease-out;
+  pointer-events: none;
+}
+
+/* the penalty area, with the spot at the bottom. It takes up the slack on a
+   tall screen, so an iPad gets a proper run-up rather than a band of empty
+   background; svh, not vh, so an iPhone's toolbar is counted (see the
+   Sound Rocket sky) */
+.pk-box { position: relative; width: 100%; height: clamp(110px, calc(40vh - 150px), 380px); }
+@supports (height: 1svh) {
+  .pk-box { height: clamp(110px, calc(40svh - 150px), 380px); }
+}
+.pk-ball {
+  position: absolute; left: 50%; bottom: 0; z-index: 2;
+  width: 60px; height: 60px; margin-left: -30px;
+  display: grid; place-items: center; font-size: 46px; line-height: 1;
+  touch-action: none;
+  transition: translate .45s cubic-bezier(.2, .7, .3, 1), scale .45s ease-out;
+}
+.pk-ball.mine { cursor: grab; }
+.pk-taker {
+  position: absolute; left: calc(50% - 86px); bottom: 0;
+  font-size: 46px; line-height: 60px;
+}
+
+.pk-banner {
+  position: absolute; left: 0; right: 0; top: 42%; z-index: 3;
+  text-align: center; pointer-events: none;
+  font-family: var(--display); font-weight: 800; font-size: clamp(34px, 10vw, 58px);
+  color: #FFFFFF; text-shadow: 0 3px 0 rgba(0, 0, 0, .45);
+  animation: pop .36s cubic-bezier(.2, 1.6, .4, 1);
+}
+.pk-banner[hidden] { display: none; }
+.pk-banner.good { color: var(--mustard); }
+
+.pk-overlay {
+  position: absolute; inset: 0; z-index: 4;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 12px; padding: 16px; text-align: center;
+  background: rgba(7, 34, 32, .8); color: var(--on-deep);
+}
+.pk-overlay[hidden] { display: none; }
+.pk-big { font-family: var(--display); font-weight: 800; font-size: clamp(24px, 6.6vw, 38px); margin: 0; }
+.pk-how { margin: 0; max-width: 30ch; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pk-ball, .pk-keeper { transition: none; }
+  .pk-banner { animation: none; }
+}

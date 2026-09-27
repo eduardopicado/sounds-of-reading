@@ -291,3 +291,6 @@ select {
   animation: pop .3s cubic-bezier(.2, 1.6, .4, 1);
 }
 .sticker.fresh { background: var(--mustard); }
+/* display: grid above would otherwise beat the hidden attribute, and a round
+   that earned nothing showed an empty mustard square where the prize goes */
+.sticker[hidden] { display: none; }
