@@ -34,7 +34,7 @@ const OUT = join(process.cwd(), 'public', 'audio');
 const UI_LINES = [
   'Well done!', 'Bingo! Well done!', 'Brilliant!', 'Perfect!', 'Good reading!',
   'Perfect sorting!', 'Nice work!', 'Pick one word from every row first',
-  'You win!', 'What a match!', 'Good game!',
+  'You win!', 'What a match!', 'Good game!', 'Every one a goal!', 'Good passing!',
 ];
 
 /** every real thing the app speaks — no made-up words anywhere in here */

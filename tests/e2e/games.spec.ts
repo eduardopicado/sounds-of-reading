@@ -866,3 +866,74 @@ test.describe('Penalty Shootout', () => {
     await expect(page.locator('.pk-banner')).toBeVisible();
   });
 });
+
+/* ── Pass and Shoot ───────────────────────────────────────────────────── */
+
+/** the word on the line, read the way the child reads it: each player's sound, in order */
+async function wordOnTheLine(page: Page): Promise<string> {
+  return (await page.locator('.ps-player .ps-sound').allTextContents()).map((t) => t.trim()).join('');
+}
+
+async function passAlong(page: Page): Promise<void> {
+  const players = page.locator('.ps-player');
+  const n = await players.count();
+  for (let i = 0; i < n; i += 1) await players.nth(i).click();
+}
+
+test.describe('Pass and Shoot', () => {
+  test('passing down the line and shooting at the word made scores, all the way to the end', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'pass-and-shoot');
+    await openSetup(page);
+    await page.getByLabel('How many words').selectOption('6');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+
+    for (let round = 0; round < 6; round += 1) {
+      const pitch = page.locator('.ps-pitch');
+      await expect(pitch).toHaveAttribute('data-phase', 'pass', { timeout: 6000 });
+      const word = await wordOnTheLine(page);
+      await passAlong(page);
+      await expect(page.locator('.ps-player.lit')).toHaveCount(await page.locator('.ps-player').count());
+      await expect(pitch).toHaveAttribute('data-phase', 'shoot');
+      /* three pictures, and the word he made is one of them */
+      await expect(page.locator('.ps-target')).toHaveCount(3);
+      await page.getByRole('button', { name: word, exact: true }).click();
+      await expect(page.locator('.pk-banner')).toHaveText('GOAL!');
+      /* the sounds pushed together into the word, whole */
+      await expect(page.locator('.ps-made')).toHaveText(word);
+    }
+
+    await expect(page.locator('.results')).toBeVisible({ timeout: 6000 });
+    await expect(page.locator('.results h2').first()).toContainText('Every one a goal');
+    await expect(page.locator('.results li')).toHaveCount(6);
+    noProblems(watch);
+  });
+
+  test('only the next player along can take a pass, so the word is read left to right', async ({ page }) => {
+    await openGame(page, 'pass-and-shoot');
+    const players = page.locator('.ps-player');
+    await expect(players.first()).toBeVisible();
+    /* skipping ahead does nothing */
+    await players.last().click();
+    await expect(page.locator('.ps-player.lit')).toHaveCount(0);
+    await players.first().click();
+    await expect(players.first()).toHaveClass(/lit/);
+    await expect(page.locator('.ps-player.lit')).toHaveCount(1);
+    /* and there is nothing to shoot at until the line is done */
+    await expect(page.locator('.ps-target').first()).toBeHidden();
+  });
+
+  test('shooting at the wrong picture is saved, and shows the right one', async ({ page }) => {
+    await openGame(page, 'pass-and-shoot');
+    await expect(page.locator('.ps-pitch')).toHaveAttribute('data-phase', 'pass');
+    const word = await wordOnTheLine(page);
+    await passAlong(page);
+    await expect(page.locator('.ps-pitch')).toHaveAttribute('data-phase', 'shoot');
+    const names = await page.locator('.ps-target').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+    await page.locator('.ps-target').nth(names.findIndex((n) => n !== word)).click();
+    await expect(page.locator('.pk-banner')).toHaveText('Saved!');
+    await expect(page.locator('.ps-target.answer')).toHaveAttribute('aria-label', word);
+    await expect(page.locator('.ps-target.wrong')).toHaveCount(1);
+    await expect(page.locator('.score b').first()).toHaveText('0');
+  });
+});

@@ -17,6 +17,7 @@ import * as sameSound from './games/same-sound';
 import * as trickyWords from './games/tricky-words';
 import * as soundRocket from './games/sound-rocket';
 import * as penaltyShootout from './games/penalty-shootout';
+import * as passAndShoot from './games/pass-and-shoot';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -32,6 +33,7 @@ const routes: Route[] = [
   { path: 'tricky-words', mount: trickyWords.mount },
   { path: 'sound-rocket', mount: soundRocket.mount },
   { path: 'penalty-shootout', mount: penaltyShootout.mount },
+  { path: 'pass-and-shoot', mount: passAndShoot.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

@@ -616,3 +616,80 @@
   .pk-ball, .pk-keeper { transition: none; }
   .pk-banner { animation: none; }
 }
+
+/* ── Pass and Shoot ────────────────────────────────────────────────────── */
+
+.ps-cue {
+  margin: 0 0 10px; min-height: 1.4em; text-align: center;
+  font-family: var(--display); font-weight: 700; font-size: clamp(17px, 4.4vw, 22px);
+}
+.ps-cue[hidden] { display: none; }
+
+/* the goal and keeper are Penalty Shootout's (.pk-goal, .pk-keeper) */
+.ps-pitch {
+  position: relative; overflow: hidden;
+  display: grid; justify-items: center; gap: 18px;
+  padding: 14px 12px 18px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+  user-select: none; -webkit-user-select: none;
+}
+.ps-pitch[hidden] { display: none; }
+
+/* a picture to shoot at, sitting where the words sit in the shootout */
+.ps-target {
+  min-height: 72px; min-width: 0; padding: 4px;
+  border: 4px solid transparent; border-radius: 14px;
+  background: var(--paper); font-size: clamp(38px, 10vw, 56px); line-height: 1.1;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, .25); cursor: pointer;
+  /* a set colour, because a disabled button's grey text turns emoji see-through */
+  color: var(--ink);
+}
+.ps-target:disabled { cursor: default; color: var(--ink); }
+.ps-target.answer { border-color: var(--mint-dark); }
+.ps-target.wrong { border-color: var(--tomato); }
+
+/* the line of players, one sound each, read left to right */
+.ps-line {
+  display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  gap: 6px; width: min(100%, 560px); margin-top: 12px;
+}
+.ps-player {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 4px 0; min-width: 0; border: 0; background: none; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ps-player svg { width: clamp(42px, 11vw, 92px); height: auto; }
+.ps-player.nudge { animation: shake .4s; }
+/* the sound on a card over his head: dark ink on paper, and when the ball
+   reaches him a wash and an underline, the way sounds are marked everywhere */
+.ps-sound {
+  min-width: 1.5em; padding: 2px 10px; border-radius: 12px;
+  font-family: var(--reading); font-weight: 700; font-size: clamp(26px, 7vw, 42px); line-height: 1.2;
+  text-align: center; color: var(--ink); background: var(--paper);
+  border-bottom: 5px solid transparent; box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.ps-player.lit .ps-sound {
+  background-image: linear-gradient(var(--wash, rgba(121, 211, 176, .55)), var(--wash, rgba(121, 211, 176, .55)));
+  border-bottom-color: var(--line, var(--mint-dark));
+}
+
+.ps-ball {
+  position: absolute; left: 0; top: 0; z-index: 2;
+  width: 44px; height: 44px; display: grid; place-items: center;
+  font-size: 34px; line-height: 1; pointer-events: none;
+  transition: translate .35s ease-out;
+}
+
+/* the word, whole, once the sounds have been pushed together */
+.ps-made {
+  min-height: 1.3em; font-family: var(--reading); font-weight: 700;
+  font-size: clamp(30px, 8vw, 46px); line-height: 1.2;
+}
+.ps-made:not(:empty) { padding: 0 16px; border-radius: 14px; background: var(--paper); color: var(--ink); }
+
+.results .mk-pic { font-size: 18px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ps-ball { transition: none; }
+  .ps-player.nudge { animation: none; }
+}
