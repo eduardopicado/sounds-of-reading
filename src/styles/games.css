@@ -520,8 +520,10 @@
 .pk-pitch[hidden] { display: none; }
 
 .pk-goal {
+  /* the players grow with the screen, so an iPad keeper fills an iPad goal */
+  --gk: clamp(68px, 12vw, 104px);
   position: relative; width: min(100%, 580px);
-  padding: 10px 8px 76px;
+  padding: 10px 8px calc(var(--gk) * 1.25 + 12px);
   border: 6px solid #FFFFFF; border-bottom: none; border-radius: 6px 6px 0 0;
   background:
     repeating-linear-gradient(45deg, rgba(255, 255, 255, .16) 0 2px, transparent 2px 14px),
@@ -550,8 +552,8 @@
    rotate — see dive() in penalty-shootout.ts */
 .pk-keeper {
   position: absolute; left: 50%; bottom: 4px;
-  width: 64px; height: 64px; margin-left: -32px;
-  font-size: 52px; line-height: 64px; text-align: center;
+  width: var(--gk); height: calc(var(--gk) * 1.25); margin-left: calc(var(--gk) / -2);
+  display: grid; place-items: center; line-height: 0;
   transition: translate .38s ease-out, rotate .38s ease-out;
   pointer-events: none;
 }
@@ -560,7 +562,7 @@
    tall screen, so an iPad gets a proper run-up rather than a band of empty
    background; svh, not vh, so an iPhone's toolbar is counted (see the
    Sound Rocket sky) */
-.pk-box { position: relative; width: 100%; height: clamp(110px, calc(40vh - 150px), 380px); }
+.pk-box { --kicker: clamp(52px, 9vw, 84px); position: relative; width: 100%; height: clamp(110px, calc(40vh - 150px), 380px); }
 @supports (height: 1svh) {
   .pk-box { height: clamp(110px, calc(40svh - 150px), 380px); }
 }
@@ -573,9 +575,11 @@
 }
 .pk-ball.mine { cursor: grab; }
 .pk-taker {
-  position: absolute; left: calc(50% - 86px); bottom: 0;
-  font-size: 46px; line-height: 60px;
+  position: absolute; left: calc(50% - var(--kicker) - 38px); bottom: 0;
+  width: var(--kicker); height: calc(var(--kicker) * 1.25); display: grid; place-items: center; line-height: 0;
 }
+/* drawn at a nominal size; the box above decides the real one */
+.pk-keeper svg, .pk-taker svg { width: 100%; height: 100%; }
 
 .pk-banner {
   position: absolute; left: 0; right: 0; top: 42%; z-index: 3;
@@ -594,7 +598,18 @@
   background: rgba(7, 34, 32, .8); color: var(--on-deep);
 }
 .pk-overlay[hidden] { display: none; }
-.pk-big { font-family: var(--display); font-weight: 800; font-size: clamp(24px, 6.6vw, 38px); margin: 0; }
+.pk-big {
+  display: flex; align-items: center; justify-content: center; gap: 10px 16px; flex-wrap: wrap;
+  font-family: var(--display); font-weight: 800; font-size: clamp(20px, 5.6vw, 34px); line-height: 1.15; margin: 0;
+}
+/* each side of the matchup: the shirt over the name */
+.pk-side { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; max-width: 42%; }
+.pk-v { font-size: .8em; color: var(--on-deep-soft); }
+
+/* the shirts: inline SVG, so they sit on the text line like a letter would */
+.pk-kit { flex: none; vertical-align: -5px; }
+.pk-team .pk-name { display: flex; align-items: center; gap: 6px; }
+.pk-label { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .pk-how { margin: 0; max-width: 30ch; }
 
 @media (prefers-reduced-motion: reduce) {

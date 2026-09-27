@@ -813,6 +813,42 @@ test.describe('Penalty Shootout', () => {
     expect(texts).toContain(await lastSaid(page));
   });
 
+  test('plays as the team he picks, against the one he picks, and remembers both', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'penalty-shootout');
+    await openSetup(page);
+    await page.getByLabel('Your team').selectOption('palmeiras');
+    await page.getByLabel('Play against').selectOption('barcelona');
+    await expect(page.locator('.pk-overlay .pk-big')).toContainText('Palmeiras');
+    await expect(page.locator('.pk-overlay .pk-big')).toContainText('Barcelona');
+    await expect(page.locator('.pk-board')).toContainText('Palmeiras');
+    await expect(page.locator('.pk-board')).toContainText('Barcelona');
+    /* each side is drawn in its own kit */
+    await expect(page.locator('.pk-board .pk-kit')).toHaveCount(2);
+
+    /* a supporter supports the same team next time */
+    await page.reload();
+    await expect(page.locator('.pk-board')).toContainText('Palmeiras');
+    await expect(page.locator('.pk-board')).toContainText('Barcelona');
+    noProblems(watch);
+  });
+
+  test('never draws his own team as the opponent', async ({ page }) => {
+    await openGame(page, 'penalty-shootout');
+    await openSetup(page);
+    await page.getByLabel('Your team').selectOption('brazil');
+    await page.getByLabel('Play against').selectOption('any');
+    for (let i = 0; i < 8; i += 1) {
+      await expect(page.locator('.pk-team').nth(1)).not.toContainText('Brazil');
+      /* changing the kicks starts a new match with a new opponent */
+      await page.getByLabel('Kicks each').selectOption(i % 2 ? '5' : '3');
+    }
+    /* and picking his own team as the opponent falls back to someone else */
+    await page.getByLabel('Play against').selectOption('brazil');
+    await expect(page.locator('.pk-team').nth(0)).toContainText('Brazil');
+    await expect(page.locator('.pk-team').nth(1)).not.toContainText('Brazil');
+  });
+
   test('a flick up and to the left shoots at the left-hand word', async ({ page }) => {
     await startShootout(page);
     const pitch = page.locator('.pk-pitch');
