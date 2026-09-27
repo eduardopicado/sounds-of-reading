@@ -526,14 +526,68 @@ async function steerUnder(page: Page, target: boolean): Promise<void> {
   const aim = await page.evaluate((want) => {
     const sky = document.querySelector('.rk-sky')?.getBoundingClientRect();
     if (!sky) return null;
-    let lowest: DOMRect | null = null;
-    for (const d of document.querySelectorAll(`.rk-drop[data-target="${want}"]:not(.caught):not(.bad)`)) {
-      const r = d.getBoundingClientRect();
-      if (!lowest || r.y > lowest.y) lowest = r;
+    const y = sky.y + sky.height - 40;
+    const live = [...document.querySelectorAll('.rk-drop:not(.caught):not(.bad)')].map((d) => ({
+      r: d.getBoundingClientRect(),
+      target: d.getAttribute('data-target') === 'true',
+    }));
+    const mid = (r: DOMRect) => r.x + r.width / 2;
+    const lowest = live.filter((d) => d.target === want).sort((a, b) => b.r.y - a.r.y)[0];
+    if (!want) return lowest ? { x: mid(lowest.r), y } : null;
+
+    /* Catching, steer the way a careful player does. The rocket follows the
+       finger fast, but not instantly, so sliding across under a word that is
+       about to land costs a shield: it only goes as far as it can without
+       passing beneath one. Within that reach it takes the lowest word to
+       catch if nothing to dodge will land on it first, and otherwise waits
+       in the clearest bit of sky. Parking under nothing was how a round
+       could lose all three shields before a single target arrived. */
+    const rocket = document.querySelector('.rk-rocket')?.getBoundingClientRect();
+    const here = rocket ? mid(rocket) : mid(sky);
+    /* close enough to land on the rocket in the moment a slide takes */
+    const landing = (rocket ? rocket.y : sky.bottom - 70) - 24;
+    const clear = 34;
+    let left = sky.x + clear;
+    let right = sky.right - clear;
+    for (const d of live.filter((x) => !x.target && x.r.bottom > landing)) {
+      if (d.r.right + clear <= here) left = Math.max(left, d.r.right + clear);
+      else if (d.r.x - clear >= here) right = Math.min(right, d.r.x - clear);
+      /* already underneath one: out by the nearer side */
+      else if (here - d.r.x < d.r.right - here) right = Math.min(right, d.r.x - clear);
+      else left = Math.max(left, d.r.right + clear);
     }
-    return lowest ? { x: lowest.x + lowest.width / 2, y: sky.y + sky.height - 40 } : null;
+    if (left > right) return null;
+
+    const near = sky.y + sky.height * 0.35;
+    const dodges = live.filter((d) => !d.target && d.r.bottom > near);
+    const inTheWay = (x: number, below: number) =>
+      dodges.some((d) => d.r.bottom > below && Math.abs(mid(d.r) - x) < d.r.width / 2 + clear);
+    if (lowest) {
+      const x = mid(lowest.r);
+      if (x >= left && x <= right && !inTheWay(x, lowest.r.bottom)) return { x, y };
+    }
+    let best = Math.min(Math.max(here, left), right);
+    let widest = -Infinity;
+    for (let x = left; x <= right; x += 12) {
+      const gap = Math.min(Infinity, ...dodges.map((d) => Math.abs(mid(d.r) - x) - d.r.width / 2));
+      if (gap > widest) { widest = gap; best = x; }
+    }
+    return { x: best, y };
   }, target);
   if (aim) await page.mouse.move(aim.x, aim.y);
+}
+
+/** keep playing until one word with the sound is caught. A round lost first
+ *  is not the end of it, any more than it is for him: go again */
+async function catchOne(page: Page): Promise<void> {
+  for (let i = 0; i < 160 && (await page.locator('.rk-score b').textContent()) === '0'; i += 1) {
+    if (await page.locator('.rk-overlay:not([hidden])').count()) {
+      await page.getByRole('button', { name: /Go again/ }).click();
+    }
+    await steerUnder(page, true);
+    await page.waitForTimeout(150);
+  }
+  await expect(page.locator('.rk-score b')).toHaveText('1');
 }
 
 test.describe('Sound Rocket', () => {
@@ -567,11 +621,7 @@ test.describe('Sound Rocket', () => {
     await page.waitForTimeout(600);
     expect((await first.boundingBox())!.y).toBeGreaterThan(y1);
 
-    for (let i = 0; i < 80 && (await page.locator('.rk-score b').textContent()) === '0'; i += 1) {
-      await steerUnder(page, true);
-      await page.waitForTimeout(200);
-    }
-    await expect(page.locator('.rk-score b')).toHaveText('1');
+    await catchOne(page);
     /* what was caught is a word with the sound, and the letters that make the
        sound are marked from their real positions. No shield count here: on
        the way across, the rocket can rightly clip a dodge word that is just
@@ -585,11 +635,7 @@ test.describe('Sound Rocket', () => {
     await page.getByRole('button', { name: /Launch/ }).click();
 
     /* catch one first, so the round ends with a score worth keeping */
-    for (let i = 0; i < 80 && (await page.locator('.rk-score b').textContent()) === '0'; i += 1) {
-      await steerUnder(page, true);
-      await page.waitForTimeout(200);
-    }
-    await expect(page.locator('.rk-score b')).toHaveText('1');
+    await catchOne(page);
 
     for (let i = 0; i < 200 && !(await page.locator('.rk-overlay:not([hidden])').count()); i += 1) {
       await steerUnder(page, false);
