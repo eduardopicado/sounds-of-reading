@@ -13,6 +13,8 @@ import {
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
 import { confusions, tilesFor } from '../src/content/spelling';
+import { FAMILIES, GLYPHS, HEIGHTS, exampleFor, glyph, heightOf } from '../src/content/handwriting';
+import { judge, parsePath, samplePath, type Point } from '../src/lib/strokes';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -623,5 +625,92 @@ describe('build the word', () => {
       return s1?.answer.join('') !== w.text.toLowerCase() || s2?.answer.join('') !== w.text.toLowerCase();
     });
     expect(wrong.map((w) => w.text)).toEqual([]);
+  });
+});
+
+describe('handwriting', () => {
+  const letters = [...'abcdefghijklmnopqrstuvwxyz'];
+  const strokes = [...GLYPHS.values()].flatMap((g) => g.strokes.map((d, i) => ({ g, d, i })));
+
+  it('has the strokes for every letter, big and little', () => {
+    const missing = [...letters, ...letters.map((l) => l.toUpperCase())].filter((l) => !GLYPHS.has(l));
+    expect(missing).toEqual([]);
+  });
+
+  it('draws every stroke with M, L, C and Q only, inside the lines', () => {
+    const bad: string[] = [];
+    for (const { g, d, i } of strokes) {
+      try {
+        parsePath(d);
+        for (const p of samplePath(d)) {
+          if (p.x < 0 || p.x > g.width || p.y < 0 || p.y > 155) bad.push(`${g.ch} stroke ${i + 1} at ${Math.round(p.x)},${Math.round(p.y)}`);
+        }
+      } catch (e) {
+        bad.push(`${g.ch} stroke ${i + 1}: ${(e as Error).message}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  /* the small letters start at the waist line, capitals and tall ones at the top */
+  it('sits every letter on the lines the way its height says', () => {
+    const wrong: string[] = [];
+    for (const l of letters) {
+      const ys = glyph(l).strokes.flatMap((d) => samplePath(d)).map((p) => p.y);
+      const top = Math.min(...ys);
+      const bottom = Math.max(...ys);
+      const h = heightOf(l);
+      /* the dot of i and j is above the waist but is not a tall letter */
+      const body = l === 'i' || l === 'j' ? Math.min(...samplePath(glyph(l).strokes[0]).map((p) => p.y)) : top;
+      const seen = bottom > 120 ? 'tail' : body < 40 ? 'tall' : 'small';
+      if (seen !== h) wrong.push(`${l} is drawn ${seen} but listed ${h}`);
+      if (h !== 'tail' && Math.abs(bottom - 100) > 1) wrong.push(`${l} does not sit on the base line`);
+    }
+    for (const l of letters.map((x) => x.toUpperCase())) {
+      const ys = glyph(l).strokes.flatMap((d) => samplePath(d)).map((p) => p.y);
+      if (Math.min(...ys) > 1 || Math.max(...ys) < 99) wrong.push(`${l} is not a full capital`);
+    }
+    expect(wrong).toEqual([]);
+    expect(Object.values(HEIGHTS).join('').split('').sort()).toEqual(letters);
+  });
+
+  it('puts every letter in a family, and every family item has strokes', () => {
+    const inFamilies = new Set(FAMILIES.filter((f) => f.id !== 'pairs').flatMap((f) => f.items));
+    expect([...letters, ...letters.map((l) => l.toUpperCase())].filter((l) => !inFamilies.has(l))).toEqual([]);
+    for (const f of FAMILIES) for (const item of f.items) for (const ch of item) expect(GLYPHS.has(ch)).toBe(true);
+  });
+
+  /* a wobbly trace of the stroke itself passes; the same stroke drawn from
+     the other end, or only halfway, or beside the line, does not */
+  it('passes a wobbly trace of each stroke and fails a backwards one', () => {
+    const wobble = (pts: Point[]): Point[] => pts.map((p, i) => ({ x: p.x + Math.sin(i) * 4, y: p.y + Math.cos(i * 1.3) * 4 }));
+    const wrong: string[] = [];
+    for (const { g, d, i } of strokes) {
+      const pts = samplePath(d);
+      const name = `${g.ch} stroke ${i + 1}`;
+      if (!judge(pts, wobble(pts)).ok) wrong.push(`${name}: a good trace failed`);
+      if (pts.length === 1) continue;
+      if (judge(pts, [...pts].reverse()).ok) wrong.push(`${name}: backwards passed`);
+      if (judge(pts, pts.slice(0, Math.floor(pts.length / 2))).ok) wrong.push(`${name}: half passed`);
+      if (judge(pts, pts.map((p) => ({ x: p.x + 30, y: p.y + 30 }))).ok) wrong.push(`${name}: off the line passed`);
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('says why a trace failed', () => {
+    const c = samplePath(glyph('c').strokes[0]);
+    expect(judge(c, [...c].reverse()).why).toBe('start');
+    const o = samplePath(glyph('o').strokes[0]);
+    expect(judge(o, [...o].reverse()).why).toBe('direction');
+    expect(judge(c, c.slice(0, 10)).why).toBe('short');
+  });
+
+  it('finds a picture word for most letters', () => {
+    const none = letters.filter((l) => !exampleFor(l));
+    expect(none.length).toBeLessThanOrEqual(3);
+    for (const l of letters) {
+      const w = exampleFor(l);
+      if (w) expect(w.text.includes(l)).toBe(true);
+    }
   });
 });

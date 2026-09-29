@@ -785,3 +785,117 @@
 @media (prefers-reduced-motion: reduce) {
   .bw-slot.nope, .bw-slots.done .bw-slot { animation: none; }
 }
+
+/* ── writing lines (Trace It, Tall Small Tail, the printed sheet) ──────── */
+
+.wl { stroke: rgba(20, 49, 47, .45); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.wl.base { stroke: rgba(20, 49, 47, .8); stroke-width: 2; }
+.wl.waist { stroke-dasharray: 6 6; }
+.wl.tail { stroke: rgba(20, 49, 47, .3); }
+.wl-ink { fill: none; stroke: var(--ink); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.wl-ink.dot { fill: var(--ink); stroke: none; }
+
+/* ── Trace It ──────────────────────────────────────────────────────────── */
+
+.tr-how { margin: 0 0 6px; text-align: center; color: var(--on-deep-soft); }
+.tr-step { font-family: var(--display); font-weight: 700; color: var(--mustard); }
+.tr-board { display: grid; justify-items: center; gap: 10px; }
+.tr-board[hidden] { display: none; }
+.tr-example { margin: 0; font-family: var(--reading); font-size: clamp(20px, 5vw, 26px); color: var(--on-deep); }
+.tr-big { font-family: var(--reading); font-weight: 700; font-size: 1.5em; }
+.tr-pic { font-size: 1.2em; }
+
+.tr-pad {
+  display: block; width: 100%; max-width: 680px; height: min(54svh, 600px);
+  background: var(--paper); border-radius: var(--radius); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+  /* nothing but drawing: no scroll, zoom, selection or iOS callout */
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+.tr-pad.good { box-shadow: 0 0 0 5px var(--mint), 0 6px 0 rgba(0, 0, 0, .25); }
+.tr-track { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.tr-track.solid { stroke: rgba(20, 49, 47, .14); stroke-width: 15; }
+.tr-track.dots { stroke: rgba(20, 49, 47, .5); stroke-width: 4; stroke-dasharray: .1 9; }
+.tr-track.none { stroke: transparent; stroke-width: 1; }
+.tr-track.dot { fill: rgba(20, 49, 47, .3); stroke: none; }
+.tr-track.none.dot { fill: transparent; }
+.tr-inked { fill: none; stroke: #1D5FD1; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.tr-inked.dot { fill: #1D5FD1; stroke: none; }
+.tr-ink { fill: none; stroke: #1D5FD1; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.tr-ink.wrong { stroke: var(--tomato); opacity: .6; transition: opacity .4s; }
+.tr-start circle { fill: var(--green); }
+.tr-start text { fill: #fff; font: 700 12px var(--display); text-anchor: middle; pointer-events: none; }
+.tr-arrow { fill: var(--tomato); }
+.tr-demo { fill: none; stroke: var(--tomato); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: tr-write .75s ease-in-out forwards; }
+.tr-demo.dot { fill: var(--tomato); stroke: none; opacity: 0; animation: tr-dot .3s forwards; }
+@keyframes tr-write { to { stroke-dashoffset: 0; } }
+@keyframes tr-dot { to { opacity: 1; } }
+
+.tr-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; }
+.tr-note.oops { color: var(--mustard); font-weight: 700; }
+.tr-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
+.tr-results { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; list-style: none; }
+.tr-results .mk { margin-left: 6px; }
+
+/* the practice sheet only exists on paper */
+.tr-print { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  body > :not(.tr-print) { display: none !important; }
+  .tr-print { display: block; color: #000; font-family: var(--reading); }
+  .tr-print h2 { font-family: var(--display); margin: 6mm 0 1mm; font-size: 20pt; }
+  .tr-print p { margin: 0 0 3mm; font-size: 12pt; }
+  .pr-head { display: flex; justify-content: space-between; font-size: 13pt; }
+  .pr-line { break-inside: avoid; margin: 0 0 3mm; }
+  .pr-row { display: block; width: 100%; height: 26mm; }
+  .pr-model { fill: none; stroke: #000; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-model.dot { fill: #000; stroke: none; }
+  .pr-dots { fill: none; stroke: #666; stroke-width: 4; stroke-dasharray: .1 8; stroke-linecap: round; }
+  .pr-dots.dot { fill: #666; stroke: none; }
+  .tr-print .wl { stroke: #888; }
+  .tr-print .wl.base { stroke: #333; }
+  .tr-print .tr-start circle { fill: #fff; stroke: #000; stroke-width: 1.5; }
+  .tr-print .tr-start text { fill: #000; }
+}
+
+/* ── Tall, Small, Tail ─────────────────────────────────────────────────── */
+
+.ts-board { display: grid; justify-items: center; gap: 14px; margin-top: 4px; }
+.ts-board[hidden] { display: none; }
+.ts-card { width: min(100%, 340px); position: relative; }
+.ts-card .wl-card {
+  display: block; width: 100%; height: auto; aspect-ratio: 150 / 182;
+  background: var(--paper); border-radius: var(--radius); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.ts-card .wl-card { max-height: 44svh; }
+.ts-card[data-h="tall"] .wl.head,
+.ts-card[data-h="tail"] .wl.tail { stroke: var(--green); stroke-width: 4; }
+.ts-card[data-h="small"] .wl.waist,
+.ts-card[data-h="small"] .wl.base { stroke: var(--green); stroke-width: 4; }
+.ts-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(100%, 520px); }
+.ts-kind {
+  display: grid; justify-items: center; gap: 4px; min-height: 88px; padding: 10px 6px 8px;
+  border: 0; border-radius: 16px; background: var(--mustard); color: var(--ink);
+  font-family: var(--display); font-weight: 800; font-size: 20px;
+  box-shadow: 0 5px 0 var(--mustard-dark); cursor: pointer;
+}
+.ts-face { font-size: 34px; line-height: 1; }
+.ts-kind.right { background: var(--mint); box-shadow: 0 5px 0 var(--mint-dark); }
+.ts-kind.nope, .ts-tile.nope { animation: shake .35s; }
+.ts-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; max-width: 560px; }
+.ts-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
+
+.ts-hunt-title { margin: 0; font-family: var(--display); font-size: 30px; color: var(--on-deep); }
+.ts-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: min(100%, 440px); }
+.ts-tile {
+  min-height: 76px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: 46px; line-height: 1;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .25); cursor: pointer;
+}
+.ts-tile.found { background: var(--mint); box-shadow: 0 5px 0 var(--mint-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-kind.nope, .ts-tile.nope { animation: none; }
+}

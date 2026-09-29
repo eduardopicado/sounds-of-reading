@@ -30,6 +30,8 @@ export const TILES: Tile[] = [
   { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A' },
   { path: 'be-the-commentator', name: 'Be the Commentator', emoji: '🎙️', what: 'Read it like you mean it', tone: '#D9534F' },
   { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5' },
+  { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6' },
+  { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A' },
 ];
 
 export function mount(root: HTMLElement): () => void {

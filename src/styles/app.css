@@ -193,6 +193,7 @@ select {
   color: var(--on-deep-soft); margin: 4px 0 12px; flex-wrap: wrap;
 }
 .score b { font-size: 22px; font-weight: 800; color: var(--mustard); }
+.score[hidden] { display: none; }
 
 .tray {
   margin-top: 16px; padding: 12px;

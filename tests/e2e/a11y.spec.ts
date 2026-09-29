@@ -20,6 +20,8 @@ const PAGES = [
   ['Pass and Shoot', '/#/pass-and-shoot'],
   ['Be the Commentator', '/#/be-the-commentator'],
   ['Build the Word', '/#/build-the-word'],
+  ['Trace It', '/#/trace-it'],
+  ['Tall, Small, Tail', '/#/tall-small-tail'],
 ] as const;
 
 for (const [name, path] of PAGES) {
