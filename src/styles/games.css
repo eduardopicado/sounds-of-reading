@@ -693,3 +693,209 @@
   .ps-ball { transition: none; }
   .ps-player.nudge { animation: none; }
 }
+
+/* ── Be the Commentator ────────────────────────────────────────────────── */
+
+/* the line on a card of paper, as big as the screen allows */
+.cm-card {
+  margin: 6px 0 12px; padding: 20px 16px 22px; text-align: center;
+  background: var(--paper); color: var(--ink); border-radius: var(--radius);
+  border: 4px solid transparent; box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.cm-card[hidden] { display: none; }
+/* on air: a red edge while the microphone is listening */
+.cm-card.live { border-color: var(--tomato); }
+.cm-mood { margin: 0 0 12px; font-family: var(--display); font-weight: 800; font-size: clamp(18px, 4.6vw, 24px); }
+.cm-line {
+  margin: 0; font-family: var(--reading); font-weight: 700;
+  font-size: clamp(28px, 7.5vw, 46px); line-height: 1.7;
+}
+
+/* a scoop under each phrase: read it in one breath */
+.cm-chunk {
+  display: inline-block; max-width: 100%; margin: 0 .08em .2em; padding: 0 .18em .1em;
+  border-bottom: 4px solid var(--mint-dark);
+  border-radius: 0 0 50% 50% / 0 0 .6em .6em;
+}
+
+/* the marks that say how to say it, drawn big. Dark enough to read on
+   paper at this size; these are not sounds, so the sound-colour rule does
+   not apply to them */
+.cm-mark { font-size: 1.3em; margin-left: .02em; }
+.cm-mark.bang { color: #B93A12; }
+.cm-mark.ask { color: #1D4ED8; }
+.cm-mark.stop, .cm-mark.comma { color: #166534; }
+
+.cm-status { margin: 0 0 12px; min-height: 1.4em; text-align: center; color: var(--on-deep-soft); }
+.cm-status[hidden] { display: none; }
+.cm-controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.cm-controls[hidden], .cm-controls .btn[hidden] { display: none; }
+.cm-rec { background: #B93A12; color: #FFFFFF; }
+
+.cm-reel { margin: 0 0 4px; padding: 0; list-style: none; font-family: var(--reading); font-size: 20px; line-height: 1.5; }
+.cm-reel li { margin: 4px 0; }
+.cm-reel li.has-take::after { content: ' 🎙'; }
+.cm-reel li.playing { color: var(--mustard); }
+
+/* ── Build the Word ────────────────────────────────────────────────────── */
+
+.bw-board { display: grid; justify-items: center; gap: 12px; margin-top: 4px; }
+.bw-board[hidden] { display: none; }
+.bw-pic {
+  font-size: clamp(64px, 18vw, 110px); line-height: 1.1; padding: 6px 18px;
+  background: var(--paper); border-radius: var(--radius); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+
+/* a slot for each sound (or letter); tiles land here in order */
+.bw-slots {
+  display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr));
+  gap: 8px; width: min(100%, calc(var(--n, 3) * 96px));
+}
+.bw-slots.letters { width: min(100%, calc(var(--n, 3) * 64px)); gap: 6px; }
+.bw-slot {
+  min-height: 72px; min-width: 0; padding: 4px;
+  border: 3px dashed rgba(255, 246, 231, .55); border-radius: 14px;
+  background: rgba(255, 246, 231, .08); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: clamp(26px, 7vw, 40px); line-height: 1.1;
+  cursor: pointer;
+}
+.bw-slots.letters .bw-slot { min-height: 60px; font-size: clamp(24px, 6.4vw, 36px); }
+.bw-slot.filled { border-style: solid; border-color: var(--paper); background: var(--paper); }
+.bw-slot.locked { border-color: var(--mint-dark); background: #DDF3E9; cursor: default; }
+.bw-slot.nope { border-color: var(--tomato); animation: shake .35s; }
+.bw-slots.done .bw-slot { animation: bounce .36s; }
+
+/* the tiles to choose from */
+.bw-tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 560px; }
+.bw-tile {
+  min-width: 64px; min-height: 64px; padding: 4px 14px;
+  border: 0; border-radius: 14px; background: var(--mustard); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: clamp(26px, 7vw, 38px); line-height: 1.1;
+  box-shadow: 0 5px 0 var(--mustard-dark); cursor: pointer;
+}
+.bw-tile:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--mustard-dark); }
+.bw-tile[hidden] { display: none; }
+
+.bw-note { margin: 0; min-height: 1.4em; text-align: center; color: var(--on-deep); }
+.bw-note.good {
+  padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: clamp(24px, 6vw, 34px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bw-slot.nope, .bw-slots.done .bw-slot { animation: none; }
+}
+
+/* ── writing lines (Trace It, Tall Small Tail, the printed sheet) ──────── */
+
+.wl { stroke: rgba(20, 49, 47, .45); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+.wl.base { stroke: rgba(20, 49, 47, .8); stroke-width: 2; }
+.wl.waist { stroke-dasharray: 6 6; }
+.wl.tail { stroke: rgba(20, 49, 47, .3); }
+.wl-ink { fill: none; stroke: var(--ink); stroke-width: 8; stroke-linecap: round; stroke-linejoin: round; }
+.wl-ink.dot { fill: var(--ink); stroke: none; }
+
+/* ── Trace It ──────────────────────────────────────────────────────────── */
+
+.tr-how { margin: 0 0 6px; text-align: center; color: var(--on-deep-soft); }
+.tr-step { font-family: var(--display); font-weight: 700; color: var(--mustard); }
+.tr-board { display: grid; justify-items: center; gap: 10px; }
+.tr-board[hidden] { display: none; }
+.tr-example { margin: 0; font-family: var(--reading); font-size: clamp(20px, 5vw, 26px); color: var(--on-deep); }
+.tr-big { font-family: var(--reading); font-weight: 700; font-size: 1.5em; }
+.tr-pic { font-size: 1.2em; }
+
+.tr-pad {
+  display: block; width: 100%; max-width: 680px; height: min(54svh, 600px);
+  background: var(--paper); border-radius: var(--radius); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+  /* nothing but drawing: no scroll, zoom, selection or iOS callout */
+  touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+.tr-pad.good { box-shadow: 0 0 0 5px var(--mint), 0 6px 0 rgba(0, 0, 0, .25); }
+.tr-track { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.tr-track.solid { stroke: rgba(20, 49, 47, .14); stroke-width: 15; }
+.tr-track.dots { stroke: rgba(20, 49, 47, .5); stroke-width: 4; stroke-dasharray: .1 9; }
+.tr-track.none { stroke: transparent; stroke-width: 1; }
+.tr-track.dot { fill: rgba(20, 49, 47, .3); stroke: none; }
+.tr-track.none.dot { fill: transparent; }
+.tr-inked { fill: none; stroke: #1D5FD1; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+.tr-inked.dot { fill: #1D5FD1; stroke: none; }
+.tr-ink { fill: none; stroke: #1D5FD1; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.tr-ink.wrong { stroke: var(--tomato); opacity: .6; transition: opacity .4s; }
+.tr-start circle { fill: var(--green); }
+.tr-start text { fill: #fff; font: 700 12px var(--display); text-anchor: middle; pointer-events: none; }
+.tr-arrow { fill: var(--tomato); }
+.tr-demo { fill: none; stroke: var(--tomato); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: tr-write .75s ease-in-out forwards; }
+.tr-demo.dot { fill: var(--tomato); stroke: none; opacity: 0; animation: tr-dot .3s forwards; }
+@keyframes tr-write { to { stroke-dashoffset: 0; } }
+@keyframes tr-dot { to { opacity: 1; } }
+
+.tr-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; }
+.tr-note.oops { color: var(--mustard); font-weight: 700; }
+.tr-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
+.tr-results { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; list-style: none; }
+.tr-results .mk { margin-left: 6px; }
+
+/* the practice sheet only exists on paper */
+.tr-print { display: none; }
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  body > :not(.tr-print) { display: none !important; }
+  .tr-print { display: block; color: #000; font-family: var(--reading); }
+  .tr-print h2 { font-family: var(--display); margin: 6mm 0 1mm; font-size: 20pt; }
+  .tr-print p { margin: 0 0 3mm; font-size: 12pt; }
+  .pr-head { display: flex; justify-content: space-between; font-size: 13pt; }
+  .pr-line { break-inside: avoid; margin: 0 0 3mm; }
+  .pr-row { display: block; width: 100%; height: 26mm; }
+  .pr-model { fill: none; stroke: #000; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+  .pr-model.dot { fill: #000; stroke: none; }
+  .pr-dots { fill: none; stroke: #666; stroke-width: 4; stroke-dasharray: .1 8; stroke-linecap: round; }
+  .pr-dots.dot { fill: #666; stroke: none; }
+  .tr-print .wl { stroke: #888; }
+  .tr-print .wl.base { stroke: #333; }
+  .tr-print .tr-start circle { fill: #fff; stroke: #000; stroke-width: 1.5; }
+  .tr-print .tr-start text { fill: #000; }
+}
+
+/* ── Tall, Small, Tail ─────────────────────────────────────────────────── */
+
+.ts-board { display: grid; justify-items: center; gap: 14px; margin-top: 4px; }
+.ts-board[hidden] { display: none; }
+.ts-card { width: min(100%, 340px); position: relative; }
+.ts-card .wl-card {
+  display: block; width: 100%; height: auto; aspect-ratio: 150 / 182;
+  background: var(--paper); border-radius: var(--radius); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.ts-card .wl-card { max-height: 44svh; }
+.ts-card[data-h="tall"] .wl.head,
+.ts-card[data-h="tail"] .wl.tail { stroke: var(--green); stroke-width: 4; }
+.ts-card[data-h="small"] .wl.waist,
+.ts-card[data-h="small"] .wl.base { stroke: var(--green); stroke-width: 4; }
+.ts-kinds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(100%, 520px); }
+.ts-kind {
+  display: grid; justify-items: center; gap: 4px; min-height: 88px; padding: 10px 6px 8px;
+  border: 0; border-radius: 16px; background: var(--mustard); color: var(--ink);
+  font-family: var(--display); font-weight: 800; font-size: 20px;
+  box-shadow: 0 5px 0 var(--mustard-dark); cursor: pointer;
+}
+.ts-face { font-size: 34px; line-height: 1; }
+.ts-kind.right { background: var(--mint); box-shadow: 0 5px 0 var(--mint-dark); }
+.ts-kind.nope, .ts-tile.nope { animation: shake .35s; }
+.ts-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; max-width: 560px; }
+.ts-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
+
+.ts-hunt-title { margin: 0; font-family: var(--display); font-size: 30px; color: var(--on-deep); }
+.ts-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; width: min(100%, 440px); }
+.ts-tile {
+  min-height: 76px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink);
+  font-family: var(--reading); font-weight: 700; font-size: 46px; line-height: 1;
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .25); cursor: pointer;
+}
+.ts-tile.found { background: var(--mint); box-shadow: 0 5px 0 var(--mint-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-kind.nope, .ts-tile.nope { animation: none; }
+}

@@ -41,8 +41,11 @@ src/content/index.ts   loads it into typed data with explicit positions
 src/content/spans.ts   works out which letters carry a sound; refuses to guess
 src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Shoot)
 src/content/near-words.ts the nearest real words, for wrong answers that need reading
-src/lib/               speech, sound effects, storage, settings, colour, router
+src/content/handwriting.ts how each letter is written: strokes, families, heights
+src/lib/               speech, sound effects, storage, settings, colour, router,
+                       strokes.ts (judging a traced stroke)
 src/ui/components.ts   header, setup panel, chips, win overlay
+src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/             one file per game, plus home.ts
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test

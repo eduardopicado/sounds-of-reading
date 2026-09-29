@@ -24,7 +24,9 @@ export function topbar(o: TopbarOptions): HTMLElement {
     on: { click: () => go('home') },
   });
   const titles = el('div', { class: 'titles' },
-    el('h1', {}, o.title + ' ', el('span', { class: 'swash', text: o.swash })),
+    el('h1', {}, o.title + ' ', el('span', { class: 'swash', text: o.swash }),
+      /* so he knows why it is harder today, and can be proud of it */
+      settings().pro ? el('span', { class: 'pro-badge', text: 'PRO' }) : null),
     el('p', { class: 'tag', text: o.tagline }),
   );
   const bar = el('div', { class: 'topbar' }, back, titles);

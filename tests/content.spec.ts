@@ -8,10 +8,13 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
-  SOUNDS_ALIKE, soundsAlike,
+  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
+import { confusions, tilesFor } from '../src/content/spelling';
+import { FAMILIES, GLYPHS, HEIGHTS, exampleFor, glyph, heightOf } from '../src/content/handwriting';
+import { judge, parsePath, samplePath, type Point } from '../src/lib/strokes';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -512,6 +515,202 @@ describe('pass and shoot', () => {
     for (const level of [1, 2, 3, 4, 5, 6, 7, 8] as Level[]) {
       const usable = REAL_WORDS.filter((w) => w.level === level && w.picture && pieces(w));
       expect(usable.length, `level ${level}`).toBeGreaterThanOrEqual(8);
+    }
+  });
+});
+
+/* ── Be the Commentator ─────────────────────────────────────────────────── */
+
+describe('commentary', () => {
+  /* the lowest level each word can be read at, from the word lists and the
+     school's sight words */
+  const readableAt = new Map<string, number>();
+  for (const w of REAL_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level));
+  }
+  for (const w of ALL_SIGHT_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level ?? 8));
+  }
+  const wordsOf = (text: string) => text.replace(/\{us\}|\{them\}/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
+
+  /* the game is about expression; a word he cannot read yet turns it back
+     into decoding */
+  it('uses only words he can read, from the lists or the sight words', () => {
+    const unknown = ALL_COMMENTARY.flatMap((l) => wordsOf(l.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${l.text}"`));
+    expect(unknown).toEqual([]);
+  });
+
+  it('puts each line at the level of its hardest word, no earlier and no later', () => {
+    const wrong = ALL_COMMENTARY.filter((l) => Math.max(1, ...wordsOf(l.text).map((w) => readableAt.get(w) ?? 9)) !== l.level)
+      .map((l) => `${l.text} @${l.level}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('has lines for every way of saying it', () => {
+    for (const mood of ['excited', 'asking', 'calm'] as const) {
+      expect(ALL_COMMENTARY.some((l) => l.mood === mood), mood).toBe(true);
+    }
+  });
+
+  it('has a match worth of lines from level 2 up', () => {
+    for (let level = 2; level <= 8; level += 1) {
+      expect(ALL_COMMENTARY.filter((l) => l.level <= level).length, `level ${level}`).toBeGreaterThanOrEqual(6);
+    }
+  });
+
+  it('shows no blocked word', () => {
+    expect(ALL_COMMENTARY.filter((l) => wordsOf(l.text).some((w) => blocked(w))).map((l) => l.text)).toEqual([]);
+  });
+});
+
+/* ── Build the Word ─────────────────────────────────────────────────────── */
+
+describe('build the word', () => {
+  const spellable = REAL_WORDS.filter((w) => w.picture && pieces(w));
+
+  it('offers the mistakes children really make', () => {
+    expect(confusions('ai')).toContain('ay');
+    expect(confusions('ee')).toContain('ea');
+    expect(confusions('ck')).toContain('k');
+    expect(confusions('i')).toContain('e');
+    expect(confusions('b')).toContain('d');
+  });
+
+  it('always has at least two wrong tiles to choose from', () => {
+    const thin = spellable.filter((w) => {
+      const set = tilesFor(w, 'sounds', 2);
+      return !set || set.tiles.length - set.answer.length < 2;
+    });
+    expect(thin.map((w) => w.text)).toEqual([]);
+  });
+
+  it('never makes a wrong tile that is the same as a right one', () => {
+    const clash: string[] = [];
+    for (const w of spellable) {
+      for (const mode of ['sounds', 'letters'] as const) {
+        const set = tilesFor(w, mode, 3);
+        if (!set) continue;
+        const extra = [...set.tiles];
+        for (const a of set.answer) extra.splice(extra.indexOf(a), 1);
+        if (extra.some((t) => set.answer.includes(t))) clash.push(`${w.text} (${mode})`);
+      }
+    }
+    expect(clash).toEqual([]);
+  });
+
+  /* the word is heard, so a wrong tile must never spell its twin */
+  it('never lets a single wrong tile spell a word that sounds the same', () => {
+    const twins: string[] = [];
+    for (const w of spellable) {
+      const set = tilesFor(w, 'sounds', 3);
+      if (!set) continue;
+      const extra = [...set.tiles];
+      for (const a of set.answer) extra.splice(extra.indexOf(a), 1);
+      set.answer.forEach((_, i) => {
+        for (const e of extra) {
+          const built = [...set.answer.slice(0, i), e, ...set.answer.slice(i + 1)].join('');
+          if (soundsAlike(built, w.text)) twins.push(`${w.text} -> ${built}`);
+        }
+      });
+    }
+    expect(twins).toEqual([]);
+  });
+
+  it('builds the word exactly from its right tiles', () => {
+    const wrong = spellable.filter((w) => {
+      const s1 = tilesFor(w, 'sounds', 2);
+      const s2 = tilesFor(w, 'letters', 2);
+      return s1?.answer.join('') !== w.text.toLowerCase() || s2?.answer.join('') !== w.text.toLowerCase();
+    });
+    expect(wrong.map((w) => w.text)).toEqual([]);
+  });
+});
+
+describe('handwriting', () => {
+  const letters = [...'abcdefghijklmnopqrstuvwxyz'];
+  const strokes = [...GLYPHS.values()].flatMap((g) => g.strokes.map((d, i) => ({ g, d, i })));
+
+  it('has the strokes for every letter, big and little', () => {
+    const missing = [...letters, ...letters.map((l) => l.toUpperCase())].filter((l) => !GLYPHS.has(l));
+    expect(missing).toEqual([]);
+  });
+
+  it('draws every stroke with M, L, C and Q only, inside the lines', () => {
+    const bad: string[] = [];
+    for (const { g, d, i } of strokes) {
+      try {
+        parsePath(d);
+        for (const p of samplePath(d)) {
+          if (p.x < 0 || p.x > g.width || p.y < 0 || p.y > 155) bad.push(`${g.ch} stroke ${i + 1} at ${Math.round(p.x)},${Math.round(p.y)}`);
+        }
+      } catch (e) {
+        bad.push(`${g.ch} stroke ${i + 1}: ${(e as Error).message}`);
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+
+  /* the small letters start at the waist line, capitals and tall ones at the top */
+  it('sits every letter on the lines the way its height says', () => {
+    const wrong: string[] = [];
+    for (const l of letters) {
+      const ys = glyph(l).strokes.flatMap((d) => samplePath(d)).map((p) => p.y);
+      const top = Math.min(...ys);
+      const bottom = Math.max(...ys);
+      const h = heightOf(l);
+      /* the dot of i and j is above the waist but is not a tall letter */
+      const body = l === 'i' || l === 'j' ? Math.min(...samplePath(glyph(l).strokes[0]).map((p) => p.y)) : top;
+      const seen = bottom > 120 ? 'tail' : body < 40 ? 'tall' : 'small';
+      if (seen !== h) wrong.push(`${l} is drawn ${seen} but listed ${h}`);
+      if (h !== 'tail' && Math.abs(bottom - 100) > 1) wrong.push(`${l} does not sit on the base line`);
+    }
+    for (const l of letters.map((x) => x.toUpperCase())) {
+      const ys = glyph(l).strokes.flatMap((d) => samplePath(d)).map((p) => p.y);
+      if (Math.min(...ys) > 1 || Math.max(...ys) < 99) wrong.push(`${l} is not a full capital`);
+    }
+    expect(wrong).toEqual([]);
+    expect(Object.values(HEIGHTS).join('').split('').sort()).toEqual(letters);
+  });
+
+  it('puts every letter in a family, and every family item has strokes', () => {
+    const inFamilies = new Set(FAMILIES.filter((f) => f.id !== 'pairs').flatMap((f) => f.items));
+    expect([...letters, ...letters.map((l) => l.toUpperCase())].filter((l) => !inFamilies.has(l))).toEqual([]);
+    for (const f of FAMILIES) for (const item of f.items) for (const ch of item) expect(GLYPHS.has(ch)).toBe(true);
+  });
+
+  /* a wobbly trace of the stroke itself passes; the same stroke drawn from
+     the other end, or only halfway, or beside the line, does not */
+  it('passes a wobbly trace of each stroke and fails a backwards one', () => {
+    const wobble = (pts: Point[]): Point[] => pts.map((p, i) => ({ x: p.x + Math.sin(i) * 4, y: p.y + Math.cos(i * 1.3) * 4 }));
+    const wrong: string[] = [];
+    for (const { g, d, i } of strokes) {
+      const pts = samplePath(d);
+      const name = `${g.ch} stroke ${i + 1}`;
+      if (!judge(pts, wobble(pts)).ok) wrong.push(`${name}: a good trace failed`);
+      if (pts.length === 1) continue;
+      if (judge(pts, [...pts].reverse()).ok) wrong.push(`${name}: backwards passed`);
+      if (judge(pts, pts.slice(0, Math.floor(pts.length / 2))).ok) wrong.push(`${name}: half passed`);
+      if (judge(pts, pts.map((p) => ({ x: p.x + 30, y: p.y + 30 }))).ok) wrong.push(`${name}: off the line passed`);
+    }
+    expect(wrong).toEqual([]);
+  });
+
+  it('says why a trace failed', () => {
+    const c = samplePath(glyph('c').strokes[0]);
+    expect(judge(c, [...c].reverse()).why).toBe('start');
+    const o = samplePath(glyph('o').strokes[0]);
+    expect(judge(o, [...o].reverse()).why).toBe('direction');
+    expect(judge(c, c.slice(0, 10)).why).toBe('short');
+  });
+
+  it('finds a picture word for most letters', () => {
+    const none = letters.filter((l) => !exampleFor(l));
+    expect(none.length).toBeLessThanOrEqual(3);
+    for (const l of letters) {
+      const w = exampleFor(l);
+      if (w) expect(w.text.includes(l)).toBe(true);
     }
   });
 });

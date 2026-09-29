@@ -87,7 +87,7 @@ export const SOUNDS: SoundSpec[] = [
     words: 'at | it | tap 🚰 | tip 💡 | tin 🥫 | tan | sat | pat | pit 🕳 | spit 💦 | spat | taps 🚰',
     silly: '[t]ant | [t]ast | tann | tinn | [t]ist' },
   { id: 'p', label: 'p', asIn: 'pin', spellings: ['p'], level: 1, practice: true, hue: 65,
-    words: 'pat | pin 📌 | pit 🕳 | pan 🍳 | tap 🚰 | tip 💡 | nap 😴 | sip 🥤 | sap | spit 💦 | snap 🫰 | pants 👖',
+    words: 'pat | pin 📌 | pit 🕳 | pan 🍳 | tap 🚰 | tip 💡 | nap 😴 | sip 🥤 | sap | spit 💦 | snap 🫰 | pants 👖 | pass @2',
     silly: 'pinn | pist | pann' },
   { id: 'i', label: 'i', asIn: 'pin', spellings: ['i'], level: 1, practice: true, hue: 202,
     words: 'it | in | sit 🪑 | sip 🥤 | pin 📌 | pit 🕳 | tip 💡 | tin 🥫 | spit 💦 | snip ✂️ | spin 🌀 | pins 📌',
@@ -102,13 +102,13 @@ export const SOUNDS: SoundSpec[] = [
     words: 'mat 🧘 | map 🗺 | man 👨 | mud | mug ☕ | mop 🧹 | met | mess | moss | mist 🌫 | camp ⛺ | drum 🥁',
     silly: 'menk | menn | mesk | mok | muk | mip | mit | mik | mep | mup' },
   { id: 'd', label: 'd', asIn: 'dog', spellings: ['d'], level: 2, practice: true, hue: 213,
-    words: 'dog 🐕 | dot ⚫ | dig ⛏ | den 🏕 | duck 🦆 | dust | drum 🥁 | red 🟥 | mud | sad 😢 | desk 🪑 | pond',
+    words: 'dog 🐕 | dot ⚫ | dig ⛏ | den 🏕 | duck 🦆 | dust | drum 🥁 | red 🟥 | mud | sad 😢 | desk 🪑 | pond | [d]id',
     silly: 'dut | det | donk | donn | duss | dosk | dont | [d]ed | dat | dek' },
   { id: 'g', label: 'g (girl)', asIn: 'got', spellings: ['g'], level: 2, practice: true, hue: 350,
     words: 'got | gum | gap | gas ⛽ | grin 😁 | grass 🌿 | dog 🐕 | pig 🐷 | big | mug ☕ | rug 🧶 | e[g]g 🥚',
     silly: 'gomp | gont | gind | gock | gisk | gint | giss | gick | gend | gesk' },
   { id: 'o', label: 'o', asIn: 'dog', spellings: ['o'], level: 2, practice: true, hue: 127,
-    words: 'on | got | dog 🐕 | dot ⚫ | mop 🧹 | top 🔝 | pot 🍲 | rock 🪨 | sock 🧦 | pond | cot 🛏 | moss',
+    words: 'on | got | dog 🐕 | dot ⚫ | mop 🧹 | top 🔝 | pot 🍲 | rock 🪨 | sock 🧦 | pond | cot 🛏 | moss | not | stop 🛑',
     silly: 'sok | sost | sond | sonk | somp | sosk | sont | sonn | tok | tos' },
   { id: 'c', label: 'c (cat)', asIn: 'cat', spellings: ['c'], level: 2, practice: true, hue: 264,
     words: 'cat 🐈 | cup ☕ | can 🥫 | cap 🧢 | cot 🛏 | cod 🐟 | cut ✂️ | cost | camp ⛺ | cross | crust | cast',
@@ -132,13 +132,13 @@ export const SOUNDS: SoundSpec[] = [
 
   /* ── Level 3 ───────────────────────────────────────────────────────────── */
   { id: 'b', label: 'b', asIn: 'bat', spellings: ['b'], level: 3, practice: true, hue: 3,
-    words: 'bat 🦇 | bed 🛏 | bus 🚌 | big | bag 🎒 | bin 🗑 | box 📦 | bell 🔔 | black | brick 🧱 | crab 🦀 | web 🕸',
+    words: 'bat 🦇 | bed 🛏 | bus 🚌 | big | bag 🎒 | bin 🗑 | box 📦 | bell 🔔 | black | brick 🧱 | crab 🦀 | web 🕸 | back | best',
     silly: 'bann | balt | bamp | bazz | bult | buft | benk | besk | benn | beft' },
   { id: 'h', label: 'h', asIn: 'hat', spellings: ['h'], level: 3, practice: true, hue: 140,
-    words: 'hat 🎩 | hen 🐔 | hop | hug 🤗 | hill ⛰ | hand ✋ | help | hot 🔥 | ham 🍖 | hid | hut 🛖 | hiss 🐍',
+    words: 'hat 🎩 | hen 🐔 | hop | hug 🤗 | hill ⛰ | hand ✋ | help | hot 🔥 | ham 🍖 | hid | hut 🛖 | hiss 🐍 | hit | him',
     silly: 'hezz | helt | hesk | heff | hinn | hink | hisk | himp | hift | hoff' },
   { id: 'f', label: 'f', asIn: 'fan', spellings: ['f'], level: 3, practice: true, hue: 277,
-    words: 'fan 🪭 | fox 🦊 | fun | fit | fell | flag 🚩 | frog 🐸 | fast | fist ✊ | [f]luff | gift 🎁 | left',
+    words: 'fan 🪭 | fox 🦊 | fun | fit | fell | flag 🚩 | frog 🐸 | fast | fist ✊ | [f]luff | gift 🎁 | left | fans',
     silly: 'filt | fos | fimp | fint | fep | fup | fus | fut | fip | fis' },
   { id: 'l', label: 'l', asIn: 'leg', spellings: ['l'], level: 3, practice: true, hue: 54,
     words: 'leg 🦵 | log 🪵 | lip 👄 | lid | lamp 💡 | land | lost | milk 🥛 | help | black | glass 🥛 | flat',
@@ -167,7 +167,7 @@ export const SOUNDS: SoundSpec[] = [
 
   /* ── Level 4 — the school sound sheet ──────────────────────────────────── */
   { id: 'sh', label: 'sh', asIn: 'ship', spellings: ['sh'], level: 4, practice: true, hue: 285,
-    words: 'ship 🚢 | fish 🐟 | shell 🐚 | shed 🏚 | brush 🪥 | shop 🏪 | wish ⭐ | crash 💥 | shelf | shut | splash 💦 | dish 🍽 | shin | rush | shrimp 🦐 | sheep 🐑 @5 | shark 🦈 @6 | shirt 👕 @6',
+    words: 'ship 🚢 | fish 🐟 | shell 🐚 | shed 🏚 | brush 🪥 | shop 🏪 | wish ⭐ | crash 💥 | shelf | shut | splash 💦 | dish 🍽 | shin | rush | shrimp 🦐 | shot | sheep 🐑 @5 | shark 🦈 @6 | shirt 👕 @6',
     silly: 'shink | shisk | shilt | shek | shel | shem | shomp | shosk | shoft | shach' },
   { id: 'ch', label: 'ch', asIn: 'chip', spellings: ['ch'], level: 4, practice: true, hue: 24,
     words: 'chip 🍟 | chin 😀 | chick 🐤 | chop 🪓 | chest 🧰 | chat 💬 | chess ♟ | chill 🥶 | chimp 🐒 | much | such | rich 💰 | lunch 🍱 | bench 🪑 | branch 🌿 | munch | cheese 🧀 @5 | chain ⛓ @5 | [ch]urch ⛪ @6 | chair 🪑 @8',
@@ -208,13 +208,13 @@ export const SOUNDS: SoundSpec[] = [
 
   /* ── Level 5 — the first vowel teams ───────────────────────────────────── */
   { id: 'ai', label: 'ai', asIn: 'rain', spellings: ['ai'], level: 5, practice: true, hue: 14, group: 'ai-ay',
-    words: 'rain 🌧 | train 🚂 | snail 🐌 | nail 🔩 | chain ⛓ | paint 🎨 | tail 🐕 | sail ⛵ | main | plain | trail 🥾 | brain 🧠 | drain | grain 🌾 | afraid 😨 | waiting ⏳',
+    words: 'rain 🌧 | train 🚂 | snail 🐌 | nail 🔩 | chain ⛓ | paint 🎨 | tail 🐕 | sail ⛵ | main | plain | trail 🥾 | brain 🧠 | drain | grain 🌾 | afraid 😨 | waiting ⏳ | wait',
     silly: 'prail | plaip | praik | vaid | vaig | plaim | smaid | vaif | plail | smaig' },
   { id: 'ay', label: 'ay', asIn: 'day', spellings: ['ay'], level: 5, practice: true, hue: 40, group: 'ai-ay',
     words: 'day ☀️ | play ⚽ | tray 🍽 | hay 🌾 | crayon 🖍 | spray 💦 | clay 🏺 | stay 🛑 | away | today | always | may | say | way | pay 💰 | lay | birthday 🎂 @6',
     silly: 'shray | vay | snay | zay | skay | thay | glay | thray | klay | smay' },
   { id: 'ee', label: 'ee', asIn: 'tree', spellings: ['ee'], level: 5, practice: true, hue: 206, group: 'ee-ea',
-    words: 'bee 🐝 | tree 🌳 | sheep 🐑 | feet 🦶 | queen 👑 | cheese 🧀 | three 3️⃣ | green 🟢 | sleep 😴 | street 🛣 | teeth 🦷 | week 📅 | keep | seed 🌱 | deep | speed 🏎 | sweet 🍬 | asleep 😴',
+    words: 'bee 🐝 | tree 🌳 | sheep 🐑 | feet 🦶 | queen 👑 | cheese 🧀 | three 3️⃣ | green 🟢 | sleep 😴 | street 🛣 | teeth 🦷 | week 📅 | keep | seed 🌱 | deep | speed 🏎 | sweet 🍬 | asleep 😴 | keeper 🧤 @6',
     silly: 'zeep | shreet | kleest | freend | zeet | pleest | greep | fleend | kleend | greel' },
   { id: 'ea', label: 'ea', asIn: 'sea', spellings: ['ea'], level: 5, practice: true, hue: 158, group: 'ee-ea',
     words: 'sea 🌊 | leaf 🍃 | peas 🫛 | meat 🥩 | beach 🏖 | seal 🦭 | bean 🫘 | dream 💭 | clean 🧼 | speak 🗣 | eating 🍽 | team | heat 🔥 | cream 🍦 | east | read 📖 | teacher 👩‍🏫 @6',
@@ -261,7 +261,7 @@ export const SOUNDS: SoundSpec[] = [
     words: 'turn | burn 🔥 | hurt 🤕 | curl | church ⛪ | purse 👛 | nurse 👩‍⚕️ | burst | surf 🏄 | curve | purple 💜 | turkey 🦃 | curtain | further | burger 🍔 | Thursday',
     silly: 'grurb | flurnd | churd | swurst | grurd | churb | brurt | grurf | grurg | brurp' },
   { id: 'oo-moon', label: 'oo (moon)', asIn: 'moon', spellings: ['oo'], level: 6, practice: true, hue: 275, group: 'oo',
-    words: 'moon 🌙 | food 🍔 | soon | pool 🏊 | room 🚪 | zoo 🦁 | boot 👢 | tooth 🦷 | spoon 🥄 | balloon 🎈 | broom 🧹 | school 🏫 | smooth | roof 🏠 | noon | cool 😎',
+    words: 'moon 🌙 | food 🍔 | soon | pool 🏊 | room 🚪 | zoo 🦁 | boot 👢 | tooth 🦷 | spoon 🥄 | balloon 🎈 | broom 🧹 | school 🏫 | smooth | roof 🏠 | noon | cool 😎 | shoot ⚽ @6',
     silly: 'shroop | shoob | ploot | shroot | shroond | smoost | stroot | shoof | shoog | voond' },
   { id: 'oo-book', label: 'oo (book)', asIn: 'book', spellings: ['oo'], level: 6, practice: true, hue: 300, group: 'oo',
     words: 'book 📖 | look 👀 | cook 👨‍🍳 | foot 🦶 | good 👍 | wood 🪵 | hook 🪝 | took | stood | wool 🧶 | hood | shook | brook | crook | cookie 🍪 | football ⚽',
@@ -277,7 +277,7 @@ export const SOUNDS: SoundSpec[] = [
      A split digraph is two pieces with a consonant between, so both pieces are
      bracketed: c[a]k[e]. The app underlines each piece on its own. */
   { id: 'a-e', label: 'a_e', asIn: 'cake', spellings: ['a_e'], level: 7, practice: true, hue: 30,
-    words: 'c[a]k[e] 🎂 | n[a]m[e] | g[a]m[e] 🎮 | l[a]t[e] | g[a]t[e] 🚪 | m[a]k[e] | sn[a]k[e] 🐍 | pl[a]t[e] 🍽 | wh[a]l[e] 🐋 | gr[a]p[e] 🍇 | sh[a]p[e] | c[a]v[e] 🕳 | f[a]c[e] 😊 | r[a]c[e] 🏁 | pl[a]n[e] ✈️ | t[a]p[e] 📼',
+    words: 'c[a]k[e] 🎂 | s[a]v[e] | n[a]m[e] | g[a]m[e] 🎮 | l[a]t[e] | g[a]t[e] 🚪 | m[a]k[e] | sn[a]k[e] 🐍 | pl[a]t[e] 🍽 | wh[a]l[e] 🐋 | gr[a]p[e] 🍇 | sh[a]p[e] | c[a]v[e] 🕳 | f[a]c[e] 😊 | r[a]c[e] 🏁 | pl[a]n[e] ✈️ | t[a]p[e] 📼',
     silly: 'sn[a]f[e] | sm[a]b[e] | gl[a]p[e] | kl[a]k[e] | pr[a]v[e] | ch[a]t[e] | sh[a]b[e] | z[a]t[e] | sw[a]m[e] | bl[a]g[e]' },
   { id: 'e-e', label: 'e_e', asIn: 'these', spellings: ['e_e'], level: 7, practice: true, hue: 200,
     words: 'th[e]s[e] | th[e]m[e] | sc[e]n[e] 🎬 | [e]v[e] | g[e]n[e] 🧬 | compl[e]t[e] | extr[e]m[e] | del[e]t[e] | athl[e]t[e] 🏃 | concr[e]t[e] | comp[e]t[e] | stamp[e]d[e] 🐃',
@@ -608,6 +608,38 @@ export const SIGHT_WORDS: SightSetSpec[] = [
   { name: 'More', level: null, words: 'ag[ai]n | bec[au]se | b[ee]n | d[o]ne | [eye] | f[a]ther | fr[ie]nd | m[o]ther | m[o]ve | p[u]sh | s[ch]ool | [s]ure | w[a]ter | [w]rite' },
 ];
 
+/*  Commentary — the lines for Be the Commentator.
+ *
+ *  Read aloud like a football commentator, so the job is expression, not
+ *  decoding: every word here is one he can already read at the line's level,
+ *  from the word lists or the school's sight words. The content test checks
+ *  that, and checks the @level is exactly the highest level of any word in
+ *  the line, so a line never turns up before he can read it.
+ *
+ *  The last mark tells him how to say it — ! excited, ? asking, . calm — and
+ *  a / is where to take a breath: the game draws a scoop under each phrase
+ *  so he reads it in chunks, not word by word. {us} and {them} are the teams,
+ *  his and the other side's.  */
+export const COMMENTARY: string[] = [
+  'It is in! @1', 'Is it in? @1',
+  'Kick it in! @2', 'Get up and go! @2', 'Up, up / and in! @2', 'Is that in? @2',
+  'Can he get it? @2', 'Can he do it? / Yes! / He can! @2', 'Did it go in? @2',
+  'She did it! @2', 'Can she stop it? @2', 'Pass it, / pass it! @2',
+  'What a kick / from {us}! @2', 'Run, run, run! @2', 'Go, go, go! @2',
+  'Pass it back! @3', '{us} win the cup! @3', 'It is a win / for {us}. @3',
+  'He is fast, / so fast! @3', 'We win! @3', 'Can {them} / get it back? @3',
+  'It is a big kick / from the back. @3',
+  'The fans sing! @4', 'What a shot! @4', 'Top shot / from {us}! @4', 'Is it a shot / or a pass? @4',
+  'Oh no, / it is not in. @5', 'What a goal! @5', 'Is it a goal? @5', 'That is a goal! @5',
+  'What a day / for {us}! @5', 'Wait, / wait, / GOAL! @5', 'The fans want a goal. @5',
+  'Is this / the best goal / of the day? @5',
+  'It is up to the keeper now. @6', 'One more kick / to win it! @6', 'Look at him go! @6',
+  'Shoot! / Shoot! @6', 'Can the keeper / stop it? @6', '{them} will not stop now. @6',
+  'What a save! @7', 'It hit the post! @7', 'The crowd goes wild! @7', 'Time is up. @7',
+  'Not in, / not this time. @7', 'What a save / from the keeper! @7',
+  'The ball is in the net! @8',
+];
+
 /*  Words that sound exactly like another word in these lists, said with an
  *  Australian accent. A game that says a word and asks him to find it written
  *  can never offer both halves of a pair: "pair" called, with pair and pear
@@ -629,6 +661,7 @@ export const BLOCKLIST: string[] = [
   'ass', 'arse', 'bum', 'butt', 'crap', 'damn', 'dick', 'fart', 'gut', 'hell',
   'poo', 'pee', 'wee', 'piss', 'shag', 'slut', 'tit', 'turd', 'willy',
   'coon', 'fag', 'gyp', 'jap', 'paki', 'spic', 'wog', 'yid',
-  'kill', 'die', 'dead', 'death', 'gun', 'shot', 'stab', 'blood',
+  /* not 'shot': in this app it is a shot at goal */
+  'kill', 'die', 'dead', 'death', 'gun', 'stab', 'blood',
   'drug', 'beer', 'wine', 'gin', 'rum', 'sex', 'nude', 'rape',
 ];
