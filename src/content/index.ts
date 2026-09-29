@@ -6,7 +6,7 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY,
   type SoundSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
@@ -188,6 +188,31 @@ export const families = (f: Filter = {}): FamilySpec[] =>
 /** practice sounds that survive a filter, in level order */
 export const soundsFor = (f: Filter = {}): Sound[] =>
   PRACTICE_SOUNDS.filter((s) => inSounds(s.id, f.sounds) && inLevels(s.level, f.levels));
+
+/* ── commentary ────────────────────────────────────────────────────────── */
+
+export type Mood = 'excited' | 'asking' | 'calm';
+
+export interface CommentaryLine {
+  /** as written, with {us} and {them} still in it */
+  text: string;
+  /** the phrases, split where the content file puts a / */
+  chunks: string[];
+  level: Level;
+  /** from the last mark: ! excited, ? asking, . calm */
+  mood: Mood;
+}
+
+export const ALL_COMMENTARY: CommentaryLine[] = COMMENTARY.map((raw) => {
+  const m = /^(.*\S)\s+@([1-8])$/.exec(raw.trim());
+  if (!m) throw new ContentError(`commentary: "${raw}" needs a level at the end, like @3`);
+  const chunks = m[1].split('/').map((c) => c.trim()).filter(Boolean);
+  const text = chunks.join(' ');
+  const last = text.slice(-1);
+  if (!'!?.'.includes(last)) throw new ContentError(`commentary: "${text}" must end with ! ? or .`);
+  const mood: Mood = last === '!' ? 'excited' : last === '?' ? 'asking' : 'calm';
+  return { text, chunks, level: Number(m[2]) as Level, mood };
+});
 
 /* every word mapped to the words it sounds exactly like */
 const TWINS = new Map<string, Set<string>>();

@@ -140,6 +140,8 @@ export const sfx = {
     { hz: 2200, at: 0, for: 0.12, gain: 0.06 },
     { hz: 2300, at: 0.17, for: 0.28, gain: 0.06 },
   ]),
+  /** a crowd murmuring under the commentary, for as long as asked */
+  crowd: (seconds: number) => noise(Math.max(1, seconds), 0.07),
   /** a goal or a save: the crowd, and the rising third on top */
   cheer: () => {
     noise(1.3, 0.22);

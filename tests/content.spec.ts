@@ -8,7 +8,7 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
-  SOUNDS_ALIKE, soundsAlike,
+  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
@@ -513,5 +513,51 @@ describe('pass and shoot', () => {
       const usable = REAL_WORDS.filter((w) => w.level === level && w.picture && pieces(w));
       expect(usable.length, `level ${level}`).toBeGreaterThanOrEqual(8);
     }
+  });
+});
+
+/* ── Be the Commentator ─────────────────────────────────────────────────── */
+
+describe('commentary', () => {
+  /* the lowest level each word can be read at, from the word lists and the
+     school's sight words */
+  const readableAt = new Map<string, number>();
+  for (const w of REAL_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level));
+  }
+  for (const w of ALL_SIGHT_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level ?? 8));
+  }
+  const wordsOf = (text: string) => text.replace(/\{us\}|\{them\}/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
+
+  /* the game is about expression; a word he cannot read yet turns it back
+     into decoding */
+  it('uses only words he can read, from the lists or the sight words', () => {
+    const unknown = ALL_COMMENTARY.flatMap((l) => wordsOf(l.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${l.text}"`));
+    expect(unknown).toEqual([]);
+  });
+
+  it('puts each line at the level of its hardest word, no earlier and no later', () => {
+    const wrong = ALL_COMMENTARY.filter((l) => Math.max(1, ...wordsOf(l.text).map((w) => readableAt.get(w) ?? 9)) !== l.level)
+      .map((l) => `${l.text} @${l.level}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('has lines for every way of saying it', () => {
+    for (const mood of ['excited', 'asking', 'calm'] as const) {
+      expect(ALL_COMMENTARY.some((l) => l.mood === mood), mood).toBe(true);
+    }
+  });
+
+  it('has a match worth of lines from level 2 up', () => {
+    for (let level = 2; level <= 8; level += 1) {
+      expect(ALL_COMMENTARY.filter((l) => l.level <= level).length, `level ${level}`).toBeGreaterThanOrEqual(6);
+    }
+  });
+
+  it('shows no blocked word', () => {
+    expect(ALL_COMMENTARY.filter((l) => wordsOf(l.text).some((w) => blocked(w))).map((l) => l.text)).toEqual([]);
   });
 });
