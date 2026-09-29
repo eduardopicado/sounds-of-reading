@@ -12,6 +12,7 @@ import { marked, setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
 import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
+import { mark } from '../lib/coach';
 
 /** contrasts worth offering: two spellings of one sound, or a set taught together */
 const NAMED_SETS: { id: string; label: string; sounds: string[] }[] = [
@@ -167,6 +168,9 @@ export function mount(root: HTMLElement): () => void {
     tries += 1;
     const word = current;
     const s = sound(word.sound);
+
+    /* only the first try tells the coach anything */
+    if (tries === 1) mark(word, soundId === word.sound);
 
     if (soundId === word.sound) {
       busy = true;

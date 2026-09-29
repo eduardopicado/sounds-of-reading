@@ -25,6 +25,8 @@ import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { read, write } from '../lib/storage';
 import { award } from '../lib/stickers';
+import { pro } from '../lib/settings';
+import { coachPick, mark } from '../lib/coach';
 import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { nearWords } from '../content/near-words';
 import { pieces, type Piece } from '../content/graphemes';
@@ -65,7 +67,8 @@ export function mount(root: HTMLElement): () => void {
 
   /* ── the pitch: the goal at the top, the line of players across the middle ── */
 
-  const targets = [0, 1, 2].map((i) => {
+  /* four pictures; Pro mode uses the fourth, and the rest of the time it hides */
+  const targets = [0, 1, 2, 3].map((i) => {
     const btn = el('button', { class: 'ps-target', type: 'button', disabled: 'disabled' });
     btn.addEventListener('click', () => shoot(i));
     return btn;
@@ -131,15 +134,17 @@ export function mount(root: HTMLElement): () => void {
   /* a word needs a picture to be shot at, and a clean cut to be passed along */
   const playable = (): Word[] => picturable(realWords(setup.filter())).filter((w) => pieces(w));
 
-  /** two near words with pictures unlike the answer's and unlike each other */
+  /** near words with pictures unlike the answer's and unlike each other:
+      two of them, or three in Pro mode */
   function decoys(word: Word): Word[] {
+    const want = pro() ? 3 : 2;
     const out: Word[] = [];
     const seen = new Set([word.picture]);
-    for (const w of nearWords(word, picturable(realWords({ levels: levelsUpTo() })), 8, { picture: true })) {
+    for (const w of nearWords(word, picturable(realWords({ levels: levelsUpTo() })), 10, { picture: true })) {
       if (seen.has(w.picture)) continue;
       seen.add(w.picture);
       out.push(w);
-      if (out.length === 2) break;
+      if (out.length === want) break;
     }
     return out;
   }
@@ -167,11 +172,14 @@ export function mount(root: HTMLElement): () => void {
     keeper.style.transition = '';
   }
 
+  /** a full dive to either post, a hop for the pictures between */
   function dive(to: number): void {
     const k = keeper.getBoundingClientRect();
     const s = targets[to].getBoundingClientRect();
-    keeper.style.translate = `${s.left + s.width / 2 - (k.left + k.width / 2)}px ${to === 1 ? -14 : 0}px`;
-    keeper.style.rotate = to === 0 ? '-55deg' : to === 2 ? '55deg' : '0deg';
+    const last = options.length - 1;
+    const middle = to !== 0 && to !== last;
+    keeper.style.translate = `${s.left + s.width / 2 - (k.left + k.width / 2)}px ${middle ? -14 : 0}px`;
+    keeper.style.rotate = to === 0 ? '-55deg' : to === last ? '55deg' : '0deg';
   }
 
   /* ── one word ────────────────────────────────────────────────────────── */
@@ -235,10 +243,13 @@ export function mount(root: HTMLElement): () => void {
   function readyToShoot(): void {
     if (!current) return;
     options = shuffle([current, ...decoys(current)]);
-    options.forEach((w, i) => {
-      targets[i].textContent = w.picture ?? '';
-      targets[i].setAttribute('aria-label', w.text);
-      targets[i].disabled = false;
+    targetRow.style.gridTemplateColumns = `repeat(${options.length}, 1fr)`;
+    targets.forEach((t, i) => {
+      const w = options[i];
+      t.hidden = !w;
+      t.textContent = w?.picture ?? '';
+      if (w) t.setAttribute('aria-label', w.text);
+      t.disabled = !w;
     });
     targetRow.classList.remove('waiting');
     cue.textContent = 'What word did you make? Shoot at it!';
@@ -255,9 +266,10 @@ export function mount(root: HTMLElement): () => void {
     const right = i === answer;
     sfx.kick();
     ballTo(targets[i], 'net');
-    dive(right ? pick([0, 1, 2].filter((x) => x !== i)) : i);
+    dive(right ? pick(options.map((_, x) => x).filter((x) => x !== i)) : i);
     if (right) { scored += 1; goals.set(scored); }
     log.push({ word, ok: right });
+    mark(word, right);
 
     later(() => {
       targets[answer].classList.add('answer');
@@ -279,7 +291,7 @@ export function mount(root: HTMLElement): () => void {
   function start(): void {
     clearTimers();
     const pool = playable();
-    queue = shuffle(pool).slice(0, Number(lenSel.value));
+    queue = coachPick(pool, Number(lenSel.value));
     us = teamById(teamSel.value) ?? YOU;
     rival = pick(TEAMS.filter((t) => t !== YOU && t !== us && t !== rival));
     scored = 0; log = []; current = null; busy = false;

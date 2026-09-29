@@ -11,6 +11,7 @@ import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../conte
 import { chip, confetti } from '../ui/components';
 import { clearStickers, stickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
+import { closeMove, maybeLevelUp, strongSounds, undoMove, unseenMove, weakSounds } from '../lib/coach';
 
 export interface Tile { path: string; name: string; emoji: string; what: string; tone: string }
 
@@ -127,7 +128,58 @@ export function mount(root: HTMLElement): () => void {
         draw();
       }),
     );
+
+    coachRow.replaceChildren(el('span', { class: 'lbl', text: 'Challenge' }));
+    coachRow.append(
+      chip('🏆 Pro mode', settings().pro, () => {
+        updateSettings({ pro: !settings().pro });
+        draw();
+      }, undefined, 'harder games'),
+      chip('🧑‍🏫 Coach', settings().coach, () => {
+        updateSettings({ coach: !settings().coach });
+        draw();
+      }, undefined, 'picks words and levels'),
+    );
+    drawReport();
   }
+
+  /* ── the coach's notes, for the parent ──────────────────────────────── */
+
+  const coachRow = el('div', { class: 'row' });
+  const reportEl = el('p', { class: 'tag coach-report' });
+
+  const labelOf = (id: string): string => { try { return sound(id).label; } catch { return id; } };
+  function drawReport(): void {
+    const good = strongSounds().map(labelOf);
+    const hard = weakSounds().map(labelOf);
+    if (!good.length && !hard.length) {
+      reportEl.textContent = 'The coach is still watching. After a few games it will say which sounds are going well and which need practice.';
+      return;
+    }
+    reportEl.replaceChildren(
+      good.length ? el('span', {}, el('b', { text: 'Going well: ' }), good.join(', '), '. ') : '',
+      hard.length ? el('span', {}, el('b', { text: 'Needs practice: ' }), hard.join(', '), '.') : '',
+    );
+  }
+
+  /* when the coach has moved the week up, say so where the parent will see
+     it first, and make it one tap to put back */
+  const moved = maybeLevelUp() ?? unseenMove();
+  const moveNote = el('div', { class: 'coach-move', role: 'status', hidden: 'hidden' });
+  function drawMove(): void {
+    const m = unseenMove();
+    moveNote.hidden = !m;
+    if (!m) return;
+    const top = Math.max(...m.from);
+    moveNote.replaceChildren(
+      el('p', {}, `🎉 Level ${top} mastered! The coach has moved this week up to levels ${m.to.join(' and ')}.`),
+      el('div', { class: 'row' },
+        el('button', { class: 'btn small', type: 'button', text: 'Great, keep it', on: { click: () => { closeMove(); drawMove(); } } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: 'Undo', on: { click: () => { undoMove(); drawMove(); draw(); } } }),
+      ),
+    );
+  }
+  if (moved) drawMove();
 
   /* the sticker book: the one thing that joins the games together */
   const book = el('div', { class: 'sticker-book' });
@@ -206,7 +258,7 @@ export function mount(root: HTMLElement): () => void {
   const week = el('div', { class: 'week' },
     el('h2', { text: "This week's sounds" }),
     summary,
-    levelRow, soundRow, toggleRow, voiceRow,
+    levelRow, soundRow, toggleRow, coachRow, reportEl, voiceRow,
   );
 
   /* a small piece of fun: one sound gets to be today's, and says hello */
@@ -228,6 +280,7 @@ export function mount(root: HTMLElement): () => void {
       el('p', { class: 'tag', text: 'Pick a game.' }),
     ),
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } }, starBtn),
+    moveNote,
     tiles,
     bookTray,
     week,

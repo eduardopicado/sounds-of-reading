@@ -22,6 +22,7 @@ import { marked, setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
+import { mark } from '../lib/coach';
 import { CONTRASTS, contrastFor, contrastSpan, obeysRule, type Contrast } from '../content/contrasts';
 
 export function mount(root: HTMLElement): () => void {
@@ -193,6 +194,8 @@ export function mount(root: HTMLElement): () => void {
     if (busy || !current) return;
     tries += 1;
     const word = current;
+    /* only the first try tells the coach anything */
+    if (tries === 1) mark(word, id === word.sound);
 
     if (id === word.sound) {
       busy = true;

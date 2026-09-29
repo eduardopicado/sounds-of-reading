@@ -24,7 +24,8 @@ import { pick, shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
-import { settings } from '../lib/settings';
+import { pro, settings } from '../lib/settings';
+import { coachPick, mark } from '../lib/coach';
 import { award } from '../lib/stickers';
 import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { nearWords } from '../content/near-words';
@@ -102,7 +103,8 @@ export function mount(root: HTMLElement): () => void {
 
   /* ── the pitch ───────────────────────────────────────────────────────── */
 
-  const spots = [0, 1, 2].map((i) => {
+  /* four spots; Pro mode uses the fourth, and the rest of the time it hides */
+  const spots = [0, 1, 2, 3].map((i) => {
     const btn = el('button', { class: 'pk-spot', type: 'button', disabled: 'disabled' });
     btn.addEventListener('click', () => choose(i));
     return btn;
@@ -186,7 +188,9 @@ export function mount(root: HTMLElement): () => void {
 
   /** the next word from a shuffled bag, refilled when it runs out */
   function draw(bag: Word[], fill: () => Word[]): Word {
-    if (!bag.length) bag.push(...shuffle(fill()));
+    /* a dozen at a time, so the coach can tilt each dozen towards the sounds
+       he is missing */
+    if (!bag.length) bag.push(...coachPick(fill(), 12));
     return bag.pop() as Word;
   }
 
@@ -237,11 +241,14 @@ export function mount(root: HTMLElement): () => void {
     ball.style.scale = '0.62';
   }
 
+  /** across to the spot: a full dive to either post, a hop for the middle ones */
   function dive(to: number): void {
     const k = keeper.getBoundingClientRect();
     const s = spots[to].getBoundingClientRect();
-    keeper.style.translate = `${s.left + s.width / 2 - (k.left + k.width / 2)}px ${to === 1 ? -18 : 0}px`;
-    keeper.style.rotate = to === 0 ? '-55deg' : to === 2 ? '55deg' : '0deg';
+    const last = options.length - 1;
+    const middle = to !== 0 && to !== last;
+    keeper.style.translate = `${s.left + s.width / 2 - (k.left + k.width / 2)}px ${middle ? -18 : 0}px`;
+    keeper.style.rotate = to === 0 ? '-55deg' : to === last ? '55deg' : '0deg';
   }
 
   function showBanner(text: string, good: boolean): void {
@@ -254,20 +261,25 @@ export function mount(root: HTMLElement): () => void {
 
   function setSpots(word: Word, near: Word[]): void {
     options = shuffle([word, ...near]);
-    const long = options.some((w) => w.text.length > 6);
-    options.forEach((w, i) => {
-      const btn = spots[i];
+    const long = options.some((w) => w.text.length > (options.length > 3 ? 5 : 6));
+    spotRow.style.gridTemplateColumns = `repeat(${options.length}, 1fr)`;
+    spots.forEach((btn, i) => {
+      const w = options[i];
+      btn.hidden = !w;
       btn.className = `pk-spot${long ? ' long' : ''}`;
-      btn.textContent = w.text;
+      btn.textContent = w?.text ?? '';
       btn.disabled = true;
     });
   }
 
   function ready(): void {
     busy = false;
-    for (const btn of spots) btn.disabled = false;
+    spots.forEach((btn, i) => { btn.disabled = i >= options.length; });
     pitch.dataset.ready = '1';
   }
+
+  /** the wrong words in the goal: two, or three in Pro mode */
+  const decoyCount = (): number => (pro() ? 3 : 2);
 
   function startShoot(): void {
     phase = 'shoot';
@@ -278,7 +290,7 @@ export function mount(root: HTMLElement): () => void {
     resetKeeper();
     const word = draw(shootBag, shootWords);
     current = word;
-    setSpots(word, nearWords(word, lookalikes(), 2, { picture: true }));
+    setSpots(word, nearWords(word, lookalikes(), decoyCount(), { picture: true }));
     keeper.replaceChildren(player(rival, 84, 'keeper'));
     taker.replaceChildren(player(us, 64, 'kicker'));
     ball.classList.add('mine');
@@ -298,7 +310,7 @@ export function mount(root: HTMLElement): () => void {
     const word = draw(saveBag, saveWords);
     current = word;
     const heard = listening();
-    setSpots(word, nearWords(word, lookalikes(), 2, { picture: !heard }));
+    setSpots(word, nearWords(word, lookalikes(), decoyCount(), { picture: !heard }));
     keeper.replaceChildren(player(us, 84, 'keeper'));
     taker.replaceChildren(player(rival, 64, 'kicker'));
     ball.classList.remove('mine');
@@ -343,7 +355,7 @@ export function mount(root: HTMLElement): () => void {
       /* the keeper guesses wrong when he reads it right, and reads his mind
          when he does not */
       flyBall(i);
-      dive(right ? pick([0, 1, 2].filter((x) => x !== i)) : i);
+      dive(right ? pick(options.map((_, x) => x).filter((x) => x !== i)) : i);
       ours.push(right);
     } else {
       dive(i);
@@ -351,6 +363,7 @@ export function mount(root: HTMLElement): () => void {
       theirs.push(!right);
     }
     log.push({ word, phase: kind, ok: right });
+    mark(word, right);
 
     later(() => {
       reveal(answer, i);
@@ -482,8 +495,10 @@ export function mount(root: HTMLElement): () => void {
     if (!from || phase !== 'shoot' || busy) return;
     const up = from.y - e.clientY;
     if (up < 30) return;
-    const lean = (e.clientX - from.x) / up;
-    choose(lean < -0.35 ? 0 : lean > 0.35 ? 2 : 1);
+    /* the lean, from hard left to hard right, spread across however many
+       words are in the goal */
+    const lean = Math.max(-0.9, Math.min(0.9, (e.clientX - from.x) / up));
+    choose(Math.round(((lean + 0.9) / 1.8) * (options.length - 1)));
   });
   ball.addEventListener('pointercancel', () => { flickFrom = null; });
 

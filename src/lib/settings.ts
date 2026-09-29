@@ -21,6 +21,11 @@ export interface Settings {
   sfx: boolean;
   /** a voice the parent picked by hand; null means choose the best installed */
   voiceURI: string | null;
+  /** every game a notch harder: more choices, less time, fewer helps */
+  pro: boolean;
+  /** the coach favours the sounds he is missing, and moves him up a level
+      when the one he is on is mastered — see src/lib/coach.ts */
+  coach: boolean;
 }
 
 const DEFAULTS: Settings = {
@@ -30,7 +35,12 @@ const DEFAULTS: Settings = {
   speech: true,
   sfx: true,
   voiceURI: null,
+  pro: false,
+  coach: true,
 };
+
+/** is Pro mode on? A one-word question every game asks */
+export const pro = (): boolean => current.pro;
 
 let current: Settings = { ...DEFAULTS, ...read<Partial<Settings>>('settings', {}) };
 const listeners = new Set<(s: Settings) => void>();

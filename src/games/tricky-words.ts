@@ -34,7 +34,7 @@ import { marked, setMarked } from '../lib/highlight';
 import { ALL_SIGHT_WORDS, SIGHT_SETS, type SightWord } from '../content/index';
 import { tonesFor } from '../lib/colour';
 import { chip, confetti, counter, scoreLine, topbar } from '../ui/components';
-import { settings } from '../lib/settings';
+import { pro, settings } from '../lib/settings';
 
 /* Tricky words practise no sound, so there is no sound's colour to borrow.
    One tone stands for "this is the bit that lies", everywhere in the game. */
@@ -42,6 +42,8 @@ const TRICKY = tonesFor(350);
 
 /** how long the word stays on screen before he has to remember it */
 const LOOK_MS = 1600;
+/** and in Pro mode, a glance: long enough to read a known word, not to sound one out */
+const PRO_LOOK_MS = 1000;
 
 /**
  * How easily one word could be mistaken for another.
@@ -192,7 +194,8 @@ export function mount(root: HTMLElement): () => void {
     choices.classList.add('waiting');
     /* a longer look when the device asks for less movement — the point is
        the memory, not the hurry */
-    const ms = prefersReducedMotion() ? LOOK_MS * 1.5 : LOOK_MS;
+    const look = pro() ? PRO_LOOK_MS : LOOK_MS;
+    const ms = prefersReducedMotion() ? look * 1.5 : look;
     hideTimer = window.setTimeout(() => {
       wordEl.classList.add('gone');
       wordEl.textContent = '?';

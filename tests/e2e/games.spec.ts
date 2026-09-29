@@ -732,10 +732,10 @@ async function takeKick(page: Page, right: boolean): Promise<void> {
     await page.getByRole('button', { name: 'Say it' }).click();
   }
   const word = await lastSaid(page);
-  const texts = (await page.locator('.pk-spot').allTextContents()).map((t) => t.trim());
+  const texts = (await page.locator('.pk-spot:not([hidden])').allTextContents()).map((t) => t.trim());
   expect(texts).toContain(word);
   const at = right ? texts.indexOf(word) : texts.findIndex((t) => t !== word);
-  await page.locator('.pk-spot').nth(at).click();
+  await page.locator('.pk-spot:not([hidden])').nth(at).click();
 }
 
 async function startShootout(page: Page): Promise<void> {
@@ -753,7 +753,7 @@ test.describe('Penalty Shootout', () => {
     await startShootout(page);
 
     /* three words in the goal, and a picture to say which one */
-    await expect(page.locator('.pk-spot')).toHaveCount(3);
+    await expect(page.locator('.pk-spot:not([hidden])')).toHaveCount(3);
     await expect(page.locator('.pk-cue .pic')).toBeVisible();
 
     await takeKick(page, true);
@@ -808,7 +808,7 @@ test.describe('Penalty Shootout', () => {
     const pitch = page.locator('.pk-pitch');
     await expect(pitch).toHaveAttribute('data-phase', 'save', { timeout: 6000 });
     await expect(pitch).toHaveAttribute('data-ready', '1', { timeout: 6000 });
-    const texts = (await page.locator('.pk-spot').allTextContents()).map((t) => t.trim());
+    const texts = (await page.locator('.pk-spot:not([hidden])').allTextContents()).map((t) => t.trim());
     expect(new Set(texts).size).toBe(3);
     expect(texts).toContain(await lastSaid(page));
   });
@@ -896,7 +896,7 @@ test.describe('Pass and Shoot', () => {
       await expect(page.locator('.ps-player.lit')).toHaveCount(await page.locator('.ps-player').count());
       await expect(pitch).toHaveAttribute('data-phase', 'shoot');
       /* three pictures, and the word he made is one of them */
-      await expect(page.locator('.ps-target')).toHaveCount(3);
+      await expect(page.locator('.ps-target:not([hidden])')).toHaveCount(3);
       await page.getByRole('button', { name: word, exact: true }).click();
       await expect(page.locator('.pk-banner')).toHaveText('GOAL!');
       /* the sounds pushed together into the word, whole */
@@ -929,8 +929,8 @@ test.describe('Pass and Shoot', () => {
     const word = await wordOnTheLine(page);
     await passAlong(page);
     await expect(page.locator('.ps-pitch')).toHaveAttribute('data-phase', 'shoot');
-    const names = await page.locator('.ps-target').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
-    await page.locator('.ps-target').nth(names.findIndex((n) => n !== word)).click();
+    const names = await page.locator('.ps-target:not([hidden])').evaluateAll((els) => els.map((e) => e.getAttribute('aria-label')));
+    await page.locator('.ps-target:not([hidden])').nth(names.findIndex((n) => n !== word)).click();
     await expect(page.locator('.pk-banner')).toHaveText('Saved!');
     await expect(page.locator('.ps-target.answer')).toHaveAttribute('aria-label', word);
     await expect(page.locator('.ps-target.wrong')).toHaveCount(1);

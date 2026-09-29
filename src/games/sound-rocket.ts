@@ -36,6 +36,8 @@ import { setMarked } from '../lib/highlight';
 import { mightContain, realWords, sound, type Level, type Sound, type Word } from '../content/index';
 import { createSetup, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
+import { pro } from '../lib/settings';
+import { mark } from '../lib/coach';
 
 const SHIELDS = 3;
 /** below this many words with the sound, a round would repeat itself */
@@ -186,13 +188,16 @@ export function mount(root: HTMLElement): () => void {
       screen-heights so a word takes the same time to cross an iPad and a
       phone: about eight seconds to start, closing to about four. */
   function speed(): number {
-    const base = skyH / 8;
+    /* Pro starts where a normal round is after a few catches: six seconds */
+    const base = skyH / (pro() ? 6 : 8);
     const cap = skyH / (reduced ? 6 : 4.2);
     return Math.min(base * (1 + score * 0.05), cap);
   }
 
-  /** seconds until the next word appears */
-  const interval = (): number => Math.max(0.95, 2.4 - score * 0.06);
+  /** seconds until the next word appears, closer together in Pro */
+  const interval = (): number => (pro()
+    ? Math.max(0.8, 1.9 - score * 0.06)
+    : Math.max(0.95, 2.4 - score * 0.06));
 
   function drawShields(): void {
     shieldsEl.replaceChildren(...Array.from({ length: SHIELDS }, (_, i) =>
@@ -394,6 +399,7 @@ export function mount(root: HTMLElement): () => void {
       score += 1;
       scoreEl.textContent = String(score);
       caught.push(d.word);
+      mark(d.word, true);
       sfx.zap();
       /* the letters that made the sound light up as it is caught */
       setMarked(d.node, d.word.text, d.word.spans, { tones: target.tones });
@@ -402,6 +408,9 @@ export function mount(root: HTMLElement): () => void {
       window.setTimeout(() => d.node.remove(), 450);
       return;
     }
+    /* a word without the sound, taken for one with it: a miss on the sound
+       he was hunting, not on whatever sound that word happens to practise */
+    if (target) mark({ sound: target.id, level: d.word.level }, false);
     shields -= 1;
     drawShields();
     sfx.crack();

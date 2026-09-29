@@ -13,6 +13,7 @@ import { setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
 import { createSetup, counter, scoreLine, topbar, winOverlay } from '../ui/components';
 import { award } from '../lib/stickers';
+import { pro } from '../lib/settings';
 
 interface Card {
   pairId: number;
@@ -29,9 +30,11 @@ export function mount(root: HTMLElement): () => void {
   );
   const pairsSel = el('select', { 'aria-label': 'How many pairs' },
     el('option', { value: '4', text: '4 pairs' }),
-    el('option', { value: '6', text: '6 pairs', selected: 'selected' }),
+    el('option', { value: '6', text: '6 pairs' }),
     el('option', { value: '8', text: '8 pairs' }),
   );
+  /* Pro starts with the most to remember */
+  pairsSel.value = pro() ? '8' : '6';
   const extra = el('div', { class: 'row' },
     el('span', { class: 'lbl', text: 'This game' }), modeSel, pairsSel,
   );

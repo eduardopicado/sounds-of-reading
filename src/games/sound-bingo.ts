@@ -13,6 +13,8 @@ import { setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Word } from '../content/index';
 import { createSetup, topbar, winOverlay } from '../ui/components';
 import { award } from '../lib/stickers';
+import { pro } from '../lib/settings';
+import { mark } from '../lib/coach';
 
 interface Cell {
   word?: Word;
@@ -23,9 +25,11 @@ interface Cell {
 
 export function mount(root: HTMLElement): () => void {
   const sizeSel = el('select', { 'aria-label': 'Card size' },
-    el('option', { value: '3', text: '3 × 3 card', selected: 'selected' }),
+    el('option', { value: '3', text: '3 × 3 card' }),
     el('option', { value: '4', text: '4 × 4 card' }),
   );
+  /* Pro starts on the big card */
+  sizeSel.value = pro() ? '4' : '3';
   const goalSel = el('select', { 'aria-label': 'How to win' },
     el('option', { value: 'line', text: 'Win on a line', selected: 'selected' }),
     el('option', { value: 'full', text: 'Win on a full card' }),
@@ -164,8 +168,11 @@ export function mount(root: HTMLElement): () => void {
     if (!called.has(cell.word.text)) {
       sfx.wrong();
       replay(cell.node, 'nope');
+      /* the word he was listening for is the one he missed */
+      if (current?.word) mark(current.word, false);
       return;
     }
+    mark(cell.word, true);
     cell.marked = true;
     cell.node.classList.add('marked');
     sfx.land();

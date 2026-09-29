@@ -16,6 +16,8 @@ import { marked, setMarked } from '../lib/highlight';
 import { realWords, sillyWords, sound, type Word } from '../content/index';
 import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
+import { pro } from '../lib/settings';
+import { coachPick, mark } from '../lib/coach';
 
 export function mount(root: HTMLElement): () => void {
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -77,8 +79,8 @@ export function mount(root: HTMLElement): () => void {
     const filter = setup.filter();
     const wanted = Number(lenSel.value);
     const half = Math.ceil(wanted / 2);
-    const reals = shuffle(realWords(filter)).slice(0, half);
-    const sillies = shuffle(sillyWords(filter)).slice(0, wanted - half);
+    const reals = coachPick(realWords(filter), half);
+    const sillies = coachPick(sillyWords(filter), wanted - half);
     queue = shuffle([...reals, ...sillies]);
 
     index = 0; right = 0; streak = 0; busy = false; log = [];
@@ -89,7 +91,8 @@ export function mount(root: HTMLElement): () => void {
     resultList.replaceChildren();
     stage.style.display = '';
     answers.style.display = '';
-    helpRow.style.display = '';
+    /* in Pro there is no one to sound it out for him */
+    helpRow.style.display = pro() ? 'none' : '';
     realBtn.disabled = false;
     sillyBtn.disabled = false;
     next();
@@ -119,6 +122,8 @@ export function mount(root: HTMLElement): () => void {
     setMarked(wordEl, word.text, word.spans, { tones: s.tones });
     revealEl.textContent = word.real ? (word.picture ?? '✅') : '🤪';
     replay(stage, correct ? 'bounce' : 'shake');
+    /* a read with help is not a read on his own, so it tells the coach nothing */
+    if (!usedHelp) mark(word, correct);
 
     if (correct) {
       right += 1;

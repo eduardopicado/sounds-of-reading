@@ -294,3 +294,24 @@ select {
 /* display: grid above would otherwise beat the hidden attribute, and a round
    that earned nothing showed an empty mustard square where the prize goes */
 .sticker[hidden] { display: none; }
+
+/* ── Pro mode and the coach ──────────────────────────────────────────────── */
+
+/* beside a game's title when Pro is on: dark ink on mustard, like a button */
+.pro-badge {
+  display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 8px;
+  font-size: .45em; letter-spacing: 1px; vertical-align: middle;
+  background: var(--mustard); color: var(--ink);
+}
+
+/* the coach's note on the home screen when it has moved the week up */
+.coach-move {
+  margin: 0 auto 14px; max-width: 640px; padding: 12px 14px; border-radius: var(--radius);
+  background: var(--paper); color: var(--ink); text-align: center;
+}
+.coach-move[hidden] { display: none; }
+.coach-move p { margin: 0 0 8px; font-weight: 700; }
+.coach-move .row { justify-content: center; }
+.coach-move .btn.ghost { color: var(--ink); border-color: rgba(20, 49, 47, .4); }
+
+.coach-report { width: 100%; margin: 2px 0 8px; }
