@@ -12,6 +12,7 @@ import {
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
+import { confusions, tilesFor } from '../src/content/spelling';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
@@ -559,5 +560,68 @@ describe('commentary', () => {
 
   it('shows no blocked word', () => {
     expect(ALL_COMMENTARY.filter((l) => wordsOf(l.text).some((w) => blocked(w))).map((l) => l.text)).toEqual([]);
+  });
+});
+
+/* ── Build the Word ─────────────────────────────────────────────────────── */
+
+describe('build the word', () => {
+  const spellable = REAL_WORDS.filter((w) => w.picture && pieces(w));
+
+  it('offers the mistakes children really make', () => {
+    expect(confusions('ai')).toContain('ay');
+    expect(confusions('ee')).toContain('ea');
+    expect(confusions('ck')).toContain('k');
+    expect(confusions('i')).toContain('e');
+    expect(confusions('b')).toContain('d');
+  });
+
+  it('always has at least two wrong tiles to choose from', () => {
+    const thin = spellable.filter((w) => {
+      const set = tilesFor(w, 'sounds', 2);
+      return !set || set.tiles.length - set.answer.length < 2;
+    });
+    expect(thin.map((w) => w.text)).toEqual([]);
+  });
+
+  it('never makes a wrong tile that is the same as a right one', () => {
+    const clash: string[] = [];
+    for (const w of spellable) {
+      for (const mode of ['sounds', 'letters'] as const) {
+        const set = tilesFor(w, mode, 3);
+        if (!set) continue;
+        const extra = [...set.tiles];
+        for (const a of set.answer) extra.splice(extra.indexOf(a), 1);
+        if (extra.some((t) => set.answer.includes(t))) clash.push(`${w.text} (${mode})`);
+      }
+    }
+    expect(clash).toEqual([]);
+  });
+
+  /* the word is heard, so a wrong tile must never spell its twin */
+  it('never lets a single wrong tile spell a word that sounds the same', () => {
+    const twins: string[] = [];
+    for (const w of spellable) {
+      const set = tilesFor(w, 'sounds', 3);
+      if (!set) continue;
+      const extra = [...set.tiles];
+      for (const a of set.answer) extra.splice(extra.indexOf(a), 1);
+      set.answer.forEach((_, i) => {
+        for (const e of extra) {
+          const built = [...set.answer.slice(0, i), e, ...set.answer.slice(i + 1)].join('');
+          if (soundsAlike(built, w.text)) twins.push(`${w.text} -> ${built}`);
+        }
+      });
+    }
+    expect(twins).toEqual([]);
+  });
+
+  it('builds the word exactly from its right tiles', () => {
+    const wrong = spellable.filter((w) => {
+      const s1 = tilesFor(w, 'sounds', 2);
+      const s2 = tilesFor(w, 'letters', 2);
+      return s1?.answer.join('') !== w.text.toLowerCase() || s2?.answer.join('') !== w.text.toLowerCase();
+    });
+    expect(wrong.map((w) => w.text)).toEqual([]);
   });
 });

@@ -19,6 +19,7 @@ import * as soundRocket from './games/sound-rocket';
 import * as penaltyShootout from './games/penalty-shootout';
 import * as passAndShoot from './games/pass-and-shoot';
 import * as beTheCommentator from './games/be-the-commentator';
+import * as buildTheWord from './games/build-the-word';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -36,6 +37,7 @@ const routes: Route[] = [
   { path: 'penalty-shootout', mount: penaltyShootout.mount },
   { path: 'pass-and-shoot', mount: passAndShoot.mount },
   { path: 'be-the-commentator', mount: beTheCommentator.mount },
+  { path: 'build-the-word', mount: buildTheWord.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

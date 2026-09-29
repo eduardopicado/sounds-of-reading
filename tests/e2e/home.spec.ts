@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectTapTargets, noProblems, watchPage } from './helpers';
 
 test.describe('home screen', () => {
-  test('shows all thirteen games and opens each one', async ({ page }) => {
+  test('shows all fourteen games and opens each one', async ({ page }) => {
     const watch = watchPage(page);
     await page.goto('/');
 
@@ -10,10 +10,10 @@ test.describe('home screen', () => {
     expect(names).toEqual([
       'Memory Match', 'Bingo', 'Sound Sort', 'Word Builder',
       'Roll & Read', 'Real or Silly?', 'Sentence Smash', 'Same Sound, Two Ways',
-      'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator',
+      'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator', 'Build the Word',
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
@@ -51,7 +51,7 @@ test.describe('home screen', () => {
       });
     });
     await page.goto('/');
-    await expect(page.locator('.tiles .tile-link')).toHaveCount(13);
+    await expect(page.locator('.tiles .tile-link')).toHaveCount(14);
     await page.goto('/#/real-or-silly');
     await expect(page.locator('.theword')).toBeVisible();
     noProblems(watch);
