@@ -32,9 +32,11 @@ import { nearWords } from '../content/near-words';
 import { pieces, type Piece } from '../content/graphemes';
 import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
 import { TEAMS, YOU, label, player, teamById, type Team } from './teams';
+import { narrate, narrationSelect } from './narration';
 
-/** how long the goal or the save stays on screen before the next word */
-const LINGER_MS = 2200;
+/** how long the goal or the save stays on screen before the next word:
+    long enough for the commentator's shout and then the word */
+const LINGER_MS = 3400;
 
 export function mount(root: HTMLElement): () => void {
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -56,7 +58,7 @@ export function mount(root: HTMLElement): () => void {
   teamSel.addEventListener('change', () => { write('shootout-team', teamSel.value); start(); });
 
   const setup = createSetup({
-    extra: [el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), teamSel, lenSel)],
+    extra: [el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), teamSel, lenSel, narrationSelect())],
     onChange: () => start(),
   });
 
@@ -281,7 +283,8 @@ export function mount(root: HTMLElement): () => void {
       made.replaceChildren(marked(word.text, word.spans, { tones: sound(word.sound).tones }));
       if (right) sfx.cheer();
       else sfx.wrong();
-      say(word.text);
+      /* the commentator calls it, then the word he made is said */
+      narrate(right ? 'goal' : 'save', us, () => say(word.text), later);
     }, 450);
     later(next, 450 + LINGER_MS);
   }

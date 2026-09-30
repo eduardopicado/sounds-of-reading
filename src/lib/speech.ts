@@ -249,6 +249,13 @@ export interface SayOptions {
   /** speak through this exact voice instead of the chosen one, for #/voices,
    *  where every row has to be audibly itself rather than the app's pick */
   voiceURI?: string;
+  /**
+   * Another language, for the football narration ("Goooool do Brasil!"),
+   * which is shouted in Portuguese the way it is at home. Spoken by the best
+   * installed voice for it, never by a recording and never by the English
+   * voice, which would mangle it — check canSpeak() first.
+   */
+  lang?: string;
   onEnd?: () => void;
 }
 
@@ -262,8 +269,30 @@ function voiceByURI(uri: string): SpeechSynthesisVoice | null {
   }
 }
 
+/** installed voices for a language, best first: the exact region (pt-BR)
+ *  before its cousins (pt-PT), then by quality */
+export function voicesFor(lang: string): SpeechSynthesisVoice[] {
+  const synth = engine();
+  if (!synth) return [];
+  const norm = (l: string) => l.replace('_', '-').toLowerCase();
+  const want = norm(lang);
+  const base = want.split('-')[0];
+  try {
+    return synth.getVoices()
+      .filter((v) => norm(v.lang).split('-')[0] === base)
+      .sort((a, b) => Number(norm(b.lang) === want) - Number(norm(a.lang) === want)
+        || QUALITY_RANK[qualityOf(a)] - QUALITY_RANK[qualityOf(b)]);
+  } catch {
+    return [];
+  }
+}
+
+/** can this device say something in that language at all? */
+export const canSpeak = (lang: string): boolean => voicesFor(lang).length > 0;
+
 export function say(text: string, options: SayOptions = {}): void {
   if (!enabled || !text) { options.onEnd?.(); return; }
+  if (options.lang) { speakAloud(text, options); return; }
   /* a recording where we shipped one, the device voice everywhere else. The
      diagnostics screen asks for a named voice, so it always gets the real
      thing rather than a clip that would sound the same in every row. */
@@ -287,6 +316,8 @@ function speakAloud(text: string, options: SayOptions): void {
     let voice: SpeechSynthesisVoice | null;
     if (options.voiceURI) {
       voice = voiceByURI(options.voiceURI);
+    } else if (options.lang) {
+      voice = voicesFor(options.lang)[0] ?? null;
     } else {
       cached ??= chooseVoice();
       voice = cached;
@@ -299,7 +330,7 @@ function speakAloud(text: string, options: SayOptions): void {
     } catch {
       /* fall back to lang alone */
     }
-    u.lang = voice?.lang ?? 'en-AU';
+    u.lang = voice?.lang ?? options.lang ?? 'en-AU';
     /* Apple's voices warble below about 0.8 and sound synthetic above a pitch
        of 1, so stay inside that. Sounding it out is meant to be slow. */
     u.rate = options.slow ? 0.45 : 0.9;

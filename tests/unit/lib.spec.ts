@@ -168,3 +168,27 @@ describe('saved settings', () => {
     expect(cleanSettings(null)).toEqual({});
   });
 });
+
+/* ── the football commentator ──────────────────────────────────────────── */
+
+describe('commentary', () => {
+  it('knows every team in Portuguese, with its article', async () => {
+    const { TEAMS } = await import('../../src/games/teams');
+    const missing = TEAMS.filter((t) => t.kind !== 'you' && !/^(do|da|de) \S/.test(t.pt ?? ''));
+    expect(missing.map((t) => t.id)).toEqual([]);
+  });
+
+  it('shouts a goal for the team that scored, and a save for the keeper', async () => {
+    const { callFor } = await import('../../src/games/narration');
+    const { teamById, YOU } = await import('../../src/games/teams');
+    const brazil = teamById('brazil')!;
+    for (let i = 0; i < 20; i += 1) {
+      expect(callFor('goal', brazil, 'pt')).toMatch(/^(Goooool|É gol|Golaço) do Brasil!$/);
+      expect(callFor('goal', teamById('argentina')!, 'pt')).toMatch(/ da Argentina!$/);
+      expect(callFor('save', brazil, 'pt')).toMatch(/^(Defendeu o goleiro|Que defesa|Pegou o goleiro)!$/);
+      /* his own side has no name to shout, so just the goal */
+      expect(callFor('goal', YOU, 'pt')).toMatch(/^(Goooool|Golaço|É gol)!$/);
+      expect(callFor('goal', brazil, 'en')).toBe('Goooal for Brazil!');
+    }
+  });
+});

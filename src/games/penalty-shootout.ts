@@ -32,6 +32,7 @@ import { nearWords } from '../content/near-words';
 import { confetti, createSetup, topbar } from '../ui/components';
 import { read, write } from '../lib/storage';
 import { TEAMS, YOU, kit, label, player, teamById, type Team } from './teams';
+import { narrate, narrationSelect } from './narration';
 
 type Phase = 'kickoff' | 'shoot' | 'save' | 'over';
 
@@ -40,8 +41,9 @@ interface Kick { word: Word; phase: 'shoot' | 'save'; ok: boolean }
 
 /** after the kicks each, how many sudden-death rounds before it is called a draw */
 const SUDDEN_DEATH = 5;
-/** how long the goal or the save is left on screen before the next kick */
-const LINGER_MS = 1900;
+/** how long the goal or the save is left on screen before the next kick:
+    long enough for the commentator's shout and then the word */
+const LINGER_MS = 3300;
 /** a hedge for speech engines that never report the end of a word */
 const HEARD_BY_MS = 2600;
 
@@ -73,7 +75,7 @@ export function mount(root: HTMLElement): () => void {
   const setup = createSetup({
     extra: [
       el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'Teams' }), ourSel, theirSel),
-      el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), kicksSel),
+      el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), kicksSel, narrationSelect()),
     ],
     onChange: () => newMatch(),
   });
@@ -372,8 +374,11 @@ export function mount(root: HTMLElement): () => void {
       else showBanner(right ? 'SAVED!' : `${rival.short} score`, right);
       if (right) sfx.cheer();
       else sfx.wrong();
-      /* said now, once it can only confirm */
-      say(word.text);
+      /* the commentator calls it — his goal, or his save — and then the word
+         is said, now that it can only confirm */
+      const moment = (kind === 'shoot') === right ? 'goal' : 'save';
+      const scorer = kind === 'shoot' ? us : rival;
+      narrate(moment, scorer, () => say(word.text), later);
     }, 480);
 
     later(() => {
