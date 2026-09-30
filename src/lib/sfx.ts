@@ -37,6 +37,22 @@ export function unlockSfx(): void {
   }
 }
 
+/**
+ * Wakes the sounds again after iOS has put them to sleep.
+ *
+ * The first tap is not enough on an iPad. When the screen locks, another app
+ * plays audio, or the home-screen app is left and reopened, Safari moves the
+ * audio context to "interrupted" (or "suspended") and it stays silent until
+ * resumed inside another gesture. Cheap to ask, so every tap asks.
+ */
+export function wakeSfx(): void {
+  try {
+    if (ctx && ctx.state !== 'running') void ctx.resume();
+  } catch {
+    /* ignore */
+  }
+}
+
 interface Note { hz: number; at: number; for: number; gain?: number; type?: OscillatorType }
 
 function play(notes: Note[]): void {

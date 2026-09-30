@@ -12,7 +12,7 @@ export default defineConfig({
       manifest: {
         name: 'Sounds of Reading',
         short_name: 'Sounds',
-        description: 'Seven small phonics games. No accounts, no tracking, works offline.',
+        description: 'Phonics, spelling and handwriting games. No accounts, no tracking, works offline.',
         lang: 'en-AU',
         start_url: './',
         scope: './',

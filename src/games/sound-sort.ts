@@ -5,36 +5,20 @@
  * Two misses and the word shows you. Nothing is ever marked wrong twice. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle, spreadAcross } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
-import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
+import { fitsAnother, picturable, realWords, sound, type Sound, type Word } from '../content/index';
+import { SORT_SETS } from '../content/sort-sets';
 import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
 import { mark } from '../lib/coach';
 
-/** contrasts worth offering: two spellings of one sound, or a set taught together */
-const NAMED_SETS: { id: string; label: string; sounds: string[] }[] = [
-  { id: 'ai-ay', label: 'ai vs ay', sounds: ['ai', 'ay'] },
-  { id: 'ee-ea', label: 'ee vs ea', sounds: ['ee', 'ea'] },
-  { id: 'sh-ch', label: 'sh vs ch', sounds: ['sh', 'ch'] },
-  { id: 'th', label: 'th (them) vs th (thin)', sounds: ['th-voiced', 'th-unvoiced'] },
-  { id: 'wh-ph', label: 'wh vs ph', sounds: ['wh', 'ph'] },
-  { id: 'g-c', label: 'soft g vs soft c', sounds: ['soft-g', 'soft-c'] },
-  { id: 'digraphs', label: 'sh · ch · th · wh', sounds: ['sh', 'ch', 'th-unvoiced', 'wh'] },
-  { id: 'trickies', label: 'ph · qu · g · c', sounds: ['ph', 'qu', 'soft-g', 'soft-c'] },
-  { id: 'long-i', label: 'ie vs igh', sounds: ['ie', 'igh'] },
-  { id: 'long-o', label: 'oa vs ow', sounds: ['oa', 'ow-slow'] },
-  { id: 'oi-oy', label: 'oi vs oy', sounds: ['oi', 'oy'] },
-  { id: 'ou-ow', label: 'ou vs ow (cow)', sounds: ['ou-loud', 'ow-cow'] },
-  { id: 'oo', label: 'oo (moon) vs oo (book)', sounds: ['oo-moon', 'oo-book'] },
-  { id: 'er-ir-ur', label: 'er · ir · ur', sounds: ['er', 'ir', 'ur'] },
-  { id: 'vowel-teams', label: 'ai · ay · ee · ea', sounds: ['ai', 'ay', 'ee', 'ea'] },
-  { id: 'l8', label: 'air · are · ear · eer', sounds: ['air', 'are', 'ear', 'eer'] },
-];
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const setSel = el('select', { 'aria-label': 'Which sorting task' });
   const lenSel = el('select', { 'aria-label': 'How many words' },
     el('option', { value: '8', text: '8 words' }),
@@ -97,7 +81,7 @@ export function mount(root: HTMLElement): () => void {
     if (chosen.length >= 2 && chosen.length <= 4) {
       setSel.append(el('option', { value: 'chosen', text: 'My chosen sounds', selected: 'selected' }));
     }
-    for (const preset of NAMED_SETS) {
+    for (const preset of SORT_SETS) {
       if (!preset.sounds.every((id) => available.has(id))) continue;
       setSel.append(el('option', { value: preset.id, text: preset.label }));
     }
@@ -111,20 +95,23 @@ export function mount(root: HTMLElement): () => void {
   function currentBins(): Sound[] {
     const chosen = setup.filter().sounds;
     if (setSel.value === 'chosen' && chosen.length >= 2) return chosen.slice(0, 4).map(sound);
-    const preset = NAMED_SETS.find((p) => p.id === setSel.value);
+    const preset = SORT_SETS.find((p) => p.id === setSel.value);
     if (preset) return preset.sounds.map(sound);
     const pool = setup.available();
     return pool.slice(0, Math.min(4, Math.max(2, pool.length)));
   }
 
   function start(): void {
+    life.clear();
     binSounds = currentBins();
     const levels = setup.filter().levels;
     /* the picture tells him which word it is, so he can get on with finding
        the sound in it — prefer words that have one, and only fall back when a
        bin would otherwise run short */
     const groups = binSounds.map((s) => {
-      const all = realWords({ sounds: [s.id], levels });
+      /* a word that would fit another bin too has no one right answer */
+      const all = realWords({ sounds: [s.id], levels })
+        .filter((w) => !binSounds.some((o) => fitsAnother(w, o)));
       const withPicture = picturable(all);
       return withPicture.length >= 6 ? withPicture : [...withPicture, ...all.filter((w) => !w.picture)];
     });
@@ -187,12 +174,12 @@ export function mount(root: HTMLElement): () => void {
       sorted += 1;
       done.set(sorted);
       current = null;
-      window.setTimeout(() => { busy = false; next(); }, 780);
+      life.later(() => { busy = false; next(); }, 780);
     } else {
       sfx.wrong();
       replay(hand, 'wrong');
       bin.classList.add('over');
-      window.setTimeout(() => bin.classList.remove('over'), 200);
+      life.later(() => bin.classList.remove('over'), 200);
       /* after two misses, stop letting him flounder */
       if (tries === 2) setMarked(wordEl, word.text, word.spans, { tones: s.tones });
     }
@@ -259,5 +246,5 @@ export function mount(root: HTMLElement): () => void {
   root.append(node);
   fillSets();
   start();
-  return () => undefined;
+  return life.end;
 }

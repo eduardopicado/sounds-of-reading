@@ -61,6 +61,36 @@ export function chip(label: string, pressed: boolean, onToggle: () => void, tone
   return node;
 }
 
+/* ── a button that asks twice ─────────────────────────────────────────── */
+
+/**
+ * For the few buttons that throw something away (the sticker book, the
+ * Roll & Read tally). They sit where a six-year-old taps freely, and one tap
+ * used to wipe weeks of stickers. The first tap only asks; a second within a
+ * few seconds does it. No dialog, which iOS styles as an alarming system box.
+ */
+export function confirmButton(label: string, ask: string, onConfirm: () => void, className = 'btn ghost small'): HTMLButtonElement {
+  let armed = 0;
+  const btn = el('button', { class: className, type: 'button', text: label });
+  const disarm = (): void => {
+    window.clearTimeout(armed);
+    armed = 0;
+    btn.textContent = label;
+    btn.classList.remove('asking');
+  };
+  btn.addEventListener('click', () => {
+    if (!armed) {
+      btn.textContent = ask;
+      btn.classList.add('asking');
+      armed = window.setTimeout(disarm, 4000);
+      return;
+    }
+    disarm();
+    onConfirm();
+  });
+  return btn;
+}
+
 /* ── the setup panel ──────────────────────────────────────────────────── */
 
 export interface Filter { sounds: string[]; levels: Level[] }

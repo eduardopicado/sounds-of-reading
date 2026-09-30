@@ -112,7 +112,10 @@ test.describe('sticker book', () => {
     await expect(page.locator('.sticker')).toHaveCount(1);
     await expect(page.locator('.sticker')).toHaveText(won!);
 
+    /* one tap only asks — a child tapping about must not wipe the book */
     await page.getByRole('button', { name: 'Start a new sticker book' }).click();
+    await expect(page.locator('.sticker')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Tap again to clear every sticker' }).click();
     await expect(page.locator('.sticker')).toHaveCount(0);
     noProblems(watch);
   });

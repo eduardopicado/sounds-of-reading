@@ -14,7 +14,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    # the suite takes about three minutes; this only catches a genuine hang
+    # the suite takes about ten minutes; this only catches a genuine hang
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
@@ -28,6 +28,9 @@ jobs:
       # this app can ship, so it fails the build before anything else runs.
       - name: Content
         run: npm run validate:content
+
+      - name: Unit
+        run: npm run test:unit
 
       - name: Typecheck and build
         run: npm run build

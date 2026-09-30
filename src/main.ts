@@ -4,7 +4,7 @@ import './styles/games.css';
 import { startRouter, type Route } from './lib/router';
 import { unlockSpeech, watchVoices } from './lib/speech';
 import { loadClips } from './lib/audio';
-import { unlockSfx } from './lib/sfx';
+import { unlockSfx, wakeSfx } from './lib/sfx';
 import * as home from './games/home';
 import * as memoryMatch from './games/sound-match';
 import * as bingo from './games/sound-bingo';
@@ -55,8 +55,11 @@ function unlockOnFirstTap(): void {
     document.removeEventListener('pointerdown', once);
     document.removeEventListener('keydown', once);
   };
-  document.addEventListener('pointerdown', once, { once: false });
-  document.addEventListener('keydown', once, { once: false });
+  document.addEventListener('pointerdown', once);
+  document.addEventListener('keydown', once);
+  /* and every tap after that, since iOS silences audio again whenever the
+     iPad sleeps or the app is left and reopened */
+  document.addEventListener('pointerdown', wakeSfx);
 }
 
 watchVoices();

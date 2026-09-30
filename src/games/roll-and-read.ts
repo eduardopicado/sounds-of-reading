@@ -8,13 +8,14 @@
  * drift over the Roll button and swallow taps. */
 
 import { el } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { read, write } from '../lib/storage';
 import { realWords, sound, type Sound, type Word } from '../content/index';
-import { confetti, createSetup, topbar } from '../ui/components';
+import { confetti, confirmButton, createSetup, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
 
 const POSITIONS = ['front', 'right', 'back', 'left', 'top', 'bottom'] as const;
@@ -31,6 +32,7 @@ const REST: Record<string, { x: number; y: number }> = {
 interface Tally { good: number; bad: number }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const countSel = el('select', { 'aria-label': 'Words per roll' },
     el('option', { value: '1', text: '1 word' }),
     el('option', { value: '3', text: '3 words', selected: 'selected' }),
@@ -42,7 +44,7 @@ export function mount(root: HTMLElement): () => void {
   );
   const extra = el('div', { class: 'row' },
     el('span', { class: 'lbl', text: 'This game' }), countSel, hintSel,
-    el('button', { class: 'btn ghost small', type: 'button', text: 'Clear tally', on: { click: () => { tally = {}; saveTally(); drawBars(); } } }),
+    confirmButton('Clear tally', 'Tap again to clear it', () => { tally = {}; saveTally(); drawBars(); }),
   );
   hintSel.addEventListener('change', () => {
     const on = hintSel.value === 'on';
@@ -118,7 +120,7 @@ export function mount(root: HTMLElement): () => void {
     const extraY = 360 * (2 + Math.floor(Math.random() * 2));
     cube.style.transform = `rotateX(${rest.x - extraX}deg) rotateY(${rest.y - extraY}deg)`;
 
-    window.setTimeout(() => {
+    life.later(() => {
       rolling = false;
       rollBtn.disabled = false;
       diceHint.textContent = `Read these ${face.label} words out loud`;
@@ -200,5 +202,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   setDie();
-  return () => undefined;
+  return life.end;
 }

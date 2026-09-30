@@ -6,11 +6,12 @@
  * rather than a drill. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle, spreadAcross } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { setMarked } from '../lib/highlight';
-import { picturable, realWords, sound, type Sound, type Word } from '../content/index';
+import { fitsAnother, picturable, realWords, sound, uniqueWords, type Sound, type Word } from '../content/index';
 import { createSetup, counter, scoreLine, topbar, winOverlay } from '../ui/components';
 import { award } from '../lib/stickers';
 import { pro } from '../lib/settings';
@@ -24,6 +25,7 @@ interface Card {
 }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const modeSel = el('select', { 'aria-label': 'Matching mode' },
     el('option', { value: 'pic', text: 'Word and picture' }),
     el('option', { value: 'sound', text: 'Two words, same sound' }),
@@ -75,29 +77,45 @@ export function mount(root: HTMLElement): () => void {
 
   function chooseWords(mode: string): { soundId: string; a: Word; b?: Word }[] {
     const filter = setup.filter();
-    const pool = realWords(filter);
+    const pool = uniqueWords(shuffle(realWords(filter)));
     const wanted = Number(pairsSel.value);
     const bySound = new Map<string, Word[]>();
     for (const w of mode === 'pic' ? picturable(pool) : pool) {
       if (!bySound.has(w.sound)) bySound.set(w.sound, []);
       bySound.get(w.sound)!.push(w);
     }
-    const groups = [...bySound.values()].filter((g) => g.length >= (mode === 'pic' ? 1 : 2));
-    if (!groups.length) return [];
+
     if (mode === 'pic') {
-      return spreadAcross(groups, wanted).map((w) => ({ soundId: w.sound, a: w }));
+      /* a picture on the board belongs to one word only: with sit and desk
+         both drawn as a chair, the right chair for "sit" was a coin toss */
+      const out: { soundId: string; a: Word }[] = [];
+      const pictures = new Set<string>();
+      for (const w of spreadAcross([...bySound.values()], pool.length)) {
+        if (out.length >= wanted) break;
+        if (!w.picture || pictures.has(w.picture)) continue;
+        pictures.add(w.picture);
+        out.push({ soundId: w.sound, a: w });
+      }
+      return out;
     }
-    /* same-sound mode needs two different words from one sound */
+
+    /* Same-sound mode: two words that share a sound match, whichever two.
+       The sounds on the board must not overlap either — with a and t both in
+       play, cat and tap share a t and are not a pair — so every word is
+       checked against the other sounds dealt, and a sound left with fewer
+       than two clean words drops out. */
+    const sounds = shuffle([...bySound.keys()].filter((id) => bySound.get(id)!.length >= 2)).slice(0, wanted);
+    const dealt = sounds.map(sound);
+    const clean = new Map(sounds.map((id) => [id,
+      bySound.get(id)!.filter((w) => !dealt.some((o) => fitsAnother(w, o)))]));
     const out: { soundId: string; a: Word; b: Word }[] = [];
-    const pools = groups.map((g) => shuffle(g));
     for (let round = 0; out.length < wanted; round += 1) {
       let took = false;
-      for (const p of pools) {
+      for (const id of sounds) {
         if (out.length >= wanted) break;
-        if (p.length < 2) continue;
-        const a = p.pop()!;
-        const b = p.pop()!;
-        out.push({ soundId: a.sound, a, b });
+        const words = clean.get(id)!;
+        if (words.length < 2) continue;
+        out.push({ soundId: id, a: words.pop()!, b: words.pop()! });
         took = true;
       }
       if (!took) break;
@@ -119,6 +137,7 @@ export function mount(root: HTMLElement): () => void {
   }
 
   function deal(): void {
+    life.clear();
     const mode = modeSel.value;
     const picks = chooseWords(mode);
     deck = [];
@@ -145,7 +164,7 @@ export function mount(root: HTMLElement): () => void {
     deck.forEach((card, i) => {
       const button = el('button', {
         class: 'card', type: 'button', 'aria-label': 'Face down card',
-        dataset: { i: String(i) },
+        dataset: { i: String(i), sound: card.soundId },
       }, el('div', { class: 'inner' }, el('div', { class: 'face back' }), cardFace(card)));
       button.addEventListener('click', () => flip(button, card));
       board.append(button);
@@ -165,9 +184,14 @@ export function mount(root: HTMLElement): () => void {
     flips.set(moves);
     const second = { card, node: button };
 
-    if (first.card.pairId === second.card.pairId) {
+    /* in same-sound mode any two words with the sound are a pair, not only
+       the two that were dealt together */
+    const pair = modeSel.value === 'sound'
+      ? first.card.soundId === second.card.soundId
+      : first.card.pairId === second.card.pairId;
+    if (pair) {
       busy = true;
-      window.setTimeout(() => {
+      life.later(() => {
         first?.node.classList.add('done');
         second.node.classList.add('done');
         collect(card.soundId);
@@ -177,7 +201,7 @@ export function mount(root: HTMLElement): () => void {
         sfx.right();
         first = null; busy = false;
         if (matched === target) {
-          window.setTimeout(() => {
+          life.later(() => {
             win.show(`You found all ${target} pairs in ${moves} flips.`, award(practised)?.face);
             say('Well done!');
           }, 350);
@@ -188,9 +212,9 @@ export function mount(root: HTMLElement): () => void {
       sfx.wrong();
       replay(first.node, 'wrong');
       replay(second.node, 'wrong');
-      const pair = [first, second];
-      window.setTimeout(() => {
-        for (const item of pair) {
+      const both = [first, second];
+      life.later(() => {
+        for (const item of both) {
           item.node.classList.remove('flipped', 'wrong');
           item.node.setAttribute('aria-label', 'Face down card');
         }
@@ -207,5 +231,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   deal();
-  return () => win.hide();
+  return () => { life.end(); win.hide(); };
 }

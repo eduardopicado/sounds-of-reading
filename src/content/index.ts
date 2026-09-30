@@ -133,6 +133,48 @@ export function mightContain(text: string, target: Sound): boolean {
   });
 }
 
+/**
+ * Would a careful reader say this word belongs to the other sound too?
+ *
+ * For games that sort words between sounds (Sound Sort, Memory Match): a
+ * word may only be offered if it fits exactly one of the choices. "which" is
+ * a wh word with a ch in it, so it cannot go in a sh · ch · th · wh sort.
+ *
+ * Unlike mightContain, the word's own marked letters do not count. Where two
+ * sounds share a spelling — th in them and thin, oo in moon and book — those
+ * letters are the question itself and the ear decides; only a second, other
+ * place in the word would make it a trap.
+ */
+export function fitsAnother(word: Word, other: Sound): boolean {
+  if (other.id === word.sound) return false;
+  const t = word.text.toLowerCase();
+  const own = new Set(word.spans.map((sp) => `${sp.at}:${sp.len}`));
+  const ownSound = SOUND_BY_ID.get(word.sound);
+  return other.spellings.some((sp) => {
+    if (sp.includes('_')) {
+      /* a split spelling the word's own sound also uses is the same question */
+      if (ownSound?.spellings.includes(sp)) return false;
+      return mightContain(t, { ...other, spellings: [sp] });
+    }
+    for (let i = t.indexOf(sp); i >= 0; i = t.indexOf(sp, i + 1)) {
+      if (!own.has(`${i}:${sp.length}`)) return true;
+    }
+    return false;
+  });
+}
+
+/** one of each word: the same word is listed under every sound it practises
+ *  (snap is an s, a, n and p word), and a round must not show it twice */
+export function uniqueWords<T extends { text: string }>(words: readonly T[]): T[] {
+  const seen = new Set<string>();
+  return words.filter((w) => {
+    const key = w.text.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 export const ALL_FAMILIES: FamilySpec[] = FAMILIES;
 
 /** what a family build spells out: onset + rime, either way round */

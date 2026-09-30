@@ -82,15 +82,34 @@ export async function playClip(
     audio.playbackRate = options.slow ? 0.6 : 1;
     /* one voice at a time, the way cancel() works for speech */
     for (const [otherId, other] of cache) if (otherId !== id) other.pause();
-    if (options.onEnd) {
-      audio.onended = () => options.onEnd?.();
-      audio.onerror = () => options.onEnd?.();
-    }
+    /* The element is cached and reused, so its handlers must be set every
+       time — including to nothing. Left over, the last caller's onEnd would
+       fire again the next time anyone played this word, even from another
+       game. And once: an error followed by the fallback to speech must not
+       report the end twice. */
+    let ended = false;
+    const end = options.onEnd ? () => { if (!ended) { ended = true; options.onEnd?.(); } } : null;
+    audio.onended = end;
+    audio.onerror = null;
     await audio.play();
     return true;
   } catch {
-    /* blocked or missing: the caller speaks it instead */
+    /* blocked or missing: the caller speaks it instead, and reports the end */
+    const audio = cache.get(id);
+    if (audio) { audio.onended = null; audio.onerror = null; }
     return false;
+  }
+}
+
+/** stop any recording that is playing, for leaving a game or the device voice taking over */
+export function stopClips(): void {
+  for (const audio of cache.values()) {
+    try {
+      audio.onended = null;
+      audio.pause();
+    } catch {
+      /* already stopped */
+    }
   }
 }
 

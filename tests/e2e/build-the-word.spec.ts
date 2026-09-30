@@ -1,30 +1,7 @@
 /* Build the Word: hear it, then spell it from the tiles. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, watchPage } from './helpers';
-
-/** a speech engine that writes down what it says, so the test hears the word too */
-async function recordSpeech(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const spoken: string[] = [];
-    (window as unknown as { __said: string[] }).__said = spoken;
-    class FakeUtterance {
-      text: string; lang = ''; rate = 1; pitch = 1; volume = 1; voice: unknown = null;
-      onend: (() => void) | null = null; onerror: (() => void) | null = null;
-      constructor(text: string) { this.text = text; }
-    }
-    Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
-    Object.defineProperty(window, 'speechSynthesis', {
-      configurable: true,
-      value: {
-        getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'karen' }],
-        speak: (u: FakeUtterance) => { if (u.text) spoken.push(u.text); window.setTimeout(() => u.onend?.(), 0); },
-        cancel: () => undefined,
-        addEventListener: () => undefined,
-      },
-    });
-  });
-}
+import { noProblems, openGame, openSetup, recordSpeech, watchPage } from './helpers';
 
 const lastSaid = (page: Page): Promise<string> =>
   page.evaluate(() => { const s = (window as unknown as { __said: string[] }).__said; return s[s.length - 1] ?? ''; });

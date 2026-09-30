@@ -29,6 +29,9 @@ export interface Team {
   pattern: Pattern;
   /** not always either shirt colour: Brazil play in royal blue shorts, Palmeiras in white */
   shorts: string;
+  /** the team as a Brazilian commentator says it, with its article: "do
+      Brasil", "da Argentina" — for "Goooool do Brasil!" */
+  pt?: string;
 }
 
 /** the side he plays for until he picks one */
@@ -37,28 +40,28 @@ export const YOU: Team = { id: 'you', name: 'You', short: 'You', kind: 'you', fl
 export const TEAMS: Team[] = [
   YOU,
   /* every World Cup winner, and the two he is likeliest to be asked about */
-  { id: 'brazil', name: 'Brazil', short: 'Brazil', kind: 'country', flag: '🇧🇷', colours: ['#FFD500', '#009B3A'], pattern: 'plain', shorts: '#1F3FA8' },
-  { id: 'argentina', name: 'Argentina', short: 'Argentina', kind: 'country', flag: '🇦🇷', colours: ['#75AADB', '#FFFFFF'], pattern: 'stripes', shorts: '#1B1B3A' },
-  { id: 'france', name: 'France', short: 'France', kind: 'country', flag: '🇫🇷', colours: ['#1F3A93', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'germany', name: 'Germany', short: 'Germany', kind: 'country', flag: '🇩🇪', colours: ['#FFFFFF', '#111111'], pattern: 'plain', shorts: '#111111' },
-  { id: 'spain', name: 'Spain', short: 'Spain', kind: 'country', flag: '🇪🇸', colours: ['#C8102E', '#FFC400'], pattern: 'plain', shorts: '#1B2A5C' },
-  { id: 'italy', name: 'Italy', short: 'Italy', kind: 'country', flag: '🇮🇹', colours: ['#1F5FBF', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'england', name: 'England', short: 'England', kind: 'country', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', colours: ['#FFFFFF', '#1D2D5C'], pattern: 'plain', shorts: '#1D2D5C' },
-  { id: 'uruguay', name: 'Uruguay', short: 'Uruguay', kind: 'country', flag: '🇺🇾', colours: ['#6CACE4', '#FFFFFF'], pattern: 'plain', shorts: '#111111' },
-  { id: 'portugal', name: 'Portugal', short: 'Portugal', kind: 'country', flag: '🇵🇹', colours: ['#C8102E', '#006600'], pattern: 'plain', shorts: '#006600' },
-  { id: 'australia', name: 'Australia', short: 'Australia', kind: 'country', flag: '🇦🇺', colours: ['#FFCD00', '#00843D'], pattern: 'plain', shorts: '#00843D' },
-  { id: 'palmeiras', name: 'Palmeiras', short: 'Palmeiras', kind: 'club', colours: ['#006437', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'flamengo', name: 'Flamengo', short: 'Flamengo', kind: 'club', colours: ['#C8102E', '#111111'], pattern: 'hoops', shorts: '#FFFFFF' },
-  { id: 'real-madrid', name: 'Real Madrid', short: 'Real Madrid', kind: 'club', colours: ['#FFFFFF', '#1B3A6B'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'barcelona', name: 'Barcelona', short: 'Barcelona', kind: 'club', colours: ['#A50044', '#004D98'], pattern: 'stripes', shorts: '#004D98' },
-  { id: 'bayern', name: 'Bayern Munich', short: 'Bayern', kind: 'club', colours: ['#DC052D', '#FFFFFF'], pattern: 'plain', shorts: '#DC052D' },
-  { id: 'psg', name: 'Paris Saint-Germain', short: 'PSG', kind: 'club', colours: ['#0B2A5B', '#DA291C'], pattern: 'band', shorts: '#0B2A5B' },
-  { id: 'man-united', name: 'Manchester United', short: 'Man United', kind: 'club', colours: ['#DA291C', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'man-city', name: 'Manchester City', short: 'Man City', kind: 'club', colours: ['#6CABDD', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF' },
-  { id: 'liverpool', name: 'Liverpool', short: 'Liverpool', kind: 'club', colours: ['#C8102E', '#FFFFFF'], pattern: 'plain', shorts: '#C8102E' },
-  { id: 'chelsea', name: 'Chelsea', short: 'Chelsea', kind: 'club', colours: ['#034694', '#FFFFFF'], pattern: 'plain', shorts: '#034694' },
-  { id: 'arsenal', name: 'Arsenal', short: 'Arsenal', kind: 'club', colours: ['#EF0107', '#FFFFFF'], pattern: 'sleeves', shorts: '#FFFFFF' },
-  { id: 'juventus', name: 'Juventus', short: 'Juventus', kind: 'club', colours: ['#111111', '#FFFFFF'], pattern: 'stripes', shorts: '#FFFFFF' },
+  { id: 'brazil', name: 'Brazil', short: 'Brazil', kind: 'country', flag: '🇧🇷', colours: ['#FFD500', '#009B3A'], pattern: 'plain', shorts: '#1F3FA8', pt: 'do Brasil' },
+  { id: 'argentina', name: 'Argentina', short: 'Argentina', kind: 'country', flag: '🇦🇷', colours: ['#75AADB', '#FFFFFF'], pattern: 'stripes', shorts: '#1B1B3A', pt: 'da Argentina' },
+  { id: 'france', name: 'France', short: 'France', kind: 'country', flag: '🇫🇷', colours: ['#1F3A93', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF', pt: 'da França' },
+  { id: 'germany', name: 'Germany', short: 'Germany', kind: 'country', flag: '🇩🇪', colours: ['#FFFFFF', '#111111'], pattern: 'plain', shorts: '#111111', pt: 'da Alemanha' },
+  { id: 'spain', name: 'Spain', short: 'Spain', kind: 'country', flag: '🇪🇸', colours: ['#C8102E', '#FFC400'], pattern: 'plain', shorts: '#1B2A5C', pt: 'da Espanha' },
+  { id: 'italy', name: 'Italy', short: 'Italy', kind: 'country', flag: '🇮🇹', colours: ['#1F5FBF', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF', pt: 'da Itália' },
+  { id: 'england', name: 'England', short: 'England', kind: 'country', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', colours: ['#FFFFFF', '#1D2D5C'], pattern: 'plain', shorts: '#1D2D5C', pt: 'da Inglaterra' },
+  { id: 'uruguay', name: 'Uruguay', short: 'Uruguay', kind: 'country', flag: '🇺🇾', colours: ['#6CACE4', '#FFFFFF'], pattern: 'plain', shorts: '#111111', pt: 'do Uruguai' },
+  { id: 'portugal', name: 'Portugal', short: 'Portugal', kind: 'country', flag: '🇵🇹', colours: ['#C8102E', '#006600'], pattern: 'plain', shorts: '#006600', pt: 'de Portugal' },
+  { id: 'australia', name: 'Australia', short: 'Australia', kind: 'country', flag: '🇦🇺', colours: ['#FFCD00', '#00843D'], pattern: 'plain', shorts: '#00843D', pt: 'da Austrália' },
+  { id: 'palmeiras', name: 'Palmeiras', short: 'Palmeiras', kind: 'club', colours: ['#006437', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF', pt: 'do Palmeiras' },
+  { id: 'flamengo', name: 'Flamengo', short: 'Flamengo', kind: 'club', colours: ['#C8102E', '#111111'], pattern: 'hoops', shorts: '#FFFFFF', pt: 'do Flamengo' },
+  { id: 'real-madrid', name: 'Real Madrid', short: 'Real Madrid', kind: 'club', colours: ['#FFFFFF', '#1B3A6B'], pattern: 'plain', shorts: '#FFFFFF', pt: 'do Real Madrid' },
+  { id: 'barcelona', name: 'Barcelona', short: 'Barcelona', kind: 'club', colours: ['#A50044', '#004D98'], pattern: 'stripes', shorts: '#004D98', pt: 'do Barcelona' },
+  { id: 'bayern', name: 'Bayern Munich', short: 'Bayern', kind: 'club', colours: ['#DC052D', '#FFFFFF'], pattern: 'plain', shorts: '#DC052D', pt: 'do Bayern' },
+  { id: 'psg', name: 'Paris Saint-Germain', short: 'PSG', kind: 'club', colours: ['#0B2A5B', '#DA291C'], pattern: 'band', shorts: '#0B2A5B', pt: 'do PSG' },
+  { id: 'man-united', name: 'Manchester United', short: 'Man United', kind: 'club', colours: ['#DA291C', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF', pt: 'do Manchester United' },
+  { id: 'man-city', name: 'Manchester City', short: 'Man City', kind: 'club', colours: ['#6CABDD', '#FFFFFF'], pattern: 'plain', shorts: '#FFFFFF', pt: 'do Manchester City' },
+  { id: 'liverpool', name: 'Liverpool', short: 'Liverpool', kind: 'club', colours: ['#C8102E', '#FFFFFF'], pattern: 'plain', shorts: '#C8102E', pt: 'do Liverpool' },
+  { id: 'chelsea', name: 'Chelsea', short: 'Chelsea', kind: 'club', colours: ['#034694', '#FFFFFF'], pattern: 'plain', shorts: '#034694', pt: 'do Chelsea' },
+  { id: 'arsenal', name: 'Arsenal', short: 'Arsenal', kind: 'club', colours: ['#EF0107', '#FFFFFF'], pattern: 'sleeves', shorts: '#FFFFFF', pt: 'do Arsenal' },
+  { id: 'juventus', name: 'Juventus', short: 'Juventus', kind: 'club', colours: ['#111111', '#FFFFFF'], pattern: 'stripes', shorts: '#FFFFFF', pt: 'da Juventus' },
 ];
 
 export const teamById = (id: string | null | undefined): Team | undefined => TEAMS.find((t) => t.id === id);

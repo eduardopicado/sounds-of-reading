@@ -136,9 +136,16 @@ export function mount(root: HTMLElement): () => void {
     if (sentence) { sfx.land(); say(sentence); }
   });
 
+  /* sentences kept this visit: keeping the same one twice adds nothing, and
+     each tap used to win another sticker */
+  const kept = new Set<string>();
+  const rewarded = new Set<string>();
+
   keepBtn.addEventListener('click', () => {
     const sentence = fullSentence();
     if (!sentence) return;
+    if (kept.has(sentence)) { replay(strip, 'read'); say(sentence); return; }
+    kept.add(sentence);
     savedList.querySelector('.empty')?.remove();
     const row = el('div', { class: 'saved-row' }, el('span', { text: sentence }));
     row.append(
@@ -148,6 +155,7 @@ export function mount(root: HTMLElement): () => void {
         on: {
           click: () => {
             row.remove();
+            kept.delete(sentence);
             if (!savedList.querySelector('.saved-row')) {
               savedList.replaceChildren(el('span', { class: 'empty', text: 'Build one and tap Keep it.' }));
             }
@@ -157,7 +165,12 @@ export function mount(root: HTMLElement): () => void {
     );
     savedList.append(row);
     sfx.right();
-    award(ORDER.map((slot) => chosen[slot]!.sound));
+    /* one sticker per new sentence: removing it and keeping it again is not
+       a new one */
+    if (!rewarded.has(sentence)) {
+      rewarded.add(sentence);
+      award(ORDER.map((slot) => chosen[slot]!.sound));
+    }
   });
 
   savedList.replaceChildren(el('span', { class: 'empty', text: 'Build one and tap Keep it.' }));

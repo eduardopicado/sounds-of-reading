@@ -9,6 +9,7 @@
  * which is why the child is no longer told that "vain" is a made-up word. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -20,6 +21,7 @@ import { award } from '../lib/stickers';
 interface Tile { part: string; real: boolean }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const familySel = el('select', { 'aria-label': 'Word family' });
   const modeSel = el('select', { 'aria-label': 'Which tiles to show' },
     el('option', { value: 'mixed', text: 'Real and silly words', selected: 'selected' }),
@@ -100,6 +102,7 @@ export function mount(root: HTMLElement): () => void {
   }
 
   function load(): void {
+    life.clear();
     const list = available();
     family = list.find((f) => f.id === familySel.value) ?? list[0] ?? null;
     if (!family) {
@@ -173,7 +176,7 @@ export function mount(root: HTMLElement): () => void {
       found.add(tile.part);
       foundEl.textContent = String(found.size);
       if (found.size === family.real.length) {
-        window.setTimeout(() => {
+        life.later(() => {
           const name = family!.kind === 'rime' ? '-' + family!.fixed : family!.fixed + '-';
           win.show(`You built all ${family!.real.length} real words in the ${name} family.`, award([family!.sound])?.face);
           say('Brilliant!');
@@ -193,5 +196,5 @@ export function mount(root: HTMLElement): () => void {
   root.append(node);
   fillFamilies();
   load();
-  return () => win.hide();
+  return () => { life.end(); win.hide(); };
 }
