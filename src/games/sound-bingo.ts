@@ -6,6 +6,7 @@
  * is the card, shuffled. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -24,6 +25,7 @@ interface Cell {
 }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const sizeSel = el('select', { 'aria-label': 'Card size' },
     el('option', { value: '3', text: '3 × 3 card' }),
     el('option', { value: '4', text: '4 × 4 card' }),
@@ -76,6 +78,7 @@ export function mount(root: HTMLElement): () => void {
   let size = 3;
 
   function deal(): void {
+    life.clear();
     size = Number(sizeSel.value);
     const freeIndex = size === 3 ? 4 : -1;
     const need = size * size - (size === 3 ? 1 : 0);
@@ -212,7 +215,7 @@ export function mount(root: HTMLElement): () => void {
     say('Bingo! Well done!');
     const practised = cells.filter((c) => c.marked && c.word).map((c) => c.word!.sound);
     const prize = award(practised)?.face;
-    window.setTimeout(() => win.show(`You filled ${what} in ${calls} words.`, prize), 450);
+    life.later(() => win.show(`You filled ${what} in ${calls} words.`, prize), 450);
   }
 
   callBtn.addEventListener('click', call);
@@ -224,5 +227,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   deal();
-  return () => win.hide();
+  return () => { life.end(); win.hide(); };
 }

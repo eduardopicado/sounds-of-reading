@@ -23,6 +23,11 @@ the prototypes it came from are in `docs/original-games/`.
 - Test at iPad Safari sizes (820×1180 both ways) and 375px wide. Zero console
   errors.
 - Run the content test before committing any content change.
+- A game schedules its timers through `lifetime()` (`src/lib/life.ts`) and
+  ends it on unmount, so nothing it planned — a word, a fanfare, a
+  microphone — happens after he has left the game.
+- A round never shows the same word twice (`uniqueWords`), and a word offered
+  between several sounds must fit only one of them (`fitsAnother`).
 
 ## Commands
 
@@ -30,7 +35,8 @@ the prototypes it came from are in `docs/original-games/`.
 npm run dev              # local dev server
 npm run build            # typecheck, then build to dist/
 npm run validate:content # the content test on its own
-npm test                 # content test, then the Playwright suite
+npm run test:unit        # unit tests for src/lib (audio, lifetime, coach, settings)
+npm test                 # content and unit tests, then the Playwright suite
 ```
 
 ## Layout
@@ -42,14 +48,16 @@ src/content/spans.ts   works out which letters carry a sound; refuses to guess
 src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Shoot)
 src/content/near-words.ts the nearest real words, for wrong answers that need reading
 src/content/handwriting.ts how each letter is written: strokes, families, heights
+src/content/sort-sets.ts the sound sets Sound Sort offers
 src/lib/               speech, sound effects, storage, settings, colour, router,
-                       strokes.ts (judging a traced stroke)
+                       strokes.ts (judging a traced stroke), life.ts (a game's timers)
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/             one file per game, plus home.ts
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
-tests/e2e/             Playwright
+tests/unit/            unit tests for the shared code, in Node with small fakes
+tests/e2e/             Playwright (review.spec.ts: regressions from the 2026-09 review)
 ```
 
 ## Adding words

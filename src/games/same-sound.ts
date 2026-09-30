@@ -15,6 +15,7 @@
  * every word. Nothing is ever asked here that the rule would answer wrongly. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle, spreadAcross } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -26,6 +27,7 @@ import { mark } from '../lib/coach';
 import { CONTRASTS, contrastFor, contrastSpan, obeysRule, type Contrast } from '../content/contrasts';
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const setSel = el('select', { 'aria-label': 'Which pair of spellings' });
   const lenSel = el('select', { 'aria-label': 'How many words' },
     el('option', { value: '8', text: '8 words' }),
@@ -122,6 +124,7 @@ export function mount(root: HTMLElement): () => void {
   const contrastOf = (word: Word): Contrast => contrastFor(word.sound) ?? CONTRASTS[0];
 
   function start(): void {
+    life.clear();
     const levels = setup.filter().levels;
     const groups = chosenContrasts().map((c) => wordsFor(c, levels)).filter((g) => g.length);
     queue = shuffle(spreadAcross(groups, Number(lenSel.value)));
@@ -207,14 +210,14 @@ export function mount(root: HTMLElement): () => void {
       spelled += 1;
       done.set(spelled);
       current = null;
-      window.setTimeout(() => { busy = false; next(); }, 820);
+      life.later(() => { busy = false; next(); }, 820);
       return;
     }
 
     sfx.wrong();
     replay(hand, 'wrong');
     btn.classList.add('over');
-    window.setTimeout(() => btn.classList.remove('over'), 200);
+    life.later(() => btn.classList.remove('over'), 200);
 
     /* first miss gets the rule rather than another blind guess */
     const mid = sound(contrast.middle);
@@ -230,7 +233,7 @@ export function mount(root: HTMLElement): () => void {
       spelled += 1;
       done.set(spelled);
       current = null;
-      window.setTimeout(() => { busy = false; next(); }, 1100);
+      life.later(() => { busy = false; next(); }, 1100);
     }
   }
 
@@ -259,5 +262,5 @@ export function mount(root: HTMLElement): () => void {
   root.append(node);
   fillSets();
   start();
-  return () => undefined;
+  return life.end;
 }

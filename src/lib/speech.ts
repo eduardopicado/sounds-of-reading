@@ -18,7 +18,7 @@
  * even reaching for the object is inside a try. On iOS nothing is spoken until
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
-import { hasClip, playClip } from './audio';
+import { hasClip, playClip, stopClips } from './audio';
 
 let cached: SpeechSynthesisVoice | null = null;
 let unlocked = false;
@@ -220,7 +220,9 @@ export function onVoicesChanged(fn: () => void): () => void {
   return () => voiceListeners.delete(fn);
 }
 
+/** silence: the device voice and any recording. Called when a game is left */
 export function cancelSpeech(): void {
+  stopClips();
   try {
     engine()?.cancel();
   } catch {
@@ -275,6 +277,8 @@ export function say(text: string, options: SayOptions = {}): void {
 }
 
 function speakAloud(text: string, options: SayOptions): void {
+  /* a recording still playing would talk over the device voice */
+  stopClips();
   const synth = engine();
   if (!synth) { options.onEnd?.(); return; }
   try {

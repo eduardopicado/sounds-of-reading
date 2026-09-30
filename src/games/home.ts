@@ -1,4 +1,4 @@
-/* The home screen: ten tiles, and the one place a parent sets up the week.
+/* The home screen: the game tiles, and the one place a parent sets up the week.
  *
  * The child can read simple words, so each tile says what it is as well as
  * showing a picture. Nothing here needs an adult to explain it. */
@@ -8,7 +8,7 @@ import { pick } from '../lib/random';
 import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
-import { chip, confetti } from '../ui/components';
+import { chip, confetti, confirmButton } from '../ui/components';
 import { clearStickers, stickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { closeMove, maybeLevelUp, strongSounds, undoMove, unseenMove, weakSounds } from '../lib/coach';
@@ -207,10 +207,7 @@ export function mount(root: HTMLElement): () => void {
     el('h2', {}, 'Your stickers'),
     book,
     el('div', { class: 'row', style: { marginTop: '10px' } },
-      el('button', {
-        class: 'btn ghost small', type: 'button', text: 'Start a new sticker book',
-        on: { click: () => { clearStickers(); drawBook(); } },
-      })),
+      confirmButton('Start a new sticker book', 'Tap again to clear every sticker', () => { clearStickers(); drawBook(); })),
   );
 
   /* ── which voice reads the words ────────────────────────────────────── */

@@ -214,6 +214,8 @@ test.describe('Roll & Read', () => {
     await expect(page.locator('.bar .n')).toHaveText('1/2');
     await page.getByRole('button', { name: 'Set up this game' }).click();
     await page.getByRole('button', { name: 'Clear tally' }).click();
+    await expect(page.locator('.bar .n')).toHaveText('1/2');
+    await page.getByRole('button', { name: 'Tap again to clear it' }).click();
     await expect(page.locator('.bars .empty')).toBeVisible();
     noProblems(watch);
   });

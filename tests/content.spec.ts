@@ -14,6 +14,8 @@ import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
 import { confusions, tilesFor } from '../src/content/spelling';
 import { FAMILIES, GLYPHS, HEIGHTS, exampleFor, glyph, heightOf } from '../src/content/handwriting';
+import { SORT_SETS } from '../src/content/sort-sets';
+import { fitsAnother, uniqueWords, SOUND_BY_ID } from '../src/content/index';
 import { judge, parsePath, samplePath, type Point } from '../src/lib/strokes';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
@@ -712,5 +714,55 @@ describe('handwriting', () => {
       const w = exampleFor(l);
       if (w) expect(w.text.includes(l)).toBe(true);
     }
+  });
+});
+
+describe('sorting between sounds', () => {
+  it('knows a word that would fit another bin by its letters', () => {
+    const word = (text: string, id: string) => {
+      const w = realWords({ sounds: [id] }).find((x) => x.text === text);
+      if (!w) throw new Error(`${text} is not a ${id} word`);
+      return w;
+    };
+    /* which is a wh word with a ch in it */
+    expect(fitsAnother(word('which', 'wh'), sound('ch'))).toBe(true);
+    /* further has an er after its ur */
+    expect(fitsAnother(word('further', 'ur'), sound('er'))).toBe(true);
+    /* moon's oo is the question in an oo/oo sort, not a trap */
+    expect(fitsAnother(word('moon', 'oo-moon'), sound('oo-book'))).toBe(false);
+    /* nor is them's th in a th/th sort */
+    expect(fitsAnother(word('them', 'th-voiced'), sound('th-unvoiced'))).toBe(false);
+    /* and a word never fits against its own sound */
+    expect(fitsAnother(word('rain', 'ai'), sound('ai'))).toBe(false);
+  });
+
+  it('gives every sort in Sound Sort enough words that fit only one bin', () => {
+    const short: string[] = [];
+    for (const set of SORT_SETS) {
+      expect(set.sounds.every((id) => SOUND_BY_ID.has(id)), set.id).toBe(true);
+      const bins = set.sounds.map(sound);
+      for (const bin of bins) {
+        const clean = uniqueWords(realWords({ sounds: [bin.id] })).filter((w) => !bins.some((o) => fitsAnother(w, o)));
+        if (clean.length < 6) short.push(`${set.id}: ${bin.id} has ${clean.length}`);
+      }
+    }
+    expect(short).toEqual([]);
+  });
+
+  it('never lets a word into a sort where it fits two bins', () => {
+    const both: string[] = [];
+    for (const set of SORT_SETS) {
+      const bins = set.sounds.map(sound);
+      const inBins = bins.map((b) => realWords({ sounds: [b.id] }).filter((w) => !bins.some((o) => fitsAnother(w, o))));
+      const seen = new Map<string, string>();
+      inBins.forEach((words, i) => {
+        for (const w of words) {
+          const other = seen.get(w.text);
+          if (other && other !== bins[i].id) both.push(`${set.id}: ${w.text} in ${other} and ${bins[i].id}`);
+          seen.set(w.text, bins[i].id);
+        }
+      });
+    }
+    expect(both).toEqual([]);
   });
 });

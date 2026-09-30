@@ -18,7 +18,7 @@
  * last 25 at that level: high enough that a lucky run does not count, low
  * enough that one slip of the finger does not hold him back. */
 
-import type { Level } from '../content/index';
+import { uniqueWords, type Level } from '../content/index';
 import { read, write } from './storage';
 import { settings, updateSettings } from './settings';
 import { shuffle } from './random';
@@ -88,8 +88,10 @@ export const strongSounds = (): string[] =>
  * he is finding hard. Never more than half: a round made only of the things
  * he gets wrong is no fun, and fun is what keeps him playing.
  */
-export function coachPick<T extends { sound: string }>(pool: readonly T[], n: number): T[] {
-  const mixed = shuffle(pool);
+export function coachPick<T extends { sound: string; text: string }>(pool: readonly T[], n: number): T[] {
+  /* one of each word: snap is listed under s, a, n and p, and a round that
+     asks for it twice looks broken */
+  const mixed = uniqueWords(shuffle(pool));
   const weak = new Set(settings().coach ? weakSounds() : []);
   if (!weak.size) return mixed.slice(0, n);
   const hard = mixed.filter((w) => weak.has(w.sound));

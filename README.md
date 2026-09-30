@@ -1,7 +1,7 @@
 # Sounds of Reading
 
-Seven small phonics games for a six-year-old learning to read, played on an
-iPad from the home screen and shared with his school friends.
+Sixteen small games for a six-year-old learning to read, spell and write,
+played on an iPad from the home screen and shared with his school friends.
 
 No accounts, no tracking, no ads, no third-party requests. It works offline
 once opened, and nothing ever leaves the device.
@@ -17,6 +17,15 @@ once opened, and nothing ever leaves the device.
 | **Roll & Read** | Taps a die, reads the words it lands on aloud. A parent taps ✅ or 🔁, and a bar chart builds up. |
 | **Real or Silly?** | Reads a word with no help, then decides whether it is a word at all. |
 | **Sentence Smash** | Picks a phrase from each of four rows and hears the silly sentence read back. |
+| **Same Sound, Two Ways** | Hears a word with its vowel missing and chooses the spelling: ai or ay, oi or oy. |
+| **Tricky Words** | Sees a sight word for a moment, then finds it among four lookalikes. |
+| **Sound Rocket** | Steers a rocket to catch falling words with the sound and dodge the rest. |
+| **Penalty Shootout** | Reads the word to score past the keeper, then hears one and dives to save it. |
+| **Pass and Shoot** | Passes along a line of players, one sound each, then shoots at the word he blended. |
+| **Be the Commentator** | Reads a football commentary line with expression, records it and hears it back. |
+| **Build the Word** | Hears a word and builds it from sound or letter tiles. |
+| **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. |
+| **Tall, Small, Tail** | Sorts letters by where they sit on the lines, then finds every b among b d p q. |
 
 Finishing a round anywhere wins a sticker for the sound it practised, and the
 stickers collect in a book on the home screen. It is the only thing that keeps

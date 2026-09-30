@@ -25,12 +25,13 @@
  * loud to whoever is with him and the game carries on. */
 
 import { el } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { sfx } from '../lib/sfx';
 import { read } from '../lib/storage';
 import { ALL_COMMENTARY, LEVELS, type CommentaryLine, type Level, type Mood } from '../content/index';
 import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
-import { canRecord, closeMic, forget, openMic, play, record, type Recording, type Take } from '../lib/recorder';
+import { canRecord, closeMic, forget, openMic, play, record, stopPlaying, type Recording, type Take } from '../lib/recorder';
 import { TEAMS, YOU, teamById } from './teams';
 
 /** the longest take, in seconds: plenty for one line, not so long a forgotten
@@ -46,6 +47,7 @@ const MOODS: Record<Mood, { face: string; say: string }> = {
 type Phase = 'ready' | 'recording' | 'recorded' | 'nomic' | 'over';
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const lenSel = el('select', { 'aria-label': 'How many lines' },
     el('option', { value: '5', text: '5 lines' }),
     el('option', { value: '8', text: '8 lines' }),
@@ -174,7 +176,13 @@ export function mount(root: HTMLElement): () => void {
     busy = true;
     /* the first press asks for the microphone, inside his tap, which is what
        iOS needs to allow it */
-    if (!mic) mic = await openMic();
+    if (!mic) {
+      const opened = await openMic();
+      /* the permission prompt can sit there while he leaves the game; a
+         microphone granted after that must be let go at once, not left on */
+      if (!life.alive()) { closeMic(opened); return; }
+      mic = opened;
+    }
     busy = false;
     if (!mic) { micRefused = true; show('nomic'); return; }
     recording = record(mic, TAKE_LIMIT, () => { void stopRecording(); });
@@ -188,6 +196,7 @@ export function mount(root: HTMLElement): () => void {
     const r = recording;
     recording = null;
     const take = await r.stop();
+    if (!life.alive()) { forget(take); return; }
     forget(takes[index]);
     takes[index] = take;
     show('recorded');
@@ -202,6 +211,7 @@ export function mount(root: HTMLElement): () => void {
     playBtn.disabled = true;
     sfx.crowd(take.seconds + 0.6);
     await play(take);
+    if (!life.alive()) return;
     if (lines[index]?.mood === 'excited') sfx.cheer();
     playBtn.disabled = false;
     busy = false;
@@ -267,7 +277,7 @@ export function mount(root: HTMLElement): () => void {
     reelBtn.hidden = !takes.some(Boolean);
     results.hidden = false;
     sfx.whistle();
-    window.setTimeout(() => { sfx.win(); confetti(); }, 350);
+    life.later(() => { sfx.win(); confetti(); }, 350);
   }
 
   /** every take in order, a breath between, the crowd all the way through */
@@ -277,6 +287,8 @@ export function mount(root: HTMLElement): () => void {
     reelBtn.disabled = true;
     sfx.whistle();
     for (let i = 0; i < lines.length; i += 1) {
+      /* leaving mid-reel stops the reel */
+      if (!life.alive()) return;
       const take = takes[i];
       if (!take) continue;
       reel.children[i]?.classList.add('playing');
@@ -294,6 +306,8 @@ export function mount(root: HTMLElement): () => void {
   root.append(node);
   start();
   return () => {
+    life.end();
+    stopPlaying();
     void recording?.stop();
     for (const t of takes) forget(t);
     closeMic(mic);

@@ -316,3 +316,6 @@ select {
 .coach-move .btn.ghost { color: var(--ink); border-color: rgba(20, 49, 47, .4); }
 
 .coach-report { width: 100%; margin: 2px 0 8px; }
+
+/* a button that has been tapped once and is asking to be sure */
+.btn.asking, .btn.ghost.asking { background: #B93A12; border-color: #B93A12; color: #fff; }

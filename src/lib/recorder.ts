@@ -108,12 +108,17 @@ export function record(stream: MediaStream, limit: number, onAutoStop: () => voi
   return { stop };
 }
 
+/** the take playing now, so leaving the game can stop it mid-line */
+let playing: { audio: HTMLAudioElement; finish: () => void } | null = null;
+
 /** play a take; resolves when it ends, or at once if it cannot play */
 export function play(take: Take): Promise<void> {
+  stopPlaying();
   return new Promise((resolve) => {
     try {
       const audio = new Audio(take.url);
-      const finish = () => resolve();
+      const finish = () => { if (playing?.audio === audio) playing = null; resolve(); };
+      playing = { audio, finish };
       audio.onended = finish;
       audio.onerror = finish;
       /* a take that will not play must not hold the game up */
@@ -124,6 +129,15 @@ export function play(take: Take): Promise<void> {
       resolve();
     }
   });
+}
+
+/** stop the take that is playing, if any; its promise resolves */
+export function stopPlaying(): void {
+  const p = playing;
+  playing = null;
+  if (!p) return;
+  try { p.audio.pause(); } catch { /* already stopped */ }
+  p.finish();
 }
 
 export function forget(take: Take | null | undefined): void {

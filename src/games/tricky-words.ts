@@ -27,6 +27,7 @@
  * become is plain matching. Nothing is scored down and nothing is lost. */
 
 import { el, prefersReducedMotion, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -89,6 +90,7 @@ function startingSets(): string[] {
 }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   let chosen: string[] = startingSets();
 
   const setRow = el('div', { class: 'row' });
@@ -167,6 +169,7 @@ export function mount(root: HTMLElement): () => void {
   const pool = (): SightWord[] => ALL_SIGHT_WORDS.filter((w) => chosen.includes(w.set));
 
   function start(): void {
+    life.clear();
     window.clearTimeout(hideTimer);
     const words = pool();
     queue = shuffle(words).slice(0, Number(lenSel.value));
@@ -250,14 +253,14 @@ export function mount(root: HTMLElement): () => void {
       found += 1;
       done.set(found);
       current = null;
-      window.setTimeout(() => { busy = false; next(); }, 950);
+      life.later(() => { busy = false; next(); }, 950);
       return;
     }
 
     sfx.wrong();
     replay(hand, 'wrong');
     btn.classList.add('over');
-    window.setTimeout(() => btn.classList.remove('over'), 200);
+    life.later(() => btn.classList.remove('over'), 200);
     /* the word comes back and stays: he is never left guessing blind */
     showWord(word);
   }
@@ -285,5 +288,5 @@ export function mount(root: HTMLElement): () => void {
   drawSets();
   root.append(node);
   start();
-  return () => window.clearTimeout(hideTimer);
+  return () => { life.end(); window.clearTimeout(hideTimer); };
 }

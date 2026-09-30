@@ -6,6 +6,8 @@ export interface Route {
   mount: (root: HTMLElement) => (() => void) | void;
 }
 
+import { cancelSpeech } from './speech';
+
 let routes: Route[] = [];
 let unmount: (() => void) | void;
 let host: HTMLElement;
@@ -20,6 +22,8 @@ function render(): void {
   } catch {
     /* a game that fails to clean up must not stop the next one opening */
   }
+  /* a word being said as he leaves stops with the game that said it */
+  cancelSpeech();
   host.replaceChildren();
   /* a win's confetti should not rain on the next game */
   for (const layer of document.querySelectorAll('.confetti')) layer.remove();

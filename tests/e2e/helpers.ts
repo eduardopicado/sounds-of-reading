@@ -44,3 +44,41 @@ export async function expectTapTargets(page: Page, selector: string): Promise<vo
   const small = boxes.filter((b) => b.h > 0 && (b.h < 40 || b.w < 40));
   expect(small, 'tap targets under 40px').toEqual([]);
 }
+
+/** a speech engine that writes down what it says, so a test can hear it too */
+export async function recordSpeech(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const spoken: string[] = [];
+    (window as unknown as { __said: string[] }).__said = spoken;
+    class FakeUtterance {
+      text: string; lang = ''; rate = 1; pitch = 1; volume = 1; voice: unknown = null;
+      onend: (() => void) | null = null; onerror: (() => void) | null = null;
+      constructor(text: string) { this.text = text; }
+    }
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'karen' }],
+        speak: (u: FakeUtterance) => { if (u.text) spoken.push(u.text); window.setTimeout(() => u.onend?.(), 0); },
+        cancel: () => undefined,
+        addEventListener: () => undefined,
+      },
+    });
+  });
+}
+
+/** everything said so far */
+export const said = (page: Page): Promise<string[]> =>
+  page.evaluate(() => [...(window as unknown as { __said: string[] }).__said]);
+
+/** save these on the device before the app starts, once per tab: the offline
+ *  worker reloads the page when it first takes over, and a seed that ran
+ *  again then would put back whatever the test had just changed */
+export async function seed(page: Page, items: Record<string, unknown>): Promise<void> {
+  await page.addInitScript((pairs) => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    for (const [k, v] of Object.entries(pairs)) localStorage.setItem(`sor:${k}`, JSON.stringify(v));
+  }, items);
+}

@@ -169,7 +169,18 @@ export const MIRRORS = [...'bdpq'];
    a picture that starts with the letter if there is one, else one that ends
    with it (x: box). */
 
-const WITH_PICTURES = picturable(REAL_WORDS).slice().sort((a, b) => a.level - b.level || a.text.length - b.text.length);
+/* A picture only says one word if no other word uses it: "c as in 🛏 cot"
+   reads as "c as in bed". So words whose picture is theirs alone come first. */
+const WORDS_PER_PICTURE = new Map<string, Set<string>>();
+for (const w of picturable(REAL_WORDS)) {
+  const set = WORDS_PER_PICTURE.get(w.picture!) ?? new Set<string>();
+  set.add(w.text);
+  WORDS_PER_PICTURE.set(w.picture!, set);
+}
+const ownPicture = (w: Word): number => (WORDS_PER_PICTURE.get(w.picture!)?.size === 1 ? 0 : 1);
+
+const WITH_PICTURES = picturable(REAL_WORDS).slice()
+  .sort((a, b) => ownPicture(a) - ownPicture(b) || a.level - b.level || a.text.length - b.text.length);
 
 export function exampleFor(ch: string): Word | null {
   const l = ch.toLowerCase();

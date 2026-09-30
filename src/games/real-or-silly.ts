@@ -9,6 +9,7 @@
  * to not secretly be a real word. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -20,6 +21,7 @@ import { pro } from '../lib/settings';
 import { coachPick, mark } from '../lib/coach';
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   const lenSel = el('select', { 'aria-label': 'How many words' },
     el('option', { value: '8', text: '8 words' }),
     el('option', { value: '12', text: '12 words', selected: 'selected' }),
@@ -76,6 +78,7 @@ export function mount(root: HTMLElement): () => void {
   let log: { word: Word; correct: boolean; usedHelp: boolean }[] = [];
 
   function start(): void {
+    life.clear();
     const filter = setup.filter();
     const wanted = Number(lenSel.value);
     const half = Math.ceil(wanted / 2);
@@ -147,7 +150,7 @@ export function mount(root: HTMLElement): () => void {
     say(word.text);
     log.push({ word, correct, usedHelp });
     index += 1;
-    window.setTimeout(next, 1600);
+    life.later(next, 1600);
   }
 
   function finish(): void {
@@ -184,5 +187,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   start();
-  return () => undefined;
+  return life.end;
 }
