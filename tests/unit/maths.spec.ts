@@ -2,6 +2,9 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  BOARD_STEPS, GRID, boardQuestion, turned,
+  SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
+  FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
   JUMP_STEPS, jumpQuestion, jumpsFor,
@@ -469,5 +472,91 @@ describe('Fan Survey', () => {
 
   it('keeps column graphs for Year 2', () => {
     expect(SURVEY_STEPS.slice(0, 3).map((s) => s.task)).toEqual(['count', 'tally', 'most']);
+  });
+});
+
+describe('Fact Family Formation', () => {
+  it('makes four true facts from three numbers', () => {
+    const f = family(3, 5);
+    expect(f.map((x) => factText(x))).toEqual(['3 + 5 = 8', '5 + 3 = 8', '8 − 3 = 5', '8 − 5 = 3']);
+    expect(factText(f[2], 1)).toBe('8 − ? = 5');
+  });
+
+  it('asks a fact of the same family, true once the gap is filled', () => {
+    for (const step of FACT_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = factQuestion(step);
+        expect(q.a + q.b).toBe(q.whole);
+        expect(q.a).not.toBe(q.b);
+        expect(q.whole).toBeLessThanOrEqual(step.max);
+        expect(Math.min(q.a, q.b)).toBeGreaterThanOrEqual(step.tens ? 10 : 1);
+        const { op, x, y, z } = q.asked;
+        expect(op === '+' ? x + y : x - y).toBe(z);
+        expect([x, y, z][q.gap]).toBe(q.answer);
+        if (step.tens) for (const n of [x, y, z]) expect(n % 10).toBe(0);
+        if (step.kind === 'turnaround') expect(q.asked.op).toBe('+');
+        if (step.kind === 'take') expect(q.asked.op).toBe('-');
+        if (step.kind === 'missing') { expect(q.known).toBeUndefined(); expect(q.gap).not.toBe(2); }
+      }
+    }
+  });
+});
+
+describe('Kit and Ball Shapes', () => {
+  it('knows the sides of every shape', () => {
+    expect(['circle', 'triangle', 'square', 'rectangle', 'pentagon', 'hexagon'].map(sidesOf)).toEqual([0, 3, 4, 4, 5, 6]);
+  });
+
+  it('always offers the answer among different choices', () => {
+    for (const step of SHAPE_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = shapeQuestion(step);
+        expect(q.options).toContain(q.answer);
+        expect(new Set(q.options).size).toBe(q.options.length);
+        if (step.task === 'sides') expect(q.answer).toBe(String(sidesOf(q.shape)));
+        if (step.task === 'solid') expect(SHAPES_3D).toContain(q.answer);
+        if (step.task === 'symmetry') expect(q.answer).toBe(q.same ? 'Yes' : 'No');
+        /* "which shape has 4 sides" must have one answer: never a square and a rectangle together */
+        if (step.task === 'which') expect(new Set(q.options.map(sidesOf)).size).toBe(q.options.length);
+      }
+    }
+  });
+
+  it('keeps pentagons, hexagons and symmetry for Year 2', () => {
+    expect(SHAPE_STEPS[0].shapes).not.toContain('hexagon');
+    expect(SHAPE_STEPS.slice(4).map((s) => s.task)).toContain('symmetry');
+  });
+});
+
+describe("Coach's Whiteboard", () => {
+  it('turns the right way', () => {
+    expect(turned('up', 'quarter-clockwise')).toBe('right');
+    expect(turned('up', 'quarter-anticlockwise')).toBe('left');
+    expect(turned('left', 'half')).toBe('right');
+    expect(turned('left', 'quarter-clockwise')).toBe('up');
+  });
+
+  it('keeps every move on the grid, and lands where the moves say', () => {
+    for (const step of BOARD_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = boardQuestion(step);
+        if (step.task === 'side') { expect(q.ball).not.toBe(q.keeper); expect(q.answer).toBe(q.ball < q.keeper ? 'left' : 'right'); }
+        if (step.task === 'move' || step.task === 'moves') {
+          expect(q.moves).toHaveLength(step.task === 'move' ? 1 : 2);
+          let [x, y] = q.start;
+          for (const m of q.moves) {
+            expect(m.n).toBeGreaterThanOrEqual(1);
+            expect(m.n).toBeLessThanOrEqual(3);
+            x += m.dir === 'right' ? m.n : m.dir === 'left' ? -m.n : 0;
+            y += m.dir === 'down' ? m.n : m.dir === 'up' ? -m.n : 0;
+            for (const v of [x, y]) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+          }
+          expect(q.answer).toBe(`${x},${y}`);
+          /* two moves go along different lines: across, then up or down */
+          if (q.moves.length === 2) expect(['left', 'right'].includes(q.moves[0].dir)).not.toBe(['left', 'right'].includes(q.moves[1].dir));
+        }
+        if (step.task === 'turn') expect(q.answer).toBe(turned(q.facing, q.turn));
+      }
+    }
   });
 });

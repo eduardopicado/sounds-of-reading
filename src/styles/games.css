@@ -1222,3 +1222,75 @@
 .fs-flag { font-size: 34px; text-anchor: middle; }
 .fs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 700 15px var(--display); }
 .mx-choice.word { font-size: clamp(20px, 5vw, 28px); }
+
+/* ── Fact Family Formation ─────────────────────────────────────────────── */
+
+.ff-formation {
+  display: grid; justify-items: center; gap: 4px; width: min(100%, 360px); padding: 14px 10px 6px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+}
+.ff-parts { display: flex; gap: clamp(30px, 14vw, 70px); }
+.ff-player { position: relative; display: grid; place-items: center; }
+.ff-number {
+  position: absolute; top: 36%; left: 50%; translate: -50% 0;
+  min-width: 1.6em; padding: 0 4px; border-radius: 8px; background: rgba(255, 246, 231, .92);
+  color: var(--ink); font: 800 24px var(--display); text-align: center;
+}
+.ff-player.whole .ff-number { font-size: 28px; }
+.ff-formation.explain .ff-number { background: var(--mustard); }
+.ff-known { margin: 0; color: var(--paper); font: 700 clamp(20px, 5vw, 26px) var(--display); min-height: 1.2em; }
+
+/* ── Kit and Ball Shapes ───────────────────────────────────────────────── */
+
+.ks-board {
+  display: grid; justify-items: center; width: min(100%, 560px); padding: 14px; border-radius: var(--radius);
+  background: var(--paper); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.ks-shape { width: min(56vw, 220px); height: auto; }
+.ks-shape.small { width: min(18vw, 90px); }
+.ks-fill { fill: #3FA07A; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.ks-corner { fill: var(--mustard); stroke: var(--ink); stroke-width: 2; opacity: 0; }
+.ks-board.explain .ks-corner { opacity: 1; }
+.ks-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.ks-pick { display: grid; justify-items: center; gap: 2px; font: 700 14px var(--display); color: var(--ink); }
+.ks-ball-edge { fill: none; stroke: var(--ink); stroke-width: 4; }
+.ks-seam { stroke: var(--ink); stroke-width: 3; }
+.ks-patch { fill: var(--ink); }
+.ks-top { fill: #8FC3E8; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-left { fill: #4E8FC4; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-right { fill: #33709F; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-base { fill: #C55B12; stroke: var(--ink); stroke-width: 3; }
+.ks-cone { fill: #FF7A1A; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-stripe { fill: #fff; }
+.ks-shirt { stroke: none; }
+.ks-outline { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.ks-mirror { stroke: #C9452E; stroke-width: 3; stroke-dasharray: 10 7; }
+
+/* ── Coach's Whiteboard ────────────────────────────────────────────────── */
+
+.cw-board {
+  display: grid; justify-items: center; width: min(100%, 560px); padding: 14px; border-radius: var(--radius);
+  background: #F7F9FA; box-shadow: inset 0 0 0 6px #B9C2CA, 0 6px 0 rgba(0, 0, 0, .25);
+}
+.cw-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; width: 100%; align-items: end; }
+.cw-spot { display: grid; place-items: center; min-height: 92px; border-bottom: 4px solid #2E8F52; }
+.cw-ball { font-size: 40px; }
+.cw-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: min(100%, 360px); }
+.cw-cell {
+  display: grid; place-items: center; aspect-ratio: 1; border: 2px solid #B9C2CA; border-radius: 8px;
+  background: #fff; color: #2E6FB0; font: 800 26px var(--display); cursor: pointer;
+}
+.cw-cell.start { background: #E7F3EA; }
+.cw-cell.path { background: #E2EEF9; }
+.cw-cell.end { background: var(--mint); color: var(--ink); }
+.cw-cell.wrong { background: #F3C3B4; }
+.cw-cell .pk-player { width: 70%; height: auto; }
+.cw-turn { display: flex; align-items: center; gap: 18px; }
+.cw-facing { width: min(40vw, 160px); height: auto; }
+.cw-arrow { fill: #2E6FB0; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; transition: transform .6s; }
+.cw-turn-sign { font: 800 34px var(--display); color: var(--ink); }
+.cw-shapes { width: 100%; height: auto; }
+.cw-shape { fill: #2E6FB0; stroke: var(--ink); stroke-width: 3; }
+.cw-shape.after { fill: #E0703A; }
+.cw-move { fill: none; stroke: #7A8590; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+@media (prefers-reduced-motion: reduce) { .cw-arrow { transition: none; } }

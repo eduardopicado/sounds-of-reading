@@ -639,9 +639,109 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText(`That's ${answer} more.`);
   });
 
+  test('Fact Family Formation: a whole round', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'fact-family');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.ff-formation').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Fact Family Formation: a miss says the family', async ({ page }) => {
+    await seed(page, { 'maths-step:fact-family': 1 });
+    await startGame(page, 'fact-family');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ff-known')).toContainText('so…');
+    await expect(page.locator('.mx-sum')).toContainText('−');
+    const answer = Number(await page.locator('.ff-formation').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText('make');
+    await expect(page.locator('.mx-sum')).not.toContainText('?');
+  });
+
+  test('Year 2: Fact Family Formation, missing tens', async ({ page }) => {
+    await seed(page, { 'maths-step:fact-family': 5 });
+    await startGame(page, 'fact-family');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ff-number', { hasText: '?' })).toHaveCount(1);
+    for (const t of await page.locator('.mx-choice').allTextContents()) expect(Number(t) % 10).toBe(0);
+    await tapNumber(page, Number(await page.locator('.ff-formation').getAttribute('data-answer')));
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+  });
+
+  test('Kit and Ball Shapes: a whole round', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'kit-shapes');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await page.locator(`.mx-choice[data-n="${await page.locator('.ks-board').getAttribute('data-answer')}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Kit and Ball Shapes: a miss on sides lights up the corners', async ({ page }) => {
+    await seed(page, { 'maths-step:kit-shapes': 1 });
+    await startGame(page, 'kit-shapes');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = await page.locator('.ks-board').getAttribute('data-answer');
+    await expect(page.locator('.ks-corner')).toHaveCount(Number(answer));
+    await page.locator('.mx-choice').filter({ hasNotText: answer! }).first().click();
+    await expect(page.locator('.ks-board.explain .ks-corner').first()).toBeVisible();
+    await expect(page.locator('.mx-note')).toContainText(`${answer} sides and ${answer} corners`);
+  });
+
+  test('Year 2: is the shirt the same on both sides?', async ({ page }) => {
+    await seed(page, { 'maths-step:kit-shapes': 5 });
+    await startGame(page, 'kit-shapes');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ks-mirror')).toHaveCount(1);
+    const answer = await page.locator('.ks-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText(answer === 'Yes' ? 'like a mirror' : 'No:');
+  });
+
+  test("Coach's Whiteboard: a whole round", async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'coach-whiteboard');
+    await playRound(page, async () => {
+      const board = page.locator('.cw-board');
+      await expect(page.locator('.mx-choice, .cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+      const answer = await board.getAttribute('data-answer');
+      if (await page.locator('.cw-grid').count()) await page.locator(`.cw-cell[data-at="${answer}"]`).click();
+      else await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test("Coach's Whiteboard: a wrong square shows the path", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 2 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell').first()).toBeEnabled({ timeout: 10000 });
+    const answer = await page.locator('.cw-board').getAttribute('data-answer');
+    await page.locator(`.cw-cell:not([data-at="${answer}"])`).first().click();
+    await expect(page.locator('.cw-cell.wrong')).toHaveCount(1);
+    await expect(page.locator(`.cw-cell.end[data-at="${answer}"]`)).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toContainText('Count the squares');
+  });
+
+  test("Year 2: Coach's Whiteboard turns, and flips, slides and turns", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 3 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    const answer = await page.locator('.cw-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText('leaves him facing');
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(11);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(14);
   });
 });

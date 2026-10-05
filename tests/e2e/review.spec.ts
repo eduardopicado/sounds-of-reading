@@ -18,6 +18,9 @@ const GAMES = [
   'jump-line',
   'match-clock',
   'fan-survey',
+  'fact-family',
+  'kit-shapes',
+  'coach-whiteboard',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */

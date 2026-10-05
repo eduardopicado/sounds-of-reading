@@ -764,3 +764,249 @@ export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQ
     return { votes, team, other, answer };
   }
 }
+
+/* ── Fact Family Formation: adding and taking away undo each other ──── */
+
+export interface FactStep extends Step {
+  /**
+   * turnaround: 3 + 5 = 8, so 5 + 3 = ?;
+   * take: 3 + 5 = 8, so 8 − 5 = ?;
+   * any: one fact known, any other fact of the family asked;
+   * missing: a number missing from the middle of a fact (? + 5 = 8).
+   */
+  kind: 'turnaround' | 'take' | 'any' | 'missing';
+  max: 10 | 20 | 100;
+  /** whole tens only (Year 2, to 100) */
+  tens?: boolean;
+}
+
+export const FACT_STEPS: FactStep[] = [
+  { name: 'Turnarounds', kind: 'turnaround', max: 10 },
+  { name: 'Take it back', kind: 'take', max: 10 },
+  { name: 'Families to 20', kind: 'any', max: 20 },
+  /* Year 2: missing numbers, and families of tens to 100 */
+  { name: 'Missing numbers', kind: 'missing', max: 20 },
+  { name: 'Families of tens', kind: 'any', max: 100, tens: true },
+  { name: 'Missing tens', kind: 'missing', max: 100, tens: true },
+];
+
+/** a fact as its three numbers: a + b = whole, or whole − a = b */
+export interface Fact { op: '+' | '-'; x: number; y: number; z: number }
+
+export interface FactQuestion {
+  a: number;
+  b: number;
+  whole: number;
+  /** the fact he is told, if any */
+  known?: Fact;
+  /** the fact he finishes, and which of its three places is the gap */
+  asked: Fact;
+  gap: 0 | 1 | 2;
+  answer: number;
+}
+
+/** the four facts of a family */
+export const family = (a: number, b: number): Fact[] => [
+  { op: '+', x: a, y: b, z: a + b },
+  { op: '+', x: b, y: a, z: a + b },
+  { op: '-', x: a + b, y: a, z: b },
+  { op: '-', x: a + b, y: b, z: a },
+];
+
+export const factText = (f: Fact, gap?: number): string =>
+  [f.x, f.op === '+' ? '+' : '−', f.y, '=', f.z].map((v, i) => (i === [0, 2, 4][gap ?? -1] ? '?' : String(v))).join(' ');
+
+export function factQuestion(step: FactStep, last?: FactQuestion): FactQuestion {
+  for (;;) {
+    const unit = step.tens ? 10 : 1;
+    const whole = unit * rand(step.tens ? 3 : 3, step.max / unit);
+    const a = unit * rand(1, whole / unit - 1);
+    const b = whole - a;
+    /* a double has only two facts, and a turnaround of it is no question */
+    if (a === b) continue;
+    const facts = family(a, b);
+    let known: Fact | undefined = facts[0];
+    let asked: Fact;
+    let gap: 0 | 1 | 2 = 2;
+    if (step.kind === 'turnaround') asked = facts[1];
+    else if (step.kind === 'take') asked = pick([facts[2], facts[3]]);
+    else if (step.kind === 'any') asked = pick(facts.slice(1));
+    else {
+      known = undefined;
+      asked = pick(facts);
+      gap = pick([0, 1] as const);
+    }
+    const answer = [asked.x, asked.y, asked.z][gap];
+    if (last && last.whole === whole && last.a === a && last.answer === answer) continue;
+    return { a, b, whole, known, asked, gap, answer };
+  }
+}
+
+/* ── Kit and Ball Shapes: 2D shapes, 3D objects, symmetry ────────────── */
+
+export interface Shape2D { name: string; sides: number }
+
+/** the flat shapes, with the sides (and so corners) each has; a circle has none */
+export const SHAPES_2D: Shape2D[] = [
+  { name: 'circle', sides: 0 },
+  { name: 'triangle', sides: 3 },
+  { name: 'square', sides: 4 },
+  { name: 'rectangle', sides: 4 },
+  { name: 'pentagon', sides: 5 },
+  { name: 'hexagon', sides: 6 },
+];
+
+/** the solid objects, each as something from the pitch */
+export const SHAPES_3D = ['sphere', 'cube', 'cylinder', 'cone', 'rectangular prism'] as const;
+export type Shape3D = typeof SHAPES_3D[number];
+
+export interface ShapeStep extends Step {
+  /**
+   * name: what is this flat shape called;
+   * sides: how many sides (or corners) has it;
+   * which: which shape has this many sides;
+   * solid: what is this object called;
+   * symmetry: is this shirt the same on both sides of the line?
+   */
+  task: 'name' | 'sides' | 'which' | 'solid' | 'symmetry';
+  /** the flat shapes this step uses */
+  shapes: string[];
+}
+
+export const SHAPE_STEPS: ShapeStep[] = [
+  { name: 'Name the shape', task: 'name', shapes: ['circle', 'triangle', 'square', 'rectangle'] },
+  { name: 'Sides and corners', task: 'sides', shapes: ['triangle', 'square', 'rectangle', 'pentagon', 'hexagon'] },
+  { name: 'Which shape?', task: 'which', shapes: ['triangle', 'square', 'pentagon', 'hexagon'] },
+  { name: 'Balls, cones and cans', task: 'solid', shapes: [] },
+  /* Year 2: more shapes, and symmetry */
+  { name: 'More shapes', task: 'name', shapes: SHAPES_2D.map((s) => s.name) },
+  { name: 'Same on both sides?', task: 'symmetry', shapes: [] },
+];
+
+export interface ShapeQuestion {
+  shape: string;
+  /** for sides: ask about sides or corners */
+  corners: boolean;
+  /** for symmetry: is the design the same both sides */
+  same: boolean;
+  /** the answer as its button says it */
+  answer: string;
+  options: string[];
+}
+
+export const sidesOf = (name: string): number => SHAPES_2D.find((s) => s.name === name)?.sides ?? 0;
+
+export function shapeQuestion(step: ShapeStep, last?: ShapeQuestion): ShapeQuestion {
+  for (;;) {
+    let shape = step.shapes.length ? pick(step.shapes) : pick([...SHAPES_3D]);
+    const corners = Math.random() < 0.5;
+    const same = Math.random() < 0.5;
+    let answer: string;
+    let options: string[];
+    if (step.task === 'name') {
+      answer = shape;
+      options = [shape, ...shuffle(step.shapes.filter((s) => s !== shape)).slice(0, 3)];
+    } else if (step.task === 'sides') {
+      answer = String(sidesOf(shape));
+      options = ['3', '4', '5', '6'];
+    } else if (step.task === 'which') {
+      answer = shape;
+      options = [...step.shapes];
+    } else if (step.task === 'solid') {
+      answer = shape;
+      options = [shape, ...shuffle(SHAPES_3D.filter((s) => s !== shape)).slice(0, 3)];
+    } else {
+      shape = 'shirt';
+      answer = same ? 'Yes' : 'No';
+      options = ['Yes', 'No'];
+    }
+    const q = { shape, corners, same, answer, options: step.task === 'symmetry' || step.task === 'sides' ? options : shuffle(options) };
+    if (last && last.shape === q.shape && last.answer === q.answer && step.task !== 'symmetry') continue;
+    return q;
+  }
+}
+
+/* ── Coach's Whiteboard: position, directions and turns ──────────────── */
+
+export type Dir = 'up' | 'right' | 'down' | 'left';
+export const DIRS: Dir[] = ['up', 'right', 'down', 'left'];
+const STEP: Record<Dir, [number, number]> = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };
+
+export interface BoardStep extends Step {
+  /**
+   * side: is the ball to the left or the right of the keeper;
+   * move / moves: follow one move (or two) on the grid and tap where he lands;
+   * turn: a quarter or half turn, which way is he facing now;
+   * transform: was the shape flipped, slid or turned?
+   */
+  task: 'side' | 'move' | 'moves' | 'turn' | 'transform';
+}
+
+export const BOARD_STEPS: BoardStep[] = [
+  { name: 'Left or right?', task: 'side' },
+  { name: 'One move', task: 'move' },
+  { name: 'Two moves', task: 'moves' },
+  /* Year 2: turns, and flips, slides and turns of a shape */
+  { name: 'Quarter and half turns', task: 'turn' },
+  { name: 'Flip, slide or turn?', task: 'transform' },
+];
+
+/** the grid on the whiteboard: GRID by GRID squares */
+export const GRID = 5;
+
+export interface Move { dir: Dir; n: number }
+
+export interface BoardQuestion {
+  /** side: where the keeper and the ball are, along a row of GRID spots */
+  keeper: number;
+  ball: number;
+  /** move(s): where he starts, the moves, where he ends */
+  start: [number, number];
+  moves: Move[];
+  end: [number, number];
+  /** turn: which way he faces, the turn, and which way he faces after */
+  facing: Dir;
+  turn: 'quarter-clockwise' | 'quarter-anticlockwise' | 'half';
+  /** transform: what was done to the shape */
+  done: 'flip' | 'slide' | 'turn';
+  answer: string;
+}
+
+export const turned = (d: Dir, turn: BoardQuestion['turn']): Dir =>
+  DIRS[(DIRS.indexOf(d) + (turn === 'half' ? 2 : turn === 'quarter-clockwise' ? 1 : 3)) % 4];
+
+export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuestion {
+  for (;;) {
+    const keeper = rand(1, GRID - 2);
+    let ball = rand(0, GRID - 1);
+    if (ball === keeper) ball = keeper + pick([-1, 1]);
+    const start: [number, number] = [rand(0, GRID - 1), rand(0, GRID - 1)];
+    const moves: Move[] = [];
+    let end: [number, number] = [...start];
+    if (step.task === 'move' || step.task === 'moves') {
+      const axes = shuffle([['left', 'right'], ['up', 'down']] as Dir[][]).slice(0, step.task === 'move' ? 1 : 2);
+      for (const axis of axes) {
+        const dir = pick(axis);
+        const room = dir === 'right' ? GRID - 1 - end[0] : dir === 'left' ? end[0] : dir === 'down' ? GRID - 1 - end[1] : end[1];
+        if (!room) continue;
+        const n = rand(1, Math.min(3, room));
+        moves.push({ dir, n });
+        end = [end[0] + STEP[dir][0] * n, end[1] + STEP[dir][1] * n];
+      }
+      if (moves.length !== axes.length) continue;
+    }
+    const facing = pick(DIRS);
+    const turn = pick(['quarter-clockwise', 'quarter-anticlockwise', 'half'] as const);
+    const done = pick(['flip', 'slide', 'turn'] as const);
+    const answer = step.task === 'side' ? (ball < keeper ? 'left' : 'right')
+      : step.task === 'turn' ? turned(facing, turn)
+        : step.task === 'transform' ? done
+          : `${end[0]},${end[1]}`;
+    const q = { keeper, ball, start, moves, end, facing, turn, done, answer };
+    if (last && last.answer === answer && last.start.join() === start.join()) continue;
+    return q;
+  }
+}
+
+/** a move as it is said: "2 squares up" */
+export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : 'squares'} ${m.dir}`;
