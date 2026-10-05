@@ -179,12 +179,34 @@ export interface FlashStep extends Step {
 }
 
 export const FLASH_STEPS: FlashStep[] = [
-  { name: 'Dice to 5', max: 5, look: 'dice', ms: 1500 },
-  { name: 'Dice to 6, quicker', max: 6, look: 'dice', ms: 900 },
-  { name: 'Ten frame', max: 10, look: 'frame', ms: 1500 },
-  { name: 'Ten frame, quicker', max: 10, look: 'frame', ms: 900 },
-  { name: 'Two dice', max: 12, look: 'two-dice', ms: 1500 },
+  { name: 'Dice to 5', max: 5, look: 'dice', ms: 2000 },
+  { name: 'Dice to 6, quicker', max: 6, look: 'dice', ms: 1400 },
+  { name: 'Ten frame', max: 10, look: 'frame', ms: 2200 },
+  { name: 'Ten frame, quicker', max: 10, look: 'frame', ms: 1500 },
+  { name: 'Two dice', max: 12, look: 'two-dice', ms: 2400 },
 ];
+
+/** the grown-up's choice of pace for Flash Count */
+export type FlashSpeed = 'slow' | 'normal' | 'quick';
+const SPEED: Record<FlashSpeed, number> = { slow: 1.6, normal: 1, quick: 0.7 };
+
+/** how much longer the first look at a step is than its usual time */
+export const FIRST_LOOK = 1.5;
+/** how much shorter each right answer in a row makes the next look */
+export const QUICKER_BY = 0.15;
+
+/**
+ * How long the dots stay up, in ms.
+ *
+ * Not one fixed flash: each step starts with a long look and closes in, 15%
+ * shorter for every right answer in a row, down to the step's own time. A
+ * miss gives the long look back. On top of that sits the grown-up's speed
+ * choice, and a longer look for a device set to reduce motion.
+ */
+export function flashMs(step: FlashStep, rightInARow: number, speed: FlashSpeed = 'normal', reduced = false): number {
+  const lead = Math.max(1, FIRST_LOOK - QUICKER_BY * rightInARow);
+  return Math.round(step.ms * lead * SPEED[speed] * (reduced ? 1.5 : 1));
+}
 
 export interface FlashQuestion { n: number; /** for two dice, each die */ parts: number[] }
 

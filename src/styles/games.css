@@ -986,3 +986,10 @@
 }
 .mx-pitch.twenty .mx-spot:nth-child(n + 11) { translate: 0 12px; }
 .mx-pitch.twenty { padding-bottom: 28px; }
+
+/* before each round: the step he is on, and Start */
+.mx-ready { display: grid; justify-items: center; gap: 10px; padding: 22px 16px; text-align: center; }
+.mx-ready[hidden] { display: none; }
+.mx-ready-step { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(24px, 6vw, 32px); color: var(--mustard); }
+.mx-ready-how { margin: 0; color: var(--on-deep); font-size: 18px; max-width: 520px; }
+.mx-go { font-size: 24px; padding: 14px 34px; }

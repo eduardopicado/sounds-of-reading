@@ -104,13 +104,15 @@ export function englishVoices(): SpeechSynthesisVoice[] {
   }
 }
 
-/** every English voice with the details behind it, for the diagnostics screen */
-export function voiceReport(): { name: string; lang: string; uri: string; local: boolean; quality: Quality }[] {
+/** every voice in a language (English by default) with the details behind
+ *  it, for the diagnostics screen */
+export function voiceReport(lang = 'en'): { name: string; lang: string; uri: string; local: boolean; quality: Quality }[] {
   const synth = engine();
   if (!synth) return [];
+  const base = lang.split('-')[0].toLowerCase();
   try {
     return synth.getVoices()
-      .filter((v) => ACCENT_RANK.some(([re]) => re.test(v.lang)))
+      .filter((v) => v.lang.replace('_', '-').toLowerCase().split('-')[0] === base)
       .map((v) => ({
         name: v.name, lang: v.lang, uri: v.voiceURI,
         local: v.localService, quality: qualityOf(v),
