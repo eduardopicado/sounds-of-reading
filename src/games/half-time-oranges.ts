@@ -22,7 +22,7 @@ import {
 } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { pick, shuffle } from '../lib/random';
-import { TEAMS, type Team } from './teams';
+import { TEAMS, strong, type Team } from './teams';
 import { svg } from '../ui/writing';
 
 export function mount(root: HTMLElement): () => void {
@@ -132,7 +132,7 @@ function build(kit: Kit) {
 
   function bib(team?: Team): HTMLElement {
     const b = el('span', { class: 'ht-bib', 'aria-hidden': 'true' });
-    if (team) b.style.background = team.colours[0];
+    if (team) b.style.background = strong(team);
     return b;
   }
 
