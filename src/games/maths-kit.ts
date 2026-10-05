@@ -65,31 +65,39 @@ export interface ChoiceRow {
   ask: (options: number[]) => Promise<number>;
   /** after the tap: light the right one, cross the one he picked if different */
   reveal: (answer: number, picked: number) => void;
+  /** the same with words, for questions answered "Yes" or "a quarter" */
+  askWords: (options: string[]) => Promise<string>;
+  revealWord: (answer: string, picked: string) => void;
   clear: () => void;
 }
 
 export function choiceRow(): ChoiceRow {
   const node = el('div', { class: 'mx-choices' });
+  /** buttons for these answers, resolving with the one he taps */
+  const offer = <T>(options: T[], word: boolean): Promise<T> => new Promise((resolve) => {
+    node.replaceChildren(...options.map((x) => {
+      const b = el('button', { class: word ? 'mx-choice word' : 'mx-choice', type: 'button', text: String(x), dataset: { n: String(x) } });
+      b.addEventListener('click', () => {
+        for (const other of node.querySelectorAll('button')) other.disabled = true;
+        sfx.tap();
+        resolve(x);
+      });
+      return b;
+    }));
+  });
+  const mark = (answer: string, picked: string): void => {
+    for (const b of node.querySelectorAll<HTMLButtonElement>('button')) {
+      const n = b.dataset.n ?? '';
+      b.classList.toggle('right', n === answer);
+      b.classList.toggle('wrong', n === picked && n !== answer);
+    }
+  };
   return {
     node,
-    ask: (options) => new Promise((resolve) => {
-      node.replaceChildren(...options.map((n) => {
-        const b = el('button', { class: 'mx-choice', type: 'button', text: String(n), dataset: { n: String(n) } });
-        b.addEventListener('click', () => {
-          for (const other of node.querySelectorAll('button')) other.disabled = true;
-          sfx.tap();
-          resolve(n);
-        });
-        return b;
-      }));
-    }),
-    reveal: (answer, picked) => {
-      for (const b of node.querySelectorAll<HTMLButtonElement>('button')) {
-        const n = Number(b.dataset.n);
-        b.classList.toggle('right', n === answer);
-        b.classList.toggle('wrong', n === picked && n !== answer);
-      }
-    },
+    ask: (options) => offer(options, false),
+    reveal: (answer, picked) => mark(String(answer), String(picked)),
+    askWords: (options) => offer(options, true),
+    revealWord: mark,
     clear: () => node.replaceChildren(),
   };
 }

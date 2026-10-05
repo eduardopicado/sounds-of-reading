@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
@@ -341,5 +342,32 @@ describe('Training Drills', () => {
   it('keeps arrays and grouping for Year 2', () => {
     expect(DRILL_STEPS.slice(0, 2).map((s) => s.task)).toEqual(['groups', 'share']);
     expect(DRILL_STEPS.slice(2).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
+  });
+});
+
+describe('Half-Time Oranges', () => {
+  it('shares bibs exactly, and names the pieces', () => {
+    for (const step of FRACTION_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = fractionQuestion(step);
+        expect(step.parts).toContain(q.parts);
+        expect(q.total % q.parts).toBe(0);
+        expect(q.total).toBeGreaterThanOrEqual(q.parts);
+        expect(q.total).toBeLessThanOrEqual(q.parts === 2 ? 20 : 40);
+        expect(q.answer).toBe(step.task === 'part-of' ? q.total / q.parts : q.parts);
+      }
+    }
+  });
+
+  it('asks about fair and unfair cuts about equally', () => {
+    const step = FRACTION_STEPS[0];
+    const fair = Array.from({ length: 400 }, () => fractionQuestion(step).fair).filter(Boolean).length;
+    expect(fair).toBeGreaterThan(120);
+    expect(fair).toBeLessThan(280);
+  });
+
+  it('is halves only until Year 2', () => {
+    expect(FRACTION_STEPS.slice(0, 2).every((s) => s.parts.every((p) => p === 2))).toBe(true);
+    expect(FRACTION_STEPS.slice(2).some((s) => s.parts.includes(8))).toBe(true);
   });
 });

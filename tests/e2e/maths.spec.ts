@@ -435,9 +435,51 @@ test.describe('maths games', () => {
     await expect(page.locator('.td-row')).toHaveCount(answer);
   });
 
+  test('Half-Time Oranges: a whole round of halves', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'half-time-oranges');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await page.locator(`.mx-choice[data-n="${await page.locator('.ht-board').getAttribute('data-answer')}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Half-Time Oranges: an unfair cut is explained', async ({ page }) => {
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = await page.locator('.ht-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer === 'Yes' ? 'No' : 'Yes'}"]`).click();
+    await expect(page.locator('.mx-choice.wrong')).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toContainText(answer === 'Yes' ? 'the same size' : 'not the same size');
+  });
+
+  test('Half-Time Oranges: half the bibs to each team, with flags', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 1 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const total = await page.locator('.ht-pile .ht-bib').count();
+    await tapNumber(page, total / 2);
+    await expect(page.locator('.ht-share')).toHaveCount(2);
+    await expect(page.locator('.ht-share').first().locator('.ht-bib')).toHaveCount(total / 2);
+    expect((await page.locator('.ht-flag').first().textContent())?.length).toBeGreaterThan(0);
+  });
+
+  test('Year 2: Half-Time Oranges names halves, quarters and eighths', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 2 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const parts = Number(await page.locator('.ht-board').getAttribute('data-parts'));
+    await expect(page.locator('.ht-shape > path, .ht-shape > rect')).toHaveCount(parts);
+    const name = { 2: 'a half', 4: 'a quarter', 8: 'an eighth' }[parts]!;
+    await page.locator(`.mx-choice[data-n="${name}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText(`each one is ${name}`);
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(7);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(8);
   });
 });
