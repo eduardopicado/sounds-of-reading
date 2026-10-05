@@ -16,9 +16,10 @@ test.describe('home screen', () => {
       'Team Buses',
       'Keepy-Uppy Count',
       'Training Drills',
+      'Half-Time Oranges',
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
