@@ -26,6 +26,7 @@ import * as offTheBench from './games/off-the-bench';
 import * as scoreboardSums from './games/scoreboard-sums';
 import * as numberLinePenalty from './games/number-line-penalty';
 import * as flashCount from './games/flash-count';
+import * as teamBuses from './games/team-buses';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -50,6 +51,7 @@ const routes: Route[] = [
   { path: 'scoreboard-sums', mount: scoreboardSums.mount },
   { path: 'number-line-penalty', mount: numberLinePenalty.mount },
   { path: 'flash-count', mount: flashCount.mount },
+  { path: 'team-buses', mount: teamBuses.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

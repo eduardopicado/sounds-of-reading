@@ -307,3 +307,83 @@ export const DICE: Record<number, number[]> = {
   5: [0, 2, 4, 6, 8],
   6: [0, 2, 3, 5, 6, 8],
 };
+
+/* ── Team Buses: tens and ones, then hundreds ────────────────────────── */
+
+export interface BusStep extends Step {
+  /**
+   * read: how many fans are there, in full buses and loose ones;
+   * load: a crowd of fans, how many full buses and how many left over;
+   * build: make the number from trains of 100, buses of 10 and fans;
+   * another: the same number another way, when a bus breaks down
+   * (3 tens and 4 is 2 tens and 14).
+   */
+  task: 'read' | 'load' | 'build' | 'another';
+  lo: number;
+  hi: number;
+  /** trains of 100 as well as buses of 10 (Year 2) */
+  trains: boolean;
+}
+
+export const BUS_STEPS: BusStep[] = [
+  { name: 'A full bus and some more', task: 'read', lo: 11, hi: 19, trains: false },
+  { name: 'Buses and fans to 50', task: 'read', lo: 20, hi: 50, trains: false },
+  { name: 'Load the buses', task: 'load', lo: 21, hi: 99, trains: false },
+  { name: 'Buses and fans to 120', task: 'read', lo: 51, hi: 120, trains: false },
+  /* Year 2: hundreds, and numbers made more than one way */
+  { name: 'Trains of 100', task: 'read', lo: 101, hi: 999, trains: true },
+  { name: 'Build the crowd', task: 'build', lo: 101, hi: 999, trains: true },
+  { name: 'A bus breaks down', task: 'another', lo: 21, hi: 99, trains: false },
+];
+
+export interface Places { hundreds: number; tens: number; ones: number }
+
+/** a number as hundreds, tens and ones; without trains, 112 is 11 tens and 2 */
+export function places(n: number, trains = true): Places {
+  const hundreds = trains ? Math.floor(n / 100) : 0;
+  return { hundreds, tens: Math.floor((n - hundreds * 100) / 10), ones: n % 10 };
+}
+
+export const valueOf = (p: Places): number => p.hundreds * 100 + p.tens * 10 + p.ones;
+
+export function busQuestion(step: BusStep, last?: number): number {
+  for (;;) {
+    const n = rand(step.lo, step.hi);
+    if (n === last) continue;
+    /* a bus can only break down if there are two, and loose fans to join */
+    if (step.task === 'another' && (n % 10 === 0 || n < 20)) continue;
+    /* loading needs fans left over half the time at least; a whole number of
+       buses is a fine question, but not every time */
+    if (step.task === 'load' && n % 10 === 0 && Math.random() < 0.7) continue;
+    return n;
+  }
+}
+
+/**
+ * Four numbers to choose from for a number read from tens and ones. The
+ * wrong ones are the place-value slips: a ten (or a hundred) out, the tens
+ * and ones digits swapped (16 for 61), and only then a miscount by one.
+ */
+export function placeChoices(n: number, top: number): number[] {
+  const p = places(n);
+  const swapped = p.hundreds * 100 + p.ones * 10 + p.tens;
+  const slips = shuffle([n + 10, n - 10, swapped, ...(top > 200 ? [n + 100, n - 100] : [])]);
+  const out = [n];
+  for (const x of [...slips, ...shuffle([n + 1, n - 1]), n + 2, n - 2]) {
+    if (out.length >= 4) break;
+    if (x >= 1 && x <= top && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+/** for "a bus breaks down": the loose fans now, and the slips — forgetting
+    the bus's ten, or counting them as one */
+export function anotherChoices(ones: number): number[] {
+  const answer = ones + 10;
+  const out = [answer];
+  for (const x of [ones, ones + 1, answer + 1, answer - 1, answer + 10]) {
+    if (out.length >= 4) break;
+    if (x >= 0 && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
