@@ -13,7 +13,7 @@ import { clearStickers, stickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { closeMove, maybeLevelUp, strongSounds, undoMove, unseenMove, weakSounds } from '../lib/coach';
 
-export interface Tile { path: string; name: string; emoji: string; what: string; tone: string }
+export interface Tile { path: string; name: string; emoji: string; what: string; tone: string; maths?: boolean }
 
 export const TILES: Tile[] = [
   { path: 'memory-match', name: 'Memory Match', emoji: '🃏', what: 'Find the pairs', tone: '#E4572E' },
@@ -32,12 +32,17 @@ export const TILES: Tile[] = [
   { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5' },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6' },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A' },
+  { path: 'flash-count', name: 'Flash Count', emoji: '⚡', what: 'Look quickly: how many?', tone: '#F08A4B', maths: true },
+  { path: 'off-the-bench', name: 'Off the Bench', emoji: '🧤', what: 'How many more make 10?', tone: '#3FA07A', maths: true },
+  { path: 'scoreboard-sums', name: 'Scoreboard Sums', emoji: '🏟️', what: 'Goals in, goals out', tone: '#5AA0DC', maths: true },
+  { path: 'number-line-penalty', name: 'Number Line Penalty', emoji: '🥅', what: 'Kick it to the number', tone: '#A87FD1', maths: true },
 ];
 
 export function mount(root: HTMLElement): () => void {
   const tiles = el('div', { class: 'tiles' });
+  const mathsTiles = el('div', { class: 'tiles' });
   for (const tile of TILES) {
-    tiles.append(el('a', {
+    (tile.maths ? mathsTiles : tiles).append(el('a', {
       class: 'tile-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
       dataset: { game: tile.path },
       on: { click: () => sfx.tap() },
@@ -282,7 +287,10 @@ export function mount(root: HTMLElement): () => void {
     ),
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } }, starBtn),
     moveNote,
+    el('h2', { class: 'tiles-head', text: 'Reading, spelling and writing' }),
     tiles,
+    el('h2', { class: 'tiles-head', text: 'Maths' }),
+    mathsTiles,
     bookTray,
     week,
   );

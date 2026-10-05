@@ -39,6 +39,13 @@ export function award(soundIds: string[]): Sticker | null {
   return sticker;
 }
 
+/** a sticker for a game that practises no sound (the maths games): its own face */
+export function awardFace(id: string, face: string): Sticker {
+  const sticker: Sticker = { sound: id, face, at: Date.now() };
+  write('stickers', [...stickers(), sticker].slice(-60));
+  return sticker;
+}
+
 export function clearStickers(): void {
   write('stickers', []);
 }

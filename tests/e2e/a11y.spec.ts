@@ -22,6 +22,10 @@ const PAGES = [
   ['Build the Word', '/#/build-the-word'],
   ['Trace It', '/#/trace-it'],
   ['Tall, Small, Tail', '/#/tall-small-tail'],
+  ['Flash Count', '/#/flash-count'],
+  ['Off the Bench', '/#/off-the-bench'],
+  ['Scoreboard Sums', '/#/scoreboard-sums'],
+  ['Number Line Penalty', '/#/number-line-penalty'],
 ] as const;
 
 for (const [name, path] of PAGES) {
