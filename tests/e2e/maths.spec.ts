@@ -20,7 +20,8 @@ async function tapNumber(page: Page, n: number): Promise<void> {
 async function answerBench(page: Page, right: boolean): Promise<number> {
   await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
   const total = await page.locator('.mx-spot').count();
-  const on = await page.locator('.mx-spot .pk-player').count();
+  /* players on the pitch, or fans in the stadium */
+  const on = await page.locator('.mx-spot .pk-player, .mx-spot.fan').count();
   const need = total - on;
   const options = (await page.locator('.mx-choice').allTextContents()).map(Number);
   await tapNumber(page, right ? need : options.find((x) => x !== need)!);
@@ -198,6 +199,66 @@ test.describe('maths games', () => {
     await page.getByRole('button', { name: '▶ Start' }).click();
     await expect(page.locator('.mx-step')).toHaveText('Make 20');
     await expect(page.locator('.mx-spot')).toHaveCount(20);
+  });
+
+  test('Year 2: Off the Bench fills a stadium of 100, in tens', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:off-the-bench': 4 });
+    await startGame(page, 'off-the-bench');
+    await expect(page.locator('.mx-step')).toHaveText('Fill 100 in tens');
+    await expect(page.locator('.mx-spot')).toHaveCount(100);
+    /* only tens to choose from */
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    for (const t of await page.locator('.mx-choice').allTextContents()) expect(Number(t) % 10).toBe(0);
+    const need = await answerBench(page, true);
+    expect(need % 10).toBe(0);
+    await expect(page.locator('.mx-spot.fan')).toHaveCount(100);
+    noProblems(watch);
+  });
+
+  test('Year 2: a wrong answer in the stadium fills up the row, then counts in tens', async ({ page }) => {
+    await seed(page, { 'maths-step:off-the-bench': 5 });
+    await startGame(page, 'off-the-bench');
+    const need = await answerBench(page, false);
+    /* the last label on the empty seats is the answer */
+    await expect(page.locator('.mx-spot.counted').last()).toHaveText(String(need));
+    await expect(page.locator('.mx-spot.counted')).toHaveCount(need);
+  });
+
+  test('Year 2: Scoreboard Sums to 100 in racks of ten, and splits a miss into tens and ones', async ({ page }) => {
+    await seed(page, { 'maths-step:scoreboard-sums': 7 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add tens and ones');
+    await expect(page.locator('.mx-ten').first()).toBeVisible();
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, , b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ').map(Number);
+    expect(await page.locator('.mx-ten').count()).toBe(Math.floor(a / 10) + Math.floor(b / 10));
+    const answer = a + b;
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toHaveText(`${a} and ${b - (b % 10)} is ${a + b - (b % 10)}, and ${b % 10} more is ${answer}.`);
+  });
+
+  test('Year 2: the number line goes to 1000', async ({ page }) => {
+    await seed(page, { 'maths-step:number-line-penalty': 7 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-label').last()).toHaveText('1000');
+    await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
+    expect(Number(await page.locator('.mx-line').getAttribute('data-asked')) % 100).toBe(0);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText('GOAL!');
+  });
+
+  test('Year 2: Flash Count shows rows and columns', async ({ page }) => {
+    await seed(page, { 'maths-step:flash-count': 5, 'flash-speed': 'slow' });
+    await startGame(page, 'flash-count');
+    await expect(page.locator('.mx-array')).toBeVisible();
+    const dots = await page.locator('.mx-flash .mx-dot').count();
+    expect(dots).toBeGreaterThanOrEqual(4);
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== dots)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toHaveText(new RegExp(`^\\d rows of \\d make ${dots}\\.$`));
   });
 
   test('the home screen has a maths section with all four', async ({ page }) => {

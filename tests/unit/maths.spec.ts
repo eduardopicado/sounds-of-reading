@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
-  flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
+  flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
 
 const MANY = 400;
@@ -50,6 +50,16 @@ describe('the number buttons', () => {
     }
   });
 
+  it('counting in tens, offers only tens', () => {
+    for (let i = 0; i < MANY; i += 1) {
+      const answer = (1 + Math.floor(Math.random() * 9)) * 10;
+      const c = choices(answer, 10, 90, 4, 10);
+      expect(c).toContain(answer);
+      expect(c).toHaveLength(4);
+      for (const x of c) { expect(x % 10).toBe(0); expect(x).toBeGreaterThanOrEqual(10); expect(x).toBeLessThanOrEqual(90); }
+    }
+  });
+
   it('offers a miscount by one as a wrong answer', () => {
     for (let i = 0; i < 50; i += 1) {
       const c = choices(6, 0, 10);
@@ -67,8 +77,16 @@ describe('Off the Bench', () => {
         expect(q.on).toBeGreaterThanOrEqual(1);
         expect(q.need).toBeGreaterThanOrEqual(1);
         expect(q.on + q.need).toBe(step.target);
+        if (step.tens) { expect(q.on % 10).toBe(0); expect(q.need % 10).toBe(0); }
       }
     }
+  });
+
+  it('ends with Year 2: a stadium of 100, in tens and then any number', () => {
+    const top = BENCH_STEPS.slice(-2);
+    expect(top.map((s) => s.target)).toEqual([100, 100]);
+    expect(top[0].tens).toBe(true);
+    expect(top[1].tens).toBeFalsy();
   });
 
   it('does not ask the same question twice running', () => {
@@ -96,7 +114,21 @@ describe('Scoreboard Sums', () => {
         if (step.op === '+') expect(q.op).toBe('+');
         /* adding to 20 keeps the second number small enough to count on */
         if (q.op === '+' && step.max === 20) expect(q.b).toBeLessThanOrEqual(9);
+        if (!step.mix && step.op === '-') expect(q.op).toBe('-');
+        /* within 100: whole tens, then never crossing a ten, then always */
+        if (step.hundred === 'tens') { expect(q.a % 10).toBe(0); expect(q.b % 10).toBe(0); }
+        const carries = q.op === '+' ? (q.a % 10) + (q.b % 10) > 9 : (q.a % 10) < (q.b % 10);
+        if (step.hundred === 'no-carry') expect(carries, `${q.a} ${q.op} ${q.b}`).toBe(false);
+        if (step.hundred === 'past') expect(carries, `${q.a} ${q.op} ${q.b}`).toBe(true);
+        if (step.hundred && step.hundred !== 'tens') { expect(q.a).toBeGreaterThan(10); expect(q.b).toBeGreaterThan(10); }
       }
+    }
+  });
+
+  it('mixes adding and taking away on the mixed steps', () => {
+    for (const step of SUM_STEPS.filter((s) => s.mix)) {
+      const ops = new Set(Array.from({ length: 60 }, () => sumQuestion(step).op));
+      expect(ops).toEqual(new Set(['+', '-']));
     }
   });
 
@@ -120,6 +152,7 @@ describe('Number Line Penalty', () => {
         const allWritten = step.labels.length === (step.hi - step.lo) / step.tick + 1;
         if (!allWritten) expect(step.labels).not.toContain(n);
         if (step.ask === 'tens') expect(n % 10).toBe(0);
+        if (step.ask === 'hundreds') expect(n % 100).toBe(0);
       }
     }
   });
@@ -138,6 +171,14 @@ describe('Number Line Penalty', () => {
     /* in tens, the tap snaps to the nearest ten */
     const tens = LINE_STEPS.find((s) => s.ask === 'tens')!;
     expect(valueAt(tens, 0.38)).toBe(40);
+    /* to 1000 in hundreds, a tap snaps to the nearest hundred */
+    const hundreds = LINE_STEPS.find((s) => s.ask === 'hundreds')!;
+    expect(valueAt(hundreds, 0.62)).toBe(600);
+    expect(onTarget(hundreds, 600, 700)).toBe(false);
+  });
+
+  it('goes on to 1000 in Year 2', () => {
+    expect(LINE_STEPS.at(-1)!.hi).toBe(1000);
   });
 });
 
@@ -147,7 +188,13 @@ describe('Flash Count', () => {
       for (let i = 0; i < MANY; i += 1) {
         const q = flashQuestion(step);
         expect(q.n).toBeLessThanOrEqual(step.max);
-        expect(q.n).toBeGreaterThanOrEqual(step.look === 'two-dice' ? 2 : 1);
+        expect(q.n).toBeGreaterThanOrEqual(flashLowest(step));
+        if (step.look === 'array') {
+          /* rows times columns, two to five of each */
+          expect(q.parts[0] * q.parts[1]).toBe(q.n);
+          for (const p of q.parts) { expect(p).toBeGreaterThanOrEqual(2); expect(p).toBeLessThanOrEqual(5); }
+          continue;
+        }
         expect(q.parts.reduce((a, b) => a + b, 0)).toBe(q.n);
         if (step.look !== 'frame') for (const p of q.parts) { expect(p).toBeGreaterThanOrEqual(1); expect(p).toBeLessThanOrEqual(6); }
       }
