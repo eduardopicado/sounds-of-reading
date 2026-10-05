@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  BOARD_STEPS, GRID, boardQuestion, turned,
   SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
@@ -524,5 +525,38 @@ describe('Kit and Ball Shapes', () => {
   it('keeps pentagons, hexagons and symmetry for Year 2', () => {
     expect(SHAPE_STEPS[0].shapes).not.toContain('hexagon');
     expect(SHAPE_STEPS.slice(4).map((s) => s.task)).toContain('symmetry');
+  });
+});
+
+describe("Coach's Whiteboard", () => {
+  it('turns the right way', () => {
+    expect(turned('up', 'quarter-clockwise')).toBe('right');
+    expect(turned('up', 'quarter-anticlockwise')).toBe('left');
+    expect(turned('left', 'half')).toBe('right');
+    expect(turned('left', 'quarter-clockwise')).toBe('up');
+  });
+
+  it('keeps every move on the grid, and lands where the moves say', () => {
+    for (const step of BOARD_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = boardQuestion(step);
+        if (step.task === 'side') { expect(q.ball).not.toBe(q.keeper); expect(q.answer).toBe(q.ball < q.keeper ? 'left' : 'right'); }
+        if (step.task === 'move' || step.task === 'moves') {
+          expect(q.moves).toHaveLength(step.task === 'move' ? 1 : 2);
+          let [x, y] = q.start;
+          for (const m of q.moves) {
+            expect(m.n).toBeGreaterThanOrEqual(1);
+            expect(m.n).toBeLessThanOrEqual(3);
+            x += m.dir === 'right' ? m.n : m.dir === 'left' ? -m.n : 0;
+            y += m.dir === 'down' ? m.n : m.dir === 'up' ? -m.n : 0;
+            for (const v of [x, y]) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+          }
+          expect(q.answer).toBe(`${x},${y}`);
+          /* two moves go along different lines: across, then up or down */
+          if (q.moves.length === 2) expect(['left', 'right'].includes(q.moves[0].dir)).not.toBe(['left', 'right'].includes(q.moves[1].dir));
+        }
+        if (step.task === 'turn') expect(q.answer).toBe(turned(q.facing, q.turn));
+      }
+    }
   });
 });

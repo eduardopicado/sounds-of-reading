@@ -705,9 +705,43 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText(answer === 'Yes' ? 'like a mirror' : 'No:');
   });
 
+  test("Coach's Whiteboard: a whole round", async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'coach-whiteboard');
+    await playRound(page, async () => {
+      const board = page.locator('.cw-board');
+      await expect(page.locator('.mx-choice, .cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+      const answer = await board.getAttribute('data-answer');
+      if (await page.locator('.cw-grid').count()) await page.locator(`.cw-cell[data-at="${answer}"]`).click();
+      else await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test("Coach's Whiteboard: a wrong square shows the path", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 2 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell').first()).toBeEnabled({ timeout: 10000 });
+    const answer = await page.locator('.cw-board').getAttribute('data-answer');
+    await page.locator(`.cw-cell:not([data-at="${answer}"])`).first().click();
+    await expect(page.locator('.cw-cell.wrong')).toHaveCount(1);
+    await expect(page.locator(`.cw-cell.end[data-at="${answer}"]`)).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toContainText('Count the squares');
+  });
+
+  test("Year 2: Coach's Whiteboard turns, and flips, slides and turns", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 3 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    const answer = await page.locator('.cw-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText('leaves him facing');
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(13);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(14);
   });
 });

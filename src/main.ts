@@ -35,6 +35,7 @@ import * as matchClock from './games/match-clock';
 import * as fanSurvey from './games/fan-survey';
 import * as factFamily from './games/fact-family';
 import * as kitShapes from './games/kit-shapes';
+import * as coachWhiteboard from './games/coach-whiteboard';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -68,6 +69,7 @@ const routes: Route[] = [
   { path: 'fan-survey', mount: fanSurvey.mount },
   { path: 'fact-family', mount: factFamily.mount },
   { path: 'kit-shapes', mount: kitShapes.mount },
+  { path: 'coach-whiteboard', mount: coachWhiteboard.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

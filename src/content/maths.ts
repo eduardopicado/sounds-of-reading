@@ -925,3 +925,88 @@ export function shapeQuestion(step: ShapeStep, last?: ShapeQuestion): ShapeQuest
     return q;
   }
 }
+
+/* ── Coach's Whiteboard: position, directions and turns ──────────────── */
+
+export type Dir = 'up' | 'right' | 'down' | 'left';
+export const DIRS: Dir[] = ['up', 'right', 'down', 'left'];
+const STEP: Record<Dir, [number, number]> = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };
+
+export interface BoardStep extends Step {
+  /**
+   * side: is the ball to the left or the right of the keeper;
+   * move / moves: follow one move (or two) on the grid and tap where he lands;
+   * turn: a quarter or half turn, which way is he facing now;
+   * transform: was the shape flipped, slid or turned?
+   */
+  task: 'side' | 'move' | 'moves' | 'turn' | 'transform';
+}
+
+export const BOARD_STEPS: BoardStep[] = [
+  { name: 'Left or right?', task: 'side' },
+  { name: 'One move', task: 'move' },
+  { name: 'Two moves', task: 'moves' },
+  /* Year 2: turns, and flips, slides and turns of a shape */
+  { name: 'Quarter and half turns', task: 'turn' },
+  { name: 'Flip, slide or turn?', task: 'transform' },
+];
+
+/** the grid on the whiteboard: GRID by GRID squares */
+export const GRID = 5;
+
+export interface Move { dir: Dir; n: number }
+
+export interface BoardQuestion {
+  /** side: where the keeper and the ball are, along a row of GRID spots */
+  keeper: number;
+  ball: number;
+  /** move(s): where he starts, the moves, where he ends */
+  start: [number, number];
+  moves: Move[];
+  end: [number, number];
+  /** turn: which way he faces, the turn, and which way he faces after */
+  facing: Dir;
+  turn: 'quarter-clockwise' | 'quarter-anticlockwise' | 'half';
+  /** transform: what was done to the shape */
+  done: 'flip' | 'slide' | 'turn';
+  answer: string;
+}
+
+export const turned = (d: Dir, turn: BoardQuestion['turn']): Dir =>
+  DIRS[(DIRS.indexOf(d) + (turn === 'half' ? 2 : turn === 'quarter-clockwise' ? 1 : 3)) % 4];
+
+export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuestion {
+  for (;;) {
+    const keeper = rand(1, GRID - 2);
+    let ball = rand(0, GRID - 1);
+    if (ball === keeper) ball = keeper + pick([-1, 1]);
+    const start: [number, number] = [rand(0, GRID - 1), rand(0, GRID - 1)];
+    const moves: Move[] = [];
+    let end: [number, number] = [...start];
+    if (step.task === 'move' || step.task === 'moves') {
+      const axes = shuffle([['left', 'right'], ['up', 'down']] as Dir[][]).slice(0, step.task === 'move' ? 1 : 2);
+      for (const axis of axes) {
+        const dir = pick(axis);
+        const room = dir === 'right' ? GRID - 1 - end[0] : dir === 'left' ? end[0] : dir === 'down' ? GRID - 1 - end[1] : end[1];
+        if (!room) continue;
+        const n = rand(1, Math.min(3, room));
+        moves.push({ dir, n });
+        end = [end[0] + STEP[dir][0] * n, end[1] + STEP[dir][1] * n];
+      }
+      if (moves.length !== axes.length) continue;
+    }
+    const facing = pick(DIRS);
+    const turn = pick(['quarter-clockwise', 'quarter-anticlockwise', 'half'] as const);
+    const done = pick(['flip', 'slide', 'turn'] as const);
+    const answer = step.task === 'side' ? (ball < keeper ? 'left' : 'right')
+      : step.task === 'turn' ? turned(facing, turn)
+        : step.task === 'transform' ? done
+          : `${end[0]},${end[1]}`;
+    const q = { keeper, ball, start, moves, end, facing, turn, done, answer };
+    if (last && last.answer === answer && last.start.join() === start.join()) continue;
+    return q;
+  }
+}
+
+/** a move as it is said: "2 squares up" */
+export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : 'squares'} ${m.dir}`;

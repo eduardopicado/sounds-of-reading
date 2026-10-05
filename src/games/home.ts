@@ -45,6 +45,7 @@ export const TILES: Tile[] = [
   { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', maths: true },
   { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', maths: true },
   { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', maths: true },
+  { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', maths: true },
 ];
 
 export function mount(root: HTMLElement): () => void {
