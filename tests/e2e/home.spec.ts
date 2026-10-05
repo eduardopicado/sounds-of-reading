@@ -53,8 +53,14 @@ test.describe('home screen', () => {
         get() { throw new Error('storage blocked'); },
       });
     });
+    /* every tile a browser with storage shows */
+    const normal = await page.context().newPage();
+    await normal.goto('/');
+    const tiles = await normal.locator('.tiles .tile-link').count();
+    await normal.close();
+    expect(tiles).toBeGreaterThan(20);
     await page.goto('/');
-    await expect(page.locator('.tiles .tile-link')).toHaveCount(20);
+    await expect(page.locator('.tiles .tile-link')).toHaveCount(tiles);
     await page.goto('/#/real-or-silly');
     await expect(page.locator('.theword')).toBeVisible();
     noProblems(watch);
