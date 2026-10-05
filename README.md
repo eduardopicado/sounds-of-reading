@@ -37,6 +37,7 @@ once opened, and nothing ever leaves the device.
 | **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. |
 | **Match Clock** | Reads and sets o'clock and half past, and the days of the week in order; then (Year 2) quarter past and quarter to, the months, and the Australian seasons. |
 | **Fan Survey** | Counts fans waving flags, reads tally marks and a picture graph; then (Year 2) reads a column graph and says how many more. |
+| **Fact Family Formation** | Three players are one family (3, 5, 8): turns a fact around and takes it back within 10 and 20; then (Year 2) finds a missing number, and does it with tens to 100. |
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
 Year 2, and each climbs its own levels: up after three right in a row, down

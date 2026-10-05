@@ -764,3 +764,80 @@ export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQ
     return { votes, team, other, answer };
   }
 }
+
+/* ── Fact Family Formation: adding and taking away undo each other ──── */
+
+export interface FactStep extends Step {
+  /**
+   * turnaround: 3 + 5 = 8, so 5 + 3 = ?;
+   * take: 3 + 5 = 8, so 8 − 5 = ?;
+   * any: one fact known, any other fact of the family asked;
+   * missing: a number missing from the middle of a fact (? + 5 = 8).
+   */
+  kind: 'turnaround' | 'take' | 'any' | 'missing';
+  max: 10 | 20 | 100;
+  /** whole tens only (Year 2, to 100) */
+  tens?: boolean;
+}
+
+export const FACT_STEPS: FactStep[] = [
+  { name: 'Turnarounds', kind: 'turnaround', max: 10 },
+  { name: 'Take it back', kind: 'take', max: 10 },
+  { name: 'Families to 20', kind: 'any', max: 20 },
+  /* Year 2: missing numbers, and families of tens to 100 */
+  { name: 'Missing numbers', kind: 'missing', max: 20 },
+  { name: 'Families of tens', kind: 'any', max: 100, tens: true },
+  { name: 'Missing tens', kind: 'missing', max: 100, tens: true },
+];
+
+/** a fact as its three numbers: a + b = whole, or whole − a = b */
+export interface Fact { op: '+' | '-'; x: number; y: number; z: number }
+
+export interface FactQuestion {
+  a: number;
+  b: number;
+  whole: number;
+  /** the fact he is told, if any */
+  known?: Fact;
+  /** the fact he finishes, and which of its three places is the gap */
+  asked: Fact;
+  gap: 0 | 1 | 2;
+  answer: number;
+}
+
+/** the four facts of a family */
+export const family = (a: number, b: number): Fact[] => [
+  { op: '+', x: a, y: b, z: a + b },
+  { op: '+', x: b, y: a, z: a + b },
+  { op: '-', x: a + b, y: a, z: b },
+  { op: '-', x: a + b, y: b, z: a },
+];
+
+export const factText = (f: Fact, gap?: number): string =>
+  [f.x, f.op === '+' ? '+' : '−', f.y, '=', f.z].map((v, i) => (i === [0, 2, 4][gap ?? -1] ? '?' : String(v))).join(' ');
+
+export function factQuestion(step: FactStep, last?: FactQuestion): FactQuestion {
+  for (;;) {
+    const unit = step.tens ? 10 : 1;
+    const whole = unit * rand(step.tens ? 3 : 3, step.max / unit);
+    const a = unit * rand(1, whole / unit - 1);
+    const b = whole - a;
+    /* a double has only two facts, and a turnaround of it is no question */
+    if (a === b) continue;
+    const facts = family(a, b);
+    let known: Fact | undefined = facts[0];
+    let asked: Fact;
+    let gap: 0 | 1 | 2 = 2;
+    if (step.kind === 'turnaround') asked = facts[1];
+    else if (step.kind === 'take') asked = pick([facts[2], facts[3]]);
+    else if (step.kind === 'any') asked = pick(facts.slice(1));
+    else {
+      known = undefined;
+      asked = pick(facts);
+      gap = pick([0, 1] as const);
+    }
+    const answer = [asked.x, asked.y, asked.z][gap];
+    if (last && last.whole === whole && last.a === a && last.answer === answer) continue;
+    return { a, b, whole, known, asked, gap, answer };
+  }
+}

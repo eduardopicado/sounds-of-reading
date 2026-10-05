@@ -33,6 +33,7 @@ const PAGES = [
   ['Jump Line', '/#/jump-line'],
   ['Match Clock', '/#/match-clock'],
   ['Fan Survey', '/#/fan-survey'],
+  ['Fact Family Formation', '/#/fact-family'],
 ] as const;
 
 for (const [name, path] of PAGES) {

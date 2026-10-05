@@ -1222,3 +1222,20 @@
 .fs-flag { font-size: 34px; text-anchor: middle; }
 .fs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 700 15px var(--display); }
 .mx-choice.word { font-size: clamp(20px, 5vw, 28px); }
+
+/* ── Fact Family Formation ─────────────────────────────────────────────── */
+
+.ff-formation {
+  display: grid; justify-items: center; gap: 4px; width: min(100%, 360px); padding: 14px 10px 6px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+}
+.ff-parts { display: flex; gap: clamp(30px, 14vw, 70px); }
+.ff-player { position: relative; display: grid; place-items: center; }
+.ff-number {
+  position: absolute; top: 36%; left: 50%; translate: -50% 0;
+  min-width: 1.6em; padding: 0 4px; border-radius: 8px; background: rgba(255, 246, 231, .92);
+  color: var(--ink); font: 800 24px var(--display); text-align: center;
+}
+.ff-player.whole .ff-number { font-size: 28px; }
+.ff-formation.explain .ff-number { background: var(--mustard); }
+.ff-known { margin: 0; color: var(--paper); font: 700 clamp(20px, 5vw, 26px) var(--display); min-height: 1.2em; }

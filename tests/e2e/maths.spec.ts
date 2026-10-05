@@ -639,9 +639,43 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText(`That's ${answer} more.`);
   });
 
+  test('Fact Family Formation: a whole round', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'fact-family');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.ff-formation').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Fact Family Formation: a miss says the family', async ({ page }) => {
+    await seed(page, { 'maths-step:fact-family': 1 });
+    await startGame(page, 'fact-family');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ff-known')).toContainText('so…');
+    await expect(page.locator('.mx-sum')).toContainText('−');
+    const answer = Number(await page.locator('.ff-formation').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText('make');
+    await expect(page.locator('.mx-sum')).not.toContainText('?');
+  });
+
+  test('Year 2: Fact Family Formation, missing tens', async ({ page }) => {
+    await seed(page, { 'maths-step:fact-family': 5 });
+    await startGame(page, 'fact-family');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ff-number', { hasText: '?' })).toHaveCount(1);
+    for (const t of await page.locator('.mx-choice').allTextContents()) expect(Number(t) % 10).toBe(0);
+    await tapNumber(page, Number(await page.locator('.ff-formation').getAttribute('data-answer')));
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(11);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(12);
   });
 });

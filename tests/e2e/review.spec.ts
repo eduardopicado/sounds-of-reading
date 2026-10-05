@@ -18,6 +18,7 @@ const GAMES = [
   'jump-line',
   'match-clock',
   'fan-survey',
+  'fact-family',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */

@@ -33,6 +33,7 @@ import * as halfTimeOranges from './games/half-time-oranges';
 import * as jumpLine from './games/jump-line';
 import * as matchClock from './games/match-clock';
 import * as fanSurvey from './games/fan-survey';
+import * as factFamily from './games/fact-family';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -64,6 +65,7 @@ const routes: Route[] = [
   { path: 'jump-line', mount: jumpLine.mount },
   { path: 'match-clock', mount: matchClock.mount },
   { path: 'fan-survey', mount: fanSurvey.mount },
+  { path: 'fact-family', mount: factFamily.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];
