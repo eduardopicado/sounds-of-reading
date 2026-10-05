@@ -1116,3 +1116,28 @@
   .td-cone { border-left-width: 10px; border-right-width: 10px; border-bottom-width: 20px; }
   .td-row .td-inside { gap: 6px; }
 }
+
+/* word answers ("Yes", "a quarter") in the maths games */
+.mx-choice.word { min-width: 120px; font-size: 28px; padding: 6px 20px; }
+
+/* ── Half-Time Oranges ─────────────────────────────────────────────────── */
+
+.ht-board {
+  display: grid; justify-items: center; gap: 12px; width: min(100%, 560px); padding: 16px; border-radius: var(--radius);
+  background: var(--paper); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.ht-shape { width: min(78vw, 300px); height: auto; }
+.ht-orange { fill: #F7931E; stroke: #C4650A; stroke-width: 3; }
+.ht-orange.picked { fill: #FFC266; }
+.ht-pitch { fill: #2E8F52; stroke: #fff; stroke-width: 3; }
+.ht-pitch.picked { fill: #6FCF8C; }
+.ht-cut line { stroke: var(--ink); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 2 0; }
+.ht-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 460px; }
+.ht-bib {
+  width: 26px; height: 30px; background: #9BA6B0;
+  clip-path: polygon(25% 0, 75% 0, 100% 18%, 88% 34%, 82% 30%, 82% 100%, 18% 100%, 18% 30%, 12% 34%, 0 18%);
+}
+.ht-shares { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+.ht-share { display: grid; justify-items: center; gap: 6px; padding: 8px; border-radius: 12px; background: rgba(0, 0, 0, .06); }
+.ht-flag { font-size: 30px; line-height: 1; }
+.ht-bibs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 150px; }

@@ -33,6 +33,7 @@ once opened, and nothing ever leaves the device.
 | **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. |
 | **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. |
 | **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |
+| **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group. |
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
 Year 2, and each climbs its own levels: up after three right in a row, down

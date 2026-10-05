@@ -29,6 +29,7 @@ import * as flashCount from './games/flash-count';
 import * as teamBuses from './games/team-buses';
 import * as keepyUppy from './games/keepy-uppy';
 import * as trainingDrills from './games/training-drills';
+import * as halfTimeOranges from './games/half-time-oranges';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -56,6 +57,7 @@ const routes: Route[] = [
   { path: 'team-buses', mount: teamBuses.mount },
   { path: 'keepy-uppy', mount: keepyUppy.mount },
   { path: 'training-drills', mount: trainingDrills.mount },
+  { path: 'half-time-oranges', mount: halfTimeOranges.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

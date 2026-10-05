@@ -506,3 +506,56 @@ export function drillChoices(step: DrillStep, q: DrillQuestion): number[] {
   }
   return out.sort((a, b) => a - b);
 }
+
+/* ── Half-Time Oranges: halves, then quarters and eighths ────────────── */
+
+export type Fraction = 2 | 4 | 8;
+
+export const FRACTION_NAME: Record<Fraction, string> = { 2: 'half', 4: 'quarter', 8: 'eighth' };
+export const FRACTION_PLURAL: Record<Fraction, string> = { 2: 'halves', 4: 'quarters', 8: 'eighths' };
+
+export interface FractionStep extends Step {
+  /**
+   * fair: is this cut into halves (or quarters)? yes or no;
+   * part-of: half (or a quarter, an eighth) of a group of bibs;
+   * name: a piece of a cut orange, what is it called?
+   */
+  task: 'fair' | 'part-of' | 'name';
+  parts: Fraction[];
+}
+
+export const FRACTION_STEPS: FractionStep[] = [
+  { name: 'Halves or not?', task: 'fair', parts: [2] },
+  { name: 'Half of the bibs', task: 'part-of', parts: [2] },
+  /* Year 2: quarters and eighths, of a shape and of a group */
+  { name: 'Halves, quarters, eighths', task: 'name', parts: [2, 4, 8] },
+  { name: 'Quarters or not?', task: 'fair', parts: [4] },
+  { name: 'A quarter of the bibs', task: 'part-of', parts: [4] },
+  { name: 'Quarters and eighths of the bibs', task: 'part-of', parts: [4, 8] },
+];
+
+export interface FractionQuestion {
+  /** an orange (a circle) or the pitch (a rectangle) */
+  shape: 'orange' | 'pitch';
+  parts: Fraction;
+  /** for fair: are the pieces the same size? */
+  fair: boolean;
+  /** for part-of: how many bibs, and the answer */
+  total: number;
+  answer: number;
+}
+
+export function fractionQuestion(step: FractionStep, last?: FractionQuestion): FractionQuestion {
+  for (;;) {
+    const parts = pick(step.parts);
+    const shape = pick(['orange', 'pitch'] as const);
+    const fair = Math.random() < 0.5;
+    /* bibs: an even number to 20 for halves, to 40 for quarters and eighths */
+    const most = parts === 2 ? 10 : 5;
+    const total = parts * rand(1, most);
+    const answer = step.task === 'part-of' ? total / parts : parts;
+    const q = { shape, parts, fair, total, answer };
+    if (last && last.total === q.total && last.parts === q.parts && last.fair === q.fair && last.shape === q.shape) continue;
+    return q;
+  }
+}
