@@ -6,6 +6,9 @@
  * sense the Kindergarten syllabus starts with. A good warm-up before the
  * other maths games.
  *
+ * In Year 2 the dots come in rows and columns, an array: "3 rows of 4" is
+ * seen as a shape too, and it is where multiplying starts.
+ *
  * The numbers to choose from only appear once the dots have gone, so the
  * dots have to be remembered, not counted. A wrong answer shows them again,
  * and counts them. */
@@ -15,7 +18,7 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
-import { DICE, FLASH_STEPS, choices, flashMs, flashQuestion, type FlashQuestion, type FlashSpeed, type FlashStep } from '../content/maths';
+import { DICE, FLASH_STEPS, choices, flashLowest, flashMs, flashQuestion, type FlashQuestion, type FlashSpeed, type FlashStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
 
@@ -53,6 +56,18 @@ function frame(n: number): SVGSVGElement {
   return f;
 }
 
+/** rows and columns of dots, evenly spaced */
+function array(rows: number, cols: number): SVGSVGElement {
+  const gap = 40;
+  const a = svg('svg', { class: 'mx-array', viewBox: `0 0 ${cols * gap} ${rows * gap}` });
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      a.append(svg('circle', { cx: gap / 2 + c * gap, cy: gap / 2 + r * gap, r: 13, class: 'mx-dot' }));
+    }
+  }
+  return a;
+}
+
 function build(kit: Kit) {
   const card = el('div', { class: 'mx-flash', role: 'img' });
   const ask = el('p', { class: 'mx-ask', text: 'Look!' });
@@ -74,7 +89,9 @@ function build(kit: Kit) {
 
   function show(q: FlashQuestion, step: FlashStep): void {
     card.classList.remove('gone');
-    card.replaceChildren(...(step.look === 'frame' ? [frame(q.n)] : q.parts.map(die)));
+    card.replaceChildren(...(step.look === 'frame' ? [frame(q.n)]
+      : step.look === 'array' ? [array(q.parts[0], q.parts[1])]
+        : q.parts.map(die)));
     card.setAttribute('aria-label', `${q.n} dots`);
   }
 
@@ -95,8 +112,7 @@ function build(kit: Kit) {
       card.replaceChildren(el('span', { class: 'mx-big', text: '?' }));
       card.setAttribute('aria-label', 'hidden');
       ask.textContent = 'How many did you see?';
-      const lo = step.look === 'two-dice' ? 2 : 1;
-      const picked = await kit.choices.ask(choices(q.n, lo, step.max));
+      const picked = await kit.choices.ask(choices(q.n, flashLowest(step), step.max));
       kit.choices.reveal(q.n, picked);
       show(q, step);
       if (picked === q.n) {
@@ -110,7 +126,9 @@ function build(kit: Kit) {
       sfx.wrong();
       /* a miss gives him the long look back */
       streak = 0;
-      const how = step.look === 'two-dice' ? `${q.parts[0]} and ${q.parts[1]} make ${q.n}.` : `There were ${q.n}.`;
+      const how = step.look === 'two-dice' ? `${q.parts[0]} and ${q.parts[1]} make ${q.n}.`
+        : step.look === 'array' ? `${q.parts[0]} rows of ${q.parts[1]} make ${q.n}.`
+          : `There were ${q.n}.`;
       kit.note(how);
       say(how);
       await kit.wait(2600);

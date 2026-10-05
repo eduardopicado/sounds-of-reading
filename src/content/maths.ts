@@ -1,12 +1,19 @@
 /* The maths: every question the maths games ask, and the levels they climb.
  *
  * Built from the NSW Mathematics K–10 syllabus (2022), Kindergarten (Early
- * Stage 1) to Year 1 (Stage 1, Part A):
+ * Stage 1) to Year 2 (the end of Stage 1):
  *
- *   Off the Bench        part–whole: the pairs that make 5, 10 and 20
- *   Scoreboard Sums      combining and separating quantities within 20
- *   Number Line Penalty  where numbers sit, from 0–10 up to 0–120
- *   Flash Count          seeing how many at a glance (subitising)
+ *   Off the Bench        part–whole: the pairs that make 5, 10 and 20, then
+ *                        filling a stadium of 100 (Year 2)
+ *   Scoreboard Sums      combining and separating quantities within 20, then
+ *                        within 100 by tens and ones (Year 2)
+ *   Number Line Penalty  where numbers sit, from 0–10 up to 0–120, then on to
+ *                        0–1000 (Year 2)
+ *   Flash Count          seeing how many at a glance (subitising), then rows
+ *                        and columns, the start of multiplying (Year 2)
+ *
+ * The Year 2 steps sit at the top of each ladder, so he only meets them by
+ * climbing there — or a grown-up starts him there in setup.
  *
  * Each game has a short ladder of steps. A round starts on the step he
  * reached last time and moves up after three right in a row, down after two
@@ -43,13 +50,14 @@ export function climb(c: Climb, ok: boolean, steps: number): Climb {
  * mistakes children make: one more or one less (a miscount), two away, and on
  * bigger numbers ten away (a tens slip). Never outside [lo, hi].
  */
-export function choices(answer: number, lo: number, hi: number, n = 4): number[] {
-  const ones = shuffle([answer - 1, answer + 1]);
-  const twos = shuffle([answer - 2, answer + 2]);
-  const tens = hi > 20 ? shuffle([answer - 10, answer + 10]) : [];
+export function choices(answer: number, lo: number, hi: number, n = 4, unit = 1): number[] {
+  const ones = shuffle([answer - unit, answer + unit]);
+  const twos = shuffle([answer - 2 * unit, answer + 2 * unit]);
+  /* counting in tens, the slip is a ten; otherwise ten is the slip on big numbers */
+  const tens = unit === 1 && hi > 20 ? shuffle([answer - 10, answer + 10]) : [];
   /* a miscount first, then a tens slip on big numbers, then further off */
   const order = [ones[0], ...tens.slice(0, 1), ones[1], ...twos, ...tens.slice(1),
-    answer - 3, answer + 3, answer - 4, answer + 4, answer - 5, answer + 5];
+    ...[3, 4, 5].flatMap((k) => [answer - k * unit, answer + k * unit])];
   const out = [answer];
   for (const x of order) {
     if (out.length >= n) break;
@@ -60,22 +68,32 @@ export function choices(answer: number, lo: number, hi: number, n = 4): number[]
 
 /* ── Off the Bench: how many more to make the team? ──────────────────── */
 
-export interface BenchStep extends Step { target: 5 | 10 | 20; spots: boolean }
+export interface BenchStep extends Step {
+  target: 5 | 10 | 20 | 100;
+  spots: boolean;
+  /** the fans come in whole rows of ten (Year 2, the stadium) */
+  tens?: boolean;
+}
 
 export const BENCH_STEPS: BenchStep[] = [
   { name: 'Make 5', target: 5, spots: true },
   { name: 'Make 10', target: 10, spots: true },
   { name: 'Make 10, no gaps shown', target: 10, spots: false },
   { name: 'Make 20', target: 20, spots: true },
+  /* Year 2: a stadium of 100 seats in rows of ten */
+  { name: 'Fill 100 in tens', target: 100, spots: true, tens: true },
+  { name: 'Fill 100', target: 100, spots: true },
 ];
 
 export interface BenchQuestion { target: number; on: number; need: number }
 
 export function benchQuestion(step: BenchStep, last?: BenchQuestion): BenchQuestion {
   /* at least one on and one to come, and not the same as last time */
-  let on = 1 + Math.floor(Math.random() * (step.target - 1));
-  if (last && last.target === step.target && last.on === on) on = on === 1 ? 2 : on - 1;
-  return { target: step.target, on, need: step.target - on };
+  const unit = step.tens ? 10 : 1;
+  const slots = step.target / unit;
+  let on = 1 + Math.floor(Math.random() * (slots - 1));
+  if (last && last.target === step.target && last.on === on * unit) on = on === 1 ? 2 : on - 1;
+  return { target: step.target, on: on * unit, need: step.target - on * unit };
 }
 
 /* ── Scoreboard Sums: goals added, and goals taken away ─────────────── */
@@ -84,9 +102,17 @@ export interface SumStep extends Step {
   /** the biggest number in the question or its answer */
   max: number;
   op: '+' | '-';
+  /** some adding, some taking away */
+  mix?: boolean;
   /** the balls on the scoreboard: all of them, only the ones being added
-      (so he counts on from the first number), or none */
-  show: 'all' | 'second' | 'none';
+      (so he counts on from the first number), tens and ones (racks of ten
+      balls and loose ones, for numbers to 100), or none */
+  show: 'all' | 'second' | 'bundles' | 'none';
+  /**
+   * Year 2, within 100: whole tens only (30 + 20), tens and ones that never
+   * cross a ten (34 + 25, 58 − 23), or ones that always do (38 + 25, 52 − 27).
+   */
+  hundred?: 'tens' | 'no-carry' | 'past';
 }
 
 export const SUM_STEPS: SumStep[] = [
@@ -95,18 +121,45 @@ export const SUM_STEPS: SumStep[] = [
   { name: 'Count on to 10', max: 10, op: '+', show: 'second' },
   { name: 'Take away in 10', max: 10, op: '-', show: 'all' },
   { name: 'Add to 20', max: 20, op: '+', show: 'second' },
-  { name: 'Add and take away to 20', max: 20, op: '-', show: 'none' },
+  { name: 'Add and take away to 20', max: 20, op: '-', mix: true, show: 'none' },
+  /* Year 2: within 100, by tens and ones */
+  { name: 'Add tens', max: 100, op: '+', show: 'bundles', hundred: 'tens' },
+  { name: 'Add tens and ones', max: 100, op: '+', show: 'bundles', hundred: 'no-carry' },
+  { name: 'Take away tens and ones', max: 100, op: '-', show: 'bundles', hundred: 'no-carry' },
+  { name: 'Add past a ten, to 100', max: 100, op: '+', show: 'none', hundred: 'past' },
+  { name: 'Add and take away to 100', max: 100, op: '-', mix: true, show: 'none', hundred: 'past' },
 ];
 
 export interface SumQuestion { a: number; b: number; op: '+' | '-'; answer: number }
 
+const rand = (lo: number, hi: number): number => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+/** a sum within 100, for the Year 2 steps */
+function hundredSum(kind: NonNullable<SumStep['hundred']>, op: '+' | '-'): { a: number; b: number } {
+  if (kind === 'tens') {
+    const a = rand(1, 8) * 10;
+    return op === '+' ? { a, b: rand(1, 10 - a / 10) * 10 } : { a: a + 10, b: rand(1, a / 10) * 10 };
+  }
+  for (;;) {
+    const a = rand(11, 99);
+    const b = rand(11, 89);
+    const carries = op === '+' ? (a % 10) + (b % 10) > 9 : (a % 10) < (b % 10);
+    if (op === '+' ? a + b > 100 : b >= a) continue;
+    if (b % 10 === 0 || a % 10 === 0) continue;
+    /* a step about crossing a ten always crosses one */
+    if (kind === 'no-carry' ? carries : !carries) continue;
+    return { a, b };
+  }
+}
+
 export function sumQuestion(step: SumStep, last?: SumQuestion): SumQuestion {
   for (let tries = 0; tries < 20; tries += 1) {
-    /* the top step mixes adding and taking away */
-    const op = step.op === '-' && step.max === 20 ? pick(['+', '-'] as const) : step.op;
+    const op = step.mix ? pick(['+', '-'] as const) : step.op;
     let a: number;
     let b: number;
-    if (op === '+') {
+    if (step.hundred) {
+      ({ a, b } = hundredSum(step.hundred, op));
+    } else if (op === '+') {
       const total = 2 + Math.floor(Math.random() * (step.max - 1));
       a = 1 + Math.floor(Math.random() * (total - 1));
       b = total - a;
@@ -132,7 +185,7 @@ export interface LineStep extends Step {
   /** the numbers written under the line */
   labels: number[];
   /** the numbers that can be asked */
-  ask: 'any' | 'tens';
+  ask: 'any' | 'tens' | 'hundreds';
   /** how far off still counts, for lines too long to have a tick for each number */
   near: number;
 }
@@ -150,10 +203,14 @@ export const LINE_STEPS: LineStep[] = [
   { name: '0 to 100 in tens', lo: 0, hi: 100, tick: 10, labels: [0, 50, 100], ask: 'tens', near: 0 },
   { name: '0 to 100', lo: 0, hi: 100, tick: 10, labels: [0, 50, 100], ask: 'any', near: 4 },
   { name: '0 to 120', lo: 0, hi: 120, tick: 10, labels: [0, 50, 100, 120], ask: 'any', near: 5 },
+  /* Year 2: on towards 1000 */
+  { name: '0 to 200', lo: 0, hi: 200, tick: 10, labels: [0, 100, 200], ask: 'any', near: 8 },
+  { name: '0 to 1000 in hundreds', lo: 0, hi: 1000, tick: 100, labels: [0, 500, 1000], ask: 'hundreds', near: 0 },
+  { name: '0 to 1000', lo: 0, hi: 1000, tick: 100, labels: [0, 500, 1000], ask: 'tens', near: 40 },
 ];
 
 export function lineQuestion(step: LineStep, last?: number): number {
-  const pool = (step.ask === 'tens' ? every(step.lo, step.hi, 10) : every(step.lo, step.hi, 1))
+  const pool = every(step.lo, step.hi, step.ask === 'hundreds' ? 100 : step.ask === 'tens' ? 10 : 1)
     /* a number written under the line is no question at all */
     .filter((n) => !step.labels.includes(n) && n !== last);
   return pick(pool.length ? pool : every(step.lo, step.hi, step.tick));
@@ -172,8 +229,9 @@ export const onTarget = (step: LineStep, asked: number, tapped: number): boolean
 
 export interface FlashStep extends Step {
   max: number;
-  /** dice spots, a ten frame, or two dice side by side */
-  look: 'dice' | 'frame' | 'two-dice';
+  /** dice spots, a ten frame, two dice side by side, or rows and columns
+      (an array, Year 2) */
+  look: 'dice' | 'frame' | 'two-dice' | 'array';
   /** how long it shows, in ms */
   ms: number;
 }
@@ -184,6 +242,9 @@ export const FLASH_STEPS: FlashStep[] = [
   { name: 'Ten frame', max: 10, look: 'frame', ms: 2200 },
   { name: 'Ten frame, quicker', max: 10, look: 'frame', ms: 1500 },
   { name: 'Two dice', max: 12, look: 'two-dice', ms: 2400 },
+  /* Year 2: rows and columns, seen as "3 rows of 4" rather than counted */
+  { name: 'Rows of dots', max: 15, look: 'array', ms: 3000 },
+  { name: 'Bigger rows of dots', max: 25, look: 'array', ms: 3000 },
 ];
 
 /** the grown-up's choice of pace for Flash Count */
@@ -208,10 +269,27 @@ export function flashMs(step: FlashStep, rightInARow: number, speed: FlashSpeed 
   return Math.round(step.ms * lead * SPEED[speed] * (reduced ? 1.5 : 1));
 }
 
-export interface FlashQuestion { n: number; /** for two dice, each die */ parts: number[] }
+export interface FlashQuestion {
+  n: number;
+  /** for two dice, each die; for an array, its rows and then its columns */
+  parts: number[];
+}
+
+/** the smallest number a step can show */
+export const flashLowest = (step: FlashStep): number =>
+  step.look === 'array' ? 4 : step.look === 'two-dice' ? 2 : 1;
 
 export function flashQuestion(step: FlashStep, last?: number): FlashQuestion {
-  const lo = step.look === 'two-dice' ? 2 : 1;
+  if (step.look === 'array') {
+    /* at least two rows and two columns, at most five of each */
+    for (;;) {
+      const rows = rand(2, 5);
+      const cols = rand(2, 5);
+      const n = rows * cols;
+      if (n <= step.max && n !== last) return { n, parts: [rows, cols] };
+    }
+  }
+  const lo = flashLowest(step);
   let n = lo + Math.floor(Math.random() * (step.max - lo + 1));
   if (n === last) n = n === lo ? n + 1 : n - 1;
   if (step.look !== 'two-dice') return { n, parts: [n] };

@@ -32,8 +32,10 @@ once opened, and nothing ever leaves the device.
 | **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120. |
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
-Year 1, and each climbs its own levels: up after three right in a row, down
-after two wrong. Each round waits for a tap on Start, so nothing is asked while
+Year 2, and each climbs its own levels: up after three right in a row, down
+after two wrong. The Year 2 levels sit at the top of each ladder: a stadium of
+100 seats to fill, sums to 100 in racks of ten, a number line to 1000, and
+dots in rows and columns. Each round waits for a tap on Start, so nothing is asked while
 the page is still loading. Flash Count gives a long first look at each level
 and shortens it with every right answer in a row; a grown-up can set it to
 slow, normal or quick in setup.
