@@ -22,7 +22,7 @@ test.describe('home screen', () => {
       expect(page.url()).toContain('#/' + path);
       /* and back out again, the way a child leaves a game */
       await page.getByRole('button', { name: 'Back to the games' }).click();
-      await expect(page.locator('.tiles')).toBeVisible();
+      await expect(page.locator('.tiles').first()).toBeVisible();
     }
     noProblems(watch);
   });

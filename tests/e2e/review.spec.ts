@@ -16,7 +16,7 @@ const GAMES = [
 /** leave the game the way he does, and check nothing is said after that */
 async function leaveAndListen(page: Page): Promise<void> {
   await page.getByRole('button', { name: 'Back to the games' }).click();
-  await expect(page.locator('.tiles')).toBeVisible();
+  await expect(page.locator('.tiles').first()).toBeVisible();
   const before = (await said(page)).length;
   await page.waitForTimeout(1800);
   expect((await said(page)).slice(before), 'spoken after leaving the game').toEqual([]);
