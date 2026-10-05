@@ -387,3 +387,65 @@ export function anotherChoices(ones: number): number[] {
   }
   return out.sort((a, b) => a - b);
 }
+
+/* ── Keepy-Uppy Count: counting on, back, and in steps ───────────────── */
+
+export interface SkipStep extends Step {
+  /** the step each bounce goes up (or down) by; one is picked per question */
+  by: number[];
+  /** where the counting starts: from 0 (and its multiples), any number, or
+      an odd number (counting the odd numbers) */
+  from: 'zero' | 'any' | 'odd';
+  dir: 1 | -1;
+  /** the biggest number said */
+  max: number;
+}
+
+export const SKIP_STEPS: SkipStep[] = [
+  { name: 'Count on in ones', by: [1], from: 'any', dir: 1, max: 30 },
+  { name: 'Count back in ones', by: [1], from: 'any', dir: -1, max: 30 },
+  { name: 'Count by 10s', by: [10], from: 'zero', dir: 1, max: 100 },
+  { name: 'Count by 5s', by: [5], from: 'zero', dir: 1, max: 60 },
+  { name: 'Count by 2s', by: [2], from: 'zero', dir: 1, max: 30 },
+  /* Year 2: from any number, odd numbers, threes, and backwards in steps */
+  { name: 'By 10s from any number', by: [10], from: 'any', dir: 1, max: 120 },
+  { name: 'Odd numbers', by: [2], from: 'odd', dir: 1, max: 41 },
+  { name: 'Count by 3s', by: [3], from: 'zero', dir: 1, max: 36 },
+  { name: 'Back in 10s and 5s', by: [10, 5], from: 'any', dir: -1, max: 120 },
+];
+
+/** how many numbers each keepy-uppy shows */
+export const BOUNCES = 6;
+
+export interface SkipQuestion { seq: number[]; gap: number; by: number }
+
+export function skipQuestion(step: SkipStep, last?: SkipQuestion): SkipQuestion {
+  for (;;) {
+    const by = pick(step.by);
+    const span = by * (BOUNCES - 1);
+    let first: number;
+    if (step.from === 'zero') first = by * rand(0, Math.floor((step.max - span) / by));
+    else if (step.from === 'odd') first = 2 * rand(0, Math.floor((step.max - span - 1) / 2)) + 1;
+    else {
+      first = rand(step.dir === 1 ? 1 : span + 1, step.dir === 1 ? step.max - span : step.max);
+      /* "from any number" in tens means not from a ten, or it is just counting by 10s */
+      if (by >= 5 && first % by === 0) continue;
+    }
+    const seq = Array.from({ length: BOUNCES }, (_, i) => first + step.dir * by * i);
+    /* never the first two: he needs to hear the pattern before the gap */
+    const gap = rand(2, BOUNCES - 1);
+    if (last && last.seq[0] === seq[0] && last.by === by) continue;
+    return { seq, gap, by };
+  }
+}
+
+/** the gap's number and the slips: one off, and a step too far either way */
+export function skipChoices(q: SkipQuestion): number[] {
+  const answer = q.seq[q.gap];
+  const out = [answer];
+  for (const x of shuffle([answer + 1, answer - 1, answer + q.by, answer - q.by]).concat(answer + 2, answer - 2, answer + 2 * q.by)) {
+    if (out.length >= 4) break;
+    if (x >= 0 && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}

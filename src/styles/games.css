@@ -1061,3 +1061,27 @@
   .tb-fan.walking { width: 14px; height: 14px; }
 }
 @media (prefers-reduced-motion: reduce) { .tb-bus.broken { animation: none; } }
+
+/* ── Keepy-Uppy Count ──────────────────────────────────────────────────── */
+
+.ku-pitch {
+  display: grid; justify-items: center; gap: 4px; width: min(100%, 720px); padding: 16px 10px 0;
+  border-radius: var(--radius); background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+}
+.ku-touches { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px; min-height: 72px; }
+.ku-ball {
+  display: grid; place-items: center; width: clamp(40px, 11vw, 70px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff 0 40%, #E8E3D6 75%); color: var(--ink);
+  font: 800 clamp(18px, 5vw, 28px) var(--display); box-shadow: 0 4px 0 rgba(0, 0, 0, .25);
+  animation: ku-bounce .45s ease-out;
+}
+.ku-ball.gap { background: var(--mustard); }
+.ku-ball.right { background: var(--mint); }
+.ku-ball.filled { background: #F3C3B4; }
+.ku-hop { min-width: 6px; color: var(--paper); font: 800 15px var(--display); }
+.ku-touches.show-hops .ku-hop { min-width: 22px; text-align: center; font-size: 13px; }
+.ku-touches.show-hops .ku-ball { width: clamp(34px, 9vw, 70px); }
+.ku-juggler { min-height: 74px; }
+.ku-juggler.trick { animation: bounce .5s 2; }
+@keyframes ku-bounce { 0% { transform: translateY(-40px); opacity: 0; } 60% { transform: translateY(4px); opacity: 1; } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ku-ball, .ku-juggler.trick { animation: none; } }

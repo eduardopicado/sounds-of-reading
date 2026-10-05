@@ -346,9 +346,42 @@ test.describe('maths games', () => {
     await expect(page.locator('.tb-bus')).toHaveCount(Math.floor(n / 10) - 1);
   });
 
+  test('Keepy-Uppy Count: a whole round, filling the gaps', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'keepy-uppy');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.ku-touches').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Keepy-Uppy Count: a miss writes the step on every jump', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 4 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.ku-hop').first()).toHaveText('+2');
+    await expect(page.locator('.mx-note')).toContainText('Up in 2s');
+    await expect(page.locator('.ku-ball.filled')).toHaveText(String(answer));
+  });
+
+  test('Year 2: Keepy-Uppy counts back in 10s and 5s', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 8 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const shown = (await page.locator('.ku-ball:not(.gap)').allTextContents()).map(Number);
+    expect(shown[0]).toBeGreaterThan(shown[1]);
+    await tapNumber(page, Number(await page.locator('.ku-touches').getAttribute('data-answer')));
+    await expect(page.locator('.mx-note')).toContainText('Keepy-uppy!');
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(5);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(6);
   });
 });
