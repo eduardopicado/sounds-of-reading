@@ -496,11 +496,14 @@ export function drillQuestion(step: DrillStep, last?: DrillQuestion): DrillQuest
     a group too many or too few, and one off */
 export function drillChoices(step: DrillStep, q: DrillQuestion): number[] {
   const unit = step.task === 'share' || step.task === 'make-rows' ? 1 : q.each;
+  /* the telling slip always: adding (3 hoops of 4 is 7), or giving the
+     number of hoops (or the row length) as the answer */
+  const telling = step.task === 'share' ? q.groups : step.task === 'make-rows' ? q.each : q.groups + q.each;
   const slips = step.task === 'share' || step.task === 'make-rows'
-    ? [q.answer + 1, q.answer - 1, step.task === 'share' ? q.groups : q.each, q.answer + 2]
-    : [q.groups + q.each, q.answer + unit, q.answer - unit, q.answer + 1, q.answer - 1];
+    ? [q.answer + 1, q.answer - 1, q.answer + 2]
+    : [q.answer + unit, q.answer - unit, q.answer + 1, q.answer - 1];
   const out = [q.answer];
-  for (const x of shuffle(slips).concat(q.answer + 2 * unit, q.answer + 2, q.answer + 3)) {
+  for (const x of [telling, ...shuffle(slips), q.answer + 2 * unit, q.answer + 2, q.answer + 3]) {
     if (out.length >= 4) break;
     if (x >= 1 && !out.includes(x)) out.push(x);
   }
