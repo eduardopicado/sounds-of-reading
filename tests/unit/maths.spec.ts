@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  SURVEY_STEPS, surveyQuestion,
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
   JUMP_STEPS, jumpQuestion, jumpsFor,
   FRACTION_STEPS, fractionQuestion,
@@ -446,5 +447,27 @@ describe('Match Clock', () => {
     const y1 = CLOCK_STEPS.slice(0, 4);
     expect(y1.flatMap((s) => s.minutes).every((m) => m === 0 || m === 30)).toBe(true);
     expect(y1.some((s) => s.task === 'seasons')).toBe(false);
+  });
+});
+
+describe('Fan Survey', () => {
+  it('has different votes for every team, so one got the most, and the right answer', () => {
+    for (const step of SURVEY_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = surveyQuestion(step);
+        expect(q.votes).toHaveLength(step.teams);
+        expect(new Set(q.votes).size).toBe(step.teams);
+        for (const v of q.votes) { expect(v).toBeGreaterThanOrEqual(1); expect(v).toBeLessThanOrEqual(step.max); }
+        if (step.task === 'most') expect(q.votes[q.answer]).toBe(Math.max(...q.votes));
+        else if (step.task === 'more') {
+          expect(q.votes[q.other]).toBeLessThan(q.votes[q.team]);
+          expect(q.answer).toBe(q.votes[q.team] - q.votes[q.other]);
+        } else expect(q.answer).toBe(q.votes[q.team]);
+      }
+    }
+  });
+
+  it('keeps column graphs for Year 2', () => {
+    expect(SURVEY_STEPS.slice(0, 3).map((s) => s.task)).toEqual(['count', 'tally', 'most']);
   });
 });

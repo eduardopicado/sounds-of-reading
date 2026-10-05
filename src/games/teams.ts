@@ -168,3 +168,13 @@ export function player(team: Team, height: number, pose: 'keeper' | 'kicker'): S
   root.append(svg('path', { d: 'M36 23.5 Q40 26.5 44 23.5', fill: 'none', stroke: INK, 'stroke-width': 1.4, 'stroke-linecap': 'round' }));
   return root;
 }
+
+/** the team's colour that shows on a light background: England's navy, not
+    its white — for dots, bibs and bars drawn on the cream boards */
+export function strong(t: Team): string {
+  const light = (hex: string): boolean => {
+    const n = parseInt(hex.replace('#', ''), 16);
+    return 0.2126 * ((n >> 16) & 255) + 0.7152 * ((n >> 8) & 255) + 0.0722 * (n & 255) > 215;
+  };
+  return t.colours.find((c) => !light(c)) ?? '#5B5148';
+}

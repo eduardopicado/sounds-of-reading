@@ -1196,3 +1196,29 @@
 .mc-cell.target { background: var(--mustard); color: var(--ink); font-size: 22px; }
 .mc-month { padding: 14px 26px; border-radius: 16px; background: var(--paper); color: var(--ink); font: 800 32px var(--display); }
 .mc-season { color: var(--paper); font: 700 18px var(--reading); text-align: center; }
+
+/* ── Fan Survey ────────────────────────────────────────────────────────── */
+
+.fs-board {
+  display: grid; justify-items: center; gap: 10px; width: min(100%, 640px); padding: 14px; border-radius: var(--radius);
+  background: var(--paper); color: var(--ink); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.fs-crowd { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; max-width: 480px; }
+.fs-fan { font-size: clamp(26px, 7vw, 36px); line-height: 1; border-radius: 8px; }
+.fs-fan.lit { outline: 3px solid var(--mustard); outline-offset: 2px; background: rgba(243, 178, 41, .3); }
+.fs-table { display: grid; gap: 10px; width: 100%; }
+.fs-row { display: grid; grid-template-columns: minmax(110px, 34%) 1fr; align-items: center; gap: 10px; }
+.fs-team { font: 800 clamp(15px, 4vw, 19px) var(--display); }
+.fs-tally { height: 34px; }
+.fs-tally line { stroke: var(--ink); stroke-width: 4; stroke-linecap: round; }
+.fs-pics { display: flex; flex-wrap: nowrap; gap: clamp(2px, 1vw, 5px); }
+.fs-pic { flex: none; width: clamp(15px, 4.4vw, 24px); aspect-ratio: 1; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .3); }
+.fs-key { margin: 0; font-size: 14px; color: #5B5148; }
+.fs-graph { width: 100%; max-width: 560px; height: auto; }
+.fs-grid { stroke: #D9CFC0; stroke-width: 1.5; }
+.fs-axis { stroke: var(--ink); stroke-width: 3; }
+.fs-scale { fill: var(--ink); font: 800 20px var(--display); text-anchor: end; }
+.fs-bar { stroke: var(--ink); stroke-width: 2.5; }
+.fs-flag { font-size: 34px; text-anchor: middle; }
+.fs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 700 15px var(--display); }
+.mx-choice.word { font-size: clamp(20px, 5vw, 28px); }

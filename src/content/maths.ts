@@ -709,3 +709,58 @@ export function clockQuestion(step: ClockStep, last?: ClockQuestion): ClockQuest
     return step.task === 'seasons' ? q : { ...q, options: shuffle(q.options) };
   }
 }
+
+/* ── Fan Survey: counting, tallies and graphs ────────────────────────── */
+
+export interface SurveyStep extends Step {
+  /**
+   * count: fans waving flags, how many for one team;
+   * tally: tally marks for each team, how many for one;
+   * most: a picture graph, which team got the most;
+   * column: a column graph, how many for one team;
+   * more: a column graph, how many more for one team than another.
+   */
+  task: 'count' | 'tally' | 'most' | 'column' | 'more';
+  /** how many teams were voted for */
+  teams: number;
+  /** the most votes a team can get */
+  max: number;
+}
+
+export const SURVEY_STEPS: SurveyStep[] = [
+  { name: 'Count the fans', task: 'count', teams: 3, max: 6 },
+  { name: 'Tally marks', task: 'tally', teams: 3, max: 12 },
+  { name: 'Picture graph', task: 'most', teams: 3, max: 8 },
+  /* Year 2: column graphs, and comparing */
+  { name: 'Column graph', task: 'column', teams: 4, max: 10 },
+  { name: 'How many more?', task: 'more', teams: 4, max: 10 },
+];
+
+export interface SurveyQuestion {
+  /** votes for each team, all different so there is one most */
+  votes: number[];
+  /** the team asked about */
+  team: number;
+  /** for "how many more": the team compared with, which got fewer */
+  other: number;
+  answer: number;
+}
+
+export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQuestion {
+  for (;;) {
+    const votes = shuffle(Array.from({ length: step.max }, (_, i) => i + 1)).slice(0, step.teams);
+    const team = rand(0, step.teams - 1);
+    const most = votes.indexOf(Math.max(...votes));
+    let other = team;
+    let answer: number;
+    if (step.task === 'most') answer = most;
+    else if (step.task === 'more') {
+      const fewer = votes.map((_, i) => i).filter((i) => votes[i] < votes[team]);
+      if (!fewer.length) continue;
+      other = pick(fewer);
+      answer = votes[team] - votes[other];
+    } else answer = votes[team];
+    if (last && last.votes.join() === votes.join()) continue;
+    return { votes, team, other, answer };
+  }
+}
