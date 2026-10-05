@@ -16,6 +16,7 @@ const GAMES = [
   'training-drills',
   'half-time-oranges',
   'jump-line',
+  'match-clock',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */
