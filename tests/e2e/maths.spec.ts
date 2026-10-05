@@ -477,9 +477,58 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText(`each one is ${name}`);
   });
 
+  test('Jump Line: a whole round of jumps', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'jump-line');
+    await playRound(page, async () => {
+      await expect(page.getByRole('button', { name: 'Done ✓' })).toBeVisible({ timeout: 10000 });
+      const line = page.locator('.jl-line');
+      const b = Number(await line.getAttribute('data-b'));
+      const back = Number(await line.getAttribute('data-answer')) < Number(await line.getAttribute('data-a'));
+      for (let i = 0; i < b; i += 1) await page.getByRole('button', { name: `Jump ${back ? 'back' : 'on'} 1`, exact: true }).click();
+      await page.getByRole('button', { name: 'Done ✓' }).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Jump Line: undo takes a jump back, and a miss shows the way', async ({ page }) => {
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Done ✓' })).toBeVisible({ timeout: 10000 });
+    const line = page.locator('.jl-line');
+    const a = Number(await line.getAttribute('data-a'));
+    const b = Number(await line.getAttribute('data-b'));
+    await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await expect(page.locator('.jl-arc.his')).toHaveCount(2);
+    await page.getByRole('button', { name: 'Undo a jump' }).click();
+    await expect(page.locator('.jl-arc.his')).toHaveCount(1);
+    await expect(line).toHaveAttribute('data-at', String(a + 1));
+    /* one jump is never right here: the smallest jump on is 1, so stop short unless it was 1 */
+    if (b === 1) await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText('You landed on');
+    await expect(page.locator('.jl-arc.way')).toHaveCount(b);
+  });
+
+  test('Year 2: Jump Line jumps a ten at a time', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 5 });
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Jump on 10' })).toBeVisible({ timeout: 10000 });
+    const b = Number(await page.locator('.jl-line').getAttribute('data-b'));
+    for (let i = 0; i < Math.floor(b / 10); i += 1) await page.getByRole('button', { name: 'Jump on 10' }).click();
+    for (let i = 0; i < b % 10; i += 1) await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await expect(page.locator('.jl-hop')).toHaveCount(Math.floor(b / 10));
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(/jumps? of ten/);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+    noProblems(watch);
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(8);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(9);
   });
 });

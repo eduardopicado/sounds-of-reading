@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  JUMP_STEPS, jumpQuestion, jumpsFor,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
@@ -369,5 +370,34 @@ describe('Half-Time Oranges', () => {
   it('is halves only until Year 2', () => {
     expect(FRACTION_STEPS.slice(0, 2).every((s) => s.parts.every((p) => p === 2))).toBe(true);
     expect(FRACTION_STEPS.slice(2).some((s) => s.parts.includes(8))).toBe(true);
+  });
+});
+
+describe('Jump Line', () => {
+  it('keeps every sum on its line, with the right answer', () => {
+    for (const step of JUMP_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = jumpQuestion(step);
+        expect(q.answer).toBe(q.op === '+' ? q.a + q.b : q.a - q.b);
+        for (const n of [q.a, q.answer]) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.top); }
+        expect(q.b).toBeGreaterThanOrEqual(1);
+        if (step.b === 'ones') expect(q.b).toBeLessThanOrEqual(9);
+        if (step.b === 'tens') expect(q.b % 10).toBe(0);
+        if (step.b === 'tens-ones') { expect(q.b).toBeGreaterThan(10); expect(q.b % 10).not.toBe(0); }
+      }
+    }
+  });
+
+  it('jumps tens then ones, and the jumps add up to the second number', () => {
+    expect(jumpsFor({ a: 38, b: 25, op: '+', answer: 63 }, true)).toEqual([10, 10, 1, 1, 1, 1, 1]);
+    expect(jumpsFor({ a: 9, b: 3, op: '-', answer: 6 }, false)).toEqual([-1, -1, -1]);
+    for (const step of JUMP_STEPS) {
+      const q = jumpQuestion(step);
+      expect(q.a + jumpsFor(q, step.tens).reduce((s, j) => s + j, 0)).toBe(q.answer);
+    }
+  });
+
+  it('stays within 20 until Year 2', () => {
+    expect(JUMP_STEPS.filter((s) => !s.tens).every((s) => s.top <= 20)).toBe(true);
   });
 });
