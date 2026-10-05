@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 import { expectTapTargets, noProblems, watchPage } from './helpers';
 
 test.describe('home screen', () => {
-  test('shows all twenty games and opens each one', async ({ page }) => {
+  test('shows every game and opens each one', async ({ page }) => {
     const watch = watchPage(page);
     await page.goto('/');
 
@@ -13,9 +13,10 @@ test.describe('home screen', () => {
       'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator', 'Build the Word',
       'Trace It', 'Tall, Small, Tail',
       'Flash Count', 'Off the Bench', 'Scoreboard Sums', 'Number Line Penalty',
+      'Team Buses',
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
@@ -52,8 +53,14 @@ test.describe('home screen', () => {
         get() { throw new Error('storage blocked'); },
       });
     });
+    /* every tile a browser with storage shows */
+    const normal = await page.context().newPage();
+    await normal.goto('/');
+    const tiles = await normal.locator('.tiles .tile-link').count();
+    await normal.close();
+    expect(tiles).toBeGreaterThan(20);
     await page.goto('/');
-    await expect(page.locator('.tiles .tile-link')).toHaveCount(20);
+    await expect(page.locator('.tiles .tile-link')).toHaveCount(tiles);
     await page.goto('/#/real-or-silly');
     await expect(page.locator('.theword')).toBeVisible();
     noProblems(watch);

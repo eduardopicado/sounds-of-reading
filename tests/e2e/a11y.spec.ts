@@ -26,6 +26,7 @@ const PAGES = [
   ['Off the Bench', '/#/off-the-bench'],
   ['Scoreboard Sums', '/#/scoreboard-sums'],
   ['Number Line Penalty', '/#/number-line-penalty'],
+  ['Team Buses', '/#/team-buses'],
 ] as const;
 
 for (const [name, path] of PAGES) {

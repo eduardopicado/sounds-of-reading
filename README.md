@@ -29,7 +29,8 @@ once opened, and nothing ever leaves the device.
 | **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many. |
 | **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? |
 | **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20. |
-| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120. |
+| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000. |
+| **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. |
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
 Year 2, and each climbs its own levels: up after three right in a row, down

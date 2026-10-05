@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -222,5 +223,49 @@ describe('Flash Count', () => {
 
   it('puts the right number of spots on every die face', () => {
     for (let n = 1; n <= 6; n += 1) expect(new Set(DICE[n]).size).toBe(n);
+  });
+});
+
+describe('Team Buses', () => {
+  it('asks numbers in each step, and only breaks down a bus when there are two and loose fans', () => {
+    for (const step of BUS_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const n = busQuestion(step);
+        expect(n).toBeGreaterThanOrEqual(step.lo);
+        expect(n).toBeLessThanOrEqual(step.hi);
+        if (step.task === 'another') { expect(n % 10).not.toBe(0); expect(n).toBeGreaterThanOrEqual(21); }
+      }
+    }
+  });
+
+  it('splits a number into hundreds, tens and ones, and back', () => {
+    expect(places(347)).toEqual({ hundreds: 3, tens: 4, ones: 7 });
+    /* without trains, 112 is eleven buses and two */
+    expect(places(112, false)).toEqual({ hundreds: 0, tens: 11, ones: 2 });
+    for (let n = 1; n < 1000; n += 1) expect(valueOf(places(n))).toBe(n);
+  });
+
+  it('offers the place-value slips as wrong answers', () => {
+    for (let i = 0; i < 50; i += 1) {
+      const c = placeChoices(61, 120);
+      expect(c).toEqual(expect.arrayContaining([61, 16, 51, 71]));
+      const big = placeChoices(347, 999);
+      expect(big).toContain(347);
+      expect(new Set(big).size).toBe(4);
+      for (const x of big) { expect(x).toBeGreaterThanOrEqual(1); expect(x).toBeLessThanOrEqual(999); }
+    }
+    expect(placeChoices(11, 120)).toContain(11);
+    expect(placeChoices(11, 120)).toHaveLength(4);
+  });
+
+  it('when a bus breaks down, offers forgetting its ten as a wrong answer', () => {
+    expect(anotherChoices(4)).toEqual(expect.arrayContaining([14, 4]));
+    expect(anotherChoices(4)).toHaveLength(4);
+  });
+
+  it('starts with teen numbers, and keeps trains for Year 2', () => {
+    expect(BUS_STEPS[0].hi).toBeLessThan(20);
+    const firstTrain = BUS_STEPS.findIndex((s) => s.trains);
+    expect(BUS_STEPS.slice(0, firstTrain).every((s) => s.hi <= 120)).toBe(true);
   });
 });
