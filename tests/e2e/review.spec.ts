@@ -13,6 +13,7 @@ const GAMES = [
   'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty',
   'team-buses',
   'keepy-uppy',
+  'training-drills',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */

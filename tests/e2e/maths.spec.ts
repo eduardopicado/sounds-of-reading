@@ -379,9 +379,65 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('Keepy-uppy!');
   });
 
+  test('Training Drills: a whole round of groups and sharing', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'training-drills');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.td-field').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Training Drills: a miss counts the hoops in steps', async ({ page }) => {
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const hoops = await page.locator('.td-hoop').count();
+    const each = await page.locator('.td-hoop').first().locator('.td-ball').count();
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    expect(answer).toBe(hoops * each);
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.td-count').last()).toHaveText(String(answer));
+    await expect(page.locator('.mx-note')).toContainText(`groups of ${each} make ${answer}`);
+  });
+
+  test('Training Drills: sharing deals the balls out fairly', async ({ page }) => {
+    await seed(page, { 'maths-step:training-drills': 1 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const total = await page.locator('.td-pile .td-ball').count();
+    const hoops = await page.locator('.td-hoop').count();
+    await tapNumber(page, total / hoops);
+    await expect(page.locator('.td-pile .td-ball')).toHaveCount(0, { timeout: 6000 });
+    for (let i = 0; i < hoops; i += 1) await expect(page.locator('.td-hoop').nth(i).locator('.td-ball')).toHaveCount(total / hoops);
+    await expect(page.locator('.mx-note')).toContainText(`each`);
+  });
+
+  test('Year 2: Training Drills sets cones out in rows, and finds how many rows', async ({ page }) => {
+    await seed(page, { 'maths-step:training-drills': 2 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const rows = await page.locator('.td-row').count();
+    const cols = await page.locator('.td-row').first().locator('.td-cone').count();
+    await tapNumber(page, rows * cols);
+    await expect(page.locator('.mx-note')).toContainText(`${rows} rows of ${cols} make ${rows * cols}`);
+  });
+
+  test('Year 2: Training Drills, cones into rows', async ({ page }) => {
+    await seed(page, { 'maths-step:training-drills': 4 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.td-pile .td-cone').first()).toBeVisible();
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.td-row')).toHaveCount(answer);
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(6);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(7);
   });
 });
