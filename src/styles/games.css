@@ -993,3 +993,31 @@
 .mx-ready-step { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(24px, 6vw, 32px); color: var(--mustard); }
 .mx-ready-how { margin: 0; color: var(--on-deep); font-size: 18px; max-width: 520px; }
 .mx-go { font-size: 24px; padding: 14px 34px; }
+
+/* ── Year 2 ────────────────────────────────────────────────────────────── */
+
+/* Off the Bench: a stadium of 100 seats, rows of ten */
+.mx-pitch.stadium { gap: 4px; padding: 12px; background: #3B4A5C; }
+.mx-pitch.stadium .mx-spot { min-height: 0; border-radius: 6px 6px 3px 3px; }
+.mx-pitch.stadium .mx-spot.gap { border-width: 2px; font-size: clamp(10px, 2.6vw, 15px); }
+.mx-pitch.stadium .mx-spot.fan { box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25); }
+
+/* Flash Count: rows and columns */
+.mx-array { width: auto; height: auto; max-width: min(76vw, 300px); max-height: 220px; }
+
+/* Scoreboard Sums: racks of ten balls, and the loose ones stacked beside them */
+.mx-group { display: inline-flex; flex-wrap: nowrap; align-items: flex-end; gap: 4px; }
+.mx-ten {
+  display: inline-grid; grid-template-rows: repeat(10, 7px); gap: 1px;
+  width: 11px; padding: 2px; border-radius: 6px;
+  background: rgba(255, 246, 231, .18);
+}
+.mx-ten i { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--paper); }
+.mx-ten.new { filter: drop-shadow(0 0 4px var(--mustard)); }
+.mx-ten.new i { background: var(--mustard); }
+.mx-ten.offside { opacity: .35; position: relative; }
+.mx-ten.offside::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #FF6B4A; font-weight: 800; font-size: 18px; }
+.mx-ones { display: inline-grid; grid-template-rows: repeat(5, 11px); grid-auto-flow: column; gap: 3px; padding-bottom: 2px; }
+.mx-one { display: block; width: 11px; height: 11px; border-radius: 50%; background: var(--paper); }
+.mx-one.new { background: var(--mustard); }
+.mx-one.offside { opacity: .35; box-shadow: 0 0 0 2px #FF6B4A; }
