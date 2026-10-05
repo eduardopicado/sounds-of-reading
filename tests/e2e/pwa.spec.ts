@@ -29,10 +29,12 @@ test.describe('progressive web app', () => {
       .catch(() => undefined);
     await page.evaluate(() => navigator.serviceWorker?.ready);
     await page.waitForTimeout(1500);
+    const tiles = await page.locator('.tiles .tile-link').count();
+    expect(tiles).toBeGreaterThan(20);
 
     await context.setOffline(true);
     await page.reload();
-    await expect(page.locator('.tiles .tile-link')).toHaveCount(20);
+    await expect(page.locator('.tiles .tile-link')).toHaveCount(tiles);
 
     /* and a game still works, fonts and all */
     await page.locator('.tile-link[data-game="word-builder"]').click();
