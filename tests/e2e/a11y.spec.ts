@@ -30,6 +30,7 @@ const PAGES = [
   ['Keepy-Uppy Count', '/#/keepy-uppy'],
   ['Training Drills', '/#/training-drills'],
   ['Half-Time Oranges', '/#/half-time-oranges'],
+  ['Jump Line', '/#/jump-line'],
 ] as const;
 
 for (const [name, path] of PAGES) {

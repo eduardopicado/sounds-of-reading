@@ -1141,3 +1141,26 @@
 .ht-share { display: grid; justify-items: center; gap: 6px; padding: 8px; border-radius: 12px; background: rgba(0, 0, 0, .06); }
 .ht-flag { font-size: 30px; line-height: 1; }
 .ht-bibs { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 150px; }
+
+/* ── Jump Line ─────────────────────────────────────────────────────────── */
+
+.jl-board { width: min(100%, 860px); padding: 8px 6px 0; border-radius: var(--radius); background: #1F4E5F; }
+.jl-line { display: block; width: 100%; height: auto; }
+.jl-label { fill: var(--paper); font: 800 46px var(--display); text-anchor: middle; }
+.jl-label.tight { font-size: 40px; letter-spacing: -1px; }
+.jl-small { stroke: rgba(255, 246, 231, .55); stroke-width: 3; }
+.jl-arc { fill: none; stroke-width: 6; stroke-linecap: round; }
+.jl-arc.his { stroke: var(--mustard); }
+.jl-arc.way { stroke: var(--mint); stroke-dasharray: 14 8; }
+.jl-hop { fill: var(--mustard); font: 800 30px var(--display); text-anchor: middle; }
+.jl-ball { font-size: 64px; text-anchor: middle; }
+.jl-pad { display: grid; justify-items: center; gap: 10px; }
+.jl-pad:empty { display: none; }
+.jl-jumps { display: flex; gap: 12px; }
+.jl-jump, .jl-undo {
+  min-width: 86px; min-height: 70px; padding: 6px 16px; border: 0; border-radius: 18px; cursor: pointer;
+  background: var(--mustard); color: var(--ink); font: 800 32px var(--display); box-shadow: 0 5px 0 var(--mustard-dark);
+}
+.jl-undo { min-width: 70px; background: var(--paper); box-shadow: 0 5px 0 rgba(0, 0, 0, .25); }
+.jl-jump:active, .jl-undo:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--mustard-dark); }
+.jl-made { min-height: 1.3em; color: var(--on-deep); font-size: 16px; }
