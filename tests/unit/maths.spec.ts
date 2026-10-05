@@ -2,6 +2,8 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  SURVEY_STEPS, surveyQuestion,
+  CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
   JUMP_STEPS, jumpQuestion, jumpsFor,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
@@ -399,5 +401,73 @@ describe('Jump Line', () => {
 
   it('stays within 20 until Year 2', () => {
     expect(JUMP_STEPS.filter((s) => !s.tens).every((s) => s.top <= 20)).toBe(true);
+  });
+});
+
+describe('Match Clock', () => {
+  it('says times the way they are said', () => {
+    expect(timeWords(3, 0)).toBe("3 o'clock");
+    expect(timeWords(3, 30)).toBe('half past 3');
+    expect(timeWords(3, 15)).toBe('quarter past 3');
+    expect(timeWords(3, 45)).toBe('quarter to 4');
+    expect(timeWords(12, 45)).toBe('quarter to 1');
+  });
+
+  it('knows the Australian seasons', () => {
+    expect(['December', 'January', 'February'].map((m) => seasonOf(MONTHS.indexOf(m)))).toEqual(['Summer', 'Summer', 'Summer']);
+    expect(seasonOf(MONTHS.indexOf('July'))).toBe('Winter');
+    expect(seasonOf(MONTHS.indexOf('April'))).toBe('Autumn');
+    expect(seasonOf(MONTHS.indexOf('October'))).toBe('Spring');
+  });
+
+  it('always offers the answer among different choices, with the classic slips', () => {
+    for (const step of CLOCK_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = clockQuestion(step);
+        expect(q.options).toContain(q.answer);
+        expect(new Set(q.options).size).toBe(q.options.length);
+        expect(q.options.length).toBeGreaterThanOrEqual(3);
+        if (step.task === 'read' || step.task === 'set') {
+          expect(step.minutes).toContain(q.m);
+          expect(q.answer).toBe(timeWords(q.h, q.m));
+        }
+        if (step.task === 'days') expect(q.answer).toBe(DAYS[(q.index + (q.after ? 1 : 6)) % 7]);
+        if (step.task === 'months') expect(q.answer).toBe(MONTHS[(q.index + (q.after ? 1 : 11)) % 12]);
+      }
+    }
+    /* half past 3 offers half past 4, the hour hand misread */
+    const half = CLOCK_STEPS.find((s) => s.name === 'Half past')!;
+    for (let i = 0; i < 100; i += 1) {
+      const q = clockQuestion(half);
+      if (q.m === 30 && q.h < 12) expect(q.options.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('keeps quarters and seasons for Year 2', () => {
+    const y1 = CLOCK_STEPS.slice(0, 4);
+    expect(y1.flatMap((s) => s.minutes).every((m) => m === 0 || m === 30)).toBe(true);
+    expect(y1.some((s) => s.task === 'seasons')).toBe(false);
+  });
+});
+
+describe('Fan Survey', () => {
+  it('has different votes for every team, so one got the most, and the right answer', () => {
+    for (const step of SURVEY_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = surveyQuestion(step);
+        expect(q.votes).toHaveLength(step.teams);
+        expect(new Set(q.votes).size).toBe(step.teams);
+        for (const v of q.votes) { expect(v).toBeGreaterThanOrEqual(1); expect(v).toBeLessThanOrEqual(step.max); }
+        if (step.task === 'most') expect(q.votes[q.answer]).toBe(Math.max(...q.votes));
+        else if (step.task === 'more') {
+          expect(q.votes[q.other]).toBeLessThan(q.votes[q.team]);
+          expect(q.answer).toBe(q.votes[q.team] - q.votes[q.other]);
+        } else expect(q.answer).toBe(q.votes[q.team]);
+      }
+    }
+  });
+
+  it('keeps column graphs for Year 2', () => {
+    expect(SURVEY_STEPS.slice(0, 3).map((s) => s.task)).toEqual(['count', 'tally', 'most']);
   });
 });

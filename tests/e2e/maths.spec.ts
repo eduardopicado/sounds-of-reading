@@ -526,9 +526,122 @@ test.describe('maths games', () => {
     noProblems(watch);
   });
 
+  test('Match Clock: a whole round of reading the clock', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'match-clock');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice, .mc-turn').first()).toBeVisible({ timeout: 10000 });
+      const board = page.locator('.mc-board');
+      /* climbing to setting the clock part way through */
+      if (await page.locator('.mc-turn').count()) {
+        const minutes = Number(await board.getAttribute('data-minutes'));
+        for (let i = 0; i < Math.floor(minutes / 60); i += 1) await page.getByRole('button', { name: '+1 hour' }).click();
+        for (let i = 0; i < (minutes % 60) / 30; i += 1) await page.getByRole('button', { name: '+30 minutes' }).click();
+        await page.getByRole('button', { name: 'Done ✓' }).click();
+        return;
+      }
+      await expect(page.locator('.mx-choice').first()).toBeEnabled();
+      await page.locator(`.mx-choice[data-n="${await board.getAttribute('data-answer')}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Match Clock: the clock shows the time it asks about', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 1 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const want = await page.locator('.mc-board').getAttribute('data-minutes');
+    await expect(page.locator('.mc-clock')).toHaveAttribute('data-minutes', want!);
+    const answer = await page.locator('.mc-board').getAttribute('data-answer');
+    await expect(page.locator('.mc-clock')).toHaveAttribute('aria-label', `A clock showing ${answer}`);
+  });
+
+  test('Match Clock: setting the wrong time shows the right one', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 2 });
+    await startGame(page, 'match-clock');
+    await expect(page.getByRole('button', { name: '+1 hour' })).toBeVisible({ timeout: 10000 });
+    const want = Number(await page.locator('.mc-board').getAttribute('data-minutes'));
+    if (want === 0) await page.getByRole('button', { name: '+1 hour' }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText('looks like this');
+    await expect(page.locator('.mc-clock')).toHaveAttribute('data-minutes', String(want));
+  });
+
+  test('Match Clock: the day after training', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 3 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.mc-cell')).toHaveCount(7);
+    const answer = await page.locator('.mc-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mc-cell.target')).toHaveText(answer!.slice(0, 3));
+  });
+
+  test('Year 2: Match Clock sets quarter times, and knows the seasons', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-clock': 5 });
+    await startGame(page, 'match-clock');
+    await expect(page.getByRole('button', { name: '+15 minutes' })).toBeVisible({ timeout: 10000 });
+    const minutes = Number(await page.locator('.mc-board').getAttribute('data-minutes'));
+    for (let i = 0; i < Math.floor(minutes / 60); i += 1) await page.getByRole('button', { name: '+1 hour' }).click();
+    for (let i = 0; i < (minutes % 60) / 15; i += 1) await page.getByRole('button', { name: '+15 minutes' }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText('The clock says');
+    noProblems(watch);
+  });
+
+  test('Year 2: summer is December to February', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 7 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    const answer = await page.locator('.mc-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mc-season')).toContainText(answer!);
+  });
+
+  test('Fan Survey: a whole round of counting and graphs', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'fan-survey');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await page.locator(`.mx-choice[data-n="${await page.locator('.fs-board').getAttribute('data-answer')}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Fan Survey: counting the flags, and a miss lights them up', async ({ page }) => {
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.fs-fan.lit')).toHaveCount(answer);
+  });
+
+  test('Fan Survey: tally marks in gates of five', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 1 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-tally')).toHaveCount(3, { timeout: 10000 });
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`${answer} for`);
+  });
+
+  test('Year 2: Fan Survey reads a column graph, and how many more', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 4 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-bar')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toContainText('How many more');
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`That's ${answer} more.`);
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(9);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(11);
   });
 });

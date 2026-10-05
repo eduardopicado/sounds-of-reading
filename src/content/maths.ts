@@ -620,3 +620,147 @@ export function jumpsFor(q: JumpQuestion, tens: boolean): number[] {
   const small = tens ? q.b % 10 : q.b;
   return [...Array.from({ length: big }, () => sign * 10), ...Array.from({ length: small }, () => sign)];
 }
+
+/* ── Match Clock: telling the time, days, months and seasons ─────────── */
+
+export interface ClockStep extends Step {
+  /**
+   * read: what time does the clock say; set: put the hands on a time;
+   * days / months: the day (or month) before or after; seasons: which
+   * season a month is in, in Australia.
+   */
+  task: 'read' | 'set' | 'days' | 'months' | 'seasons';
+  /** the minutes a time can have */
+  minutes: (0 | 15 | 30 | 45)[];
+}
+
+export const CLOCK_STEPS: ClockStep[] = [
+  { name: "O'clock", task: 'read', minutes: [0] },
+  { name: 'Half past', task: 'read', minutes: [0, 30] },
+  { name: 'Set the clock', task: 'set', minutes: [0, 30] },
+  { name: 'Days of the week', task: 'days', minutes: [] },
+  /* Year 2: quarter past and quarter to, months and seasons */
+  { name: 'Quarter past, quarter to', task: 'read', minutes: [15, 45] },
+  { name: 'Set quarter times', task: 'set', minutes: [0, 15, 30, 45] },
+  { name: 'Months of the year', task: 'months', minutes: [] },
+  { name: 'Seasons', task: 'seasons', minutes: [] },
+];
+
+export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** the seasons in Australia, by month: summer is December to February */
+export const SEASONS = ['Summer', 'Autumn', 'Winter', 'Spring'];
+export const seasonOf = (month: number): string => SEASONS[Math.floor(((month + 1) % 12) / 3)];
+
+/** a time in words, the way it is said: "half past 3", "quarter to 4" */
+export function timeWords(h: number, m: number): string {
+  const next = (h % 12) + 1;
+  if (m === 0) return `${h} o'clock`;
+  if (m === 15) return `quarter past ${h}`;
+  if (m === 30) return `half past ${h}`;
+  return `quarter to ${next}`;
+}
+
+export interface ClockQuestion {
+  h: number;
+  m: 0 | 15 | 30 | 45;
+  /** for days and months: which one, and before or after */
+  index: number;
+  after: boolean;
+  /** the answer as its button says it */
+  answer: string;
+  options: string[];
+}
+
+export function clockQuestion(step: ClockStep, last?: ClockQuestion): ClockQuestion {
+  for (;;) {
+    const h = rand(1, 12);
+    const m = step.minutes.length ? pick(step.minutes) : 0;
+    const after = Math.random() < 0.5;
+    let index = 0;
+    let answer: string;
+    let options: string[];
+    if (step.task === 'read' || step.task === 'set') {
+      answer = timeWords(h, m);
+      /* the slips: the hour on the wrong side (half past 4 for half past 3),
+         and the other way of saying the minutes */
+      const wrongHour = timeWords((h % 12) + 1, m);
+      const before = timeWords(h === 1 ? 12 : h - 1, m);
+      const otherMinutes = step.minutes.filter((x) => x !== m).map((x) => timeWords(h, x));
+      /* and reading the minute hand as the hour: 12 o'clock for 3 o'clock */
+      const swapped = `${m === 0 ? 12 : m / 5} o'clock`;
+      options = [answer, ...shuffle([wrongHour, before, ...otherMinutes]).slice(0, 2), swapped];
+    } else if (step.task === 'days') {
+      index = rand(0, 6);
+      answer = DAYS[(index + (after ? 1 : 6)) % 7];
+      options = [answer, DAYS[(index + (after ? 6 : 1)) % 7], DAYS[index], DAYS[(index + (after ? 2 : 5)) % 7]];
+    } else if (step.task === 'months') {
+      index = rand(0, 11);
+      answer = MONTHS[(index + (after ? 1 : 11)) % 12];
+      options = [answer, MONTHS[(index + (after ? 11 : 1)) % 12], MONTHS[index], MONTHS[(index + (after ? 2 : 10)) % 12]];
+    } else {
+      index = rand(0, 11);
+      answer = seasonOf(index);
+      options = [...SEASONS];
+    }
+    const q: ClockQuestion = { h, m, index, after, answer, options: [...new Set(options)] };
+    if (last && last.answer === q.answer && last.index === q.index) continue;
+    /* the seasons keep their order round the year; everything else shuffles */
+    return step.task === 'seasons' ? q : { ...q, options: shuffle(q.options) };
+  }
+}
+
+/* ── Fan Survey: counting, tallies and graphs ────────────────────────── */
+
+export interface SurveyStep extends Step {
+  /**
+   * count: fans waving flags, how many for one team;
+   * tally: tally marks for each team, how many for one;
+   * most: a picture graph, which team got the most;
+   * column: a column graph, how many for one team;
+   * more: a column graph, how many more for one team than another.
+   */
+  task: 'count' | 'tally' | 'most' | 'column' | 'more';
+  /** how many teams were voted for */
+  teams: number;
+  /** the most votes a team can get */
+  max: number;
+}
+
+export const SURVEY_STEPS: SurveyStep[] = [
+  { name: 'Count the fans', task: 'count', teams: 3, max: 6 },
+  { name: 'Tally marks', task: 'tally', teams: 3, max: 12 },
+  { name: 'Picture graph', task: 'most', teams: 3, max: 8 },
+  /* Year 2: column graphs, and comparing */
+  { name: 'Column graph', task: 'column', teams: 4, max: 10 },
+  { name: 'How many more?', task: 'more', teams: 4, max: 10 },
+];
+
+export interface SurveyQuestion {
+  /** votes for each team, all different so there is one most */
+  votes: number[];
+  /** the team asked about */
+  team: number;
+  /** for "how many more": the team compared with, which got fewer */
+  other: number;
+  answer: number;
+}
+
+export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQuestion {
+  for (;;) {
+    const votes = shuffle(Array.from({ length: step.max }, (_, i) => i + 1)).slice(0, step.teams);
+    const team = rand(0, step.teams - 1);
+    const most = votes.indexOf(Math.max(...votes));
+    let other = team;
+    let answer: number;
+    if (step.task === 'most') answer = most;
+    else if (step.task === 'more') {
+      const fewer = votes.map((_, i) => i).filter((i) => votes[i] < votes[team]);
+      if (!fewer.length) continue;
+      other = pick(fewer);
+      answer = votes[team] - votes[other];
+    } else answer = votes[team];
+    if (last && last.votes.join() === votes.join()) continue;
+    return { votes, team, other, answer };
+  }
+}
