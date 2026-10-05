@@ -562,3 +562,61 @@ export function fractionQuestion(step: FractionStep, last?: FractionQuestion): F
     return q;
   }
 }
+
+/* ── Jump Line: adding and taking away as jumps on a number line ─────── */
+
+export interface JumpStep extends Step {
+  op: '+' | '-';
+  /** the line runs from 0 to this */
+  top: 10 | 20 | 100;
+  /** tens jumps as well as ones (Year 2) */
+  tens: boolean;
+  /** how the second number is made: a few ones, whole tens, or tens and ones */
+  b: 'ones' | 'tens' | 'tens-ones';
+}
+
+export const JUMP_STEPS: JumpStep[] = [
+  { name: 'Jump on to 10', op: '+', top: 10, tens: false, b: 'ones' },
+  { name: 'Jump back in 10', op: '-', top: 10, tens: false, b: 'ones' },
+  { name: 'Jump on to 20', op: '+', top: 20, tens: false, b: 'ones' },
+  { name: 'Jump back in 20', op: '-', top: 20, tens: false, b: 'ones' },
+  /* Year 2: within 100, jumping a ten at a time */
+  { name: 'Jump on in tens', op: '+', top: 100, tens: true, b: 'tens' },
+  { name: 'Tens and ones to 100', op: '+', top: 100, tens: true, b: 'tens-ones' },
+  { name: 'Jump back in tens and ones', op: '-', top: 100, tens: true, b: 'tens-ones' },
+];
+
+export interface JumpQuestion { a: number; b: number; op: '+' | '-'; answer: number }
+
+export function jumpQuestion(step: JumpStep, last?: JumpQuestion): JumpQuestion {
+  for (;;) {
+    let a: number;
+    let b: number;
+    if (step.b === 'ones') {
+      /* to 10, at most 5 jumps; to 20, up to 9 */
+      b = rand(step.top === 10 ? 1 : 2, step.top === 10 ? 5 : 9);
+      a = step.op === '+' ? rand(step.top === 10 ? 0 : 5, step.top - b) : rand(Math.max(b + 1, step.top === 10 ? 2 : 10), step.top);
+    } else if (step.b === 'tens') {
+      b = 10 * rand(1, 4);
+      a = rand(1, 99 - b);
+      if (a % 10 === 0) continue;
+    } else {
+      b = rand(11, 39);
+      if (b % 10 === 0) continue;
+      a = step.op === '+' ? rand(11, 99 - b) : rand(b + 1, 99);
+      if (a % 10 === 0) continue;
+    }
+    const answer = step.op === '+' ? a + b : a - b;
+    if (answer < 0 || answer > step.top) continue;
+    if (last && last.a === a && last.b === b) continue;
+    return { a, b, op: step.op, answer };
+  }
+}
+
+/** the jumps that get there the Year 2 way: the tens of b, then its ones */
+export function jumpsFor(q: JumpQuestion, tens: boolean): number[] {
+  const sign = q.op === '+' ? 1 : -1;
+  const big = tens ? Math.floor(q.b / 10) : 0;
+  const small = tens ? q.b % 10 : q.b;
+  return [...Array.from({ length: big }, () => sign * 10), ...Array.from({ length: small }, () => sign)];
+}

@@ -40,6 +40,7 @@ export const TILES: Tile[] = [
   { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', maths: true },
   { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', maths: true },
   { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', maths: true },
+  { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', maths: true },
 ];
 
 export function mount(root: HTMLElement): () => void {
