@@ -22,6 +22,10 @@ import * as beTheCommentator from './games/be-the-commentator';
 import * as buildTheWord from './games/build-the-word';
 import * as traceIt from './games/trace-it';
 import * as tallSmallTail from './games/tall-small-tail';
+import * as offTheBench from './games/off-the-bench';
+import * as scoreboardSums from './games/scoreboard-sums';
+import * as numberLinePenalty from './games/number-line-penalty';
+import * as flashCount from './games/flash-count';
 import * as voices from './games/voices';
 
 const routes: Route[] = [
@@ -42,6 +46,10 @@ const routes: Route[] = [
   { path: 'build-the-word', mount: buildTheWord.mount },
   { path: 'trace-it', mount: traceIt.mount },
   { path: 'tall-small-tail', mount: tallSmallTail.mount },
+  { path: 'off-the-bench', mount: offTheBench.mount },
+  { path: 'scoreboard-sums', mount: scoreboardSums.mount },
+  { path: 'number-line-penalty', mount: numberLinePenalty.mount },
+  { path: 'flash-count', mount: flashCount.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
   { path: 'voices', mount: voices.mount },
 ];

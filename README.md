@@ -1,6 +1,6 @@
 # Sounds of Reading
 
-Sixteen small games for a six-year-old learning to read, spell and write,
+Twenty small games for a six-year-old learning to read, spell, write and count,
 played on an iPad from the home screen and shared with his school friends.
 
 No accounts, no tracking, no ads, no third-party requests. It works offline
@@ -26,6 +26,14 @@ once opened, and nothing ever leaves the device.
 | **Build the Word** | Hears a word and builds it from sound or letter tiles. |
 | **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. |
 | **Tall, Small, Tail** | Sorts letters by where they sit on the lines, then finds every b among b d p q. |
+| **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many. |
+| **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? |
+| **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20. |
+| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120. |
+
+The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
+Year 1, and each climbs its own levels: up after three right in a row, down
+after two wrong.
 
 Finishing a round anywhere wins a sticker for the sound it practised, and the
 stickers collect in a book on the home screen. It is the only thing that keeps

@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Phonics games web app for a 6-year-old, played on an iPad from the home screen
+Phonics, writing and maths games web app for a 6-year-old, played on an iPad from the home screen
 and shared with his school friends. The original brief is `docs/HANDOVER.md`;
 the prototypes it came from are in `docs/original-games/`.
 
@@ -49,11 +49,14 @@ src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Sho
 src/content/near-words.ts the nearest real words, for wrong answers that need reading
 src/content/handwriting.ts how each letter is written: strokes, families, heights
 src/content/sort-sets.ts the sound sets Sound Sort offers
+src/content/maths.ts   the maths games' questions and levels (NSW K–Year 1)
 src/lib/               speech, sound effects, storage, settings, colour, router,
                        strokes.ts (judging a traced stroke), life.ts (a game's timers)
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/             one file per game, plus home.ts
+                       maths-kit.ts: the frame every maths game sits in (round,
+                       levels, results); a maths game only asks one question
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes

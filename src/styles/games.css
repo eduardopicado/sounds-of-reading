@@ -899,3 +899,90 @@
 @media (prefers-reduced-motion: reduce) {
   .ts-kind.nope, .ts-tile.nope { animation: none; }
 }
+
+/* ── home: the sections of tiles ───────────────────────────────────────── */
+
+.tiles-head { margin: 18px 0 0; font-family: var(--display); font-size: 20px; color: var(--on-deep); }
+
+/* ── maths games (the shared frame and its four games) ─────────────────── */
+
+.mx-step { font-family: var(--display); font-weight: 700; color: var(--mustard); }
+.mx-board { display: grid; justify-items: center; gap: 12px; }
+.mx-board[hidden] { display: none; }
+.mx-stage { display: grid; justify-items: center; gap: 10px; width: 100%; }
+.mx-ask { margin: 0; text-align: center; color: var(--on-deep); font-family: var(--reading); font-size: clamp(20px, 5vw, 26px); line-height: 1.3; max-width: 640px; }
+.mx-big { font-family: var(--display); font-weight: 800; font-size: 1.6em; color: var(--mustard); }
+.mx-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; max-width: 600px; }
+.mx-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
+
+.mx-choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.mx-choice {
+  min-width: 76px; min-height: 76px; padding: 6px 14px; border: 0; border-radius: 18px;
+  background: var(--mustard); color: var(--ink);
+  font-family: var(--display); font-weight: 800; font-size: 38px; line-height: 1;
+  box-shadow: 0 5px 0 var(--mustard-dark); cursor: pointer;
+}
+.mx-choice:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--mustard-dark); }
+.mx-choice:disabled { cursor: default; color: var(--ink); }
+.mx-choice.right { background: var(--mint); box-shadow: 0 5px 0 var(--mint-dark); }
+.mx-choice.wrong { background: #F3C3B4; box-shadow: 0 5px 0 #C97B65; text-decoration: line-through; }
+
+/* Off the Bench: the team in rows of five, like a ten frame */
+.mx-pitch {
+  display: grid; grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr)); gap: 8px;
+  width: min(100%, 520px); padding: 16px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+}
+.mx-spot { display: grid; place-items: center; aspect-ratio: 1; min-height: 52px; border-radius: 50%; }
+.mx-spot .pk-player { width: 80%; height: auto; }
+.mx-spot.gap { border: 3px dashed rgba(255, 246, 231, .75); color: var(--paper); font-family: var(--display); font-weight: 800; font-size: 26px; }
+.mx-spot.counted { background: rgba(243, 178, 41, .35); border-color: var(--mustard); }
+.mx-spot.arrived { animation: bounce .4s; }
+
+/* Scoreboard Sums */
+.mx-scoreboard {
+  display: grid; gap: 8px; justify-items: center; width: min(100%, 560px);
+  padding: 14px; border-radius: var(--radius); background: #0B2422; color: var(--paper);
+  box-shadow: inset 0 0 0 3px rgba(255, 246, 231, .15);
+}
+.mx-team { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 800; font-size: 22px; }
+.mx-balls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; min-height: 48px; font-size: 34px; }
+.mx-ball.new { animation: bounce .5s; filter: drop-shadow(0 0 6px var(--mustard)); }
+.mx-ball.offside { opacity: .35; position: relative; }
+.mx-ball.offside::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #FF6B4A; font-weight: 800; opacity: 1; }
+.mx-plus { font-family: var(--display); font-weight: 800; font-size: 34px; color: var(--mustard); margin: 0 6px; }
+.mx-sum { margin: 0; font-family: var(--display); font-weight: 800; font-size: clamp(34px, 9vw, 48px); color: var(--paper); letter-spacing: .04em; }
+
+/* Number Line Penalty */
+.mx-goal {
+  position: relative; width: min(100%, 760px); padding: 96px 10px 6px; border-radius: var(--radius);
+  background: repeating-linear-gradient(180deg, #2E8F52 0 46px, #297F49 46px 92px);
+  border-top: 8px solid var(--paper);
+}
+.mx-keeper { position: absolute; top: 4px; left: 50%; margin-left: -28px; transition: translate .45s ease-out; }
+.mx-goal { touch-action: none; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.mx-line { display: block; width: 100%; height: auto; aspect-ratio: 1000 / 150; }
+.mx-axis { stroke: var(--paper); stroke-width: 6; stroke-linecap: round; }
+.mx-tick { stroke: var(--paper); stroke-width: 5; }
+.mx-label { fill: var(--paper); font: 800 46px var(--display); text-anchor: middle; }
+.mx-mark { font-size: 56px; text-anchor: middle; }
+
+/* Flash Count */
+.mx-flash {
+  display: flex; gap: 16px; justify-content: center; align-items: center;
+  min-height: 170px; min-width: min(100%, 320px); padding: 16px; border-radius: var(--radius);
+  background: var(--paper); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.mx-flash.gone .mx-big { color: var(--ink); font-size: 64px; }
+.mx-die { width: 130px; height: 130px; }
+.mx-die-face { fill: #fff; stroke: var(--ink); stroke-width: 4; }
+.mx-frame { width: min(80vw, 320px); height: auto; }
+.mx-cell { fill: #fff; stroke: var(--ink); stroke-width: 3; }
+.mx-dot { fill: var(--tomato); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mx-spot.arrived, .mx-ball.new { animation: none; }
+  .mx-keeper { transition: none; }
+}
+.mx-pitch.twenty .mx-spot:nth-child(n + 11) { translate: 0 12px; }
+.mx-pitch.twenty { padding-bottom: 28px; }
