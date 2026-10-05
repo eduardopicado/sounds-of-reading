@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  DRILL_STEPS, drillChoices, drillQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
@@ -306,5 +307,39 @@ describe('Keepy-Uppy Count', () => {
     const y1 = SKIP_STEPS.slice(0, 5).flatMap((s) => s.by);
     expect(new Set(y1)).toEqual(new Set([1, 2, 5, 10]));
     expect(SKIP_STEPS.slice(5).some((s) => s.by.includes(3))).toBe(true);
+  });
+});
+
+describe('Training Drills', () => {
+  it('makes equal groups within the step, and asks the right thing for each task', () => {
+    for (const step of DRILL_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = drillQuestion(step);
+        expect(q.groups).toBeGreaterThanOrEqual(step.groups[0]);
+        expect(q.groups).toBeLessThanOrEqual(step.groups[1]);
+        expect(step.each).toContain(q.each);
+        expect(q.total).toBe(q.groups * q.each);
+        expect(q.answer).toBe(step.task === 'share' ? q.each : step.task === 'make-rows' ? q.groups : q.total);
+        if (step.task === 'share' || step.task === 'make-rows') expect(q.each).toBeGreaterThan(1);
+      }
+    }
+  });
+
+  it('offers adding instead of grouping as a wrong answer', () => {
+    const step = DRILL_STEPS[0];
+    for (let i = 0; i < 50; i += 1) {
+      const q = drillQuestion(step);
+      const c = drillChoices(step, q);
+      expect(c).toContain(q.answer);
+      expect(new Set(c).size).toBe(4);
+      for (const x of c) expect(x).toBeGreaterThanOrEqual(1);
+    }
+    const c = drillChoices(step, { groups: 3, each: 4, total: 12, answer: 12 });
+    expect(c).toContain(7);
+  });
+
+  it('keeps arrays and grouping for Year 2', () => {
+    expect(DRILL_STEPS.slice(0, 2).map((s) => s.task)).toEqual(['groups', 'share']);
+    expect(DRILL_STEPS.slice(2).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
   });
 });

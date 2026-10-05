@@ -449,3 +449,63 @@ export function skipChoices(q: SkipQuestion): number[] {
   }
   return out.sort((a, b) => a - b);
 }
+
+/* ── Training Drills: equal groups, sharing, rows ────────────────────── */
+
+export interface DrillStep extends Step {
+  /**
+   * groups: so many hoops with so many balls in each, how many balls;
+   * share: so many balls shared fairly between the hoops, how many in each;
+   * rows: cones set out in rows and columns, how many cones (an array);
+   * make-rows: so many cones put out in rows of so many, how many rows.
+   */
+  task: 'groups' | 'share' | 'rows' | 'make-rows';
+  /** how many groups (or rows), least and most */
+  groups: [number, number];
+  /** how many in each group (or row): one of these */
+  each: number[];
+  /** teams of players rather than hoops of balls */
+  teams?: boolean;
+}
+
+export const DRILL_STEPS: DrillStep[] = [
+  { name: 'Equal groups', task: 'groups', groups: [2, 4], each: [1, 2, 3, 4, 5] },
+  { name: 'Share the balls', task: 'share', groups: [2, 4], each: [1, 2, 3, 4, 5] },
+  /* Year 2: arrays, groups of 2, 5 and 10, and grouping as early division */
+  { name: 'Rows of cones', task: 'rows', groups: [2, 5], each: [2, 3, 4, 5] },
+  { name: 'Teams of 2, 5 and 10', task: 'groups', groups: [2, 6], each: [2, 5, 10], teams: true },
+  { name: 'Cones into rows', task: 'make-rows', groups: [2, 5], each: [2, 3, 4, 5] },
+];
+
+export interface DrillQuestion { groups: number; each: number; total: number; answer: number }
+
+export function drillQuestion(step: DrillStep, last?: DrillQuestion): DrillQuestion {
+  for (;;) {
+    const groups = rand(step.groups[0], step.groups[1]);
+    const each = pick(step.each);
+    /* one in each group is no question for sharing or grouping */
+    if ((step.task === 'share' || step.task === 'make-rows') && each === 1) continue;
+    if (last && last.groups === groups && last.each === each) continue;
+    const total = groups * each;
+    const answer = step.task === 'share' ? each : step.task === 'make-rows' ? groups : total;
+    return { groups, each, total, answer };
+  }
+}
+
+/** the answer and the slips: adding the two numbers instead of grouping,
+    a group too many or too few, and one off */
+export function drillChoices(step: DrillStep, q: DrillQuestion): number[] {
+  const unit = step.task === 'share' || step.task === 'make-rows' ? 1 : q.each;
+  /* the telling slip always: adding (3 hoops of 4 is 7), or giving the
+     number of hoops (or the row length) as the answer */
+  const telling = step.task === 'share' ? q.groups : step.task === 'make-rows' ? q.each : q.groups + q.each;
+  const slips = step.task === 'share' || step.task === 'make-rows'
+    ? [q.answer + 1, q.answer - 1, q.answer + 2]
+    : [q.answer + unit, q.answer - unit, q.answer + 1, q.answer - 1];
+  const out = [q.answer];
+  for (const x of [telling, ...shuffle(slips), q.answer + 2 * unit, q.answer + 2, q.answer + 3]) {
+    if (out.length >= 4) break;
+    if (x >= 1 && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
