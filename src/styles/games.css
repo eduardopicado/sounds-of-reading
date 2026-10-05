@@ -1239,3 +1239,29 @@
 .ff-player.whole .ff-number { font-size: 28px; }
 .ff-formation.explain .ff-number { background: var(--mustard); }
 .ff-known { margin: 0; color: var(--paper); font: 700 clamp(20px, 5vw, 26px) var(--display); min-height: 1.2em; }
+
+/* ── Kit and Ball Shapes ───────────────────────────────────────────────── */
+
+.ks-board {
+  display: grid; justify-items: center; width: min(100%, 560px); padding: 14px; border-radius: var(--radius);
+  background: var(--paper); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.ks-shape { width: min(56vw, 220px); height: auto; }
+.ks-shape.small { width: min(18vw, 90px); }
+.ks-fill { fill: #3FA07A; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.ks-corner { fill: var(--mustard); stroke: var(--ink); stroke-width: 2; opacity: 0; }
+.ks-board.explain .ks-corner { opacity: 1; }
+.ks-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+.ks-pick { display: grid; justify-items: center; gap: 2px; font: 700 14px var(--display); color: var(--ink); }
+.ks-ball-edge { fill: none; stroke: var(--ink); stroke-width: 4; }
+.ks-seam { stroke: var(--ink); stroke-width: 3; }
+.ks-patch { fill: var(--ink); }
+.ks-top { fill: #8FC3E8; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-left { fill: #4E8FC4; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-right { fill: #33709F; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-base { fill: #C55B12; stroke: var(--ink); stroke-width: 3; }
+.ks-cone { fill: #FF7A1A; stroke: var(--ink); stroke-width: 3; stroke-linejoin: round; }
+.ks-stripe { fill: #fff; }
+.ks-shirt { stroke: none; }
+.ks-outline { fill: none; stroke: var(--ink); stroke-width: 4; stroke-linejoin: round; }
+.ks-mirror { stroke: #C9452E; stroke-width: 3; stroke-dasharray: 10 7; }

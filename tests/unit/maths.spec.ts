@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
@@ -497,5 +498,31 @@ describe('Fact Family Formation', () => {
         if (step.kind === 'missing') { expect(q.known).toBeUndefined(); expect(q.gap).not.toBe(2); }
       }
     }
+  });
+});
+
+describe('Kit and Ball Shapes', () => {
+  it('knows the sides of every shape', () => {
+    expect(['circle', 'triangle', 'square', 'rectangle', 'pentagon', 'hexagon'].map(sidesOf)).toEqual([0, 3, 4, 4, 5, 6]);
+  });
+
+  it('always offers the answer among different choices', () => {
+    for (const step of SHAPE_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = shapeQuestion(step);
+        expect(q.options).toContain(q.answer);
+        expect(new Set(q.options).size).toBe(q.options.length);
+        if (step.task === 'sides') expect(q.answer).toBe(String(sidesOf(q.shape)));
+        if (step.task === 'solid') expect(SHAPES_3D).toContain(q.answer);
+        if (step.task === 'symmetry') expect(q.answer).toBe(q.same ? 'Yes' : 'No');
+        /* "which shape has 4 sides" must have one answer: never a square and a rectangle together */
+        if (step.task === 'which') expect(new Set(q.options.map(sidesOf)).size).toBe(q.options.length);
+      }
+    }
+  });
+
+  it('keeps pentagons, hexagons and symmetry for Year 2', () => {
+    expect(SHAPE_STEPS[0].shapes).not.toContain('hexagon');
+    expect(SHAPE_STEPS.slice(4).map((s) => s.task)).toContain('symmetry');
   });
 });

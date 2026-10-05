@@ -34,6 +34,7 @@ const PAGES = [
   ['Match Clock', '/#/match-clock'],
   ['Fan Survey', '/#/fan-survey'],
   ['Fact Family Formation', '/#/fact-family'],
+  ['Kit and Ball Shapes', '/#/kit-shapes'],
 ] as const;
 
 for (const [name, path] of PAGES) {

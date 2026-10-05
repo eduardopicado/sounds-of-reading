@@ -21,9 +21,10 @@ test.describe('home screen', () => {
       'Match Clock',
       'Fan Survey',
       'Fact Family Formation',
+      'Kit and Ball Shapes',
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family', 'kit-shapes']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();

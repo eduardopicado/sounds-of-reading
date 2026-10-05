@@ -673,9 +673,41 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toHaveClass(/good/);
   });
 
+  test('Kit and Ball Shapes: a whole round', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'kit-shapes');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await page.locator(`.mx-choice[data-n="${await page.locator('.ks-board').getAttribute('data-answer')}"]`).click();
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Kit and Ball Shapes: a miss on sides lights up the corners', async ({ page }) => {
+    await seed(page, { 'maths-step:kit-shapes': 1 });
+    await startGame(page, 'kit-shapes');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = await page.locator('.ks-board').getAttribute('data-answer');
+    await expect(page.locator('.ks-corner')).toHaveCount(Number(answer));
+    await page.locator('.mx-choice').filter({ hasNotText: answer! }).first().click();
+    await expect(page.locator('.ks-board.explain .ks-corner').first()).toBeVisible();
+    await expect(page.locator('.mx-note')).toContainText(`${answer} sides and ${answer} corners`);
+  });
+
+  test('Year 2: is the shirt the same on both sides?', async ({ page }) => {
+    await seed(page, { 'maths-step:kit-shapes': 5 });
+    await startGame(page, 'kit-shapes');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ks-mirror')).toHaveCount(1);
+    const answer = await page.locator('.ks-board').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText(answer === 'Yes' ? 'like a mirror' : 'No:');
+  });
+
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(12);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(13);
   });
 });

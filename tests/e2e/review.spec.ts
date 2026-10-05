@@ -19,6 +19,7 @@ const GAMES = [
   'match-clock',
   'fan-survey',
   'fact-family',
+  'kit-shapes',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */

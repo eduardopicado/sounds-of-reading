@@ -841,3 +841,87 @@ export function factQuestion(step: FactStep, last?: FactQuestion): FactQuestion 
     return { a, b, whole, known, asked, gap, answer };
   }
 }
+
+/* ── Kit and Ball Shapes: 2D shapes, 3D objects, symmetry ────────────── */
+
+export interface Shape2D { name: string; sides: number }
+
+/** the flat shapes, with the sides (and so corners) each has; a circle has none */
+export const SHAPES_2D: Shape2D[] = [
+  { name: 'circle', sides: 0 },
+  { name: 'triangle', sides: 3 },
+  { name: 'square', sides: 4 },
+  { name: 'rectangle', sides: 4 },
+  { name: 'pentagon', sides: 5 },
+  { name: 'hexagon', sides: 6 },
+];
+
+/** the solid objects, each as something from the pitch */
+export const SHAPES_3D = ['sphere', 'cube', 'cylinder', 'cone', 'rectangular prism'] as const;
+export type Shape3D = typeof SHAPES_3D[number];
+
+export interface ShapeStep extends Step {
+  /**
+   * name: what is this flat shape called;
+   * sides: how many sides (or corners) has it;
+   * which: which shape has this many sides;
+   * solid: what is this object called;
+   * symmetry: is this shirt the same on both sides of the line?
+   */
+  task: 'name' | 'sides' | 'which' | 'solid' | 'symmetry';
+  /** the flat shapes this step uses */
+  shapes: string[];
+}
+
+export const SHAPE_STEPS: ShapeStep[] = [
+  { name: 'Name the shape', task: 'name', shapes: ['circle', 'triangle', 'square', 'rectangle'] },
+  { name: 'Sides and corners', task: 'sides', shapes: ['triangle', 'square', 'rectangle', 'pentagon', 'hexagon'] },
+  { name: 'Which shape?', task: 'which', shapes: ['triangle', 'square', 'pentagon', 'hexagon'] },
+  { name: 'Balls, cones and cans', task: 'solid', shapes: [] },
+  /* Year 2: more shapes, and symmetry */
+  { name: 'More shapes', task: 'name', shapes: SHAPES_2D.map((s) => s.name) },
+  { name: 'Same on both sides?', task: 'symmetry', shapes: [] },
+];
+
+export interface ShapeQuestion {
+  shape: string;
+  /** for sides: ask about sides or corners */
+  corners: boolean;
+  /** for symmetry: is the design the same both sides */
+  same: boolean;
+  /** the answer as its button says it */
+  answer: string;
+  options: string[];
+}
+
+export const sidesOf = (name: string): number => SHAPES_2D.find((s) => s.name === name)?.sides ?? 0;
+
+export function shapeQuestion(step: ShapeStep, last?: ShapeQuestion): ShapeQuestion {
+  for (;;) {
+    let shape = step.shapes.length ? pick(step.shapes) : pick([...SHAPES_3D]);
+    const corners = Math.random() < 0.5;
+    const same = Math.random() < 0.5;
+    let answer: string;
+    let options: string[];
+    if (step.task === 'name') {
+      answer = shape;
+      options = [shape, ...shuffle(step.shapes.filter((s) => s !== shape)).slice(0, 3)];
+    } else if (step.task === 'sides') {
+      answer = String(sidesOf(shape));
+      options = ['3', '4', '5', '6'];
+    } else if (step.task === 'which') {
+      answer = shape;
+      options = [...step.shapes];
+    } else if (step.task === 'solid') {
+      answer = shape;
+      options = [shape, ...shuffle(SHAPES_3D.filter((s) => s !== shape)).slice(0, 3)];
+    } else {
+      shape = 'shirt';
+      answer = same ? 'Yes' : 'No';
+      options = ['Yes', 'No'];
+    }
+    const q = { shape, corners, same, answer, options: step.task === 'symmetry' || step.task === 'sides' ? options : shuffle(options) };
+    if (last && last.shape === q.shape && last.answer === q.answer && step.task !== 'symmetry') continue;
+    return q;
+  }
+}
