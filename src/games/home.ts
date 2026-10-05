@@ -36,6 +36,7 @@ export const TILES: Tile[] = [
   { path: 'off-the-bench', name: 'Off the Bench', emoji: '🧤', what: 'How many more make 10?', tone: '#3FA07A', maths: true },
   { path: 'scoreboard-sums', name: 'Scoreboard Sums', emoji: '🏟️', what: 'Goals in, goals out', tone: '#5AA0DC', maths: true },
   { path: 'number-line-penalty', name: 'Number Line Penalty', emoji: '🥅', what: 'Kick it to the number', tone: '#A87FD1', maths: true },
+  { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', maths: true },
 ];
 
 export function mount(root: HTMLElement): () => void {

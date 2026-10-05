@@ -261,9 +261,94 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toHaveText(new RegExp(`^\\d rows of \\d make ${dots}\\.$`));
   });
 
-  test('the home screen has a maths section with all four', async ({ page }) => {
+  test('Team Buses: reading buses and fans, a whole round', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'team-buses');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+      const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+      /* climbing to loading the buses part way through the round */
+      if (await page.locator('.tb-row.crowd').count()) {
+        await tapNumber(page, Math.floor(n / 10));
+        await expect(page.locator('.mx-ask')).toContainText('left over', { timeout: 6000 });
+        await tapNumber(page, n % 10);
+        return;
+      }
+      /* 1 bus and 6 fans */
+      expect(await page.locator('.tb-bus').count()).toBe(Math.floor(n / 10));
+      expect(await page.locator('.tb-row.fans .tb-fan').count()).toBe(n % 10);
+      await tapNumber(page, n);
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Team Buses: a wrong read swaps the digits, and is explained', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 1 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== n)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`That's ${n}.`);
+  });
+
+  test('Team Buses: loading a crowd into buses', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 2 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.tb-row.crowd')).toBeVisible();
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-row.crowd .tb-fan')).toHaveCount(n);
+    await tapNumber(page, Math.floor(n / 10));
+    await expect(page.locator('.tb-bus')).toHaveCount(Math.floor(n / 10));
+    await expect(page.locator('.mx-ask')).toContainText('left over', { timeout: 6000 });
+    await tapNumber(page, n % 10);
+    await expect(page.locator('.mx-note')).toContainText(`make ${n}.`);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+  });
+
+  test('Year 2: Team Buses reads trains of 100', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 4 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-train')).toHaveCount(Math.floor(n / 100));
+    await tapNumber(page, n);
+    await expect(page.locator('.mx-note')).toContainText(`That's ${n}.`);
+  });
+
+  test('Year 2: Team Buses builds a crowd from trains, buses and fans', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:team-buses': 5 });
+    await startGame(page, 'team-buses');
+    await expect(page.getByRole('button', { name: 'Done ✓' })).toBeVisible();
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    /* one fan too many, sent home again with a tap */
+    await page.getByRole('button', { name: 'Add a fan' }).click();
+    await page.locator('.tb-fan.walking').first().click();
+    await expect(page.locator('.tb-fan.walking')).toHaveCount(0);
+    for (let i = 0; i < Math.floor(n / 100); i += 1) await page.getByRole('button', { name: 'Add a train of 100' }).click();
+    for (let i = 0; i < Math.floor(n / 10) % 10; i += 1) await page.getByRole('button', { name: 'Add a bus of 10' }).click();
+    for (let i = 0; i < n % 10; i += 1) await page.getByRole('button', { name: 'Add a fan' }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(`Yes! ${n} is`);
+    noProblems(watch);
+  });
+
+  test('Year 2: Team Buses, a bus breaks down and the number stays the same', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 6 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-bus.broken')).toHaveCount(1);
+    await tapNumber(page, (n % 10) + 10);
+    await expect(page.locator('.mx-note')).toContainText(`Still ${n}!`);
+    await expect(page.locator('.tb-bus')).toHaveCount(Math.floor(n / 10) - 1);
+  });
+
+  test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(4);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(5);
   });
 });
