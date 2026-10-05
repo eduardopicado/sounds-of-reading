@@ -2,6 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
+  BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
@@ -267,5 +268,43 @@ describe('Team Buses', () => {
     expect(BUS_STEPS[0].hi).toBeLessThan(20);
     const firstTrain = BUS_STEPS.findIndex((s) => s.trains);
     expect(BUS_STEPS.slice(0, firstTrain).every((s) => s.hi <= 120)).toBe(true);
+  });
+});
+
+describe('Keepy-Uppy Count', () => {
+  it('counts in even steps, all within the step, with the gap never in the first two', () => {
+    for (const step of SKIP_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = skipQuestion(step);
+        expect(q.seq).toHaveLength(BOUNCES);
+        expect(step.by).toContain(q.by);
+        for (let j = 1; j < q.seq.length; j += 1) expect(q.seq[j] - q.seq[j - 1]).toBe(step.dir * q.by);
+        for (const n of q.seq) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.max); }
+        expect(q.gap).toBeGreaterThanOrEqual(2);
+        expect(q.gap).toBeLessThan(BOUNCES);
+        if (step.from === 'zero') expect(q.seq[0] % q.by).toBe(0);
+        if (step.from === 'odd') for (const n of q.seq) expect(n % 2).toBe(1);
+        /* from any number in fives and tens: not from a multiple, or it is the easy count */
+        if (step.from === 'any' && q.by >= 5) expect(q.seq[0] % q.by).not.toBe(0);
+      }
+    }
+  });
+
+  it('offers the gap and its slips', () => {
+    for (const step of SKIP_STEPS) {
+      for (let i = 0; i < 50; i += 1) {
+        const q = skipQuestion(step);
+        const c = skipChoices(q);
+        expect(c).toContain(q.seq[q.gap]);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) expect(x).toBeGreaterThanOrEqual(0);
+      }
+    }
+  });
+
+  it('keeps 2s, 5s and 10s for Year 1, and 3s and any-number tens for Year 2', () => {
+    const y1 = SKIP_STEPS.slice(0, 5).flatMap((s) => s.by);
+    expect(new Set(y1)).toEqual(new Set([1, 2, 5, 10]));
+    expect(SKIP_STEPS.slice(5).some((s) => s.by.includes(3))).toBe(true);
   });
 });
