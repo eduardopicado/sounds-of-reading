@@ -3,6 +3,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
 
+/** open a maths game and tap Start, as he does */
+async function startGame(page: Page, id: string): Promise<void> {
+  await openGame(page, id);
+  await page.getByRole('button', { name: '▶ Start' }).click();
+}
+
 /** wait for the number buttons, then tap one */
 async function tapNumber(page: Page, n: number): Promise<void> {
   const btn = page.locator(`.mx-choice[data-n="${n}"]`);
@@ -53,6 +59,7 @@ async function playRound(page: Page, answer: () => Promise<void>): Promise<void>
   await openSetup(page);
   await page.getByLabel('How many questions').selectOption('8');
   await page.getByRole('button', { name: 'Set up this game' }).click();
+  await page.getByRole('button', { name: '▶ Start' }).click();
   for (let i = 0; i < 8; i += 1) {
     await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 8000 });
     await answer();
@@ -72,7 +79,7 @@ test.describe('maths games', () => {
   });
 
   test('Off the Bench: a wrong answer counts the gaps with him', async ({ page }) => {
-    await openGame(page, 'off-the-bench');
+    await startGame(page, 'off-the-bench');
     const need = await answerBench(page, false);
     await expect(page.locator('.mx-choice.wrong')).toHaveCount(1);
     await expect(page.locator('.mx-choice.right')).toHaveText(String(need));
@@ -82,7 +89,7 @@ test.describe('maths games', () => {
 
   test('Scoreboard Sums: a whole round of sums', async ({ page }) => {
     const watch = watchPage(page);
-    await openGame(page, 'scoreboard-sums');
+    await startGame(page, 'scoreboard-sums');
     /* the goals are there to count at first */
     await expect(page.locator('.mx-balls .mx-ball').first()).toBeVisible();
     await playRound(page, () => answerSum(page));
@@ -92,14 +99,14 @@ test.describe('maths games', () => {
 
   test('Scoreboard Sums: the take-away step shows the offside goals', async ({ page }) => {
     await seed(page, { 'maths-step:scoreboard-sums': 3 });
-    await openGame(page, 'scoreboard-sums');
+    await startGame(page, 'scoreboard-sums');
     await expect(page.locator('.mx-sum')).toContainText('−');
     await expect(page.locator('.mx-ball.offside').first()).toBeVisible();
   });
 
   test('Number Line Penalty: kicking to the number scores, missing it is saved', async ({ page }) => {
     const watch = watchPage(page);
-    await openGame(page, 'number-line-penalty');
+    await startGame(page, 'number-line-penalty');
     await kickToNumber(page, false);
     await expect(page.locator('.mx-note')).toContainText('Saved!');
     await expect(page.locator('.mx-answer')).toHaveCount(1);
@@ -115,7 +122,7 @@ test.describe('maths games', () => {
 
   test('Number Line Penalty: the long lines go up to 100 and 120', async ({ page }) => {
     await seed(page, { 'maths-step:number-line-penalty': 5 });
-    await openGame(page, 'number-line-penalty');
+    await startGame(page, 'number-line-penalty');
     await expect(page.locator('.mx-label').last()).toHaveText('120');
     await kickToNumber(page, true);
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
@@ -123,12 +130,58 @@ test.describe('maths games', () => {
 
   test('Flash Count: the numbers only appear once the dots have gone', async ({ page }) => {
     const watch = watchPage(page);
-    await openGame(page, 'flash-count');
+    await startGame(page, 'flash-count');
     await expect(page.locator('.mx-flash .mx-dot').first()).toBeVisible();
     await expect(page.locator('.mx-choice')).toHaveCount(0);
     await expect(page.locator('.mx-choice').first()).toBeVisible({ timeout: 4000 });
     await expect(page.locator('.mx-flash .mx-dot')).toHaveCount(0);
     noProblems(watch);
+  });
+
+  test('nothing is asked until he taps Start, and a setup change waits for Start again', async ({ page }) => {
+    const watch = watchPage(page);
+    for (const id of ['flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty']) {
+      await openGame(page, id);
+      await expect(page.locator('.mx-ready')).toBeVisible();
+      await expect(page.locator('.mx-board')).toBeHidden();
+      await expect(page.locator('.score')).toBeHidden();
+      await page.waitForTimeout(600);
+      await expect(page.locator('.mx-choice, .mx-flash .mx-dot, .mx-line[data-ready="1"]')).toHaveCount(0);
+    }
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.score')).toContainText('Question 1');
+    await openSetup(page);
+    await page.getByLabel('How many questions').selectOption('12');
+    await expect(page.locator('.mx-ready')).toBeVisible();
+    await expect(page.locator('.mx-board')).toBeHidden();
+    noProblems(watch);
+  });
+
+  test('Flash Count: a long first look that closes in as he gets them right', async ({ page }) => {
+    await seed(page, { 'flash-speed': 'normal' });
+    await startGame(page, 'flash-count');
+    const card = page.locator('.mx-flash');
+    const looks: number[] = [];
+    for (let i = 0; i < 3; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 8000 });
+      await expect(card.locator('.mx-dot').first()).toBeVisible({ timeout: 8000 });
+      looks.push(Number(await card.getAttribute('data-ms')));
+      await answerFlash(page);
+    }
+    /* Dice to 5 is 2 seconds; the first look is half as long again */
+    expect(looks).toEqual([3000, 2700, 2400]);
+  });
+
+  test('Flash Count: the speed in setup slows the look down, and is remembered', async ({ page }) => {
+    await openGame(page, 'flash-count');
+    await openSetup(page);
+    await page.getByLabel('Speed').selectOption('slow');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.mx-flash .mx-dot').first()).toBeVisible();
+    expect(Number(await page.locator('.mx-flash').getAttribute('data-ms'))).toBe(4800);
+    await page.reload();
+    await expect(page.getByLabel('Speed')).toHaveValue('slow');
   });
 
   test('Flash Count: a whole round', async ({ page }) => {
@@ -141,6 +194,8 @@ test.describe('maths games', () => {
     await seed(page, { 'maths-step:off-the-bench': 2, settings: { pro: true } });
     await openGame(page, 'off-the-bench');
     await expect(page.getByLabel('Start at')).toHaveValue('3');
+    await expect(page.locator('.mx-ready-step')).toHaveText('Make 20');
+    await page.getByRole('button', { name: '▶ Start' }).click();
     await expect(page.locator('.mx-step')).toHaveText('Make 20');
     await expect(page.locator('.mx-spot')).toHaveCount(20);
   });

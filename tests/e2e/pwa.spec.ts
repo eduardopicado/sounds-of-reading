@@ -224,6 +224,29 @@ test.describe('speech', () => {
     await expect(page.locator('.wrap')).toContainText('com.apple.speech.synthesis.voice.Albert');
   });
 
+  test('the diagnostics screen lists the Portuguese voices too, and marks the one each language uses', async ({ page }) => {
+    await page.addInitScript(() => {
+      const voices = [
+        { name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' },
+        { name: 'Daniel', lang: 'en-GB', localService: true, default: false, voiceURI: 'com.apple.voice.enhanced.en-GB.Daniel' },
+        { name: 'Luciana', lang: 'pt-BR', localService: true, default: false, voiceURI: 'com.apple.voice.compact.pt-BR.Luciana' },
+        { name: 'Luciana', lang: 'pt-BR', localService: true, default: false, voiceURI: 'com.apple.voice.enhanced.pt-BR.Luciana' },
+      ];
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: { getVoices: () => voices, speak: () => undefined, cancel: () => undefined, addEventListener: () => undefined },
+      });
+    });
+    await page.goto('/#/voices');
+    await expect(page.locator('.wrap')).toContainText('2 English voices');
+    await expect(page.locator('.wrap')).toContainText('2 Portuguese voices');
+    const using = page.locator('[data-using="1"]');
+    await expect(using).toHaveCount(2);
+    /* the Australian accent wins for English, the best tier for Portuguese */
+    await expect(using.nth(0)).toContainText('com.apple.voice.compact.en-AU.Karen');
+    await expect(using.nth(1)).toContainText('com.apple.voice.enhanced.pt-BR.Luciana');
+  });
+
   test('a super-compact voice never passes for the compact one of the same name', async ({ page }) => {
     await page.addInitScript(() => {
       /* straight off the iPad: one Samantha in each of these two tiers. The

@@ -14,7 +14,8 @@ import { el, prefersReducedMotion } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { pro } from '../lib/settings';
-import { DICE, FLASH_STEPS, choices, flashQuestion, type FlashQuestion, type FlashStep } from '../content/maths';
+import { read, write } from '../lib/storage';
+import { DICE, FLASH_STEPS, choices, flashMs, flashQuestion, type FlashQuestion, type FlashSpeed, type FlashStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
 
@@ -57,6 +58,19 @@ function build(kit: Kit) {
   const ask = el('p', { class: 'mx-ask', text: 'Look!' });
   const node = el('div', { class: 'mx-stage' }, ask, card);
   let last: number | undefined;
+  /* right answers in a row at the current step: each one shortens the look */
+  let streak = 0;
+  let streakStep: FlashStep | null = null;
+
+  /* the grown-up's pace, remembered; Pro starts on quick */
+  const speedSel = el('select', { 'aria-label': 'Speed' },
+    el('option', { value: 'slow', text: 'Speed: slow' }),
+    el('option', { value: 'normal', text: 'Speed: normal' }),
+    el('option', { value: 'quick', text: 'Speed: quick' }),
+  );
+  const saved = read<string>('flash-speed', '');
+  speedSel.value = saved === 'slow' || saved === 'normal' || saved === 'quick' ? saved : pro() ? 'quick' : 'normal';
+  speedSel.addEventListener('change', () => write('flash-speed', speedSel.value));
 
   function show(q: FlashQuestion, step: FlashStep): void {
     card.classList.remove('gone');
@@ -66,13 +80,16 @@ function build(kit: Kit) {
 
   return {
     node,
+    setup: speedSel,
     ask: async (step: FlashStep): Promise<boolean> => {
       const q = flashQuestion(step, last);
       last = q.n;
       ask.textContent = 'Look!';
       show(q, step);
-      /* Pro gives a shorter look, reduced motion a longer one */
-      const ms = step.ms * (pro() ? 0.7 : 1) * (prefersReducedMotion() ? 1.5 : 1);
+      /* a long first look at each step, closing in as he gets them right */
+      if (streakStep !== step) { streakStep = step; streak = 0; }
+      const ms = flashMs(step, streak, speedSel.value as FlashSpeed, prefersReducedMotion());
+      card.dataset.ms = String(ms);
       await kit.wait(ms);
       card.classList.add('gone');
       card.replaceChildren(el('span', { class: 'mx-big', text: '?' }));
@@ -86,10 +103,13 @@ function build(kit: Kit) {
         sfx.right();
         kit.note(`Yes, ${q.n}!`, true);
         say(String(q.n));
+        streak += 1;
         await kit.wait(1300);
         return true;
       }
       sfx.wrong();
+      /* a miss gives him the long look back */
+      streak = 0;
       const how = step.look === 'two-dice' ? `${q.parts[0]} and ${q.parts[1]} make ${q.n}.` : `There were ${q.n}.`;
       kit.note(how);
       say(how);

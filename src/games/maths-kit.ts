@@ -40,6 +40,8 @@ export interface Question<S extends Step> {
   node: HTMLElement;
   /** ask one question at this step; true if right first time */
   ask: (step: S) => Promise<boolean>;
+  /** a control of the game's own for the setup panel, such as Flash Count's speed */
+  setup?: HTMLElement;
 }
 
 export interface MathsGame<S extends Step> {
@@ -107,11 +109,11 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     ...game.steps.map((s, i) => el('option', { value: String(i), text: `Start at: ${s.name}` })));
   /* Pro starts a step above where he got to */
   stepSel.value = String(Math.min(game.steps.length - 1, saved() + (pro() ? 1 : 0)));
-  lenSel.addEventListener('change', () => start());
-  stepSel.addEventListener('change', () => { write(key, Number(stepSel.value)); start(); });
-  const panel = el('div', { class: 'panel', hidden: 'hidden' },
-    el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), stepSel, lenSel,
-      game.football ? narrationSelect() : null));
+  lenSel.addEventListener('change', () => ready());
+  stepSel.addEventListener('change', () => { write(key, Number(stepSel.value)); ready(); });
+  const panelRow = el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), stepSel, lenSel,
+    game.football ? narrationSelect() : null);
+  const panel = el('div', { class: 'panel', hidden: 'hidden' }, panelRow);
 
   const pos = counter('Question');
   const totalEl = el('span', { text: '0' });
@@ -132,6 +134,10 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     rival: () => rivalTeam,
   };
   const question = game.build(kit);
+  if (question.setup) {
+    panelRow.append(question.setup);
+    question.setup.addEventListener('change', () => ready());
+  }
   const board = el('div', { class: 'mx-board' }, question.node, noteEl, choices.node);
 
   const summary = el('p', {});
@@ -142,11 +148,20 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
       el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
   );
 
+  /* nothing is asked until he taps Start: a question that flashes up while
+     the page is still settling, or before he has sat down, is not a fair one */
+  const readyStep = el('p', { class: 'mx-ready-step' });
+  const startBtn = el('button', { class: 'btn mx-go', type: 'button', text: '▶ Start', on: { click: () => start() } });
+  const readyEl = el('div', { class: 'tray mx-ready' },
+    readyStep, el('p', { class: 'mx-ready-how', text: game.tagline }), startBtn);
+
+  const score = scoreLine(el('span', {}, pos.node, ' of ', totalEl), firsts.node, stepEl);
+
   const node = el('div', { class: 'wrap' },
     topbar({ title: game.title, swash: game.swash, tagline: game.tagline, onSetup: (open) => { panel.hidden = !open; } }),
     panel,
-    scoreLine(el('span', {}, pos.node, ' of ', totalEl), firsts.node, stepEl),
-    board, results,
+    score,
+    readyEl, board, results,
   );
 
   /* each start bumps the round, so an old round's loop stops where it is */
@@ -171,12 +186,25 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     finish(right, n, startStep, c.step);
   }
 
+  /** stop any round and wait for Start */
+  function ready(): void {
+    life.clear();
+    round += 1;
+    score.hidden = true;
+    readyStep.textContent = game.steps[Number(stepSel.value)].name;
+    results.hidden = true;
+    board.hidden = true;
+    readyEl.hidden = false;
+  }
+
   function start(): void {
     life.clear();
     round += 1;
     rivalTeam = pick(TEAMS.filter((t) => t !== YOU && t !== ourTeam()));
     totalEl.textContent = lenSel.value;
     firsts.set(0);
+    readyEl.hidden = true;
+    score.hidden = false;
     results.hidden = true;
     board.hidden = false;
     void play(round);
@@ -198,6 +226,6 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   }
 
   root.append(node);
-  start();
+  ready();
   return life.end;
 }

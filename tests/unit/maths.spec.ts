@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
-  flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
+  flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
 
 const MANY = 400;
@@ -152,6 +152,25 @@ describe('Flash Count', () => {
         if (step.look !== 'frame') for (const p of q.parts) { expect(p).toBeGreaterThanOrEqual(1); expect(p).toBeLessThanOrEqual(6); }
       }
     }
+  });
+
+  it('gives a long first look, 15% shorter for each right answer, never below the step', () => {
+    const step = FLASH_STEPS[0];
+    expect(flashMs(step, 0)).toBe(step.ms * 1.5);
+    expect(flashMs(step, 1)).toBe(Math.round(step.ms * 1.35));
+    expect(flashMs(step, 3)).toBe(Math.round(step.ms * 1.05));
+    expect(flashMs(step, 4)).toBe(step.ms);
+    expect(flashMs(step, 40)).toBe(step.ms);
+    for (let i = 0; i < 6; i += 1) expect(flashMs(step, i + 1)).toBeLessThanOrEqual(flashMs(step, i));
+  });
+
+  it('slows down for slow and reduced motion, speeds up for quick', () => {
+    const step = FLASH_STEPS[2];
+    expect(flashMs(step, 0, 'slow')).toBeGreaterThan(flashMs(step, 0, 'normal'));
+    expect(flashMs(step, 0, 'quick')).toBeLessThan(flashMs(step, 0, 'normal'));
+    expect(flashMs(step, 0, 'normal', true)).toBe(Math.round(flashMs(step, 0) * 1.5));
+    /* even quick, at full speed, leaves time to see a pattern */
+    for (const s of FLASH_STEPS) expect(flashMs(s, 99, 'quick')).toBeGreaterThanOrEqual(900);
   });
 
   it('puts the right number of spots on every die face', () => {

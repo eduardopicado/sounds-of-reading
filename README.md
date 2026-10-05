@@ -33,7 +33,10 @@ once opened, and nothing ever leaves the device.
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
 Year 1, and each climbs its own levels: up after three right in a row, down
-after two wrong.
+after two wrong. Each round waits for a tap on Start, so nothing is asked while
+the page is still loading. Flash Count gives a long first look at each level
+and shortens it with every right answer in a row; a grown-up can set it to
+slow, normal or quick in setup.
 
 Finishing a round anywhere wins a sticker for the sound it practised, and the
 stickers collect in a book on the home screen. It is the only thing that keeps
@@ -154,6 +157,12 @@ No web page can install a voice, and Siri's voices are not available to the web
 at all. To get a better one on an iPad: **Settings › Accessibility › Spoken
 Content › Voices › English**, then download an Enhanced or Premium voice. It
 appears in the picker straight away.
+
+The Portuguese commentator picks its own voice, best tier first. On an iPad set
+to Portuguese, iOS has often already downloaded a good Brazilian voice, so it can
+sound much better than the English one. `#/voices` (linked from nowhere) lists
+every English and Portuguese voice the browser offers, with its tier, and marks
+the one the app uses for each language.
 
 ## Design rules
 
