@@ -51,6 +51,8 @@ src/content/handwriting.ts how each letter is written: strokes, families, height
 src/content/sort-sets.ts the sound sets Sound Sort offers
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
                        Year 2 steps sit at the top of each game's ladder)
+src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
+                       games ask, every word in English and Portuguese
 src/lib/               speech, sound effects, storage, settings, colour, router,
                        strokes.ts (judging a traced stroke), life.ts (a game's timers)
 src/ui/components.ts   header, setup panel, chips, win overlay
@@ -61,6 +63,8 @@ src/games/             one file per game, plus home.ts
                        asks one question. A new maths game that needs a team
                        picture uses a country with its flag; club kits are
                        fine where it is a shirt
+                       bjj-art.ts draws the moves; bjj-kit.ts is the 🇦🇺/🇧🇷
+                       language switch, speech and belt the BJJ games share
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes

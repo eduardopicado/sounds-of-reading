@@ -40,6 +40,8 @@ once opened, and nothing ever leaves the device.
 | **Fact Family Formation** | Three players are one family (3, 5, 8): turns a fact around and takes it back within 10 and 20; then (Year 2) finds a missing number, and does it with tens to 100. |
 | **Kit and Ball Shapes** | Names flat shapes, counts sides and corners, and names the solid objects of football (the ball is a sphere, the cone a cone); then (Year 2) pentagons and hexagons, and whether a kit is the same on both sides. |
 | **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. |
+| **Ref's Call** | Jiu-jitsu: sees a move (takedown, sweep, mount…) and calls its IBJJF points, reads the move's name alone, finds the move worth 3; then (Year 2) says whether the referee gives points, an advantage or a penalty. In English or Portuguese, switched with the flags. |
+| **Match Maths** | Adds up a jiu-jitsu match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. English or Portuguese. |
 
 The maths games follow the NSW Mathematics K–10 syllabus from Kindergarten to
 Year 2, and each climbs its own levels: up after three right in a row, down

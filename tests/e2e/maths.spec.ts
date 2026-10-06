@@ -742,6 +742,6 @@ test.describe('maths games', () => {
   test('the home screen has a maths section with every maths game', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(14);
+    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(16);
   });
 });

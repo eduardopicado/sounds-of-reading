@@ -1294,3 +1294,47 @@
 .cw-shape.after { fill: #E0703A; }
 .cw-move { fill: none; stroke: #7A8590; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .cw-arrow { transition: none; } }
+
+/* ── Jiu-jitsu: Ref's Call and Match Maths ─────────────────────────────── */
+
+.bj-langs { display: flex; gap: 10px; justify-content: center; }
+.bj-flag {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 56px; padding: 6px 16px;
+  border: 3px solid transparent; border-radius: 16px; cursor: pointer;
+  background: rgba(255, 246, 231, .14); color: var(--paper); font: 800 18px var(--display);
+}
+.bj-flag-icon { font-size: 34px; line-height: 1; }
+.bj-flag[aria-pressed="true"] { background: var(--paper); color: var(--ink); border-color: var(--mustard); }
+.bj-card {
+  display: grid; justify-items: center; gap: 8px; width: min(100%, 560px); padding: 14px; border-radius: var(--radius);
+  background: var(--paper); color: var(--ink); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.bj-move { display: grid; justify-items: center; gap: 4px; }
+.bj-pic { width: min(80vw, 360px); height: auto; }
+.bj-move.small .bj-pic { width: min(38vw, 170px); }
+.bj-name { font: 700 clamp(26px, 7vw, 36px) var(--reading); }
+.bj-move.small .bj-name { font-size: clamp(16px, 4vw, 20px); }
+.bj-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+.bj-moment { margin: 0; font: 600 clamp(20px, 5vw, 24px) var(--reading); text-align: center; line-height: 1.35; }
+
+/* Match Maths: the moves on a strip, and an IBJJF-style scoreboard */
+.bj-story { margin: 0; color: var(--paper); font: 600 clamp(19px, 4.8vw, 24px) var(--reading); text-align: center; max-width: 640px; line-height: 1.35; }
+.bj-strip { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 720px); }
+.bj-step {
+  display: grid; justify-items: center; gap: 2px; width: clamp(96px, 27vw, 150px); padding: 6px 6px 8px;
+  border-radius: 14px; background: var(--paper); color: var(--ink); border: 4px solid #2F6FC4;
+}
+.bj-step.white { border-color: #D9D3C4; }
+.bj-step .bj-pic { width: 100%; }
+.bj-step-name { font: 700 clamp(13px, 3.4vw, 16px) var(--reading); text-align: center; line-height: 1.15; min-height: 2.3em; }
+.bj-step-points { font: 800 22px var(--display); color: #C9452E; }
+.bj-step-mystery { display: grid; place-items: center; width: 100%; aspect-ratio: 3 / 2; font: 800 48px var(--display); color: #8C9096; }
+.bj-scoreboard { display: grid; gap: 4px; width: min(100%, 420px); padding: 8px; border-radius: 12px; background: #111; }
+.bj-score-row { display: grid; grid-template-columns: 1fr 70px; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; font: 800 22px var(--display); }
+.bj-scoreboard:has(.head) .bj-score-row { grid-template-columns: 1fr 70px 56px 56px; }
+.bj-score-row.blue { background: #2F6FC4; color: #fff; }
+.bj-score-row.white { background: #F4F1EA; color: var(--ink); }
+.bj-score-row.head { padding: 0 10px; color: #CFC8BA; font-size: 13px; }
+.bj-score-points { text-align: center; font-size: 30px; }
+.bj-score-extra { text-align: center; font-size: 18px; border-radius: 6px; background: rgba(0, 0, 0, .18); }
+.bj-score-head { text-align: center; }
