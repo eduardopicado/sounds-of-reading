@@ -36,6 +36,7 @@ const PAGES = [
   ['Fact Family Formation', '/#/fact-family'],
   ['Kit and Ball Shapes', '/#/kit-shapes'],
   ["Coach's Whiteboard", '/#/coach-whiteboard'],
+  ["Ref's Call", '/#/refs-call'],
 ] as const;
 
 for (const [name, path] of PAGES) {

@@ -21,6 +21,7 @@ const GAMES = [
   'fact-family',
   'kit-shapes',
   'coach-whiteboard',
+  'refs-call',
 ];
 
 /** leave the game the way he does, and check nothing is said after that */

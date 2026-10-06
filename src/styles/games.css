@@ -1294,3 +1294,25 @@
 .cw-shape.after { fill: #E0703A; }
 .cw-move { fill: none; stroke: #7A8590; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .cw-arrow { transition: none; } }
+
+/* ── Jiu-jitsu: Ref's Call and Match Maths ─────────────────────────────── */
+
+.bj-langs { display: flex; gap: 10px; justify-content: center; }
+.bj-flag {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 56px; padding: 6px 16px;
+  border: 3px solid transparent; border-radius: 16px; cursor: pointer;
+  background: rgba(255, 246, 231, .14); color: var(--paper); font: 800 18px var(--display);
+}
+.bj-flag-icon { font-size: 34px; line-height: 1; }
+.bj-flag[aria-pressed="true"] { background: var(--paper); color: var(--ink); border-color: var(--mustard); }
+.bj-card {
+  display: grid; justify-items: center; gap: 8px; width: min(100%, 560px); padding: 14px; border-radius: var(--radius);
+  background: var(--paper); color: var(--ink); box-shadow: 0 6px 0 rgba(0, 0, 0, .25);
+}
+.bj-move { display: grid; justify-items: center; gap: 4px; }
+.bj-pic { width: min(80vw, 360px); height: auto; }
+.bj-move.small .bj-pic { width: min(38vw, 170px); }
+.bj-name { font: 700 clamp(26px, 7vw, 36px) var(--reading); }
+.bj-move.small .bj-name { font-size: clamp(16px, 4vw, 20px); }
+.bj-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; width: 100%; }
+.bj-moment { margin: 0; font: 600 clamp(20px, 5vw, 24px) var(--reading); text-align: center; line-height: 1.35; }
