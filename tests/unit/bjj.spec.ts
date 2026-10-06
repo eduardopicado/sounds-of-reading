@@ -1,7 +1,9 @@
 /* Jiu-jitsu: the IBJJF points, both languages, and every question Ref's Call asks. */
 
 import { describe, expect, it } from 'vitest';
-import { CALL_NAME, MOMENTS, MOVES, REF_STEPS, pointsWords, refCall, refQuestion } from '../../src/content/bjj';
+import {
+  CALL_NAME, MATCH_STEPS, MOMENTS, MOVES, REF_STEPS, matchQuestion, missingOptions, pointsOf, pointsWords, refCall, refQuestion,
+} from '../../src/content/bjj';
 
 const MANY = 300;
 
@@ -49,5 +51,50 @@ describe("Ref's Call", () => {
   it('keeps advantages and penalties for Year 2', () => {
     expect(REF_STEPS.at(-1)!.task).toBe('call');
     expect(REF_STEPS.slice(0, -1).some((s) => s.task === 'call')).toBe(false);
+  });
+});
+
+describe('Match Maths', () => {
+  it('asks a score the moves add up to, at every step', () => {
+    for (const step of MATCH_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = matchQuestion(step);
+        expect(q.blue.length).toBeGreaterThanOrEqual(step.moves[0]);
+        expect(q.blue.length).toBeLessThanOrEqual(step.moves[1]);
+        if (step.task === 'total') expect(q.answer).toBe(pointsOf(q.side === 'Blue' ? q.blue : q.white));
+        if (step.task === 'ahead') {
+          expect(q.answer).toBe(Math.abs(pointsOf(q.blue) - pointsOf(q.white)));
+          expect(q.answer).toBeGreaterThan(0);
+        }
+        if (step.task === 'total' || step.task === 'ahead') expect(q.options).toContain(q.answer);
+        if (!step.both && step.task === 'total') expect(q.white).toHaveLength(0);
+      }
+    }
+  });
+
+  it('settles a draw the IBJJF way: advantages first, then fewer penalties', () => {
+    const step = MATCH_STEPS.find((s) => s.task === 'tiebreak')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = matchQuestion(step);
+      expect(pointsOf(q.blue)).toBe(pointsOf(q.white));
+      const { advantages: a, penalties: p } = q;
+      const winner = a.Blue !== a.White ? (a.Blue > a.White ? 'Blue' : 'White') : (p.Blue < p.White ? 'Blue' : 'White');
+      expect(a.Blue !== a.White || p.Blue !== p.White).toBe(true);
+      expect(q.answer).toBe(winner);
+    }
+  });
+
+  it('offers one move of each value for "which move was it"', () => {
+    for (const m of MOVES) {
+      const o = missingOptions(m);
+      expect(o).toContain(m);
+      expect(o.map((x) => x.points).sort()).toEqual([2, 3, 4]);
+    }
+  });
+
+  it('starts with the points written down, and keeps tie-breakers for Year 2', () => {
+    expect(MATCH_STEPS[0].shown).toBe(true);
+    expect(MATCH_STEPS.slice(1).every((s) => !s.shown)).toBe(true);
+    expect(MATCH_STEPS.at(-1)!.task).toBe('tiebreak');
   });
 });

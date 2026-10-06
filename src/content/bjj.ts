@@ -16,7 +16,7 @@
  * these games has an English and a Portuguese side, kept together here. */
 
 import { pick, shuffle } from '../lib/random';
-import type { Step } from './maths';
+import { choices, type Step } from './maths';
 
 export type Lang = 'en' | 'pt';
 
@@ -27,16 +27,18 @@ export interface Move {
   id: 'takedown' | 'sweep' | 'knee-on-belly' | 'guard-pass' | 'mount' | 'back';
   /** the name, to read: "guard pass", "passagem de guarda" */
   name: Both;
+  /** "uma montada", "um joelho na barriga" */
+  um: 'um' | 'uma';
   points: 2 | 3 | 4;
 }
 
 export const MOVES: Move[] = [
-  { id: 'takedown', name: { en: 'takedown', pt: 'queda' }, points: 2 },
-  { id: 'sweep', name: { en: 'sweep', pt: 'raspagem' }, points: 2 },
-  { id: 'knee-on-belly', name: { en: 'knee on belly', pt: 'joelho na barriga' }, points: 2 },
-  { id: 'guard-pass', name: { en: 'guard pass', pt: 'passagem de guarda' }, points: 3 },
-  { id: 'mount', name: { en: 'mount', pt: 'montada' }, points: 4 },
-  { id: 'back', name: { en: 'back control', pt: 'pegada nas costas' }, points: 4 },
+  { id: 'takedown', name: { en: 'takedown', pt: 'queda' }, um: 'uma', points: 2 },
+  { id: 'sweep', name: { en: 'sweep', pt: 'raspagem' }, um: 'uma', points: 2 },
+  { id: 'knee-on-belly', name: { en: 'knee on belly', pt: 'joelho na barriga' }, um: 'um', points: 2 },
+  { id: 'guard-pass', name: { en: 'guard pass', pt: 'passagem de guarda' }, um: 'uma', points: 3 },
+  { id: 'mount', name: { en: 'mount', pt: 'montada' }, um: 'uma', points: 4 },
+  { id: 'back', name: { en: 'back control', pt: 'pegada nas costas' }, um: 'uma', points: 4 },
 ];
 
 export const moveById = (id: Move['id']): Move => MOVES.find((m) => m.id === id)!;
@@ -131,4 +133,100 @@ export function refQuestion(step: RefStep, last?: RefQuestion): RefQuestion {
     if (last && (step.task === 'call' ? last.moment === q.moment : last.move === move)) continue;
     return q;
   }
+}
+
+const rand = (lo: number, hi: number): number => lo + Math.floor(Math.random() * (hi - lo + 1));
+
+/* ── Match Maths: adding up a match ──────────────────────────────────── */
+
+export interface MatchStep extends Step {
+  /**
+   * total: how many points did Blue score;
+   * ahead: who is ahead, by how many;
+   * missing: Blue had so many, now has so many, which move was it;
+   * tiebreak: the points are level, who wins on advantages and penalties?
+   */
+  task: 'total' | 'ahead' | 'missing' | 'tiebreak';
+  /** how many moves Blue makes (least, most) */
+  moves: [number, number];
+  /** write the points on the moves, or he remembers them */
+  shown: boolean;
+  /** White scores too, and the question can be about either */
+  both?: boolean;
+}
+
+export const MATCH_STEPS: MatchStep[] = [
+  { name: 'Add the points', task: 'total', moves: [2, 2], shown: true },
+  { name: 'Remember the points', task: 'total', moves: [2, 2], shown: false },
+  { name: 'Three moves', task: 'total', moves: [3, 3], shown: false },
+  { name: 'How far ahead?', task: 'ahead', moves: [1, 2], shown: false },
+  { name: 'Which move was it?', task: 'missing', moves: [2, 2], shown: false },
+  /* Year 2: a whole match, and the tie-breakers */
+  { name: 'A whole match', task: 'total', moves: [3, 4], shown: false, both: true },
+  { name: 'Advantages and penalties', task: 'tiebreak', moves: [1, 2], shown: false },
+];
+
+export type Side = 'Blue' | 'White';
+
+export interface MatchQuestion {
+  blue: Move[];
+  white: Move[];
+  /** for total in a whole match: whose points are asked */
+  side: Side;
+  advantages: { Blue: number; White: number };
+  penalties: { Blue: number; White: number };
+  /** a number, or for tiebreak the winner */
+  answer: number | Side;
+  options: (number | string)[];
+}
+
+export const pointsOf = (moves: Move[]): number => moves.reduce((s, m) => s + m.points, 0);
+const moves = (n: number): Move[] => Array.from({ length: n }, () => pick(MOVES));
+
+export function matchQuestion(step: MatchStep, last?: MatchQuestion): MatchQuestion {
+  for (;;) {
+    const blue = moves(rand(step.moves[0], step.moves[1]));
+    let white: Move[] = [];
+    let side: Side = 'Blue';
+    const advantages = { Blue: 0, White: 0 };
+    const penalties = { Blue: 0, White: 0 };
+    let answer: number | Side;
+    let options: (number | string)[];
+    if (step.task === 'total') {
+      if (step.both) { white = moves(rand(1, 2)); side = pick(['Blue', 'White'] as Side[]); }
+      answer = pointsOf(side === 'Blue' ? blue : white);
+      options = choices(answer, 1, 20);
+    } else if (step.task === 'ahead') {
+      white = moves(rand(1, 2));
+      answer = Math.abs(pointsOf(blue) - pointsOf(white));
+      if (!answer) continue;
+      options = choices(answer, 1, 12);
+    } else if (step.task === 'missing') {
+      /* the second move is the one he works out; one move of each value to choose from */
+      answer = blue[1].points;
+      options = [];
+    } else {
+      /* level on points, and the tie-breakers decide */
+      white = moves(blue.length);
+      if (pointsOf(white) !== pointsOf(blue)) continue;
+      advantages.Blue = rand(0, 3);
+      advantages.White = rand(0, 3);
+      penalties.Blue = rand(0, 2);
+      penalties.White = rand(0, 2);
+      if (advantages.Blue === advantages.White && penalties.Blue === penalties.White) continue;
+      answer = advantages.Blue !== advantages.White
+        ? (advantages.Blue > advantages.White ? 'Blue' : 'White')
+        : (penalties.Blue < penalties.White ? 'Blue' : 'White');
+      options = ['Blue', 'White'];
+    }
+    const q: MatchQuestion = { blue, white, side, advantages, penalties, answer, options };
+    if (last && last.blue.map((m) => m.id).join() === blue.map((m) => m.id).join()) continue;
+    return q;
+  }
+}
+
+/** for "which move was it": the answer and one move of each other value */
+export function missingOptions(answer: Move): Move[] {
+  const others = [2, 3, 4].filter((p) => p !== answer.points).map((p) => pick(MOVES.filter((m) => m.points === p)));
+  return shuffle([answer, ...others]);
 }

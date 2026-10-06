@@ -122,3 +122,73 @@ test.describe("Ref's Call", () => {
     await expect(page.locator('.bj-pic polyline[stroke="#EE8A2B"]').first()).toBeAttached();
   });
 });
+
+test.describe('Match Maths', () => {
+  test('a whole round of adding up the match', async ({ page }) => {
+    const watch = watchPage(page);
+    await voices(page);
+    await openGame(page, 'match-maths');
+    await openSetup(page);
+    await page.getByLabel('How many questions').selectOption('8');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    for (let i = 0; i < 8; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 10000 });
+      await answer(page, '.bj-story');
+    }
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('takedown and mount: the cards say the points, and 2 + 4 = 6', async ({ page }) => {
+    await start(page, 'match-maths');
+    await expect(page.locator('.bj-step')).toHaveCount(2, { timeout: 10000 });
+    const shown = (await page.locator('.bj-step-points').allTextContents()).map((t) => Number(t.replace('+', '')));
+    const total = Number(await page.locator('.bj-story').getAttribute('data-answer'));
+    expect(shown[0] + shown[1]).toBe(total);
+    await page.locator(`.mx-choice[data-n="${total}"]`).click();
+    await expect(page.locator('.mx-sum')).toHaveText(`${shown[0]} + ${shown[1]} = ${total}`);
+    await expect(page.locator('.bj-score-row.blue .bj-score-points')).toHaveText(String(total));
+  });
+
+  test('in Portuguese, the story, the cards and the voice', async ({ page }) => {
+    await voices(page);
+    await seed(page, { 'bjj-lang': 'pt', 'maths-step:match-maths': 1 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.bj-story')).toContainText('Quantos pontos o Azul tem?', { timeout: 10000 });
+    await expect(page.locator('.bj-step-points').first()).toHaveText('?');
+    await expect(page.locator('.bj-score-row.blue .bj-score-name')).toHaveText('Azul');
+    await expect.poll(async () => (await said(page)).at(-1)).toMatchObject({ lang: 'pt-BR' });
+    /* and back to English in the middle */
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.locator('.bj-story')).toContainText('How many points has Blue got?');
+    await answer(page, '.bj-story');
+    await expect(page.locator('.mx-note')).toContainText('Yes!');
+  });
+
+  test('which move was it: any move worth those points', async ({ page }) => {
+    await seed(page, { 'maths-step:match-maths': 4 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.mx-choice')).toHaveCount(3, { timeout: 10000 });
+    await expect(page.locator('.bj-step-mystery')).toHaveCount(1);
+    await expect(page.locator('.mx-sum')).toContainText('+ ? =');
+    const points = Number(await page.locator('.bj-story').getAttribute('data-answer'));
+    const ids = await page.locator('.mx-choice').evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.n ?? ''));
+    const worth: Record<string, number> = { takedown: 2, sweep: 2, 'knee-on-belly': 2, 'guard-pass': 3, mount: 4, back: 4 };
+    await page.locator(`.mx-choice[data-n="${ids.find((id) => worth[id] === points)}"]`).click();
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+  });
+
+  test('Year 2: a draw on points goes to the advantages, then the penalties', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-maths': 6 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.bj-score-extra')).toHaveCount(4, { timeout: 10000 });
+    const [blue, white] = await page.locator('.bj-score-points').allTextContents();
+    expect(blue).toBe(white);
+    const winner = await page.locator('.bj-story').getAttribute('data-answer');
+    await page.locator(`.mx-choice[data-n="${winner}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText(`${winner} wins!`);
+    noProblems(watch);
+  });
+});
