@@ -31,10 +31,10 @@ export const BELTS: Record<string, string> = {
 
 const INK = '#1E2B2A';
 
-function line(points: P[], colour: string, width: number): SVGElement {
+function line(points: P[], colour: string, width: number, cap: 'round' | 'butt' = 'round'): SVGElement {
   return svg('polyline', {
     points: points.map((p) => p.join(',')).join(' '),
-    fill: 'none', stroke: colour, 'stroke-width': width, 'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+    fill: 'none', stroke: colour, 'stroke-width': width, 'stroke-linecap': cap, 'stroke-linejoin': 'round',
   });
 }
 
@@ -48,16 +48,44 @@ function person(pose: Pose, look: Gi, only?: 'limbs'): SVGElement {
   if (!only) g.append(...limb(pose.neck, farArm, 8), ...limb(pose.hip, farLeg, 10));
   if (!only) {
     g.append(line([pose.neck, pose.hip], INK, 22), line([pose.neck, pose.hip], look.gi, 18));
-    /* the belt: a band across the body just above the hips */
-    const t = 0.16;
-    const a: P = [pose.hip[0] + (pose.neck[0] - pose.hip[0]) * t, pose.hip[1] + (pose.neck[1] - pose.hip[1]) * t];
-    const b: P = [pose.hip[0] + (pose.neck[0] - pose.hip[0]) * (t + 0.12), pose.hip[1] + (pose.neck[1] - pose.hip[1]) * (t + 0.12)];
-    g.append(line([a, b], INK, 22), line([a, b], look.belt, 18));
     g.append(svg('circle', { cx: pose.head[0], cy: pose.head[1], r: 12, fill: '#F2C7A5', stroke: INK, 'stroke-width': 3 }));
   }
   if (only) g.append(...limb(pose.neck, farArm, 8), ...limb(pose.hip, farLeg, 10));
   g.append(...limb(pose.hip, nearLeg, 10), ...limb(pose.neck, nearArm, 8));
+  /* the belt last, over the arms and legs, so it is always seen: a band
+     wider than the gi just above the hips, a knot, and its two tails */
+  g.append(...belt(pose, look.belt));
   return g;
+}
+
+function belt(pose: Pose, colour: string): SVGElement[] {
+  const dx = pose.neck[0] - pose.hip[0];
+  const dy = pose.neck[1] - pose.hip[1];
+  const len = Math.hypot(dx, dy) || 1;
+  const u: P = [dx / len, dy / len];
+  const n: P = [-u[1], u[0]];
+  const at = (t: number): P => [pose.hip[0] + dx * t, pose.hip[1] + dy * t];
+  /* a flat band: a short stroke along the body, its width across it */
+  const a = at(0.11);
+  const b = at(0.27);
+  const edge = (p: P, d: number): P => [p[0] - u[0] * d, p[1] - u[1] * d];
+  const knot = at(0.19);
+  const tail = (along: number, side: number): P => [knot[0] - u[0] * along + n[0] * side, knot[1] - u[1] * along + n[1] * side];
+  const tails = [[knot, tail(14, 6)], [knot, tail(13, -3)]] as P[][];
+  return [
+    line([edge(a, 1.5), edge(b, -1.5)], INK, 27, 'butt'), line([a, b], colour, 23, 'butt'),
+    ...tails.map((t) => line(t, INK, 7)), ...tails.map((t) => line(t, colour, 4)),
+    svg('circle', { cx: knot[0], cy: knot[1], r: 3.5, fill: colour, stroke: INK, 'stroke-width': 2 }),
+  ];
+}
+
+/** a belt on its own, for beside his name: band, knot and tails */
+export function beltBadge(colour: string): SVGSVGElement {
+  return svg('svg', { class: 'bj-belt', viewBox: '0 0 64 28', 'aria-hidden': 'true' },
+    svg('rect', { x: 2, y: 4, width: 60, height: 11, rx: 3, fill: colour, stroke: INK, 'stroke-width': 2.5 }),
+    svg('path', { d: 'M30 12 L22 26 M34 12 L42 26', stroke: INK, 'stroke-width': 8, 'stroke-linecap': 'round' }),
+    svg('path', { d: 'M30 12 L22 26 M34 12 L42 26', stroke: colour, 'stroke-width': 4.5, 'stroke-linecap': 'round' }),
+    svg('rect', { x: 26, y: 2, width: 12, height: 15, rx: 3, fill: colour, stroke: INK, 'stroke-width': 2.5 }));
 }
 
 /** a curved arrow, for a move that is a movement */
