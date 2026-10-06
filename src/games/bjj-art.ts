@@ -21,6 +21,10 @@ interface Pose {
   arms: [P, P][];
   /** knee then foot, near leg then far leg */
   legs: [P, P][];
+  /** which side of the body is the front, where the belt is tied: the
+      side to the left of the hip-to-neck line (1, the default), or the
+      other (-1), as for someone lying on their back facing up */
+  front?: 1 | -1;
 }
 
 export interface Gi { gi: string; belt: string }
@@ -69,13 +73,16 @@ function belt(pose: Pose, colour: string): SVGElement[] {
   const a = at(0.11);
   const b = at(0.27);
   const edge = (p: P, d: number): P => [p[0] - u[0] * d, p[1] - u[1] * d];
-  const knot = at(0.19);
-  const tail = (along: number, side: number): P => [knot[0] - u[0] * along + n[0] * side, knot[1] - u[1] * along + n[1] * side];
-  const tails = [[knot, tail(14, 6)], [knot, tail(13, -3)]] as P[][];
+  /* tied at the front, the belly side, with the tails hanging from the knot */
+  const f = pose.front ?? 1;
+  const mid = at(0.19);
+  const knot: P = [mid[0] + n[0] * f * 10, mid[1] + n[1] * f * 10];
+  const tail = (along: number, out: number): P => [knot[0] - u[0] * along + n[0] * f * out, knot[1] - u[1] * along + n[1] * f * out];
+  const tails = [[knot, tail(14, 4)], [knot, tail(12, -1)]] as P[][];
   return [
     line([edge(a, 1.5), edge(b, -1.5)], INK, 27, 'butt'), line([a, b], colour, 23, 'butt'),
     ...tails.map((t) => line(t, INK, 7)), ...tails.map((t) => line(t, colour, 4)),
-    svg('circle', { cx: knot[0], cy: knot[1], r: 3.5, fill: colour, stroke: INK, 'stroke-width': 2 }),
+    svg('circle', { cx: knot[0], cy: knot[1], r: 4.5, fill: colour, stroke: INK, 'stroke-width': 2 }),
   ];
 }
 
@@ -99,7 +106,7 @@ function arrow(d: string, tip: P, angle: number): SVGElement[] {
 /* ── the poses: [the one underneath or behind, the other], in drawing order ── */
 
 /** lying on the back, head to the right */
-const lying = (legs: [P, P][], arms: [P, P][]): Pose => ({ head: [200, 128], neck: [184, 128], hip: [132, 130], arms, legs });
+const lying = (legs: [P, P][], arms: [P, P][]): Pose => ({ head: [200, 128], neck: [184, 128], hip: [132, 130], arms, legs, front: -1 });
 
 const POSES: Record<Move['id'], (blue: Gi, white: Gi) => SVGElement[]> = {
   /* White thrown onto the mat, Blue standing over and holding on */
