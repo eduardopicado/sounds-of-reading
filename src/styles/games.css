@@ -1510,3 +1510,12 @@
   background: transparent; min-height: 56px;
 }
 .bw-gap:disabled { cursor: default; }
+
+/* ── Ref's Signals ────────────────────────────────────────────────────── */
+
+.bj-ref { max-width: 360px; }
+.bj-signals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; margin-top: 8px; }
+.bj-signal { padding: 4px; border-radius: 16px; background: rgba(20, 49, 47, .06); border: 3px solid transparent; cursor: pointer; }
+.bj-signal svg { width: 100%; height: auto; }
+.bj-signal.right { border-color: var(--mint); background: rgba(121, 211, 176, .35); }
+.bj-signal.wrong { border-color: var(--tomato); animation: shake .4s; }

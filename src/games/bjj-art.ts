@@ -176,3 +176,94 @@ export function movePicture(move: Move, blue: Gi, white: Gi = { gi: '#FBFAF6', b
   pic.append(...POSES[move.id](blue, white));
   return pic;
 }
+
+/* ── the referee, facing us, and the signals ─────────────────────────── */
+
+const SKIN = '#F2C7A5';
+const SHIRT = '#2B2F33';
+const TROUSERS = '#4A4F57';
+
+/** an open hand at p, flat (palm down) or upright */
+function openHand(p: P, flat: boolean): SVGElement {
+  return svg('ellipse', { cx: p[0], cy: p[1], rx: flat ? 11 : 6, ry: flat ? 6 : 11, fill: SKIN, stroke: INK, 'stroke-width': 2.5 });
+}
+
+function fist(p: P): SVGElement[] {
+  return [
+    svg('circle', { cx: p[0], cy: p[1], r: 8, fill: SKIN, stroke: INK, 'stroke-width': 2.5 }),
+    svg('path', { d: `M${p[0] - 5} ${p[1] - 2} h10 M${p[0] - 5} ${p[1] + 2} h10`, stroke: INK, 'stroke-width': 1.2 }),
+  ];
+}
+
+/** a raised hand with n fingers up, big enough to count from across the mat */
+function fingers(p: P, n: number): SVGElement[] {
+  const out: SVGElement[] = [];
+  const spread = [-16.5, -5.5, 5.5, 16.5].slice(0, n);
+  const shift = n === 2 ? 5.5 : n === 3 ? 5.5 : 0;
+  for (const dx of spread) {
+    const x = dx + shift;
+    const base: P = [p[0] + x * 0.5, p[1] - 4];
+    const tip: P = [p[0] + x * 1.1, p[1] - 30];
+    out.push(line([base, tip], INK, 9), line([base, tip], SKIN, 5.5));
+  }
+  /* the palm, with the folded fingers and thumb across it */
+  out.push(svg('circle', { cx: p[0], cy: p[1] + 2, r: 11, fill: SKIN, stroke: INK, 'stroke-width': 2.5 }));
+  return out;
+}
+
+const arm = (pts: P[]): SVGElement[] => [line(pts, INK, 12), line(pts, SHIRT, 8)];
+
+/**
+ * The referee making a signal, or calling out a command (a speech bubble
+ * with the word). The signalling arm is his right, on our left.
+ */
+export function refPicture(signal: string | null, call?: string): SVGSVGElement {
+  const pic = svg('svg', { class: 'bj-pic bj-ref', viewBox: '0 0 240 160', role: 'img', 'aria-label': 'The referee' },
+    svg('rect', { x: 0, y: 146, width: 240, height: 14, fill: '#4F7FB8', rx: 4 }));
+  const L: P = [106, 60];
+  const R: P = [134, 60];
+  const down = (s: P, side: -1 | 1): P[] => [s, [s[0] + side * 6, 82], [s[0] + side * 8, 104]];
+  let left: SVGElement[] = arm(down(L, -1));
+  let right: SVGElement[] = arm(down(R, 1));
+  const hands: SVGElement[] = [];
+  if (signal?.startsWith('points-')) {
+    const n = Number(signal.slice(7));
+    left = arm([L, [90, 46], [80, 36]]);
+    hands.push(...fingers([78, 34], n));
+  } else if (signal === 'advantage') {
+    left = arm([L, [82, 60], [58, 60]]);
+    hands.push(openHand([46, 60], true));
+  } else if (signal === 'penalty') {
+    left = arm([L, [84, 72], [84, 58]]);
+    hands.push(...fist([84, 52]));
+  } else if (signal === 'parou') {
+    left = arm([L, [82, 60], [58, 60]]);
+    right = arm([R, [158, 60], [182, 60]]);
+    hands.push(openHand([50, 60], false), openHand([190, 60], false));
+  } else if (signal === 'dq') {
+    left = arm([L, [90, 30], [132, 12]]);
+    right = arm([R, [150, 30], [108, 12]]);
+    hands.push(...fist([134, 11]), ...fist([106, 11]));
+  }
+  if (!signal?.startsWith('points-') && !['advantage', 'penalty', 'parou', 'dq'].includes(signal ?? '')) {
+    hands.push(svg('circle', { cx: 98, cy: 106, r: 6, fill: SKIN, stroke: INK, 'stroke-width': 2.5 }),
+      svg('circle', { cx: 142, cy: 106, r: 6, fill: SKIN, stroke: INK, 'stroke-width': 2.5 }));
+  }
+  pic.append(
+    line([[114, 100], [110, 122], [106, 144]], INK, 14), line([[114, 100], [110, 122], [106, 144]], TROUSERS, 10),
+    line([[126, 100], [130, 122], [134, 144]], INK, 14), line([[126, 100], [130, 122], [134, 144]], TROUSERS, 10),
+    line([[120, 56], [120, 100]], INK, 32), line([[120, 56], [120, 100]], SHIRT, 28),
+    svg('circle', { cx: 120, cy: 40, r: 13, fill: SKIN, stroke: INK, 'stroke-width': 3 }),
+    ...left, ...right, ...hands,
+  );
+  if (call) {
+    const bubble = svg('g', {},
+      svg('path', { d: 'M150 14 h80 a8 8 0 0 1 8 8 v24 a8 8 0 0 1 -8 8 h-60 l-14 12 l2 -12 h-8 a8 8 0 0 1 -8 -8 v-24 a8 8 0 0 1 8 -8 z', fill: '#FFF6E7', stroke: INK, 'stroke-width': 2.5 }));
+    const t = svg('text', { x: 190, y: 40, 'text-anchor': 'middle', 'font-size': 17, 'font-weight': 800, fill: INK });
+    t.textContent = call;
+    bubble.append(t);
+    pic.append(bubble);
+  }
+  pic.dataset.signal = signal ?? '';
+  return pic;
+}

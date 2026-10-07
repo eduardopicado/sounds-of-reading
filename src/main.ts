@@ -40,6 +40,7 @@ import * as iceCreamVan from './games/ice-cream-van';
 import * as refsCall from './games/refs-call';
 import * as matchMaths from './games/match-maths';
 import * as weighIn from './games/weigh-in';
+import * as refsSignals from './games/refs-signals';
 import * as coachSays from './games/coach-says';
 import * as bigWords from './games/big-words';
 import * as grownUps from './games/grown-ups';
@@ -83,6 +84,7 @@ const routes: Route[] = [
   { path: 'refs-call', mount: refsCall.mount },
   { path: 'match-maths', mount: matchMaths.mount },
   { path: 'weigh-in', mount: weighIn.mount },
+  { path: 'refs-signals', mount: refsSignals.mount },
   /* the settings, behind a button held for three seconds on the home screen */
   { path: 'grown-ups', mount: grownUps.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */

@@ -70,8 +70,9 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        asks one question. A new maths game that needs a team
                        picture uses a country with its flag; club kits are
                        fine where it is a shirt
-                       bjj-art.ts draws the moves; bjj-kit.ts is the 🇦🇺/🇧🇷
-                       language switch, speech and belt the BJJ games share
+                       bjj-art.ts draws the moves and the referee's signals;
+                       bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
+                       belt the BJJ games share
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes

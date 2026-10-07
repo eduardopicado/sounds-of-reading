@@ -63,6 +63,7 @@ export const TILES: Tile[] = [
   { path: 'ice-cream-van', name: 'Ice Cream Van', emoji: '🍦', what: 'Pay with Aussie coins', tone: '#E58FB3', section: 'maths' },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj' },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj' },
+  { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj' },
   { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj' },
 ];
 

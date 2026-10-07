@@ -353,3 +353,116 @@ export function weighQuestion(step: WeighStep, last?: WeighQuestion): WeighQuest
     return q;
   }
 }
+
+/* ── Ref's Signals: what the referee's hands say ─────────────────────── */
+
+/* The referee scores with gestures, as the IBJJF rules book sets them out:
+ *
+ *   points      a hand raised, with as many fingers as points (2, 3 or 4)
+ *   advantage   the arm out level with the mat, hand open, palm down
+ *   penalty     a touch on the athlete's shoulder, then a clenched fist
+ *               raised to shoulder height
+ *   stop        PAROU, arms open and raised at shoulder height
+ *   disqualified  arms over the head, forearms crossed, fists clenched
+ *
+ * and calls in Portuguese wherever the competition is: COMBATE to start, or
+ * start again; PAROU to stop; LUTE, pointing at a fighter who is stalling,
+ * for "fight!". Kindergarten and Year 1 read the fingers and tell the three
+ * scoring signals apart; Year 2 plays referee — here is what happened, which
+ * signal? — and learns the calls. */
+
+export type Signal = 'points-2' | 'points-3' | 'points-4' | 'advantage' | 'penalty' | 'parou' | 'dq';
+
+export const SIGNAL_MEANING: Record<Signal, Both> = {
+  'points-2': { en: '2 points', pt: 'Dois pontos' },
+  'points-3': { en: '3 points', pt: 'Três pontos' },
+  'points-4': { en: '4 points', pt: 'Quatro pontos' },
+  advantage: { en: 'Advantage', pt: 'Vantagem' },
+  penalty: { en: 'Penalty', pt: 'Punição' },
+  parou: { en: 'Stop', pt: 'Parou' },
+  dq: { en: 'Disqualified', pt: 'Desclassificado' },
+};
+
+export type Command = 'combate' | 'parou' | 'lute';
+
+/** each call as it is shouted, and what it means */
+export const COMMANDS: Record<Command, { said: string; means: Both }> = {
+  combate: { said: 'Combate!', means: { en: 'Start the fight', pt: 'Começar a luta' } },
+  parou: { said: 'Parou!', means: { en: 'Stop', pt: 'Parar' } },
+  lute: { said: 'Lute!', means: { en: 'Fight, do not stall', pt: 'Lutar, sem amarrar' } },
+};
+
+export interface SignalStep extends Step {
+  /**
+   * fingers: how many points is that hand;
+   * kind: points, advantage or penalty;
+   * move: which move scores what the hand shows;
+   * referee: here is what happened, which signal (Year 2);
+   * calls: what a call or a stop or disqualified signal means (Year 2)
+   */
+  task: 'fingers' | 'kind' | 'move' | 'referee' | 'calls';
+}
+
+export const SIGNAL_STEPS: SignalStep[] = [
+  { name: 'How many points?', task: 'fingers' },
+  { name: 'Points, advantage or penalty?', task: 'kind' },
+  { name: 'Which move was it?', task: 'move' },
+  /* Year 2 */
+  { name: 'You are the referee', task: 'referee' },
+  { name: 'The calls', task: 'calls' },
+];
+
+export interface SignalQuestion {
+  task: SignalStep['task'];
+  /** the signal shown, if any */
+  signal?: Signal;
+  /** for calls: a shouted call instead of a signal */
+  command?: Command;
+  /** for referee: what happened */
+  moment?: Moment;
+  /** for move: the moves to choose from */
+  moves: Move[];
+  answer: string | number;
+  options: (string | number)[];
+}
+
+const pointsSignal = (n: number): Signal => `points-${n}` as Signal;
+
+/** the signal for what happened on the mat */
+export const signalFor = (m: Moment): Signal =>
+  m.call === 'points' ? pointsSignal(moveById(m.move!).points) : m.call;
+
+export function signalQuestion(step: SignalStep, last?: SignalQuestion): SignalQuestion {
+  for (;;) {
+    let q: SignalQuestion;
+    if (step.task === 'fingers') {
+      const n = pick([2, 3, 4]);
+      q = { task: 'fingers', signal: pointsSignal(n), moves: [], answer: n, options: [2, 3, 4] };
+    } else if (step.task === 'kind') {
+      const kind = pick(['points', 'advantage', 'penalty'] as const);
+      const signal: Signal = kind === 'points' ? pointsSignal(pick([2, 3, 4])) : kind;
+      q = { task: 'kind', signal, moves: [], answer: kind, options: ['points', 'advantage', 'penalty'] };
+    } else if (step.task === 'move') {
+      const move = pick(MOVES);
+      /* one move worth that many among them, so there is one right answer */
+      const moves = shuffle([move, ...[2, 3, 4].filter((p) => p !== move.points).map((p) => pick(MOVES.filter((m) => m.points === p)))]);
+      q = { task: 'move', signal: pointsSignal(move.points), moves, answer: move.id, options: moves.map((m) => m.id) };
+    } else if (step.task === 'referee') {
+      const moment = pick(MOMENTS);
+      const right = signalFor(moment);
+      const others = shuffle((['points-2', 'points-3', 'points-4', 'advantage', 'penalty'] as Signal[]).filter((s) => s !== right)).slice(0, 2);
+      q = { task: 'referee', moment, moves: [], answer: right, options: shuffle([right, ...others]) };
+    } else {
+      /* a call shouted, or the stop or disqualified signal */
+      if (Math.random() < 0.6) {
+        const command = pick(['combate', 'parou', 'lute'] as Command[]);
+        q = { task: 'calls', command, moves: [], answer: command, options: ['combate', 'parou', 'lute'] };
+      } else {
+        const signal = pick(['parou', 'dq'] as Signal[]);
+        q = { task: 'calls', signal, moves: [], answer: signal, options: shuffle(['parou', 'dq', 'advantage']) };
+      }
+    }
+    if (last && last.answer === q.answer && last.signal === q.signal && last.moment === q.moment) continue;
+    return q;
+  }
+}

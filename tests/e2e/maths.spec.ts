@@ -744,6 +744,6 @@ test.describe('maths games', () => {
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
     await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(15);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(3);
+    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
   });
 });
