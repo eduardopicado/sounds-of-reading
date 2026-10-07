@@ -41,6 +41,7 @@ import * as refsCall from './games/refs-call';
 import * as matchMaths from './games/match-maths';
 import * as weighIn from './games/weigh-in';
 import * as coachSays from './games/coach-says';
+import * as bigWords from './games/big-words';
 import * as grownUps from './games/grown-ups';
 import * as voices from './games/voices';
 
@@ -61,6 +62,7 @@ const routes: Route[] = [
   { path: 'be-the-commentator', mount: beTheCommentator.mount },
   { path: 'build-the-word', mount: buildTheWord.mount },
   { path: 'coach-says', mount: coachSays.mount },
+  { path: 'big-words', mount: bigWords.mount },
   { path: 'trace-it', mount: traceIt.mount },
   { path: 'tall-small-tail', mount: tallSmallTail.mount },
   { path: 'off-the-bench', mount: offTheBench.mount },

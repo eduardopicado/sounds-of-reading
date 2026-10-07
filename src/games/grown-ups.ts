@@ -17,6 +17,7 @@ import {
 } from '../content/maths';
 import { MATCH_STEPS, REF_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
+import { BIG_STEPS } from '../content/big-words';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
@@ -27,6 +28,7 @@ import { TILES } from './home';
     maths and jiu-jitsu tile has one */
 export const LADDERS: Record<string, readonly Step[]> = {
   'coach-says': SAYS_STEPS,
+  'big-words': BIG_STEPS,
   'flash-count': FLASH_STEPS,
   'off-the-bench': BENCH_STEPS,
   'scoreboard-sums': SUM_STEPS,
