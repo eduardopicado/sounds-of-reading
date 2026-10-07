@@ -17,9 +17,9 @@ async function seed(page: Page, items: Record<string, unknown>): Promise<void> {
 }
 
 test.describe('Pro mode', () => {
-  test('is one switch on the home screen, and every game shows it is on', async ({ page }) => {
+  test('is one switch in the grown-ups corner, and every game shows it is on', async ({ page }) => {
     const watch = watchPage(page);
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     await page.getByRole('button', { name: /Pro mode/ }).click();
     await expect(page.getByRole('button', { name: /Pro mode/ })).toHaveAttribute('aria-pressed', 'true');
 
@@ -78,17 +78,21 @@ test.describe('the coach', () => {
     await page.goto('/');
     await expect(page.locator('.coach-move')).toContainText('Level 5 mastered');
     await expect(page.locator('.coach-move')).toContainText('levels 5 and 6');
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 5, 6');
 
+    await page.goto('/');
     await page.getByRole('button', { name: 'Undo' }).click();
     await expect(page.locator('.coach-move')).toBeHidden();
     /* back to the week the parent chose, sound pick and all */
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 4, 5');
     await expect(page.locator('.week .now')).toContainText('ai');
 
     /* and it has to be earned again, not repeated on the next visit */
-    await page.reload();
+    await page.goto('/');
     await expect(page.locator('.coach-move')).toBeHidden();
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 4, 5');
     noProblems(watch);
   });
@@ -103,6 +107,7 @@ test.describe('the coach', () => {
     await expect(page.locator('.coach-move')).toBeHidden();
     await page.reload();
     await expect(page.locator('.coach-move')).toBeHidden();
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 5, 6');
   });
 
@@ -113,6 +118,7 @@ test.describe('the coach', () => {
     });
     await page.goto('/');
     await expect(page.locator('.coach-move')).toBeHidden();
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 4, 5');
   });
 
@@ -123,12 +129,13 @@ test.describe('the coach', () => {
     });
     await page.goto('/');
     await expect(page.locator('.coach-move')).toBeHidden();
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.week .now')).toContainText('Level 4, 5');
   });
 
   test('tells the parent which sounds are going well and which need practice', async ({ page }) => {
     await seed(page, { coach: { sounds: { sh: '11111111', ai: '0101000' }, levels: {} } });
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     await expect(page.locator('.coach-report')).toContainText('Going well: sh');
     await expect(page.locator('.coach-report')).toContainText('Needs practice: ai');
   });

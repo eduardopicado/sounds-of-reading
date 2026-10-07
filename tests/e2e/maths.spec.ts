@@ -739,9 +739,11 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('leaves him facing');
   });
 
-  test('the home screen has a maths section with every maths game', async ({ page }) => {
+  test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('.tiles-head').nth(1)).toHaveText('Maths');
-    await expect(page.locator('.tiles').nth(1).locator('.tile-link')).toHaveCount(16);
+    await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(14);
+    await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
+    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(2);
   });
 });

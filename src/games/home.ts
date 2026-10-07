@@ -1,187 +1,190 @@
-/* The home screen: the game tiles, and the one place a parent sets up the week.
+/* The home screen: today's picks, the game tiles, and the sticker book.
  *
  * The child can read simple words, so each tile says what it is as well as
- * showing a picture. Nothing here needs an adult to explain it. */
+ * showing a picture. Nothing here needs an adult to explain it. The settings
+ * live on their own page (src/games/grown-ups.ts), behind a button that has
+ * to be held for three seconds, so a tap about cannot change his week. */
 
 import { el } from '../lib/dom';
 import { pick } from '../lib/random';
-import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say } from '../lib/speech';
+import { go } from '../lib/router';
+import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
-import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
-import { chip, confetti, confirmButton } from '../ui/components';
-import { clearStickers, stickers } from '../lib/stickers';
-import { settings, updateSettings } from '../lib/settings';
-import { closeMove, maybeLevelUp, strongSounds, undoMove, unseenMove, weakSounds } from '../lib/coach';
+import { PRACTICE_SOUNDS, sound, type Sound } from '../content/index';
+import { confetti } from '../ui/components';
+import { stickers } from '../lib/stickers';
+import { settings } from '../lib/settings';
+import { closeMove, maybeLevelUp, undoMove, unseenMove, weakSounds } from '../lib/coach';
 
-export interface Tile { path: string; name: string; emoji: string; what: string; tone: string; maths?: boolean }
+export type Section = 'reading' | 'writing' | 'maths' | 'bjj';
 
-export const TILES: Tile[] = [
-  { path: 'memory-match', name: 'Memory Match', emoji: '🃏', what: 'Find the pairs', tone: '#E4572E' },
-  { path: 'bingo', name: 'Bingo', emoji: '🎯', what: 'Find the word you hear', tone: '#3D8FCB' },
-  { path: 'sound-sort', name: 'Sound Sort', emoji: '🗂️', what: 'Drop it in the right bin', tone: '#79D3B0' },
-  { path: 'word-builder', name: 'Word Builder', emoji: '🧱', what: 'Swap a part, make a word', tone: '#F3B229' },
-  { path: 'roll-and-read', name: 'Roll & Read', emoji: '🎲', what: 'Roll it, read it out loud', tone: '#A87FD1' },
-  { path: 'real-or-silly', name: 'Real or Silly?', emoji: '🤪', what: 'Is it a word or not?', tone: '#EF7A5A' },
-  { path: 'sentence-smash', name: 'Sentence Smash', emoji: '💥', what: 'Build a silly sentence', tone: '#2FB5B5' },
-  { path: 'same-sound', name: 'Same Sound, Two Ways', emoji: '🪞', what: 'Hear it, then spell it', tone: '#C77DBB' },
-  { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A' },
-  { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF' },
-  { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E' },
-  { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A' },
-  { path: 'be-the-commentator', name: 'Be the Commentator', emoji: '🎙️', what: 'Read it like you mean it', tone: '#D9534F' },
-  { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5' },
-  { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6' },
-  { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A' },
-  { path: 'flash-count', name: 'Flash Count', emoji: '⚡', what: 'Look quickly: how many?', tone: '#F08A4B', maths: true },
-  { path: 'off-the-bench', name: 'Off the Bench', emoji: '🧤', what: 'How many more make 10?', tone: '#3FA07A', maths: true },
-  { path: 'scoreboard-sums', name: 'Scoreboard Sums', emoji: '🏟️', what: 'Goals in, goals out', tone: '#5AA0DC', maths: true },
-  { path: 'number-line-penalty', name: 'Number Line Penalty', emoji: '🥅', what: 'Kick it to the number', tone: '#A87FD1', maths: true },
-  { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', maths: true },
-  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', maths: true },
-  { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', maths: true },
-  { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', maths: true },
-  { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', maths: true },
-  { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', maths: true },
-  { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', maths: true },
-  { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', maths: true },
-  { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', maths: true },
-  { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', maths: true },
-  { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', maths: true },
-  { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', maths: true },
+export interface Tile { path: string; name: string; emoji: string; what: string; tone: string; section: Section }
+
+export const SECTIONS: { id: Section; title: string }[] = [
+  { id: 'reading', title: 'Reading and spelling' },
+  { id: 'writing', title: 'Handwriting' },
+  { id: 'maths', title: 'Maths' },
+  { id: 'bjj', title: 'Jiu-jitsu 🥋' },
 ];
 
+export const TILES: Tile[] = [
+  { path: 'memory-match', name: 'Memory Match', emoji: '🃏', what: 'Find the pairs', tone: '#E4572E', section: 'reading' },
+  { path: 'bingo', name: 'Bingo', emoji: '🎯', what: 'Find the word you hear', tone: '#3D8FCB', section: 'reading' },
+  { path: 'sound-sort', name: 'Sound Sort', emoji: '🗂️', what: 'Drop it in the right bin', tone: '#79D3B0', section: 'reading' },
+  { path: 'word-builder', name: 'Word Builder', emoji: '🧱', what: 'Swap a part, make a word', tone: '#F3B229', section: 'reading' },
+  { path: 'roll-and-read', name: 'Roll & Read', emoji: '🎲', what: 'Roll it, read it out loud', tone: '#A87FD1', section: 'reading' },
+  { path: 'real-or-silly', name: 'Real or Silly?', emoji: '🤪', what: 'Is it a word or not?', tone: '#EF7A5A', section: 'reading' },
+  { path: 'sentence-smash', name: 'Sentence Smash', emoji: '💥', what: 'Build a silly sentence', tone: '#2FB5B5', section: 'reading' },
+  { path: 'same-sound', name: 'Same Sound, Two Ways', emoji: '🪞', what: 'Hear it, then spell it', tone: '#C77DBB', section: 'reading' },
+  { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A', section: 'reading' },
+  { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF', section: 'reading' },
+  { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E', section: 'reading' },
+  { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A', section: 'reading' },
+  { path: 'be-the-commentator', name: 'Be the Commentator', emoji: '🎙️', what: 'Read it like you mean it', tone: '#D9534F', section: 'reading' },
+  { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5', section: 'reading' },
+  { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing' },
+  { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing' },
+  { path: 'flash-count', name: 'Flash Count', emoji: '⚡', what: 'Look quickly: how many?', tone: '#F08A4B', section: 'maths' },
+  { path: 'off-the-bench', name: 'Off the Bench', emoji: '🧤', what: 'How many more make 10?', tone: '#3FA07A', section: 'maths' },
+  { path: 'scoreboard-sums', name: 'Scoreboard Sums', emoji: '🏟️', what: 'Goals in, goals out', tone: '#5AA0DC', section: 'maths' },
+  { path: 'number-line-penalty', name: 'Number Line Penalty', emoji: '🥅', what: 'Kick it to the number', tone: '#A87FD1', section: 'maths' },
+  { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', section: 'maths' },
+  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', section: 'maths' },
+  { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths' },
+  { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths' },
+  { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', section: 'maths' },
+  { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', section: 'maths' },
+  { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths' },
+  { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', section: 'maths' },
+  { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', section: 'maths' },
+  { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths' },
+  { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj' },
+  { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj' },
+];
+
+/* ── the coach's picks ────────────────────────────────────────────────── */
+
+export interface Pick { tile: Tile; why: string }
+
+/** a number for today, the same all day, so the picks do not reshuffle every
+    time he comes back to the home screen */
+function today(): number {
+  const d = new Date();
+  return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
+}
+
+const nth = <T>(list: T[], seed: number): T => list[((seed % list.length) + list.length) % list.length];
+
+/**
+ * Three games for today, so 32 tiles are not a wall to choose from: a reading
+ * game (aimed at the sounds that need practice, which the coach steers the
+ * words towards), a maths or jiu-jitsu game he has not finished a round of
+ * yet — or has not played for longest — and something different, a
+ * handwriting game. Only what the app already keeps is used: the coach's
+ * notes and the sticker book.
+ */
+export function coachPicks(seed = today()): Pick[] {
+  const of = (section: Section): Tile[] => TILES.filter((t) => t.section === section);
+  const labels = (ids: string[]): string => ids.map((id) => { try { return sound(id).label; } catch { return id; } }).join(', ');
+
+  const weak = weakSounds();
+  const reading: Pick = {
+    tile: nth(of('reading'), seed),
+    why: weak.length ? `Practise ${labels(weak.slice(0, 3))}` : "This week's sounds",
+  };
+
+  /* a maths game's sticker carries the game's own id, so it says when he
+     last finished a round of it */
+  const lastWon = new Map<string, number>();
+  for (const s of stickers()) lastWon.set(s.sound, Math.max(lastWon.get(s.sound) ?? 0, s.at));
+  const numbers = [...of('maths'), ...of('bjj')];
+  const fresh = numbers.filter((t) => !lastWon.has(t.path));
+  const maths: Pick = fresh.length
+    ? { tile: nth(fresh, seed * 7 + 3), why: 'Not tried yet' }
+    : { tile: [...numbers].sort((a, b) => (lastWon.get(a.path) ?? 0) - (lastWon.get(b.path) ?? 0))[0], why: 'Not played for a while' };
+
+  const writing: Pick = { tile: nth(of('writing'), seed * 3 + 1), why: 'Something different' };
+  return [reading, maths, writing];
+}
+
+/* ── hold to open ─────────────────────────────────────────────────────── */
+
+const HOLD_MS = 3000;
+
+/** a button that only works when held down for three seconds, with a bar
+    that fills while it is held; a tap just says what to do */
+function holdButton(label: string, onDone: () => void): { node: HTMLButtonElement; stop: () => void } {
+  let timer = 0;
+  const hint = el('span', { class: 'hold-hint', text: 'Hold for 3 seconds' });
+  const node = el('button', { class: 'hold-btn', type: 'button', vars: { '--hold': `${HOLD_MS}ms` } },
+    el('span', { class: 'hold-fill', 'aria-hidden': 'true' }), el('span', { class: 'hold-label', text: label }), hint);
+  const stop = (): void => {
+    window.clearTimeout(timer);
+    timer = 0;
+    node.classList.remove('holding');
+  };
+  const start = (): void => {
+    if (timer) return;
+    node.classList.add('holding');
+    hint.textContent = 'Keep holding…';
+    timer = window.setTimeout(() => { stop(); onDone(); }, HOLD_MS);
+  };
+  const letGo = (): void => {
+    if (timer) hint.textContent = 'Hold for 3 seconds';
+    stop();
+  };
+  node.addEventListener('pointerdown', (e) => { e.preventDefault(); start(); });
+  for (const type of ['pointerup', 'pointerleave', 'pointercancel']) node.addEventListener(type, letGo);
+  node.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); start(); } });
+  node.addEventListener('keyup', letGo);
+  /* iOS opens its callout menu on a long press; the page must not */
+  node.addEventListener('contextmenu', (e) => e.preventDefault());
+  return { node, stop };
+}
+
 export function mount(root: HTMLElement): () => void {
-  const tiles = el('div', { class: 'tiles' });
-  const mathsTiles = el('div', { class: 'tiles' });
-  for (const tile of TILES) {
-    (tile.maths ? mathsTiles : tiles).append(el('a', {
-      class: 'tile-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
+  const tileLink = (tile: Tile): HTMLElement => el('a', {
+    class: 'tile-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
+    dataset: { game: tile.path },
+    on: { click: () => sfx.tap() },
+  },
+    el('span', { class: 'emoji', text: tile.emoji, 'aria-hidden': 'true' }),
+    el('span', { class: 'name', text: tile.name }),
+    el('span', { class: 'what', text: tile.what }),
+  );
+
+  const sections = SECTIONS.flatMap((section) => [
+    el('h2', { class: 'tiles-head', text: section.title }),
+    el('div', { class: 'tiles', dataset: { section: section.id } },
+      ...TILES.filter((t) => t.section === section.id).map(tileLink)),
+  ]);
+
+  /* ── today's picks ──────────────────────────────────────────────────── */
+
+  const picks = el('div', { class: 'picks' },
+    ...coachPicks().map(({ tile, why }) => el('a', {
+      class: 'pick-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
       dataset: { game: tile.path },
       on: { click: () => sfx.tap() },
     },
       el('span', { class: 'emoji', text: tile.emoji, 'aria-hidden': 'true' }),
       el('span', { class: 'name', text: tile.name }),
-      el('span', { class: 'what', text: tile.what }),
-    ));
-  }
+      el('span', { class: 'why', text: why }),
+    )));
 
-  /* ── this week's sounds ─────────────────────────────────────────────── */
-
-  const summary = el('p', { class: 'now' });
-  const levelRow = el('div', { class: 'row' });
-  const soundRow = el('div', { class: 'row' });
-  const toggleRow = el('div', { class: 'row' });
-
-  const inLevels = (): Sound[] => {
-    const levels = settings().levels;
-    return levels.length ? PRACTICE_SOUNDS.filter((s) => levels.includes(s.level)) : PRACTICE_SOUNDS;
-  };
-
-  function describe(): string {
-    const { levels, sounds } = settings();
-    const levelText = levels.length ? `Level ${levels.join(', ')}` : 'All levels';
-    if (!sounds.length) return `${levelText} — every sound`;
-    const labels = sounds.map((id) => { try { return sound(id).label; } catch { return id; } });
-    const shown = labels.slice(0, 6).join(', ');
-    return `${levelText} — ${shown}${labels.length > 6 ? ` and ${labels.length - 6} more` : ''}`;
-  }
-
-  function draw(): void {
-    summary.textContent = describe();
-
-    levelRow.replaceChildren(el('span', { class: 'lbl', text: 'Levels' }));
-    levelRow.append(chip('All', settings().levels.length === 0, () => {
-      updateSettings({ levels: [], sounds: [] });
-      draw();
-    }));
-    for (const lv of LEVELS) {
-      levelRow.append(chip(String(lv.n), settings().levels.includes(lv.n), () => {
-        const levels = settings().levels;
-        const next = (levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort()) as Level[];
-        const stillThere = next.length ? PRACTICE_SOUNDS.filter((s) => next.includes(s.level)) : PRACTICE_SOUNDS;
-        updateSettings({
-          levels: next,
-          sounds: settings().sounds.filter((id) => stillThere.some((s) => s.id === id)),
-        });
-        draw();
-      }, undefined, lv.blurb.split(' ').slice(0, 3).join(' ')));
-    }
-
-    const pool = inLevels();
-    soundRow.replaceChildren(el('span', { class: 'lbl', text: 'Sounds' }));
-    soundRow.append(chip('All', settings().sounds.length === 0, () => {
-      updateSettings({ sounds: [] });
-      draw();
-    }));
-    const merge = settings().mergeTh;
-    let shownTh = false;
-    for (const s of pool) {
-      if (merge && s.group === 'th') {
-        if (shownTh) continue;
-        shownTh = true;
-        const on = settings().sounds.includes('th-voiced') || settings().sounds.includes('th-unvoiced');
-        soundRow.append(chip('th', on, () => {
-          const without = settings().sounds.filter((id) => id !== 'th-voiced' && id !== 'th-unvoiced');
-          updateSettings({ sounds: on ? without : [...without, 'th-voiced', 'th-unvoiced'] });
-          draw();
-        }, s.tones.light));
-        continue;
-      }
-      soundRow.append(chip(s.label, settings().sounds.includes(s.id), () => {
-        const list = settings().sounds;
-        updateSettings({ sounds: list.includes(s.id) ? list.filter((x) => x !== s.id) : [...list, s.id] });
-        draw();
-      }, s.tones.light));
-    }
-
-    toggleRow.replaceChildren(el('span', { class: 'lbl', text: 'Options' }));
-    toggleRow.append(
-      chip('Merge the two th sounds', settings().mergeTh, () => {
-        updateSettings({ mergeTh: !settings().mergeTh });
-        draw();
-      }),
-      chip(settings().speech ? '🔊 Words spoken' : '🔇 Words silent', settings().speech, () => {
-        updateSettings({ speech: !settings().speech });
-        draw();
-      }),
-      chip(settings().sfx ? '🎵 Game sounds' : '🔕 No game sounds', settings().sfx, () => {
-        updateSettings({ sfx: !settings().sfx });
-        draw();
-      }),
-    );
-
-    coachRow.replaceChildren(el('span', { class: 'lbl', text: 'Challenge' }));
-    coachRow.append(
-      chip('🏆 Pro mode', settings().pro, () => {
-        updateSettings({ pro: !settings().pro });
-        draw();
-      }, undefined, 'harder games'),
-      chip('🧑‍🏫 Coach', settings().coach, () => {
-        updateSettings({ coach: !settings().coach });
-        draw();
-      }, undefined, 'picks words and levels'),
-    );
-    drawReport();
-  }
-
-  /* ── the coach's notes, for the parent ──────────────────────────────── */
-
-  const coachRow = el('div', { class: 'row' });
-  const reportEl = el('p', { class: 'tag coach-report' });
-
-  const labelOf = (id: string): string => { try { return sound(id).label; } catch { return id; } };
-  function drawReport(): void {
-    const good = strongSounds().map(labelOf);
-    const hard = weakSounds().map(labelOf);
-    if (!good.length && !hard.length) {
-      reportEl.textContent = 'The coach is still watching. After a few games it will say which sounds are going well and which need practice.';
-      return;
-    }
-    reportEl.replaceChildren(
-      good.length ? el('span', {}, el('b', { text: 'Going well: ' }), good.join(', '), '. ') : '',
-      hard.length ? el('span', {}, el('b', { text: 'Needs practice: ' }), hard.join(', '), '.') : '',
-    );
-  }
+  /* a small piece of fun: one sound gets to be today's, and says hello */
+  const levels = settings().levels;
+  const pool: Sound[] = levels.length ? PRACTICE_SOUNDS.filter((s) => levels.includes(s.level)) : PRACTICE_SOUNDS;
+  const star = pool.length ? pick(pool) : PRACTICE_SOUNDS[0];
+  const starBtn = el('button', {
+    class: 'btn', type: 'button',
+    vars: { '--mustard': star.tones.light, '--mustard-dark': star.tones.deep },
+  }, `Today's sound: ${star.label} · ${star.asIn}`);
+  starBtn.addEventListener('click', () => {
+    say(star.asIn);
+    sfx.right();
+    confetti(14);
+  });
 
   /* when the coach has moved the week up, say so where the parent will see
      it first, and make it one tap to put back */
@@ -196,7 +199,7 @@ export function mount(root: HTMLElement): () => void {
       el('p', {}, `🎉 Level ${top} mastered! The coach has moved this week up to levels ${m.to.join(' and ')}.`),
       el('div', { class: 'row' },
         el('button', { class: 'btn small', type: 'button', text: 'Great, keep it', on: { click: () => { closeMove(); drawMove(); } } }),
-        el('button', { class: 'btn ghost small', type: 'button', text: 'Undo', on: { click: () => { undoMove(); drawMove(); draw(); } } }),
+        el('button', { class: 'btn ghost small', type: 'button', text: 'Undo', on: { click: () => { undoMove(); drawMove(); } } }),
       ),
     );
   }
@@ -204,93 +207,19 @@ export function mount(root: HTMLElement): () => void {
 
   /* the sticker book: the one thing that joins the games together */
   const book = el('div', { class: 'sticker-book' });
-  function drawBook(): void {
-    const earned = stickers();
-    if (!earned.length) {
-      book.replaceChildren(el('span', { class: 'empty', text: 'Finish a round in any game to win your first sticker.' }));
-      return;
-    }
-    book.replaceChildren();
-    /* newest last, so the one just won lands at the end */
-    for (const sticker of earned.slice(-24)) {
-      let label = sticker.sound;
-      try { label = sound(sticker.sound).label; } catch { /* a removed sound */ }
-      book.append(el('span', { class: 'sticker', text: sticker.face, title: label, 'aria-label': `${label} sticker` }));
-    }
+  const earned = stickers();
+  if (!earned.length) {
+    book.append(el('span', { class: 'empty', text: 'Finish a round in any game to win your first sticker.' }));
   }
-  drawBook();
-
-  const bookTray = el('div', { class: 'tray' },
-    el('h2', {}, 'Your stickers'),
-    book,
-    el('div', { class: 'row', style: { marginTop: '10px' } },
-      confirmButton('Start a new sticker book', 'Tap again to clear every sticker', () => { clearStickers(); drawBook(); })),
-  );
-
-  /* ── which voice reads the words ────────────────────────────────────── */
-
-  const voiceRow = el('div', { class: 'row' });
-
-  function drawVoices(): void {
-    const voices = englishVoices();
-    voiceRow.replaceChildren(el('span', { class: 'lbl', text: 'Reading voice' }));
-    if (!voices.length) {
-      voiceRow.append(el('span', { class: 'tag', text: 'This device has no English voice installed, so words are shown but not spoken.' }));
-      return;
-    }
-
-    const select = el('select', { 'aria-label': 'Which voice reads the words' },
-      el('option', { value: '', text: 'Best available (' + describeVoice(voices[0]) + ')' }),
-      ...voices.map((v) => el('option', {
-        value: v.voiceURI,
-        text: describeVoice(v),
-        selected: settings().voiceURI === v.voiceURI ? 'selected' : undefined,
-      })),
-    );
-    select.addEventListener('change', () => {
-      updateSettings({ voiceURI: select.value || null });
-      say('rain, sheep, quick');
-    });
-
-    voiceRow.append(select, el('button', {
-      class: 'btn ghost small', type: 'button', text: '🔊 Try it',
-      on: { click: () => say('rain, sheep, quick') },
-    }));
-
-    /* We used to send the parent to Settings to download a better voice.
-       An iPad with three Karens installed offers this page exactly one, the
-       super-compact build, so that errand does not work — it just costs
-       several hundred megabytes. Say what is true instead. */
-    if (onlyCompactVoices()) {
-      voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
-        text: 'These are the only voices Safari offers a web page. Downloading better ones in Settings does not change this list, so the words a child reads are recorded in advance instead.' }));
-    }
+  /* newest last, so the one just won lands at the end */
+  for (const sticker of earned.slice(-24)) {
+    let label = sticker.sound;
+    try { label = sound(sticker.sound).label; } catch { /* a removed sound, or a maths game */ }
+    book.append(el('span', { class: 'sticker', text: sticker.face, title: label, 'aria-label': `${label} sticker` }));
   }
+  const bookTray = el('div', { class: 'tray' }, el('h2', {}, 'Your stickers'), book);
 
-  drawVoices();
-  /* Voices arrive asynchronously everywhere, and on iOS the downloaded ones
-     only appear once the first tap has unlocked speech — so this redraws
-     whenever the list actually grows, not just at load. */
-  const stopWatchingVoices = onVoicesChanged(drawVoices);
-
-  const week = el('div', { class: 'week' },
-    el('h2', { text: "This week's sounds" }),
-    summary,
-    levelRow, soundRow, toggleRow, coachRow, reportEl, voiceRow,
-  );
-
-  /* a small piece of fun: one sound gets to be today's, and says hello */
-  const pool = inLevels();
-  const star = pool.length ? pick(pool) : PRACTICE_SOUNDS[0];
-  const starBtn = el('button', {
-    class: 'btn', type: 'button',
-    vars: { '--mustard': star.tones.light, '--mustard-dark': star.tones.deep },
-  }, `Today's sound: ${star.label} · ${star.asIn}`);
-  starBtn.addEventListener('click', () => {
-    say(star.asIn);
-    sfx.right();
-    confetti(14);
-  });
+  const grownUps = holdButton('⚙ Grown-ups', () => { sfx.tap(); go('grown-ups'); });
 
   const node = el('div', { class: 'wrap wide' },
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } },
@@ -299,15 +228,13 @@ export function mount(root: HTMLElement): () => void {
     ),
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } }, starBtn),
     moveNote,
-    el('h2', { class: 'tiles-head', text: 'Reading, spelling and writing' }),
-    tiles,
-    el('h2', { class: 'tiles-head', text: 'Maths' }),
-    mathsTiles,
+    el('h2', { class: 'tiles-head', text: "Coach's picks for today" }),
+    picks,
+    ...sections,
     bookTray,
-    week,
+    el('div', { class: 'grown-ups-row' }, grownUps.node),
   );
 
-  draw();
   root.append(node);
-  return stopWatchingVoices;
+  return grownUps.stop;
 }

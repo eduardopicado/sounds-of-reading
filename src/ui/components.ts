@@ -188,26 +188,57 @@ export function createSetup(o: SetupOptions): Setup {
     }
   }
 
+  /* what is in play, in one line, with the chips folded away under it: most
+     days the week's sounds are right and only the game's own options matter */
+  const now = el('span', { class: 'setup-now' });
+  function drawNow(): void {
+    const same = levels.join() === settings().levels.join() && sounds.join() === settings().sounds.join();
+    const levelText = levels.length ? `Level ${levels.join(', ')}` : 'All levels';
+    const soundText = sounds.length
+      ? soundsInLevels().filter((s) => sounds.includes(s.id)).map((s) => s.label).join(', ')
+      : 'every sound';
+    now.textContent = `${same ? 'This week’s sounds' : 'Just for this game'}: ${levelText}, ${soundText}`;
+  }
+  const redraw = (): void => { drawLevels(); drawSounds(); drawNow(); };
+  /* the chips redraw their own rows; the line above them follows */
+  levelRow.addEventListener('click', drawNow);
+  soundRow.addEventListener('click', drawNow);
+
   drawLevels();
   drawSounds();
+  drawNow();
 
-  const panel = el('div', { class: 'panel', hidden: 'hidden' }, levelRow, soundRow, ...(o.extra ?? []));
-  panel.append(el('div', { class: 'row' },
-    el('button', {
-      class: 'btn ghost small', type: 'button', text: 'Use this week’s sounds',
-      on: {
-        click: () => {
-          levels = [...settings().levels];
-          sounds = [...settings().sounds];
-          drawLevels(); drawSounds(); o.onChange();
+  const pickers = el('div', { class: 'setup-sounds', hidden: 'hidden' }, levelRow, soundRow,
+    el('div', { class: 'row' },
+      el('button', {
+        class: 'btn ghost small', type: 'button', text: 'Use this week’s sounds',
+        on: {
+          click: () => {
+            levels = [...settings().levels];
+            sounds = [...settings().sounds];
+            redraw(); o.onChange();
+          },
         },
+      }),
+      el('button', {
+        class: 'btn ghost small', type: 'button', text: 'Make this the week’s sounds',
+        on: { click: () => { updateSettings({ levels: [...levels], sounds: [...sounds] }); drawNow(); } },
+      }),
+    ));
+  const toggle = el('button', {
+    class: 'btn ghost small', type: 'button', text: 'Change', 'aria-expanded': 'false',
+    on: {
+      click: () => {
+        pickers.hidden = !pickers.hidden;
+        toggle.setAttribute('aria-expanded', String(!pickers.hidden));
+        toggle.textContent = pickers.hidden ? 'Change' : 'Done';
       },
-    }),
-    el('button', {
-      class: 'btn ghost small', type: 'button', text: 'Make this the week’s sounds',
-      on: { click: () => updateSettings({ levels: [...levels], sounds: [...sounds] }) },
-    }),
-  ));
+    },
+  });
+
+  const panel = el('div', { class: 'panel', hidden: 'hidden' }, ...(o.extra ?? []),
+    el('div', { class: 'row setup-sounds-row' }, el('span', { class: 'lbl', text: 'Sounds' }), now, toggle),
+    pickers);
 
   return {
     node: panel,
