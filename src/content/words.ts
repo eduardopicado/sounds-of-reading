@@ -640,6 +640,37 @@ export const COMMENTARY: string[] = [
   'The ball is in the net! @8',
 ];
 
+/*  Coach Says — read an instruction, then do it.
+ *
+ *  The first game that checks he understood a sentence, not only that he
+ *  could say it: "Put the frog in the box." Every thing and place is a real
+ *  word from the lists above, drawn with that word's own picture and offered
+ *  only once he can read it. The pictures carry no words, so the only way to
+ *  know which to tap is to read the coach's instruction.
+ *
+ *  The instructions follow the commentary's rule: every word in them he can
+ *  read at their @level, and the content test checks it. {a}, {b} and {c} are
+ *  the things, {in} is in or on, as each place says.  */
+export const COACH_THINGS: string =
+  'dog | duck | pig | cat | cup | cap | sock | egg | bat | crab | hat | hen | fox | frog | gift | drum | bell | ' +
+  'fish | chick | squid | shell | king | sheep | snail | bee | goat | cow | owl | mouse | shark | ' +
+  'whale | snake | kite | bike | cake | tiger | zebra | spider | bear | deer';
+
+export const COACH_PLACES: string =
+  'in box | in bag | in bin | in net | in nest | on bed | on log | in van | in truck | on ship | ' +
+  'in hut | in bath | on bench | in boat | in tree | in house | in car';
+
+export const COACH_SAYS: Record<string, string> = {
+  tap: 'Tap the {a}. @1',
+  both: 'Tap the {a} and the {b}. @1',
+  big: 'Tap the big {a}. @2',
+  put: 'Put the {a} {in} the {b}. @3',
+  then: 'Tap the {a}, then tap the {b}. @3',
+  notBig: 'Tap the {a} that is not big. @2',
+  putBoth: 'Put the {a} and the {b} {in} the {c}. @3',
+  putThen: 'Put the {a} {in} the {b}, then tap the {c}. @3',
+};
+
 /*  Words that sound exactly like another word in these lists, said with an
  *  Australian accent. A game that says a word and asks him to find it written
  *  can never offer both halves of a pair: "pair" called, with pair and pear

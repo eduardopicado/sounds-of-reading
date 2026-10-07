@@ -10,7 +10,7 @@ test.describe('home screen', () => {
     expect(names).toEqual([
       'Memory Match', 'Bingo', 'Sound Sort', 'Word Builder',
       'Roll & Read', 'Real or Silly?', 'Sentence Smash', 'Same Sound, Two Ways',
-      'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator', 'Build the Word',
+      'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator', 'Build the Word', 'Coach Says',
       'Trace It', 'Tall, Small, Tail',
       'Flash Count', 'Off the Bench', 'Scoreboard Sums', 'Number Line Penalty',
       'Team Buses',
@@ -27,7 +27,7 @@ test.describe('home screen', () => {
       'Match Maths',
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'refs-call', 'match-maths']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'coach-says', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'refs-call', 'match-maths']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
@@ -192,7 +192,7 @@ test.describe('the grown-ups corner', () => {
     await expect(rows).toHaveCount(2);
     await expect(rows.first()).toHaveAttribute('data-game', 'team-buses');
     await expect(rows.first().locator('.mp-step')).toContainText('step 3 of');
-    await expect(page.locator('.maths-progress')).toContainText('Not tried yet: Flash Count');
+    await expect(page.locator('.maths-progress')).toContainText('Not tried yet: Coach Says, Flash Count');
   });
 
   test('every maths and jiu-jitsu game has its ladder in the progress card', async ({ page }) => {

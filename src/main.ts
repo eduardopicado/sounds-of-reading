@@ -38,6 +38,7 @@ import * as kitShapes from './games/kit-shapes';
 import * as coachWhiteboard from './games/coach-whiteboard';
 import * as refsCall from './games/refs-call';
 import * as matchMaths from './games/match-maths';
+import * as coachSays from './games/coach-says';
 import * as grownUps from './games/grown-ups';
 import * as voices from './games/voices';
 
@@ -57,6 +58,7 @@ const routes: Route[] = [
   { path: 'pass-and-shoot', mount: passAndShoot.mount },
   { path: 'be-the-commentator', mount: beTheCommentator.mount },
   { path: 'build-the-word', mount: buildTheWord.mount },
+  { path: 'coach-says', mount: coachSays.mount },
   { path: 'trace-it', mount: traceIt.mount },
   { path: 'tall-small-tail', mount: tallSmallTail.mount },
   { path: 'off-the-bench', mount: offTheBench.mount },
