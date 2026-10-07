@@ -230,3 +230,126 @@ export function missingOptions(answer: Move): Move[] {
   const others = [2, 3, 4].filter((p) => p !== answer.points).map((p) => pick(MOVES.filter((m) => m.points === p)));
   return shuffle([answer, ...others]);
 }
+
+/* ── Weigh-In: heavier and lighter, then kilograms ────────────────────── */
+
+/* Before a competition every fighter is weighed, and fights others in the
+ * same weight class. Kindergarten and Year 1 compare on a balance: the side
+ * that goes down is heavier. Then they measure with blocks, the informal unit
+ * the syllabus starts with. Year 2 reads kilograms off the scale, finds his
+ * weight class, and adds or takes away the gi, since he is weighed in it.
+ *
+ * The classes have their Portuguese names in English too, as on the mat at a
+ * competition: Galo (rooster) for the lightest, up through Pluma, Pena, Leve
+ * and Médio. The kilogram limits are a made-up tournament's, in the range of
+ * a young child's; real tables change with age, and this is about reading
+ * them, not about any one competition. */
+
+export interface WeighThing {
+  id: string;
+  picture: string;
+  name: Both;
+  /** heavier things have bigger numbers; only the order matters */
+  heft: number;
+}
+
+export const WEIGH_THINGS: WeighThing[] = [
+  { id: 'feather', picture: '🪶', name: { en: 'feather', pt: 'pena' }, heft: 1 },
+  { id: 'medal', picture: '🥇', name: { en: 'medal', pt: 'medalha' }, heft: 2 },
+  { id: 'banana', picture: '🍌', name: { en: 'banana', pt: 'banana' }, heft: 3 },
+  { id: 'shoe', picture: '👟', name: { en: 'shoe', pt: 'tênis' }, heft: 4 },
+  { id: 'gi', picture: '🥋', name: { en: 'gi', pt: 'quimono' }, heft: 5 },
+  { id: 'ball', picture: '⚽', name: { en: 'ball', pt: 'bola' }, heft: 6 },
+  { id: 'trophy', picture: '🏆', name: { en: 'trophy', pt: 'troféu' }, heft: 7 },
+  { id: 'backpack', picture: '🎒', name: { en: 'backpack', pt: 'mochila' }, heft: 8 },
+  { id: 'watermelon', picture: '🍉', name: { en: 'watermelon', pt: 'melancia' }, heft: 9 },
+  { id: 'rock', picture: '🪨', name: { en: 'rock', pt: 'pedra' }, heft: 10 },
+];
+
+export interface WeightClass { name: string; upTo: number }
+
+/** the classes of a made-up kids' tournament, lightest first; each goes up to
+    and including its limit */
+export const WEIGHT_CLASSES: WeightClass[] = [
+  { name: 'Galo', upTo: 20 },
+  { name: 'Pluma', upTo: 23 },
+  { name: 'Pena', upTo: 26 },
+  { name: 'Leve', upTo: 29 },
+  { name: 'Médio', upTo: 32 },
+];
+
+export const classFor = (kg: number): WeightClass | undefined => WEIGHT_CLASSES.find((c) => kg <= c.upTo);
+
+/** what the gi weighs, in kilograms, at every weigh-in here */
+export const GI_KG = 2;
+
+export interface WeighStep extends Step {
+  /**
+   * heavier / lighter: which side of the balance;
+   * mixed: either, so the question word has to be read;
+   * blocks: how many blocks balance it;
+   * scale: read the kilograms off the scale;
+   * class: which weight class;
+   * gi: on the scale with the gi, or without it
+   */
+  task: 'heavier' | 'mixed' | 'blocks' | 'scale' | 'class' | 'gi';
+}
+
+export const WEIGH_STEPS: WeighStep[] = [
+  { name: 'Which is heavier?', task: 'heavier' },
+  { name: 'Heavier or lighter?', task: 'mixed' },
+  { name: 'How many blocks?', task: 'blocks' },
+  /* Year 2: kilograms */
+  { name: 'Read the scale', task: 'scale' },
+  { name: 'Which weight class?', task: 'class' },
+  { name: 'With the gi on', task: 'gi' },
+];
+
+export interface WeighQuestion {
+  task: WeighStep['task'];
+  /** the two on the balance, left then right */
+  left?: WeighThing;
+  right?: WeighThing;
+  /** for heavier and lighter: which is asked for */
+  ask?: 'heavier' | 'lighter';
+  /** for blocks: what is weighed */
+  thing?: WeighThing;
+  /** Blue's weight without his gi */
+  kg?: number;
+  /** for gi: does the scale show it with the gi on, and he works out without, or the other way */
+  giOn?: boolean;
+  /** a thing's id, a number, or a class name */
+  answer: string | number;
+  options: (string | number)[];
+}
+
+export function weighQuestion(step: WeighStep, last?: WeighQuestion): WeighQuestion {
+  for (;;) {
+    let q: WeighQuestion;
+    if (step.task === 'heavier' || step.task === 'mixed') {
+      const [left, right] = shuffle(WEIGH_THINGS).slice(0, 2);
+      const ask = step.task === 'heavier' ? 'heavier' : pick(['heavier', 'lighter'] as const);
+      const heavy = left.heft > right.heft ? left : right;
+      const light = heavy === left ? right : left;
+      q = { task: step.task, left, right, ask, answer: (ask === 'heavier' ? heavy : light).id, options: [left.id, right.id] };
+    } else if (step.task === 'blocks') {
+      const thing = pick(WEIGH_THINGS.filter((t) => t.heft >= 2));
+      /* one block for each step of heft, so heavier things take more */
+      q = { task: 'blocks', thing, answer: thing.heft, options: choices(thing.heft, 1, 12) };
+    } else if (step.task === 'scale') {
+      const kg = rand(16, 34);
+      q = { task: 'scale', kg, answer: kg, options: choices(kg, 15, 35) };
+    } else if (step.task === 'class') {
+      const kg = rand(17, 32);
+      q = { task: 'class', kg, answer: classFor(kg)!.name, options: WEIGHT_CLASSES.map((c) => c.name) };
+    } else {
+      const kg = rand(17, 30);
+      const giOn = pick([true, false]);
+      /* with the gi on the scale shows more; he works out the other one */
+      const answer = giOn ? kg : kg + GI_KG;
+      q = { task: 'gi', kg, giOn, answer, options: choices(answer, 15, 35) };
+    }
+    if (last && last.answer === q.answer && last.left === q.left) continue;
+    return q;
+  }
+}

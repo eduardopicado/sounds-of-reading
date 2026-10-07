@@ -54,7 +54,8 @@ src/content/coach-says.ts Coach Says: the things, places and instructions from
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
                        Year 2 steps sit at the top of each game's ladder)
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
-                       games ask, every word in English and Portuguese
+                       games ask (Weigh-In's things and weight classes too),
+                       every word in English and Portuguese
 src/lib/               speech, sound effects, storage, settings, colour, router,
                        strokes.ts (judging a traced stroke), life.ts (a game's timers)
 src/ui/components.ts   header, setup panel, chips, win overlay

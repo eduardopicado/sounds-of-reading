@@ -15,7 +15,7 @@ import {
   BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS,
   JUMP_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, type Step,
 } from '../content/maths';
-import { MATCH_STEPS, REF_STEPS } from '../content/bjj';
+import { MATCH_STEPS, REF_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
@@ -43,6 +43,7 @@ export const LADDERS: Record<string, readonly Step[]> = {
   'coach-whiteboard': BOARD_STEPS,
   'refs-call': REF_STEPS,
   'match-maths': MATCH_STEPS,
+  'weigh-in': WEIGH_STEPS,
 };
 
 const card = (title: string, cls: string, ...children: (Node | null)[]): HTMLElement =>
