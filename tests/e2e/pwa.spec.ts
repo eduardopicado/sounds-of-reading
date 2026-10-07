@@ -162,13 +162,13 @@ test.describe('speech', () => {
       });
     });
 
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     const picker = page.getByLabel('Which voice reads the words');
     /* before any tap only the preinstalled voice is on offer */
     await expect(picker.locator('option')).toHaveCount(2);
 
     /* the first tap unlocks speech, and the list has to be read again */
-    await page.locator('.tile-link').first().click();
+    await page.getByRole('button', { name: 'Back to the games' }).click();
     await page.goBack();
     await expect(picker.locator('option')).toHaveCount(3, { timeout: 10_000 });
     const options = await picker.locator('option').allTextContents();
@@ -193,7 +193,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     /* "Best available" plus Karen plus one Samantha */
     expect(options).toHaveLength(3);
@@ -272,7 +272,7 @@ test.describe('speech', () => {
     await page.goto('/#/voices');
     await expect(page.locator('.wrap')).toContainText('read as: super-compact');
 
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     const samanthas = options.filter((o) => o.includes('Samantha'));
     /* both survive, and the parent can tell which is which */
@@ -323,12 +323,12 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     /* An iPad with three Karens installed still offers this page one, so the
        hint must not read as an errand: no path to follow, no promise. It may
        still name Settings, to say that going there will not help. */
-    await expect(page.locator('.week')).not.toContainText('Spoken Content');
-    await expect(page.locator('.week')).toContainText('does not change this list');
+    await expect(page.locator('.sound')).not.toContainText('Spoken Content');
+    await expect(page.locator('.sound')).toContainText('does not change this list');
   });
 
   test('each diagnostics row speaks in its own voice', async ({ page }) => {
@@ -417,9 +417,9 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     /* an Eloquence voice in the list must not be mistaken for "already better" */
-    await expect(page.locator('.week .tag', { hasText: 'does not change this list' })).toBeVisible();
+    await expect(page.locator('.sound .tag', { hasText: 'does not change this list' })).toBeVisible();
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     expect(options.join(' | ')).toContain('Karen (en-AU) — standard');
     expect(options.join(' | ')).toContain('Reed (en-AU) — retro, robotic');
@@ -441,12 +441,12 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/');
+    await page.goto('/#/grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     expect(options.join(' | ')).toContain('Karen (en-AU)');
     expect(options.join(' | ')).toContain('Daniel (en-GB)');
     /* nothing a web page does can install a voice, so it explains where to */
-    await expect(page.locator('.week .tag', { hasText: 'does not change this list' })).toBeVisible();
+    await expect(page.locator('.sound .tag', { hasText: 'does not change this list' })).toBeVisible();
   });
 
   test('survives a browser where touching speechSynthesis throws', async ({ page }) => {

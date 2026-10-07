@@ -57,7 +57,9 @@ src/lib/               speech, sound effects, storage, settings, colour, router,
                        strokes.ts (judging a traced stroke), life.ts (a game's timers)
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
-src/games/             one file per game, plus home.ts
+src/games/             one file per game, plus home.ts (tiles by section, the
+                       coach's picks) and grown-ups.ts (the settings, opened
+                       by holding a button on home for three seconds)
                        maths-kit.ts: the frame every maths game sits in (round,
                        levels, results, the Start screen); a maths game only
                        asks one question. A new maths game that needs a team
