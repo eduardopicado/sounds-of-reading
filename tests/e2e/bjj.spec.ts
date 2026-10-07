@@ -166,6 +166,18 @@ test.describe('Match Maths', () => {
     await expect(page.locator('.mx-note')).toContainText('Yes!');
   });
 
+  test('his belt is on Blue in every picture and beside his name on the scoreboard', async ({ page }) => {
+    await seed(page, { 'bjj-belt': 'green' });
+    await start(page, 'match-maths');
+    await expect(page.locator('.bj-step').first()).toBeVisible({ timeout: 10000 });
+    /* the belt is drawn on every Blue card, last, so nothing covers it */
+    for (const pic of await page.locator('.bj-step.blue .bj-pic').all()) {
+      await expect(pic.locator('polyline[stroke="#3A9A4E"]').first()).toBeAttached();
+    }
+    await expect(page.locator('.bj-score-row.blue .bj-belt rect[fill="#3A9A4E"]').first()).toBeAttached();
+    await expect(page.locator('.bj-score-row.white .bj-belt rect[fill="#F4F1EA"]').first()).toBeAttached();
+  });
+
   test('which move was it: any move worth those points', async ({ page }) => {
     await seed(page, { 'maths-step:match-maths': 4 });
     await start(page, 'match-maths');

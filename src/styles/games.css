@@ -1338,3 +1338,6 @@
 .bj-score-points { text-align: center; font-size: 30px; }
 .bj-score-extra { text-align: center; font-size: 18px; border-radius: 6px; background: rgba(0, 0, 0, .18); }
 .bj-score-head { text-align: center; }
+
+.bj-score-who { display: inline-flex; align-items: center; gap: 8px; }
+.bj-belt { width: 44px; height: auto; flex: none; }

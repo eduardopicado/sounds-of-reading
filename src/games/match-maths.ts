@@ -20,7 +20,7 @@ import {
   type Both, type Lang, type MatchQuestion, type MatchStep, type Move, type Side,
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
-import { movePicture, BELTS } from './bjj-art';
+import { beltBadge, movePicture, BELTS } from './bjj-art';
 import { beltSelect, blueGi, langSwitch, speak } from './bjj-kit';
 
 export function mount(root: HTMLElement): () => void {
@@ -94,7 +94,8 @@ function build(kit: Kit) {
   function board(q: MatchQuestion, points: { Blue: number | '?'; White: number | '?' }, extras = false): void {
     scoreboard.replaceChildren(...(['Blue', 'White'] as Side[]).map((s) =>
       el('div', { class: `bj-score-row ${s.toLowerCase()}`, dataset: { side: s } },
-        el('span', { class: 'bj-score-name' }),
+        /* his belt beside his name, the one he chose */
+        el('span', { class: 'bj-score-who' }, el('span', { class: 'bj-score-name' }), beltBadge(s === 'Blue' ? blueGi(belt).belt : BELTS.white)),
         el('span', { class: 'bj-score-points', text: String(points[s]) }),
         extras ? el('span', { class: 'bj-score-extra adv', text: String(q.advantages[s]) }) : '',
         extras ? el('span', { class: 'bj-score-extra pen', text: String(q.penalties[s]) }) : '')));
