@@ -13,7 +13,7 @@ import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say }
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import {
   BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS,
-  JUMP_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, type Step,
+  JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, type Step,
 } from '../content/maths';
 import { MATCH_STEPS, REF_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
@@ -41,6 +41,7 @@ export const LADDERS: Record<string, readonly Step[]> = {
   'fact-family': FACT_STEPS,
   'kit-shapes': SHAPE_STEPS,
   'coach-whiteboard': BOARD_STEPS,
+  'ice-cream-van': KIOSK_STEPS,
   'refs-call': REF_STEPS,
   'match-maths': MATCH_STEPS,
   'weigh-in': WEIGH_STEPS,

@@ -1453,3 +1453,28 @@
 .wi-classes th, .wi-classes td { padding: 6px 14px; border-bottom: 1px solid rgba(20, 49, 47, .2); text-align: left; }
 .wi-classes th { font-family: var(--display); }
 .wi-classes tr.right { background: rgba(121, 211, 176, .45); }
+
+/* ── Ice Cream Van ────────────────────────────────────────────────────── */
+
+.iv-counter { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 64px; }
+.iv-van { font-size: 52px; line-height: 1; }
+.iv-treat { font-size: 46px; line-height: 1; }
+.iv-tag {
+  font-family: var(--display); font-weight: 800; font-size: 26px; color: var(--ink);
+  background: var(--paper); padding: 6px 14px; border-radius: 10px; border: 3px dashed var(--mustard-dark);
+}
+.iv-stage { display: grid; justify-items: center; gap: 8px; width: 100%; }
+.iv-coins { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px; min-height: 60px; padding: 8px; }
+.iv-tray { min-width: 260px; border-radius: 16px; border: 3px dashed rgba(255, 246, 231, .4); }
+.iv-label { margin: 4px 0 0; font-family: var(--display); font-size: 13px; text-transform: uppercase; letter-spacing: 1.2px; color: var(--on-deep-soft); }
+.iv-total { margin: 0; font-family: var(--display); font-weight: 700; font-size: 18px; }
+.iv-pick { display: grid; place-items: center; min-width: 52px; min-height: 52px; padding: 2px; border-radius: 50%; background: none; border: 3px solid transparent; cursor: pointer; }
+.iv-pick:disabled { cursor: default; }
+.iv-pick.right { border-color: var(--mint); background: rgba(121, 211, 176, .3); }
+.iv-pick.wrong { border-color: var(--tomato); animation: shake .4s; }
+.iv-slot { position: relative; display: grid; place-items: center; }
+.counted .iv-slot::after {
+  content: attr(data-run); position: absolute; bottom: -18px; left: 50%; translate: -50% 0;
+  font-family: var(--display); font-weight: 800; font-size: 13px; color: var(--mustard);
+}
+.counted .iv-coins { padding-bottom: 24px; }
