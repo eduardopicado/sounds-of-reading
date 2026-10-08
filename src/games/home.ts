@@ -61,6 +61,7 @@ export const TILES: Tile[] = [
   { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths' },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj' },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj' },
+  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj' },
 ];
 
 /* ── the coach's picks ────────────────────────────────────────────────── */

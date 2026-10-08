@@ -1440,3 +1440,16 @@
 .cs-inside { position: absolute; right: 6px; bottom: 4px; display: flex; gap: 2px; font-size: 26px; }
 .cs-inside span { animation: pop .3s; }
 .cs-place.arrived { animation: bounce .4s; }
+
+/* ── Weigh-In ─────────────────────────────────────────────────────────── */
+
+.wi-card { display: grid; justify-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 10px; border-radius: 20px; background: var(--paper); color: var(--ink); }
+.wi-pic { width: 100%; max-width: 420px; height: auto; }
+.wi-block.counted { fill: var(--mint); }
+.wi-scale { width: 100%; max-width: 440px; height: auto; }
+.wi-on-scale { font-size: 44px; line-height: 1; }
+.wi-kg { margin: 0; font-family: var(--display); font-weight: 800; font-size: 24px; }
+.wi-classes { border-collapse: collapse; font-size: 18px; min-width: 240px; }
+.wi-classes th, .wi-classes td { padding: 6px 14px; border-bottom: 1px solid rgba(20, 49, 47, .2); text-align: left; }
+.wi-classes th { font-family: var(--display); }
+.wi-classes tr.right { background: rgba(121, 211, 176, .45); }
