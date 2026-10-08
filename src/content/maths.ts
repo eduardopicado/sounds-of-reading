@@ -11,6 +11,8 @@
  *                        0–1000 (Year 2)
  *   Flash Count          seeing how many at a glance (subitising), then rows
  *                        and columns, the start of multiplying (Year 2)
+ *   Ice Cream Van        Australian coins: worth more, paying, counting, then
+ *                        mixed coins, the exact price and change (Year 2)
  *
  * The Year 2 steps sit at the top of each ladder, so he only meets them by
  * climbing there — or a grown-up starts him there in setup.
@@ -1010,3 +1012,161 @@ export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuest
 
 /** a move as it is said: "2 squares up" */
 export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : 'squares'} ${m.dir}`;
+
+/* ── Ice Cream Van: Australian coins ─────────────────────────────────── */
+
+/* Money with the coins in his pocket. Kindergarten and Year 1 compare coins
+ * (the $2 is smaller than the 5c and worth forty of them — size is not
+ * value), pay with one coin, and count a handful of the same coin. Year 2
+ * counts mixed coins, picks coins that make a price exactly, and works out
+ * the change.
+ *
+ * Everything is in cents so there is no rounding; money() writes it the way
+ * a price tag does: 50c, $2, $3.50. */
+
+export interface Coin {
+  cents: number;
+  /** diameter in millimetres, the real coin's, so sizes compare truly */
+  mm: number;
+  gold: boolean;
+  /** the 50c has twelve sides */
+  sides?: number;
+}
+
+export const COINS: Coin[] = [
+  { cents: 5, mm: 19.4, gold: false },
+  { cents: 10, mm: 23.6, gold: false },
+  { cents: 20, mm: 28.5, gold: false },
+  { cents: 50, mm: 31.5, gold: false, sides: 12 },
+  { cents: 100, mm: 25, gold: true },
+  { cents: 200, mm: 20.5, gold: true },
+];
+
+export const coinOf = (cents: number): Coin => COINS.find((c) => c.cents === cents)!;
+
+/** how a price tag writes it */
+export const money = (cents: number): string =>
+  cents < 100 ? `${cents}c` : cents % 100 ? `$${Math.floor(cents / 100)}.${String(cents % 100).padStart(2, '0')}` : `$${cents / 100}`;
+
+/** how it is said */
+export const moneyWords = (cents: number): string => {
+  const d = Math.floor(cents / 100);
+  const c = cents % 100;
+  const dollars = d ? `${d} ${d === 1 ? 'dollar' : 'dollars'}` : '';
+  const pence = c ? `${c} cents` : '';
+  return [dollars, pence].filter(Boolean).join(' ') || '0 cents';
+};
+
+export interface Treat { id: string; picture: string; name: string }
+
+export const TREATS: Treat[] = [
+  { id: 'cone', picture: '🍦', name: 'a soft serve' },
+  { id: 'sundae', picture: '🍨', name: 'a sundae' },
+  { id: 'slushie', picture: '🍧', name: 'a slushie' },
+  { id: 'cookie', picture: '🍪', name: 'a cookie' },
+  { id: 'juice', picture: '🧃', name: 'a juice' },
+];
+
+export interface KioskStep extends Step {
+  /**
+   * more: which coin is worth more;
+   * one: which one coin pays the price exactly;
+   * count: how much is a handful of the same coin;
+   * mixed: how much is a handful of different coins;
+   * pay: tap coins that make the price exactly;
+   * change: pay with a note, how much change
+   */
+  task: 'more' | 'one' | 'count' | 'mixed' | 'pay' | 'change';
+}
+
+export const KIOSK_STEPS: KioskStep[] = [
+  { name: 'Which coin is worth more?', task: 'more' },
+  { name: 'Pay with one coin', task: 'one' },
+  { name: 'Count the coins', task: 'count' },
+  /* Year 2 */
+  { name: 'Count mixed coins', task: 'mixed' },
+  { name: 'Pay the exact price', task: 'pay' },
+  { name: 'How much change?', task: 'change' },
+];
+
+export interface KioskQuestion {
+  task: KioskStep['task'];
+  treat: Treat;
+  /** the price, in cents */
+  price: number;
+  /** the coins shown: to compare, to count, or in his purse to pay with */
+  coins: number[];
+  /** for change: the note he pays with, in cents */
+  paid?: number;
+  /** cents; for more, the coin worth more */
+  answer: number;
+  options: number[];
+}
+
+/** a handful of coins that adds up to `cents`, biggest first, using only
+    these coins */
+function makeUp(cents: number, from: number[]): number[] {
+  const out: number[] = [];
+  let left = cents;
+  for (const c of [...from].sort((a, b) => b - a)) {
+    while (left >= c) { out.push(c); left -= c; }
+  }
+  return left ? [] : out;
+}
+
+/** three wrong amounts beside the right one, each a slip a child makes */
+function moneyChoices(answer: number, step: number): number[] {
+  const out = new Set([answer]);
+  for (const d of shuffle([step, -step, 2 * step, -2 * step, 100, -100, 50, -50])) {
+    if (out.size >= 4) break;
+    if (answer + d > 0) out.add(answer + d);
+  }
+  return [...out].sort((a, b) => a - b);
+}
+
+export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuestion {
+  for (;;) {
+    const treat = pick(TREATS);
+    let q: KioskQuestion;
+    if (step.task === 'more') {
+      /* half the time the pair where the smaller coin is worth more */
+      const tricky = Math.random() < 0.5;
+      const pairs = COINS.flatMap((a) => COINS.filter((b) => b.cents > a.cents).map((b) => [a, b] as const))
+        .filter(([a, b]) => (b.mm < a.mm) === tricky);
+      const [a, b] = pick(pairs);
+      q = { task: 'more', treat, price: 0, coins: shuffle([a.cents, b.cents]), answer: b.cents, options: [] };
+    } else if (step.task === 'one') {
+      const price = pick(COINS).cents;
+      q = { task: 'one', treat, price, coins: shuffle(COINS.map((c) => c.cents)).slice(0, 4), answer: price, options: [] };
+      if (!q.coins.includes(price)) q.coins[0] = price;
+      q.coins = shuffle(q.coins);
+    } else if (step.task === 'count') {
+      const coin = pick([10, 20, 50, 100, 200]);
+      const n = rand(2, coin >= 100 ? 5 : 6);
+      const answer = coin * n;
+      q = { task: 'count', treat, price: answer, coins: Array(n).fill(coin), answer, options: moneyChoices(answer, coin) };
+    } else if (step.task === 'mixed') {
+      const coins = shuffle(COINS.map((c) => c.cents)).slice(0, rand(3, 4)).sort((a, b) => b - a);
+      if (Math.random() < 0.5) coins.splice(1, 0, coins[0]);
+      const answer = coins.reduce((s, c) => s + c, 0);
+      q = { task: 'mixed', treat, price: answer, coins, answer, options: moneyChoices(answer, pick([10, 50])) };
+    } else if (step.task === 'pay') {
+      /* a price in tens of cents up to $5, and a purse that can make it */
+      const price = rand(5, 50) * 10;
+      const exact = makeUp(price, [200, 100, 50, 20, 10]);
+      const extra = shuffle([200, 100, 50, 20, 10, 5]).slice(0, 2);
+      const coins = [...exact, ...extra].sort((a, b) => b - a);
+      q = { task: 'pay', treat, price, coins, answer: price, options: [] };
+    } else {
+      const paid = pick([500, 1000]);
+      const price = rand(paid === 500 ? 3 : 10, paid === 500 ? 9 : 19) * 50;
+      const answer = paid - price;
+      q = { task: 'change', treat, price, coins: [], paid, answer, options: moneyChoices(answer, 50) };
+    }
+    if (last && last.answer === q.answer && last.task === q.task) continue;
+    return q;
+  }
+}
+
+/** do these coins make the price exactly? */
+export const pays = (coins: number[], price: number): boolean => coins.reduce((s, c) => s + c, 0) === price;

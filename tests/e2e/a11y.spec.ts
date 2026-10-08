@@ -38,6 +38,7 @@ const PAGES = [
   ['Fact Family Formation', '/#/fact-family'],
   ['Kit and Ball Shapes', '/#/kit-shapes'],
   ["Coach's Whiteboard", '/#/coach-whiteboard'],
+  ['Ice Cream Van', '/#/ice-cream-van'],
   ["Ref's Call", '/#/refs-call'],
   ['Match Maths', '/#/match-maths'],
   ['Weigh-In', '/#/weigh-in'],
