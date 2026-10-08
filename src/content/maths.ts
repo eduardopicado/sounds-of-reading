@@ -654,13 +654,23 @@ export const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', '
 export const SEASONS = ['Summer', 'Autumn', 'Winter', 'Spring'];
 export const seasonOf = (month: number): string => SEASONS[Math.floor(((month + 1) % 12) / 3)];
 
-/** a time in words, the way it is said: "half past 3", "quarter to 4" */
+/** the hour as the clock face numbers it: 0 and 12 are both 12 */
+export const clockHour = (h: number): number => ((h % 12) + 12) % 12 || 12;
+
+/**
+ * A time in words, the way it is said in Australia: "3 o'clock", "quarter
+ * past 3", "25 past 3", "half past 3", "20 to 4", "quarter to 4". The hour
+ * can be given 0 to 23; 0 and 12 are both 12.
+ */
 export function timeWords(h: number, m: number): string {
-  const next = (h % 12) + 1;
-  if (m === 0) return `${h} o'clock`;
-  if (m === 15) return `quarter past ${h}`;
-  if (m === 30) return `half past ${h}`;
-  return `quarter to ${next}`;
+  const hour = clockHour(h);
+  const next = clockHour(h + 1);
+  if (m === 0) return `${hour} o'clock`;
+  if (m === 15) return `quarter past ${hour}`;
+  if (m === 30) return `half past ${hour}`;
+  if (m === 45) return `quarter to ${next}`;
+  if (m < 30) return `${m} past ${hour}`;
+  return `${60 - m} to ${next}`;
 }
 
 export interface ClockQuestion {
@@ -1170,3 +1180,112 @@ export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuest
 
 /** do these coins make the price exactly? */
 export const pays = (coins: number[], price: number): boolean => coins.reduce((s, c) => s + c, 0) === price;
+
+/* ── Short Hand, Long Hand: the clock's two scales ───────────────────── */
+
+/* The clock has two scales on one face: hours 1 to 12, and minutes 0 to 59
+ * around the outside. A six-year-old reads the long hand against the hour
+ * numbers, so 3:25 comes out as "3:5". Everything here keeps the two apart:
+ * hours are red and minutes are blue, the minutes have their own ring of
+ * numbers (0, 5, 10 ... 55), and the hour is the "zone" the short hand is in,
+ * not the number it is nearest — at 3:50 it is nearly 4, but it is still 3.
+ *
+ * The hands are geared, as on a real clock: the long hand going past the top
+ * moves the hour on (or back). An hour here is 0 to 11, where 0 is 12. */
+
+export interface HandsStep extends Step {
+  /** the minutes a time can have at this level */
+  minutes: 'oclock' | 'half' | 'quarters' | 'fives' | 'any';
+}
+
+/** the levels, the same for setting the clock and for reading it */
+export const HANDS_STEPS: HandsStep[] = [
+  { name: "o'clock", minutes: 'oclock' },
+  { name: 'half past', minutes: 'half' },
+  { name: 'quarters', minutes: 'quarters' },
+  { name: 'fives', minutes: 'fives' },
+  { name: 'any minute', minutes: 'any' },
+];
+
+export interface ClockTime { h: number; m: number }
+
+/** the same time, read off a clock face */
+export const sameTime = (a: ClockTime, b: ClockTime): boolean => clockHour(a.h) === clockHour(b.h) && a.m === b.m;
+
+/** a time to set or read at this level, never the one just asked */
+export function handsTarget(step: HandsStep, last?: ClockTime): ClockTime {
+  /* half past comes up twice as often as o'clock at the half past level */
+  const from: Record<HandsStep['minutes'], number[] | null> = {
+    oclock: [0], half: [0, 30, 30], quarters: [0, 15, 30, 45], fives: null, any: null,
+  };
+  for (;;) {
+    const list = from[step.minutes];
+    const m = list ? pick(list) : step.minutes === 'fives' ? rand(0, 11) * 5 : rand(0, 59);
+    const t = { h: rand(0, 11), m };
+    if (!last || !sameTime(t, last)) return t;
+  }
+}
+
+/** the long hand moved to minute n, which may be past the top either way:
+    the short hand follows, as on a real clock */
+export function moveMinute(t: ClockTime, n: number): ClockTime {
+  const m = ((n % 60) + 60) % 60;
+  let h = t.h;
+  if (t.m - m > 30) h = (h + 1) % 12;
+  else if (m - t.m > 30) h = (h + 11) % 12;
+  return { h, m };
+}
+
+/**
+ * Three times to choose from when reading the clock: the right one and two
+ * of the mistakes children make. The hands swapped; the red number the long
+ * hand points at read as the minutes (3:25 read as 3:05); and the hour one
+ * on, because the short hand looks nearly there. A random time only fills a
+ * gap if two of those are the same.
+ */
+export function handsChoices(t: ClockTime, step: HandsStep): (ClockTime & { ok?: true })[] {
+  const out: ClockTime[] = [];
+  const add = (c: ClockTime): void => {
+    if (out.length < 2 && !sameTime(c, t) && !out.some((o) => sameTime(o, c))) out.push(c);
+  };
+  add({ h: Math.floor(t.m / 5) || 12, m: (t.h % 12) * 5 });
+  if (t.m >= 5) add({ h: t.h, m: Math.floor(t.m / 5) });
+  add({ h: t.h + 1, m: t.m });
+  while (out.length < 2) add({ h: rand(0, 11), m: step.minutes === 'any' ? rand(0, 59) : rand(0, 11) * 5 });
+  return shuffle([...out, { h: t.h, m: t.m, ok: true as const }]);
+}
+
+/** where to look when the long hand is wrong */
+export function minuteHint(m: number): string {
+  const base = Math.floor(m / 5) * 5;
+  const extra = m - base;
+  const steps = (n: number): string => `${n} little ${n === 1 ? 'step' : 'steps'}`;
+  if (m === 0) return 'The long hand has to point straight up, at the top. That is 0 minutes.';
+  if (extra === 0) return `Move the long hand. Count in fives until you say ${m}. It will point at the red ${base / 5}.`;
+  return `Move the long hand. Count in fives to ${base}, then go ${steps(extra)} more.`;
+}
+
+/** what the short hand is saying, for the Play screen */
+export function hourExplained(t: ClockTime): string {
+  const hour = clockHour(t.h);
+  const next = clockHour(t.h + 1);
+  if (t.m === 0) return `The short hand points right at the ${hour}. So the hour is ${hour}.`;
+  const zone = `The short hand is in the ${hour} zone. It went past the ${hour} and has not reached the ${next} yet. So the hour is ${hour}.`;
+  return t.m >= 40 ? `${zone} It looks close to the ${next}, but it is still ${hour} until the long hand gets back to the top.` : zone;
+}
+
+/** what the long hand is saying: the words, the fives to count, the little
+    steps after them, and the total */
+export function minuteExplained(m: number): { text: string; fives: number[]; extra: number; total: string } {
+  const base = Math.floor(m / 5) * 5;
+  const extra = m - base;
+  const steps = (n: number): string => `${n} little ${n === 1 ? 'step' : 'steps'}`;
+  if (m === 0) return { text: 'The long hand points straight up. That means 0 minutes. A brand new hour starts here!', fives: [], extra: 0, total: '' };
+  const fives = Array.from({ length: base / 5 }, (_, i) => (i + 1) * 5);
+  const total = `${m} ${m === 1 ? 'minute' : 'minutes'}`;
+  if (base === 0) return { text: `The long hand is ${steps(extra)} past the top.`, fives, extra, total };
+  if (extra === 0) {
+    return { text: `The long hand points at the red ${base / 5}, but the long hand does not use red numbers. It counts in fives:`, fives, extra, total };
+  }
+  return { text: `The long hand is ${steps(extra)} past the red ${base / 5}. Count in fives, then add the little steps:`, fives, extra, total };
+}

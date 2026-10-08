@@ -32,6 +32,7 @@ import * as trainingDrills from './games/training-drills';
 import * as halfTimeOranges from './games/half-time-oranges';
 import * as jumpLine from './games/jump-line';
 import * as matchClock from './games/match-clock';
+import * as clockTrainer from './games/clock-trainer';
 import * as fanSurvey from './games/fan-survey';
 import * as factFamily from './games/fact-family';
 import * as kitShapes from './games/kit-shapes';
@@ -76,6 +77,7 @@ const routes: Route[] = [
   { path: 'half-time-oranges', mount: halfTimeOranges.mount },
   { path: 'jump-line', mount: jumpLine.mount },
   { path: 'match-clock', mount: matchClock.mount },
+  { path: 'clock-trainer', mount: clockTrainer.mount },
   { path: 'fan-survey', mount: fanSurvey.mount },
   { path: 'fact-family', mount: factFamily.mount },
   { path: 'kit-shapes', mount: kitShapes.mount },

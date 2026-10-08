@@ -56,6 +56,7 @@ export const TILES: Tile[] = [
   { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths' },
   { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', section: 'maths' },
   { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', section: 'maths' },
+  { path: 'clock-trainer', name: 'Short Hand, Long Hand', emoji: '🕰️', what: 'Move the hands, read the time', tone: '#D25A44', section: 'maths' },
   { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths' },
   { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', section: 'maths' },
   { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', section: 'maths' },

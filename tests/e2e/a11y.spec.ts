@@ -35,6 +35,7 @@ const PAGES = [
   ['Half-Time Oranges', '/#/half-time-oranges'],
   ['Jump Line', '/#/jump-line'],
   ['Match Clock', '/#/match-clock'],
+  ['Short Hand, Long Hand', '/#/clock-trainer'],
   ['Fan Survey', '/#/fan-survey'],
   ['Fact Family Formation', '/#/fact-family'],
   ['Kit and Ball Shapes', '/#/kit-shapes'],
