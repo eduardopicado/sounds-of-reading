@@ -42,6 +42,7 @@ export const TILES: Tile[] = [
   { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A', section: 'reading' },
   { path: 'be-the-commentator', name: 'Be the Commentator', emoji: '🎙️', what: 'Read it like you mean it', tone: '#D9534F', section: 'reading' },
   { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5', section: 'reading' },
+  { path: 'coach-says', name: 'Coach Says', emoji: '📣', what: 'Read it, then do it', tone: '#E07A3C', section: 'reading' },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing' },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing' },
   { path: 'flash-count', name: 'Flash Count', emoji: '⚡', what: 'Look quickly: how many?', tone: '#F08A4B', section: 'maths' },

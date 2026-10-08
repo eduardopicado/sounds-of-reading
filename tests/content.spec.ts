@@ -766,3 +766,71 @@ describe('sorting between sounds', () => {
     expect(both).toEqual([]);
   });
 });
+
+/* ── Coach Says ─────────────────────────────────────────────────────────── */
+
+import { PLACES, SAYS_STEPS, TEMPLATES, THINGS, saysQuestion } from '../src/content/coach-says';
+
+describe('coach says', () => {
+  const readableAt = new Map<string, number>();
+  for (const w of REAL_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level));
+  }
+  for (const w of ALL_SIGHT_WORDS) {
+    const t = w.text.toLowerCase();
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level ?? 8));
+  }
+  const wordsOf = (text: string) => text.replace(/\{\w+\}/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
+
+  it('draws every thing and place with its own picture, none the same', () => {
+    const pictures = [...THINGS, ...PLACES].map((t) => t.picture);
+    const twice = pictures.filter((p, i) => pictures.indexOf(p) !== i);
+    expect(twice).toEqual([]);
+    expect([...THINGS, ...PLACES].filter((t) => blocked(t.word)).map((t) => t.word)).toEqual([]);
+  });
+
+  it('writes the instructions in words he can read at their level, and puts each at its hardest word', () => {
+    const unknown = Object.values(TEMPLATES).flatMap((t) => wordsOf(t.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${t.text}"`));
+    expect(unknown).toEqual([]);
+    const wrong = Object.values(TEMPLATES).filter((t) => Math.max(1, ...wordsOf(t.text).map((w) => readableAt.get(w) ?? 9)) !== t.level)
+      .map((t) => `${t.text} @${t.level}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('has every step a template, and enough to play with at every level', () => {
+    for (const step of SAYS_STEPS) expect(TEMPLATES[step.task], step.name).toBeTruthy();
+    for (let level = 2; level <= 8; level += 1) {
+      expect(THINGS.filter((t) => t.level <= level).length, `things at ${level}`).toBeGreaterThanOrEqual(6);
+      expect(PLACES.filter((t) => t.level <= level).length, `places at ${level}`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('asks every question with exactly one answer, naming what it means', () => {
+    for (const step of SAYS_STEPS) {
+      for (let level = 1; level <= 8; level += 1) {
+        for (let i = 0; i < 40; i += 1) {
+          const q = saysQuestion(step, level);
+          const said = q.text.toLowerCase().match(/[a-z]+/g)!;
+          for (const a of q.answer) {
+            const shown = q.shown[a.item];
+            expect(shown, q.text).toBeTruthy();
+            expect(said, q.text).toContain(shown.thing.word);
+            if (a.kind === 'put') expect(said, q.text).toContain(q.places[a.place].word);
+          }
+          if (q.task === 'big' || q.task === 'notBig') {
+            /* only one picture is that thing at that size */
+            const a = q.shown[q.answer[0].item];
+            expect(q.shown.filter((s) => s.thing === a.thing && s.big === a.big)).toHaveLength(1);
+            expect(a.big, q.text).toBe(q.task === 'big');
+          } else {
+            const words = q.shown.map((s) => s.thing.word);
+            expect(new Set(words).size, q.text).toBe(words.length);
+            /* a thing named in the instruction is never also a place, nor two places the same */
+            expect(new Set(q.places.map((p) => p.word)).size).toBe(q.places.length);
+          }
+        }
+      }
+    }
+  });
+});

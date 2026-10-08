@@ -16,15 +16,17 @@ import {
   JUMP_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, type Step,
 } from '../content/maths';
 import { MATCH_STEPS, REF_STEPS } from '../content/bjj';
+import { SAYS_STEPS } from '../content/coach-says';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { strongSounds, weakSounds } from '../lib/coach';
 import { TILES } from './home';
 
-/** each maths game's ladder of steps, for the progress card; a test checks
-    every maths and jiu-jitsu tile has one */
+/** each game's ladder of steps, for the progress card; a test checks every
+    maths and jiu-jitsu tile has one */
 export const LADDERS: Record<string, readonly Step[]> = {
+  'coach-says': SAYS_STEPS,
   'flash-count': FLASH_STEPS,
   'off-the-bench': BENCH_STEPS,
   'scoreboard-sums': SUM_STEPS,
@@ -172,8 +174,8 @@ export function mount(root: HTMLElement): () => void {
         el('span', { class: 'mp-step', text: `${ladder[step].name} · step ${step + 1} of ${ladder.length}` })));
     }
     mathsList.replaceChildren(
-      el('span', { class: 'lbl', text: 'Maths: the step reached in each game' }),
-      ...(played.length ? played : [el('p', { class: 'tag', text: 'No maths games played yet.' })]),
+      el('span', { class: 'lbl', text: 'The step reached in each game' }),
+      ...(played.length ? played : [el('p', { class: 'tag', text: 'No games with steps played yet.' })]),
       untried.length && played.length ? el('p', { class: 'tag', text: `Not tried yet: ${untried.join(', ')}.` }) : '',
     );
   }

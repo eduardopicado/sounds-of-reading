@@ -49,6 +49,8 @@ src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Sho
 src/content/near-words.ts the nearest real words, for wrong answers that need reading
 src/content/handwriting.ts how each letter is written: strokes, families, heights
 src/content/sort-sets.ts the sound sets Sound Sort offers
+src/content/coach-says.ts Coach Says: the things, places and instructions from
+                       words.ts, made into questions with exactly one answer
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
                        Year 2 steps sit at the top of each game's ladder)
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ

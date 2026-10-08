@@ -54,6 +54,9 @@ export interface MathsGame<S extends Step> {
   face: string;
   /** a football game, with teams and the commentator */
   football?: boolean;
+  /** said at full time when not every answer was right; a reading game
+      using this frame says something other than "Good counting!" */
+  cheer?: string;
   build: (kit: Kit) => Question<S>;
 }
 
@@ -237,7 +240,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     results.hidden = false;
     sfx.whistle();
     life.later(() => { sfx.win(); confetti(); }, 350);
-    say(right === n ? 'Every one right!' : 'Good counting!');
+    say(right === n ? 'Every one right!' : game.cheer ?? 'Good counting!');
   }
 
   root.append(node);
