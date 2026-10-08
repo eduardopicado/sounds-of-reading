@@ -671,6 +671,29 @@ export const COACH_SAYS: Record<string, string> = {
   putThen: 'Put the {a} {in} the {b}, then tap the {c}. @3',
 };
 
+/*  Big Words — two syllables, read a part at a time.
+ *
+ *  After one-syllable words comes chunking: sun·set, rab·bit, rain·bow. Each
+ *  word is written with a - where it splits, and a picture where there is a
+ *  clear one. The content test works out each word's level from the
+ *  spellings in its parts (no @level to keep in step by hand), checks every
+ *  part is one syllable that cuts cleanly into sounds he knows, and that the
+ *  whole is a real word. Only closed syllables and vowel teams: an open one
+ *  like ro·bot says its vowel long, which the cut cannot see.  */
+export const BIG_WORDS: string = [
+  'sun-set 🌅', 'pic-nic 🧺', 'mag-net 🧲', 'kit-ten 🐱', 'ten-nis 🎾', 'cac-tus 🌵', 'in-sect 🐛',
+  'rock-et 🚀', 'tick-et 🎟️', 'mit-ten 🧤', 'den-tist', 'up-set',
+  'rab-bit 🐇', 'hot-dog 🌭', 'lap-top 💻', 'pump-kin 🎃', 'pad-lock 🔒', 'lip-stick 💄', 'jack-et 🧥',
+  'hel-met ⛑️', 'buck-et 🪣', 'cob-web 🕸️', 'zig-zag', 'lem-on 🍋', 'mel-on 🍈', 'drag-on 🐉', 'cam-el 🐫',
+  'drum-stick 🍗', 'nap-kin',
+  'sand-wich 🥪', 'chick-en 🐔', 'bath-tub 🛁', 'chip-munk 🐿️', 'pud-ding 🍮', 'rub-bish 🗑️',
+  'rain-bow 🌈', 'tea-pot 🫖', 'snow-man ⛄', 'pea-nut 🥜', 'sail-boat ⛵', 'rail-way 🚆', 'sea-weed',
+  'pea-cock 🦚', 'oat-meal 🥣', 'week-end',
+  'pop-corn 🍿', 'tooth-brush 🪥', 'cow-boy 🤠', 'thun-der ⛈️', 'ham-ster 🐹', 'lob-ster 🦞',
+  'mon-ster 👾', 'mush-room 🍄', 'farm-er', 'win-ter', 'sum-mer',
+  'see-saw 🛝', 'match-box', 'ketch-up',
+].join(' | ');
+
 /*  Words that sound exactly like another word in these lists, said with an
  *  Australian accent. A game that says a word and asks him to find it written
  *  can never offer both halves of a pair: "pair" called, with pair and pear

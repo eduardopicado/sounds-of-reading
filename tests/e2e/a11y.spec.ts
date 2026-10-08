@@ -22,6 +22,7 @@ const PAGES = [
   ['Be the Commentator', '/#/be-the-commentator'],
   ['Build the Word', '/#/build-the-word'],
   ['Coach Says', '/#/coach-says'],
+  ['Big Words', '/#/big-words'],
   ['Trace It', '/#/trace-it'],
   ['Tall, Small, Tail', '/#/tall-small-tail'],
   ['Flash Count', '/#/flash-count'],

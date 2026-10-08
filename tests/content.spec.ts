@@ -834,3 +834,64 @@ describe('coach says', () => {
     }
   });
 });
+
+/* ── Big Words ──────────────────────────────────────────────────────────── */
+
+import { ALL_BIG_WORDS, BIG_STEPS, bigQuestion, plainSplit } from '../src/content/big-words';
+
+describe('big words', () => {
+  it('are real words, each two parts that make it', () => {
+    expect(ALL_BIG_WORDS.filter((w) => !isRealWord(w.text)).map((w) => w.text)).toEqual([]);
+    for (const w of ALL_BIG_WORDS) expect(w.parts.join('')).toBe(w.text);
+    expect(ALL_BIG_WORDS.filter((w) => blocked(w.text) || w.parts.some((p) => blocked(p))).map((w) => w.text)).toEqual([]);
+  });
+
+  it('never repeats a word or a picture', () => {
+    const words = ALL_BIG_WORDS.map((w) => w.text);
+    expect(words.filter((w, i) => words.indexOf(w) !== i)).toEqual([]);
+    const pics = ALL_BIG_WORDS.flatMap((w) => (w.picture ? [w.picture] : []));
+    expect(pics.filter((p, i) => pics.indexOf(p) !== i)).toEqual([]);
+  });
+
+  it('works out the level from the spellings in the parts', () => {
+    const level = (t: string) => ALL_BIG_WORDS.find((w) => w.text === t)!.level;
+    expect(level('sunset')).toBe(2);
+    expect(level('rabbit')).toBe(3);
+    expect(level('sandwich')).toBe(4);
+    expect(level('rainbow')).toBe(5);
+    expect(level('popcorn')).toBe(6);
+    expect(level('seesaw')).toBe(8);
+  });
+
+  it('has enough words, pictures and plain splits to play from level 2', () => {
+    for (let level = 2; level <= 8; level += 1) {
+      const ok = ALL_BIG_WORDS.filter((w) => w.level <= level);
+      expect(ok.length, `words at ${level}`).toBeGreaterThanOrEqual(8);
+      expect(ok.filter((w) => w.picture).length, `pictures at ${level}`).toBeGreaterThanOrEqual(3);
+      expect(ok.filter(plainSplit).length, `splits at ${level}`).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('splits only where two consonants meet, and asks every question fairly', () => {
+    expect(plainSplit(ALL_BIG_WORDS.find((w) => w.text === 'rabbit')!)).toBe(true);
+    expect(plainSplit(ALL_BIG_WORDS.find((w) => w.text === 'chicken')!)).toBe(false);
+    expect(plainSplit(ALL_BIG_WORDS.find((w) => w.text === 'pumpkin')!)).toBe(false);
+    for (const step of BIG_STEPS) {
+      for (let level = 1; level <= 8; level += 1) {
+        for (let i = 0; i < 30; i += 1) {
+          const q = bigQuestion(step, level);
+          if (q.task === 'parts' || q.task === 'whole') {
+            expect(q.pictures).toContain(q.word);
+            expect(new Set(q.pictures.map((w) => w.picture)).size).toBe(3);
+          }
+          if (q.task === 'build' || q.task === 'buildHard') {
+            expect(q.tiles).toHaveLength(q.task === 'build' ? 4 : 6);
+            expect(new Set(q.tiles).size).toBe(q.tiles.length);
+            for (const p of q.word.parts) expect(q.tiles).toContain(p);
+          }
+          if (q.task === 'split') expect(plainSplit(q.word)).toBe(true);
+        }
+      }
+    }
+  });
+});
