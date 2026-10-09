@@ -19,6 +19,7 @@ test.describe('home screen', () => {
       'Half-Time Oranges',
       'Jump Line',
       'Match Clock',
+      'Short Hand, Long Hand',
       'Fan Survey',
       'Fact Family Formation',
       'Kit and Ball Shapes',
@@ -27,9 +28,10 @@ test.describe('home screen', () => {
       "Ref's Call",
       'Match Maths',
       'Weigh-In',
+      "Ref's Signals",
     ]);
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'coach-says', 'big-words', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'ice-cream-van', 'refs-call', 'match-maths', 'weigh-in']) {
+    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'coach-says', 'big-words', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'clock-trainer', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'ice-cream-van', 'refs-call', 'match-maths', 'weigh-in', 'refs-signals']) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();

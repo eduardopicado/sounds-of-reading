@@ -56,6 +56,7 @@ export const TILES: Tile[] = [
   { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths' },
   { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', section: 'maths' },
   { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', section: 'maths' },
+  { path: 'clock-trainer', name: 'Short Hand, Long Hand', emoji: '🕰️', what: 'Move the hands, read the time', tone: '#D25A44', section: 'maths' },
   { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths' },
   { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', section: 'maths' },
   { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', section: 'maths' },
@@ -64,6 +65,7 @@ export const TILES: Tile[] = [
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj' },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj' },
   { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj' },
+  { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj' },
 ];
 
 /* ── the coach's picks ────────────────────────────────────────────────── */

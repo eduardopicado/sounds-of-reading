@@ -32,6 +32,7 @@ import * as trainingDrills from './games/training-drills';
 import * as halfTimeOranges from './games/half-time-oranges';
 import * as jumpLine from './games/jump-line';
 import * as matchClock from './games/match-clock';
+import * as clockTrainer from './games/clock-trainer';
 import * as fanSurvey from './games/fan-survey';
 import * as factFamily from './games/fact-family';
 import * as kitShapes from './games/kit-shapes';
@@ -40,6 +41,7 @@ import * as iceCreamVan from './games/ice-cream-van';
 import * as refsCall from './games/refs-call';
 import * as matchMaths from './games/match-maths';
 import * as weighIn from './games/weigh-in';
+import * as refsSignals from './games/refs-signals';
 import * as coachSays from './games/coach-says';
 import * as bigWords from './games/big-words';
 import * as grownUps from './games/grown-ups';
@@ -75,6 +77,7 @@ const routes: Route[] = [
   { path: 'half-time-oranges', mount: halfTimeOranges.mount },
   { path: 'jump-line', mount: jumpLine.mount },
   { path: 'match-clock', mount: matchClock.mount },
+  { path: 'clock-trainer', mount: clockTrainer.mount },
   { path: 'fan-survey', mount: fanSurvey.mount },
   { path: 'fact-family', mount: factFamily.mount },
   { path: 'kit-shapes', mount: kitShapes.mount },
@@ -83,6 +86,7 @@ const routes: Route[] = [
   { path: 'refs-call', mount: refsCall.mount },
   { path: 'match-maths', mount: matchMaths.mount },
   { path: 'weigh-in', mount: weighIn.mount },
+  { path: 'refs-signals', mount: refsSignals.mount },
   /* the settings, behind a button held for three seconds on the home screen */
   { path: 'grown-ups', mount: grownUps.mount },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */

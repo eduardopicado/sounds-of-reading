@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Short Hand, Long Hand</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: clock on the left as the toy, a talking panel on the right; stacks on phones.
+   Everything about hours is warm red, everything about minutes is blue. */
+:root{
+  --bg:#EFF5FA; --surface:#FFFFFF; --face:#FFFFFF; --ink:#16233B; --muted:#56667F; --line:#D3DEEA;
+  --hour:#DB4326; --hour-soft:#FDE2DA; --min:#1763D1; --min-soft:#D9E9FF;
+  --star:#F2B100; --good:#1B8A4B; --good-soft:#DDF4E6;
+  --display:"Baloo 2","Nunito","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito","Trebuchet MS",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0F1828; --surface:#18243A; --face:#1F2D47; --ink:#EEF3FA; --muted:#A3B3CA; --line:#2C3C58;
+  --hour:#FF7F62; --hour-soft:#4B2720; --min:#62ABFF; --min-soft:#1B3660;
+  --star:#FFCB3D; --good:#5FD592; --good-soft:#173A29; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0F1828; --surface:#18243A; --face:#1F2D47; --ink:#EEF3FA; --muted:#A3B3CA; --line:#2C3C58;
+  --hour:#FF7F62; --hour-soft:#4B2720; --min:#62ABFF; --min-soft:#1B3660;
+  --star:#FFCB3D; --good:#5FD592; --good-soft:#173A29; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-inline:16px;padding-block:18px 32px}
+.wrap{max-width:1020px;margin-inline:auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,5vw,2.3rem);line-height:1;margin:0;flex:1 1 auto;text-wrap:balance}
+h1 .hc,h1 .mc{white-space:nowrap}
+.hc{color:var(--hour)} .mc{color:var(--min)}
+.stars{display:flex;align-items:center;gap:6px;font-family:var(--display);font-weight:800;font-size:1.5rem;
+  font-variant-numeric:tabular-nums}
+.stars svg{width:30px;height:30px;fill:var(--star)}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;width:100%}
+button{font:inherit;color:inherit;cursor:pointer;border:2px solid var(--line);background:var(--surface);
+  border-radius:14px;min-height:46px;padding:6px 14px;font-weight:800}
+button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+button:disabled{opacity:.45;cursor:default}
+.tabs button{flex:1 1 120px;font-family:var(--display);font-size:1.15rem}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.stage{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:760px){.stage{grid-template-columns:minmax(0,1fr)}}
+.clockcol{display:flex;flex-direction:column;gap:12px;align-items:center;min-width:0}
+#clock{width:100%;max-width:500px;height:auto;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+#clock.locked{cursor:default}
+#clock text{font-family:var(--display);text-anchor:middle;dominant-baseline:central;pointer-events:none}
+.hournum{fill:var(--hour);font-weight:800;font-size:31px}
+.minnum{fill:var(--min);font-weight:700;font-size:17px;opacity:.75}
+.minnum.on{font-size:23px;font-weight:800;opacity:1}
+
+.row{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;width:100%}
+.steps{align-items:center}
+.steps .lab{font-weight:800;font-size:.95rem}
+.steps button{min-width:52px;padding-inline:8px}
+.bh{border-color:var(--hour);color:var(--hour)} .bm{border-color:var(--min);color:var(--min)}
+.helpers button{font-size:.92rem;min-height:40px}
+.helpers button[aria-pressed="true"]{background:var(--min-soft);border-color:var(--min)}
+#tZone[aria-pressed="true"]{background:var(--hour-soft);border-color:var(--hour)}
+
+.panel{display:flex;flex-direction:column;gap:14px;min-width:0}
+.readout{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.digits{font-family:var(--display);font-weight:800;font-size:clamp(3.2rem,13vw,4.6rem);line-height:1;
+  font-variant-numeric:tabular-nums}
+.digits .colon{color:var(--muted);margin-inline:.04em}
+.words{font-family:var(--display);font-weight:700;font-size:1.5rem;line-height:1.15}
+.card{border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.card.h{background:var(--hour-soft)} .card.m{background:var(--min-soft)}
+.card h2{font-family:var(--display);font-size:1.25rem;line-height:1.1;margin:0}
+.card.h h2{color:var(--hour)} .card.m h2{color:var(--min)}
+.card p{margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--surface);color:var(--min);border-radius:999px;padding:1px 11px;font-weight:800;
+  font-variant-numeric:tabular-nums}
+.chip.last{background:var(--min);color:var(--surface)}
+.chip.extra{border:2px dashed var(--min)}
+.big{font-family:var(--display);font-weight:800;font-size:1.25rem}
+.wide{width:100%;font-family:var(--display);font-size:1.15rem}
+.go{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.levels button{flex:1 1 90px;font-size:.92rem;min-height:40px;padding-inline:6px}
+.levels button[aria-pressed="true"]{background:var(--star);border-color:var(--star);color:#16233B}
+.ask{font-family:var(--display);font-weight:700;font-size:1.5rem;line-height:1.15;margin:0}
+.ask .digits{display:block;margin-top:4px}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choices button{font-family:var(--display);font-size:clamp(1.5rem,6vw,2.1rem);font-variant-numeric:tabular-nums;
+  min-height:72px;padding-inline:4px}
+.choices button.right{background:var(--good-soft);border-color:var(--good)}
+.fb{min-height:3.2em;border-radius:16px;padding:12px 14px;background:var(--surface);border:2px dashed var(--line);font-weight:700}
+.fb.good{background:var(--good-soft);border:2px solid var(--good)}
+.fb.hint{background:var(--surface);border:2px solid var(--star)}
+.tip{color:var(--muted);font-size:.95rem;margin:0}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.35) rotate(-8deg)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:no-preference){.pop{animation:pop .5s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span class="hc">Short Hand,</span> <span class="mc">Long Hand</span></h1>
+    <div class="stars" id="stars" title="Stars you have won"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg><span id="starN">0</span></div>
+    <div class="tabs" role="group" aria-label="What to do">
+      <button id="tab-explore" data-mode="explore" aria-pressed="true">Play</button>
+      <button id="tab-make" data-mode="make" aria-pressed="false">Set the clock</button>
+      <button id="tab-quiz" data-mode="quiz" aria-pressed="false">Read the clock</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="clockcol">
+      <svg id="clock" viewBox="0 0 400 400" role="img" aria-label="Clock you can move"></svg>
+      <div class="row steps" id="steps">
+        <span class="lab hc">Hours</span>
+        <button class="bh" id="hDown" aria-label="One hour back">-1</button>
+        <button class="bh" id="hUp" aria-label="One hour forward">+1</button>
+        <span class="lab mc">Minutes</span>
+        <button class="bm" id="m5Down" aria-label="Five minutes back">-5</button>
+        <button class="bm" id="m1Down" aria-label="One minute back">-1</button>
+        <button class="bm" id="m1Up" aria-label="One minute forward">+1</button>
+        <button class="bm" id="m5Up" aria-label="Five minutes forward">+5</button>
+      </div>
+      <div class="row helpers">
+        <button id="tRing" aria-pressed="true">Minute numbers</button>
+        <button id="tZone" aria-pressed="true">Hour zone</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="pExplore">
+        <div class="panel">
+          <div class="readout">
+            <div class="digits" id="digits"></div>
+            <div>
+              <div class="words" id="words"></div>
+              <button id="say" hidden>Say it out loud</button>
+            </div>
+          </div>
+          <div class="card h"><h2>Short hand tells the hour</h2><p id="exH"></p></div>
+          <div class="card m"><h2>Long hand tells the minutes</h2><p id="exM"></p><div class="chips" id="chips"></div><p class="big" id="exMsum"></p></div>
+          <button class="wide go" id="watch">Watch one whole hour go by</button>
+          <p class="tip">Drag the hands with your finger. The red numbers belong to the short hand. The blue numbers around the outside belong to the long hand.</p>
+        </div>
+      </div>
+
+      <div id="pGame" hidden>
+        <div class="panel">
+          <div class="row levels" id="levels" role="group" aria-label="How hard">
+            <button data-l="1">o'clock</button><button data-l="2">half past</button><button data-l="3">quarters</button><button data-l="4">fives</button><button data-l="5">any minute</button>
+          </div>
+          <p class="ask" id="ask"></p>
+          <div class="choices" id="choices" hidden></div>
+          <button class="wide go" id="check">Check my clock</button>
+          <div class="fb" id="fb" aria-live="polite"></div>
+          <button class="wide" id="next" hidden>Next one</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var NS="http://www.w3.org/2000/svg", C=200;
+var S={mode:"explore",h:3,m:25,ring:true,zone:true,level:1,target:null,stars:0,locked:false,first:true,done:false,timer:null};
+function $(id){return document.getElementById(id)}
+function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+function pol(r,deg){var a=deg*Math.PI/180;return [C+r*Math.sin(a),C-r*Math.cos(a)]}
+function disp(h){return ((h%12)+12)%12||12}
+function pad(m){return m<10?"0"+m:""+m}
+function fmt(h,m){return '<span class="hc">'+disp(h)+'</span><span class="colon">:</span><span class="mc">'+pad(m)+'</span>'}
+function words(h,m){
+  var H=disp(h),N=disp(h+1);
+  if(m===0)return H+" o'clock";
+  if(m===15)return "quarter past "+H;
+  if(m===30)return "half past "+H;
+  if(m===45)return "quarter to "+N;
+  if(m<30)return m+" past "+H;
+  return (60-m)+" to "+N;
+}
+try{var sv=JSON.parse(localStorage.getItem("shlh")||"{}");if(sv.stars>0)S.stars=sv.stars;if(sv.ring===false)S.ring=false;if(sv.zone===false)S.zone=false;if(sv.level)S.level=sv.level}catch(e){}
+function save(){try{localStorage.setItem("shlh",JSON.stringify({stars:S.stars,ring:S.ring,zone:S.zone,level:S.level}))}catch(e){}}
+
+/* ---------- draw the clock once ---------- */
+var svg=$("clock");
+var ringG=el("g",{},svg);
+el("circle",{cx:C,cy:C,r:174,fill:"none",stroke:"var(--min-soft)","stroke-width":44},ringG);
+var arc=el("path",{fill:"none",stroke:"var(--min)","stroke-width":44,opacity:.3},ringG);
+var minNums=[];
+for(var i=0;i<12;i++){var p=pol(175,i*30);var t=el("text",{x:p[0],y:p[1]+1,"class":"minnum"},ringG);t.textContent=i*5;minNums.push(t)}
+el("circle",{cx:C,cy:C,r:150,fill:"var(--face)",stroke:"var(--ink)","stroke-width":4},svg);
+var zone=el("path",{fill:"var(--hour-soft)"},svg);
+for(i=0;i<60;i++){var big=i%5===0,a=pol(big?133:140,i*6),b=pol(147,i*6);
+  el("line",{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:"var(--min)","stroke-width":big?4:2,"stroke-linecap":"round"},svg)}
+for(i=1;i<=12;i++){p=pol(110,i*30);t=el("text",{x:p[0],y:p[1]+2,"class":"hournum"},svg);t.textContent=i}
+var hHand=el("line",{x1:C,y1:C,x2:C,y2:C-80,stroke:"var(--hour)","stroke-width":14,"stroke-linecap":"round"},svg);
+var mHand=el("line",{x1:C,y1:C,x2:C,y2:C-143,stroke:"var(--min)","stroke-width":7,"stroke-linecap":"round"},svg);
+el("circle",{cx:C,cy:C,r:10,fill:"var(--ink)"},svg);
+
+function hAngle(){return (S.h%12)*30+S.m*0.5}
+function render(){
+  hHand.setAttribute("transform","rotate("+hAngle()+" 200 200)");
+  mHand.setAttribute("transform","rotate("+(S.m*6)+" 200 200)");
+  ringG.style.display=S.ring?"":"none";
+  zone.style.display=S.zone?"":"none";
+  var a0=(S.h%12)*30,p1=pol(147,a0),p2=pol(147,a0+30);
+  zone.setAttribute("d","M200 200 L"+p1[0]+" "+p1[1]+" A147 147 0 0 1 "+p2[0]+" "+p2[1]+" Z");
+  if(S.m===0){arc.setAttribute("d","")}
+  else{var e=pol(174,S.m*6);arc.setAttribute("d","M200 26 A174 174 0 "+(S.m>30?1:0)+" 1 "+e[0]+" "+e[1])}
+  var idx=Math.floor(S.m/5);
+  minNums.forEach(function(n,k){n.setAttribute("class","minnum"+(k===idx?" on":""))});
+  svg.setAttribute("aria-label","Clock showing "+words(S.h,S.m));
+  if(S.mode==="explore")explain();
+}
+function explain(){
+  var H=disp(S.h),N=disp(S.h+1),m=S.m,base=Math.floor(m/5)*5,extra=m-base,num=base/5;
+  $("digits").innerHTML=fmt(S.h,m);
+  $("words").textContent=words(S.h,m);
+  var th;
+  if(m===0)th="The short hand points right at the "+H+". So the hour is "+H+".";
+  else{th="The short hand is in the "+H+" zone. It went past the "+H+" and has not reached the "+N+" yet. So the hour is "+H+".";
+    if(m>=40)th+=" It looks close to the "+N+", but it is still "+H+" until the long hand gets back to the top."}
+  $("exH").textContent=th;
+  var tm,chips="",sum="";
+  if(m===0){tm="The long hand points straight up. That means 0 minutes. A brand new hour starts here!"}
+  else{
+    if(base===0)tm="The long hand is "+extra+" little "+(extra===1?"step":"steps")+" past the top.";
+    else if(extra===0)tm="The long hand points at the red "+num+", but the long hand does not use red numbers. It counts in fives:";
+    else tm="The long hand is "+extra+" little "+(extra===1?"step":"steps")+" past the red "+num+". Count in fives, then add the little steps:";
+    for(var k=5;k<=base;k+=5)chips+='<span class="chip'+(k===base&&!extra?" last":"")+'">'+k+'</span>';
+    if(extra)chips+='<span class="chip extra last">+'+extra+'</span>';
+    sum=m+(m===1?" minute":" minutes");
+  }
+  $("exM").textContent=tm;$("chips").innerHTML=chips;$("exMsum").textContent=sum;
+}
+
+/* ---------- moving the hands ---------- */
+function snap(){return (S.mode==="make"&&S.level<=4)?5:1}
+function setMin(n){ // n may step past 0 or 59, the hour follows
+  var prev=S.m;n=((n%60)+60)%60;
+  if(prev-n>30)S.h=(S.h+1)%12; else if(n-prev>30)S.h=(S.h+11)%12;
+  S.m=n;
+}
+var drag=null;
+function ptr(ev){var r=svg.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*400-C,y=(ev.clientY-r.top)/r.height*400-C;
+  var ang=Math.atan2(x,-y)*180/Math.PI;if(ang<0)ang+=360;return {ang:ang,r:Math.sqrt(x*x+y*y)}}
+function diff(a,b){var d=Math.abs(a-b)%360;return d>180?360-d:d}
+function move(ev){
+  var p=ptr(ev);
+  if(drag==="m"){var s=snap();setMin(Math.round(p.ang/6/s)*s)}
+  else S.h=Math.floor(p.ang/30)%12;
+  render();
+}
+svg.addEventListener("pointerdown",function(ev){
+  if(S.locked)return;
+  var p=ptr(ev),dH=diff(p.ang,hAngle()),dM=diff(p.ang,S.m*6);
+  drag=(p.r<96&&dH<40)?"h":(dM<=dH?"m":"h");
+  try{svg.setPointerCapture(ev.pointerId)}catch(e){}
+  ev.preventDefault();move(ev);
+});
+svg.addEventListener("pointermove",function(ev){if(drag&&!S.locked)move(ev)});
+function drop(){drag=null}
+svg.addEventListener("pointerup",drop);svg.addEventListener("pointercancel",drop);
+
+function step(fn){return function(){if(S.locked)return;fn();render()}}
+$("hUp").onclick=step(function(){S.h=(S.h+1)%12});
+$("hDown").onclick=step(function(){S.h=(S.h+11)%12});
+$("m1Up").onclick=step(function(){setMin(S.m+1)});
+$("m1Down").onclick=step(function(){setMin(S.m-1)});
+$("m5Up").onclick=step(function(){setMin(S.m+5)});
+$("m5Down").onclick=step(function(){setMin(S.m-5)});
+function tog(id,key){var b=$(id);b.setAttribute("aria-pressed",S[key]);b.onclick=function(){S[key]=!S[key];b.setAttribute("aria-pressed",S[key]);save();render()}}
+tog("tRing","ring");tog("tZone","zone");
+
+/* ---------- play mode extras ---------- */
+$("watch").onclick=function(){
+  if(S.timer)return;
+  S.m=0;S.locked=true;lockUI();render();var n=0;
+  S.timer=setInterval(function(){
+    setMin(S.m+5);n++;render();
+    if(n>=12){clearInterval(S.timer);S.timer=null;S.locked=false;lockUI();
+      $("exH").textContent="See? The long hand went all the way around, and the short hand moved to the next number. Now it points right at the "+disp(S.h)+".";}
+  },600);
+};
+var canSpeak=false;try{canSpeak="speechSynthesis" in window&&typeof SpeechSynthesisUtterance==="function"}catch(e){}
+if(canSpeak){$("say").hidden=false;$("say").onclick=function(){try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(words(S.h,S.m));u.rate=.85;speechSynthesis.speak(u)}catch(e){}}}
+
+/* ---------- games ---------- */
+function rnd(n){return Math.floor(Math.random()*n)}
+function pick(){
+  var opts={1:[0],2:[0,30,30],3:[0,15,30,45],4:null,5:null}[S.level],t,key,old=S.target?S.target.h+":"+S.target.m:"";
+  do{var m=opts?opts[rnd(opts.length)]:(S.level===4?rnd(12)*5:rnd(60));t={h:rnd(12),m:m};key=t.h+":"+t.m}while(key===old);
+  return t;
+}
+function fb(cls,html){var f=$("fb");f.className="fb"+(cls?" "+cls:"");f.innerHTML=html}
+function star(){S.stars++;$("starN").textContent=S.stars;save();var s=$("stars");s.classList.remove("pop");void s.offsetWidth;s.classList.add("pop")}
+function minuteHint(m){
+  var base=Math.floor(m/5)*5,extra=m-base;
+  if(m===0)return "The long hand has to point straight up, at the top. That is 0 minutes.";
+  if(extra===0)return "Move the long hand. Count in fives until you say "+m+". It will point at the red "+(base/5)+".";
+  return "Move the long hand. Count in fives to "+base+", then go "+extra+" little "+(extra===1?"step":"steps")+" more.";
+}
+function newRound(){
+  S.target=pick();S.first=true;S.done=false;$("next").hidden=true;
+  if(S.mode==="make"){
+    S.h=0;S.m=0;S.locked=false;
+    $("ask").innerHTML='Can you make the clock say <span class="digits">'+fmt(S.target.h,S.target.m)+'</span>';
+    $("choices").hidden=true;$("check").hidden=false;
+    fb("",'First put the <span class="hc">short hand</span> in the right zone. Then move the <span class="mc">long hand</span>.');
+  }else{
+    S.h=S.target.h;S.m=S.target.m;S.locked=true;
+    $("ask").textContent="What time is it?";
+    $("check").hidden=true;buildChoices();
+    fb("",'Look at the <span class="hc">short hand</span> first, then the <span class="mc">long hand</span>.');
+  }
+  lockUI();render();
+}
+function buildChoices(){
+  var t=S.target,seen={},list=[];seen[disp(t.h)+":"+t.m]=1;
+  function add(h,m){var k=disp(h)+":"+m;if(list.length<2&&!seen[k]){seen[k]=1;list.push({h:h,m:m})}}
+  add(Math.floor(t.m/5)||12,(t.h%12)*5);            // hands swapped
+  if(t.m>=5)add(t.h,Math.floor(t.m/5));             // read the red number as minutes
+  add(t.h+1,t.m);
+  while(list.length<2)add(rnd(12),S.level<5?rnd(12)*5:rnd(60));
+  list.push({h:t.h,m:t.m,ok:true});
+  list.sort(function(){return Math.random()-.5});
+  var box=$("choices");box.innerHTML="";box.hidden=false;
+  list.forEach(function(c,i){
+    var b=document.createElement("button");b.id="choice"+i;b.innerHTML=fmt(c.h,c.m);
+    b.setAttribute("aria-label",disp(c.h)+" "+pad(c.m));
+    b.onclick=function(){
+      if(S.done)return;
+      if(c.ok){S.done=true;b.classList.add("right");if(S.first)star();
+        fb("good","Yes! It is "+fmt(t.h,t.m)+". We say <b>"+words(t.h,t.m)+"</b>.");$("next").hidden=false;$("next").focus()}
+      else{S.first=false;b.disabled=true;S.ring=true;S.zone=true;$("tRing").setAttribute("aria-pressed",true);$("tZone").setAttribute("aria-pressed",true);render();
+        fb("hint",'Not that one. Which zone is the <span class="hc">short hand</span> in? That is the hour. Then read the <span class="mc">blue number</span> next to the long hand.')}
+    };
+    box.appendChild(b);
+  });
+}
+$("check").onclick=function(){
+  if(S.done)return;var t=S.target;
+  if(S.h%12===t.h%12&&S.m===t.m){S.done=true;S.locked=true;lockUI();if(S.first)star();
+    fb("good","You did it! That is "+fmt(t.h,t.m)+". We say <b>"+words(t.h,t.m)+"</b>.");$("next").hidden=false;$("next").focus()}
+  else{S.first=false;
+    if(S.h%12!==t.h%12)fb("hint",'Look at the <span class="hc">short hand</span>. Put it in the '+disp(t.h)+' zone: past the '+disp(t.h)+', before the '+disp(t.h+1)+'.');
+    else fb("hint",'The hour is right! '+minuteHint(t.m))}
+};
+$("next").onclick=newRound;
+function lockUI(){
+  svg.classList.toggle("locked",S.locked);
+  $("steps").hidden=S.mode==="quiz";
+  ["hUp","hDown","m1Up","m1Down","m5Up","m5Down"].forEach(function(id){$(id).disabled=S.locked});
+  $("m1Up").hidden=$("m1Down").hidden=snap()===5;
+}
+function levels(){[].forEach.call($("levels").children,function(b){b.setAttribute("aria-pressed",+b.dataset.l===S.level)})}
+[].forEach.call($("levels").children,function(b){b.id="level"+b.dataset.l;b.onclick=function(){S.level=+b.dataset.l;save();levels();newRound()}});
+function setMode(m){
+  if(S.timer){clearInterval(S.timer);S.timer=null}
+  S.mode=m;S.locked=false;
+  ["explore","make","quiz"].forEach(function(k){$("tab-"+k).setAttribute("aria-pressed",k===m)});
+  $("pExplore").hidden=m!=="explore";$("pGame").hidden=m==="explore";
+  if(m==="explore"){lockUI();render()}else{levels();newRound()}
+}
+["explore","make","quiz"].forEach(function(k){$("tab-"+k).onclick=function(){setMode(k)}});
+$("starN").textContent=S.stars;
+setMode("explore");
+})();
+</script>
+</body>
+</html>

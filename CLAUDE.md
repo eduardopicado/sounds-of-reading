@@ -54,7 +54,8 @@ src/content/big-words.ts two-syllable words from words.ts, each level worked out
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
-                       Year 2 steps sit at the top of each game's ladder)
+                       Year 2 steps sit at the top of each game's ladder), and
+                       timeWords(), the one way the app says a time
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask (Weigh-In's things and weight classes too),
                        every word in English and Portuguese
@@ -70,8 +71,9 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        asks one question. A new maths game that needs a team
                        picture uses a country with its flag; club kits are
                        fine where it is a shirt
-                       bjj-art.ts draws the moves; bjj-kit.ts is the 🇦🇺/🇧🇷
-                       language switch, speech and belt the BJJ games share
+                       bjj-art.ts draws the moves and the referee's signals;
+                       bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
+                       belt the BJJ games share
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes
