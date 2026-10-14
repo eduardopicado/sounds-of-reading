@@ -1,0 +1,25 @@
+# Keeps the build tools and the CI actions current, in a few grouped pull
+# requests rather than one per package. Every dependency here is used to
+# build or test the app; none of them is shipped to the iPad.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      # patch and minor bumps together, in one pull request a month
+      tools:
+        patterns: ['*']
+        update-types: [minor, patch]
+    # urgent security fixes are a separate switch, outside this file:
+    # Settings → Code security → Dependabot security updates
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']

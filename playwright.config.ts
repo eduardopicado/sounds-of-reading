@@ -31,7 +31,10 @@ export default defineConfig({
     { name: 'phone', use: { ...devices['Desktop Chrome'], viewport: { width: 375, height: 667 }, hasTouch: true } },
   ],
   webServer: {
-    command: 'npm run build && npx vite preview --port 4173 --strictPort',
+    /* CI has just built it in its own step, and building twice only costs time */
+    command: process.env.CI
+      ? 'npx vite preview --port 4173 --strictPort'
+      : 'npm run build && npx vite preview --port 4173 --strictPort',
     url: 'http://localhost:4173',
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
