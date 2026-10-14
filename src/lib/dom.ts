@@ -6,7 +6,6 @@ type Child = Node | string | null | undefined | false;
 export interface Attrs {
   class?: string;
   text?: string;
-  html?: string;
   style?: Partial<CSSStyleDeclaration> | string;
   vars?: Record<string, string>;
   on?: Partial<Record<keyof HTMLElementEventMap, (e: never) => void>>;
@@ -23,7 +22,6 @@ export function el<K extends keyof HTMLElementTagNameMap>(
     if (value === undefined || value === null || value === false) continue;
     if (key === 'class') node.className = String(value);
     else if (key === 'text') node.textContent = String(value);
-    else if (key === 'html') node.innerHTML = String(value);
     else if (key === 'style' && typeof value === 'object') Object.assign(node.style, value);
     else if (key === 'vars') for (const [k, v] of Object.entries(value as Record<string, string>)) node.style.setProperty(k, v);
     else if (key === 'on') {

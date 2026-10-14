@@ -81,8 +81,6 @@ export function samplePath(d: string, step = 3): Point[] {
   return out;
 }
 
-export const startOf = (d: string): Point => samplePath(d)[0];
-
 export interface Verdict {
   ok: boolean;
   /** what to tell him when it is not */

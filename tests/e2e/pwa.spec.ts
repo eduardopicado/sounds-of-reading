@@ -56,6 +56,22 @@ test.describe('progressive web app', () => {
     noProblems(watch);
   });
 
+  test('tells the browser to refuse any other origin, whatever the code asks', async ({ page }) => {
+    const errors: string[] = [];
+    const external: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    page.on('request', (r) => { if (!r.url().startsWith('http://localhost:4173')) external.push(r.url()); });
+    await page.goto('/');
+    const policy = await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
+    expect(policy).toContain("default-src 'self'");
+    expect(policy).toContain("connect-src 'self'");
+    /* a request elsewhere is stopped by the browser before it is sent */
+    const outcome = await page.evaluate(() => fetch('https://example.com/').then(() => 'sent', () => 'refused'));
+    expect(outcome).toBe('refused');
+    expect(external).toEqual([]);
+    expect(errors.some((e) => /Content Security Policy/i.test(e))).toBe(true);
+  });
+
   test('asks the network for nothing but itself', async ({ page }) => {
     const watch = watchPage(page);
     await page.goto('/');

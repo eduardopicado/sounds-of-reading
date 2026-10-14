@@ -52,9 +52,33 @@ interface CoachRecord {
   moved?: Move;
 }
 
+/** answers saved as runs of 1s and 0s; anything else in there is dropped */
+function runs(x: unknown): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return out;
+  for (const [id, run] of Object.entries(x)) if (typeof run === 'string' && /^[01]*$/.test(run)) out[id] = run;
+  return out;
+}
+
+const levelList = (x: unknown): x is Level[] =>
+  Array.isArray(x) && x.every((n) => Number.isInteger(n) && n >= 1 && n <= 8);
+
+/** the last move, if what was saved still describes one */
+function move(x: unknown): Move | undefined {
+  if (!x || typeof x !== 'object') return undefined;
+  const m = x as Record<string, unknown>;
+  if (!levelList(m.from) || !m.from.length || !levelList(m.to) || !Array.isArray(m.fromSounds)) return undefined;
+  return {
+    from: m.from, to: m.to,
+    fromSounds: m.fromSounds.filter((id): id is string => typeof id === 'string'),
+    at: typeof m.at === 'number' ? m.at : 0,
+    seen: m.seen === true,
+  };
+}
+
 function load(): CoachRecord {
-  const r = read<Partial<CoachRecord>>('coach', {});
-  return { sounds: r.sounds ?? {}, levels: r.levels ?? {}, moved: r.moved };
+  const r = read<Record<string, unknown>>('coach', {});
+  return { sounds: runs(r.sounds), levels: runs(r.levels), moved: move(r.moved) };
 }
 
 const rights = (run: string): number => [...run].filter((c) => c === '1').length;
@@ -146,8 +170,4 @@ export function undoMove(): void {
   rec.levels[top] = '';
   rec.moved = { ...m, seen: true };
   write('coach', rec);
-}
-
-export function resetCoach(): void {
-  write('coach', {});
 }

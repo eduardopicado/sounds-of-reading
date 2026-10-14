@@ -112,6 +112,3 @@ export function stopClips(): void {
     }
   }
 }
-
-/** for the tests and the diagnostics screen */
-export const clipCount = (): number => have?.size ?? 0;

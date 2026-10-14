@@ -59,7 +59,10 @@ interface Drop {
 }
 
 const bestKey = 'rocket-best';
-const bestFor = (id: string): number => read<Record<string, number>>(bestKey, {})[id] ?? 0;
+const bestFor = (id: string): number => {
+  const best = read<Record<string, unknown>>(bestKey, {})[id];
+  return typeof best === 'number' && best > 0 ? best : 0;
+};
 function saveBest(id: string, score: number): void {
   const all = read<Record<string, number>>(bestKey, {});
   all[id] = score;

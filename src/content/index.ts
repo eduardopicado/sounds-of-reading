@@ -227,10 +227,6 @@ export const phrases = (f: Filter = {}): Phrase[] =>
 export const families = (f: Filter = {}): FamilySpec[] =>
   ALL_FAMILIES.filter((fam) => inSounds(fam.sound, f.sounds) && inLevels(fam.level, f.levels));
 
-/** practice sounds that survive a filter, in level order */
-export const soundsFor = (f: Filter = {}): Sound[] =>
-  PRACTICE_SOUNDS.filter((s) => inSounds(s.id, f.sounds) && inLevels(s.level, f.levels));
-
 /* ── commentary ────────────────────────────────────────────────────────── */
 
 export type Mood = 'excited' | 'asking' | 'calm';

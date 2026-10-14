@@ -2,11 +2,45 @@
 import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
+/**
+ * The rule "nothing leaves the device" made a promise the browser keeps.
+ *
+ * The tests already fail on any request to another origin, but only for what
+ * they exercise; this tells the browser itself to refuse one, whatever the
+ * code does. Everything — scripts, styles, fonts, pictures, sound — comes from
+ * the app's own origin. The exceptions are deliberate: recorded takes play
+ * from blob: URLs (Be the Commentator), and styles set from script count as
+ * inline. Added at build only, since the dev server injects inline scripts
+ * of its own.
+ */
+const POLICY = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data:",
+  "font-src 'self'",
+  "media-src 'self' blob:",
+  "connect-src 'self'",
+  "worker-src 'self'",
+  "manifest-src 'self'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+].join('; ');
+
+const contentSecurityPolicy = {
+  name: 'content-security-policy',
+  apply: 'build' as const,
+  transformIndexHtml: (html: string): string =>
+    html.replace('<meta charset="utf-8">', `<meta charset="utf-8">\n  <meta http-equiv="Content-Security-Policy" content="${POLICY}">`),
+};
+
 export default defineConfig({
   /* relative, so the same build works from a domain root, a GitHub Pages
      project path or a folder on a USB stick */
   base: './',
   plugins: [
+    contentSecurityPolicy,
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png'],

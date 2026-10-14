@@ -7,9 +7,12 @@ the prototypes it came from are in `docs/original-games/`.
 ## Rules
 
 - No accounts, analytics, ads, or third-party network requests. Fonts are
-  self-hosted. Nothing leaves the device.
-- Static site, offline-capable PWA. State in `localStorage` only, always
-  wrapped in try/catch.
+  self-hosted. Nothing leaves the device. The built page carries a
+  Content-Security-Policy (`vite.config.ts`) that makes the browser refuse
+  any other origin; a new kind of resource has to be allowed there.
+- Static site, offline-capable PWA. State in `localStorage` only, through
+  `src/lib/storage.ts`, which guards every call and returns the fallback for
+  a saved value of the wrong kind.
 - One shared content file: `src/content/words.ts`. Never duplicate word lists
   per game.
 - Grapheme highlights use the explicit positions in the content file, never

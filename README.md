@@ -245,6 +245,8 @@ the device.
   off in the grown-ups corner.
 - Leaving a game stops everything it started: its timers, its speech and its
   sound effects (see `src/lib/life.ts`).
+- The built page carries a Content-Security-Policy, so the browser itself
+  refuses any request to another origin, whatever the code asks for.
 
 ## Tests
 
