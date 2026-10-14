@@ -31,7 +31,7 @@ import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
 import { read } from '../lib/storage';
 import { ALL_COMMENTARY, LEVELS, type CommentaryLine, type Level, type Mood } from '../content/index';
-import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
+import { confetti, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 import { canRecord, closeMic, forget, openMic, play, record, stopPlaying, type Recording, type Take } from '../lib/recorder';
 import { TEAMS, YOU, teamById } from './teams';
 
@@ -77,12 +77,9 @@ export function mount(root: HTMLElement): () => void {
 
   const reel = el('ol', { class: 'cm-reel' });
   const reelBtn = el('button', { class: 'btn', type: 'button', text: '▶ Play the highlights' });
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'Your match highlights ', prize), reel,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      reelBtn,
-      el('button', { class: 'btn ghost', type: 'button', text: 'New match', on: { click: () => start() } })),
+  const results = resultsTray('Your match highlights', reel,
+    reelBtn,
+    el('button', { class: 'btn ghost', type: 'button', text: 'New match', on: { click: () => start() } }),
   );
 
   const node = el('div', { class: 'wrap' },
@@ -93,7 +90,7 @@ export function mount(root: HTMLElement): () => void {
     }),
     setup.node,
     scoreLine(el('span', {}, lineNo.node, ' of ', totalEl)),
-    card, status, controls, results,
+    card, status, controls, results.node,
   );
 
   /* ── state ───────────────────────────────────────────────────────────── */
@@ -262,7 +259,7 @@ export function mount(root: HTMLElement): () => void {
     us = team === YOU ? 'the Reds' : team.short;
     them = pick(TEAMS.filter((t) => t !== YOU && t !== team)).short;
     totalEl.textContent = String(lines.length);
-    results.hidden = true;
+    results.hide();
     card.hidden = false;
     controls.hidden = false;
     status.hidden = false;
@@ -277,9 +274,7 @@ export function mount(root: HTMLElement): () => void {
     reel.replaceChildren(...lines.map((l, i) =>
       el('li', { class: takes[i] ? 'has-take' : '' }, `${MOODS[l.mood].face} ${fill(l.text)}`)));
     reelBtn.hidden = !takes.some(Boolean);
-    prize.textContent = awardFace('be-the-commentator', '🎙️').face;
-    prize.hidden = false;
-    results.hidden = false;
+    results.show(awardFace('be-the-commentator', '🎙️'));
     sfx.whistle();
     life.later(() => { sfx.win(); confetti(); }, 350);
   }
@@ -302,7 +297,7 @@ export function mount(root: HTMLElement): () => void {
       if (!life.alive()) return;
       if (lines[i].mood === 'excited') sfx.cheer();
       reel.children[i]?.classList.remove('playing');
-      await new Promise((r) => window.setTimeout(r, 450));
+      await new Promise<void>((r) => { life.later(r, 450); });
     }
     sfx.whistle();
     reelBtn.disabled = false;

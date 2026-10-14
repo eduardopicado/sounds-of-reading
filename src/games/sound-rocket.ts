@@ -28,6 +28,7 @@
  * answer when the sound is e. */
 
 import { el, prefersReducedMotion, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -66,6 +67,7 @@ function saveBest(id: string, score: number): void {
 }
 
 export function mount(root: HTMLElement): () => void {
+  const life = lifetime();
   /* ── setup: which sound to catch ─────────────────────────────────────── */
 
   const targetSel = el('select', { 'aria-label': 'Which sound to catch' });
@@ -405,7 +407,7 @@ export function mount(root: HTMLElement): () => void {
       setMarked(d.node, d.word.text, d.word.spans, { tones: target.tones });
       d.node.classList.add('caught');
       replay(rocket, 'boost');
-      window.setTimeout(() => d.node.remove(), 450);
+      life.later(() => d.node.remove(), 450);
       return;
     }
     /* a word without the sound, taken for one with it: a miss on the sound
@@ -416,7 +418,7 @@ export function mount(root: HTMLElement): () => void {
     sfx.crack();
     d.node.classList.add('bad');
     if (!reduced) replay(sky, 'shake');
-    window.setTimeout(() => d.node.remove(), 350);
+    life.later(() => d.node.remove(), 350);
     if (shields <= 0) gameOver();
   }
 
@@ -453,6 +455,7 @@ export function mount(root: HTMLElement): () => void {
   void document.fonts?.ready.then(() => { if (sky.isConnected) measure(); });
 
   return () => {
+    life.end();
     stop();
     window.removeEventListener('keydown', onKey);
     document.removeEventListener('visibilitychange', onHidden);

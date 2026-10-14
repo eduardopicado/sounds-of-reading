@@ -21,6 +21,7 @@
  * family prints as a practice sheet for paper and pencil. */
 
 import { el, prefersReducedMotion } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
@@ -29,7 +30,7 @@ import { read, write } from '../lib/storage';
 import { shuffle } from '../lib/random';
 import { judge, type Point } from '../lib/strokes';
 import { FAMILIES, exampleFor, family } from '../content/handwriting';
-import { confetti, counter, scoreLine, topbar } from '../ui/components';
+import { celebrate, counter, resultsTray, scoreLine, topbar } from '../ui/components';
 import { SLOPE, arrow, layout, startDot, strokeShape, svg, viewBox, writingLines, type Layout } from '../ui/writing';
 
 /** how near the line counts as on it, in letter units (a letter body is 50) */
@@ -99,12 +100,9 @@ export function mount(root: HTMLElement): () => void {
     el('div', { class: 'row tr-actions' }, showBtn));
 
   const resultList = el('ul', { class: 'tr-results' });
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'Letters you wrote ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Write again', on: { click: () => start() } }),
-      el('button', { class: 'btn ghost', type: 'button', text: '🖨 Print a practice sheet', on: { click: () => printSheet() } })),
+  const results = resultsTray('Letters you wrote', resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Write again', on: { click: () => start() } }),
+    el('button', { class: 'btn ghost', type: 'button', text: '🖨 Print a practice sheet', on: { click: () => printSheet() } }),
   );
 
   const node = el('div', { class: 'wrap' },
@@ -115,7 +113,7 @@ export function mount(root: HTMLElement): () => void {
     }),
     panel,
     scoreLine(el('span', {}, pos.node, ' of ', totalEl), stepEl),
-    hint, board, results,
+    hint, board, results.node,
   );
 
   /* the printed sheet lives outside the app, so print styles can show only it */
@@ -131,8 +129,9 @@ export function mount(root: HTMLElement): () => void {
   let misses = 0;
   let log: { item: string; ok: boolean }[] = [];
   let busy = false;
-  let timers: number[] = [];
-  const later = (fn: () => void, ms: number): void => { timers.push(window.setTimeout(fn, ms)); };
+  /* everything it plans goes through its lifetime, which leaving ends */
+  const life = lifetime();
+  const later = life.later;
   const goes = (): Go[] => GOES.slice(0, pro() ? 3 : 2);
 
   /* ── drawing ─────────────────────────────────────────────────────────── */
@@ -371,8 +370,7 @@ export function mount(root: HTMLElement): () => void {
   /* ── the round ───────────────────────────────────────────────────────── */
 
   function start(): void {
-    for (const t of timers) window.clearTimeout(t);
-    timers = [];
+    life.clear();
     const f = family(famSel.value);
     hint.textContent = `${f.name}: ${f.how}`;
     const n = lenSel.value === 'all' ? f.items.length : Number(lenSel.value);
@@ -381,7 +379,7 @@ export function mount(root: HTMLElement): () => void {
     queue = f.items.filter((_, i) => keep.has(i));
     index = 0; log = []; active = null; trace = [];
     totalEl.textContent = String(queue.length);
-    results.hidden = true;
+    results.hide();
     board.hidden = false;
     next();
   }
@@ -393,20 +391,16 @@ export function mount(root: HTMLElement): () => void {
       el('li', { class: entry.ok ? '' : 'miss' }, el('span', { class: 'tr-big', text: [...entry.item].join(' ') }),
         entry.ok ? '' : el('span', { class: 'mk', text: 'again' }))));
     /* writing earns a sticker of its own: it practises no one sound */
-    prize.textContent = awardFace('trace-it', '✏️').face;
-    prize.hidden = false;
-    results.hidden = false;
+    results.show(awardFace('trace-it', '✏️'));
     stepEl.textContent = '';
-    sfx.win();
-    confetti();
-    say(log.every((e) => e.ok) ? 'Beautiful writing!' : 'Good writing!');
+    celebrate(log.every((e) => e.ok) ? 'Beautiful writing!' : 'Good writing!');
   }
 
   root.append(node);
   document.body.append(sheet);
   start();
   return () => {
-    for (const t of timers) window.clearTimeout(t);
+    life.end();
     sheet.remove();
   };
 }

@@ -15,7 +15,7 @@ import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
 import { realWords, sillyWords, sound, type Word } from '../content/index';
-import { confetti, createSetup, counter, scoreLine, topbar } from '../ui/components';
+import { celebrate, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
 import { pro } from '../lib/settings';
 import { coachPick, mark } from '../lib/coach';
@@ -51,11 +51,8 @@ export function mount(root: HTMLElement): () => void {
   const answers = el('div', { class: 'answers' }, realBtn, sillyBtn);
 
   const resultList = el('ul', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'How it went ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray('How it went', resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
 
   const node = el('div', { class: 'wrap' },
@@ -66,7 +63,7 @@ export function mount(root: HTMLElement): () => void {
     }),
     setup.node,
     scoreLine(el('span', {}, posEl.node, ' of ', totalEl), rightEl.node, streakBox),
-    stage, helpRow, answers, results,
+    stage, helpRow, answers, results.node,
   );
 
   let queue: Word[] = [];
@@ -90,7 +87,7 @@ export function mount(root: HTMLElement): () => void {
     posEl.set(1); rightEl.set(0);
     totalEl.textContent = String(queue.length);
     streakBox.style.visibility = 'hidden';
-    results.hidden = true;
+    results.hide();
     resultList.replaceChildren();
     stage.style.display = '';
     answers.style.display = '';
@@ -167,12 +164,8 @@ export function mount(root: HTMLElement): () => void {
       resultList.append(li);
     }
     const sticker = award(log.map((entry) => entry.word.sound));
-    prize.hidden = !sticker;
-    prize.textContent = sticker?.face ?? '';
-    results.hidden = false;
-    sfx.win();
-    confetti();
-    say(right === log.length ? 'Perfect!' : 'Good reading!');
+    results.show(sticker);
+    celebrate(right === log.length ? 'Perfect!' : 'Good reading!');
   }
 
   realBtn.addEventListener('click', () => answer(true));

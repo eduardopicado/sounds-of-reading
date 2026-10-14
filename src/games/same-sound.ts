@@ -21,7 +21,7 @@ import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
 import { picturable, realWords, sound, type Level, type Word } from '../content/index';
-import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
+import { celebrate, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 import { award } from '../lib/stickers';
 import { mark } from '../lib/coach';
 import { CONTRASTS, contrastFor, contrastSpan, obeysRule, type Contrast } from '../content/contrasts';
@@ -58,11 +58,8 @@ export function mount(root: HTMLElement): () => void {
   const choices = el('div', { class: 'bins choices' });
 
   const resultList = el('ul', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'How it went ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray('How it went', resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
 
   const empty = el('p', { class: 'tag', hidden: 'hidden' },
@@ -80,7 +77,7 @@ export function mount(root: HTMLElement): () => void {
     stage,
     el('div', { class: 'row', style: { justifyContent: 'center' } },
       el('button', { class: 'btn ghost', type: 'button', text: '🔊 Say it again', on: { click: () => current && say(current.text) } })),
-    choices, rule, results,
+    choices, rule, results.node,
   );
 
   let queue: Word[] = [];
@@ -136,7 +133,7 @@ export function mount(root: HTMLElement): () => void {
 
     spelled = 0; firstTry = 0; log = []; busy = false; current = null;
     done.set(0); rightFirst.set(0); totalEl.textContent = String(queue.length);
-    results.hidden = true;
+    results.hide();
     rule.hidden = true;
     resultList.replaceChildren();
     hand.style.display = '';
@@ -251,12 +248,8 @@ export function mount(root: HTMLElement): () => void {
       resultList.append(li);
     }
     const sticker = award(log.map((entry) => entry.word.sound));
-    prize.hidden = !sticker;
-    prize.textContent = sticker?.face ?? '';
-    results.hidden = false;
-    sfx.win();
-    confetti();
-    say(firstTry === log.length ? 'Every one right!' : 'Good spelling!');
+    results.show(sticker);
+    celebrate(firstTry === log.length ? 'Every one right!' : 'Good spelling!');
   }
 
   root.append(node);
