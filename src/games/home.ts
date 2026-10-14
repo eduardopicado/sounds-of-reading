@@ -82,7 +82,7 @@ function today(): number {
 const nth = <T>(list: T[], seed: number): T => list[((seed % list.length) + list.length) % list.length];
 
 /**
- * Three games for today, so 32 tiles are not a wall to choose from: a reading
+ * Three games for today, so the tiles are not a wall to choose from: a reading
  * game (aimed at the sounds that need practice, which the coach steers the
  * words towards), a maths or jiu-jitsu game he has not finished a round of
  * yet — or has not played for longest — and something different, a
