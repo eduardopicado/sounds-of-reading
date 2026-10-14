@@ -3,7 +3,17 @@
  * way the child does, by looking at the screen and tapping. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, watchPage } from './helpers';
+import { journal, noProblems, openGame, openSetup, watchPage } from './helpers';
+
+/* WebKit on CI stops answering partway through some of these games. Until
+   that is found, a test that fails there prints what the page was doing. */
+let tell: ((title: string) => Promise<void>) | null = null;
+test.beforeEach(async ({ page }, info) => {
+  tell = info.project.name === 'ipad-webkit' ? (await journal(page)).tell : null;
+});
+test.afterEach(async ({}, info) => {
+  if (tell && info.status !== info.expectedStatus) await tell(`${info.title} (retry ${info.retry})`);
+});
 
 test.describe('Memory Match', () => {
   test('plays a full round through to the win screen', async ({ page }) => {
