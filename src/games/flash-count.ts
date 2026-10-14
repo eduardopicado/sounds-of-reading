@@ -60,6 +60,7 @@ function frame(n: number): SVGSVGElement {
 function array(rows: number, cols: number): SVGSVGElement {
   const gap = 40;
   const a = svg('svg', { class: 'mx-array', viewBox: `0 0 ${cols * gap} ${rows * gap}` });
+  a.style.setProperty('--aspect', String(cols / rows));
   for (let r = 0; r < rows; r += 1) {
     for (let c = 0; c < cols; c += 1) {
       a.append(svg('circle', { cx: gap / 2 + c * gap, cy: gap / 2 + r * gap, r: 13, class: 'mx-dot' }));

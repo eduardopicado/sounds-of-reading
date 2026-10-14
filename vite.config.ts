@@ -65,7 +65,7 @@ export default defineConfig({
       workbox: {
         /* everything the app is, including the fonts — it has to work in the
            car with no signal, and it never asks the network for anything else */
-        globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg,webmanifest,json,m4a}'],
         navigateFallback: 'index.html',
         cleanupOutdatedCaches: true,
       },

@@ -39,6 +39,8 @@ function tally(n: number): SVGSVGElement {
   const rest = n % 5;
   const width = gates * 70 + rest * 14 + 10;
   const marks = svg('svg', { class: 'fs-tally', viewBox: `0 0 ${Math.max(width, 20)} 50`, 'aria-hidden': 'true' });
+  /* its width comes from its shape: Safari will not work it out from the height alone */
+  marks.style.setProperty('--aspect', String(Math.max(width, 20) / 50));
   let x = 8;
   for (let g = 0; g < gates; g += 1) {
     for (let i = 0; i < 4; i += 1) marks.append(svg('line', { x1: x + i * 12, y1: 6, x2: x + i * 12, y2: 44 }));

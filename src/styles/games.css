@@ -1002,8 +1002,13 @@
 .mx-pitch.stadium .mx-spot.gap { border-width: 2px; font-size: clamp(10px, 2.6vw, 15px); }
 .mx-pitch.stadium .mx-spot.fan { box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .25); }
 
-/* Flash Count: rows and columns */
-.mx-array { width: auto; height: auto; max-width: min(76vw, 300px); max-height: 220px; }
+/* Flash Count: rows and columns. Sized from its own shape (--aspect is
+   columns over rows): Safari gives an SVG with no width of its own a width
+   of nothing inside the flex card, so the dots were never seen on the iPad */
+.mx-array {
+  width: min(76vw, 300px, calc(220px * var(--aspect, 1)));
+  height: auto; aspect-ratio: var(--aspect, 1);
+}
 
 /* Scoreboard Sums: racks of ten balls, and the loose ones stacked beside them */
 .mx-group { display: inline-flex; flex-wrap: nowrap; align-items: flex-end; gap: 4px; }
@@ -1209,7 +1214,7 @@
 .fs-table { display: grid; gap: 10px; width: 100%; }
 .fs-row { display: grid; grid-template-columns: minmax(110px, 34%) 1fr; align-items: center; gap: 10px; }
 .fs-team { font: 800 clamp(15px, 4vw, 19px) var(--display); }
-.fs-tally { height: 34px; }
+.fs-tally { height: 34px; width: auto; aspect-ratio: var(--aspect, 1); }
 .fs-tally line { stroke: var(--ink); stroke-width: 4; stroke-linecap: round; }
 .fs-pics { display: flex; flex-wrap: nowrap; gap: clamp(2px, 1vw, 5px); }
 .fs-pic { flex: none; width: clamp(15px, 4.4vw, 24px); aspect-ratio: 1; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .3); }

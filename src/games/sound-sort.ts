@@ -128,7 +128,7 @@ export function mount(root: HTMLElement): () => void {
         class: 'bin', type: 'button', vars: { '--tone': s.tones.light },
         dataset: { sound: s.id }, 'aria-label': `Put it in the ${s.label} bin`,
       }, el('span', { class: 'name', text: s.label }), el('span', { class: 'stack' }));
-      bin.addEventListener('click', () => drop(s.id, bin));
+      bin.addEventListener('click', () => { if (!dropped) drop(s.id, bin); });
       bins.append(bin);
     }
     next();
@@ -213,6 +213,12 @@ export function mount(root: HTMLElement): () => void {
   let startX = 0;
   let startY = 0;
   let moved = false;
+  /** the bin lit up under the card: where letting go puts it */
+  let overBin: HTMLElement | null = null;
+  /* Letting go of a dragged card over a bin can also count as a tap on the
+     bin — Safari sends the click to whatever is under the finger once the
+     card has gone back — and the word would be dropped twice. */
+  let dropped = false;
   hand.addEventListener('pointerdown', (e) => {
     if (!current || busy) return;
     dragging = true; moved = false; startX = e.clientX; startY = e.clientY;
@@ -226,22 +232,32 @@ export function mount(root: HTMLElement): () => void {
     if (!moved) return;
     hand.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.03}deg)`;
     for (const b of bins.querySelectorAll('.bin')) b.classList.remove('over');
-    binAt(e.clientX, e.clientY)?.classList.add('over');
+    overBin = binAt(e.clientX, e.clientY);
+    overBin?.classList.add('over');
   });
   hand.addEventListener('pointerup', (e) => {
     if (!dragging) return;
     dragging = false;
+    /* found while the card is still where he let go of it, not after it
+       has gone back: the one lit up, or failing that the one under it */
+    const under = moved ? overBin ?? binAt(e.clientX, e.clientY) : null;
+    overBin = null;
     hand.classList.remove('dragging');
     hand.style.transform = '';
     for (const b of bins.querySelectorAll('.bin')) b.classList.remove('over');
     if (!moved) { if (current) say(current.text); return; }
-    const under = binAt(e.clientX, e.clientY);
-    if (under?.dataset.sound) drop(under.dataset.sound, under);
+    if (under?.dataset.sound) {
+      dropped = true;
+      life.later(() => { dropped = false; }, 0);
+      drop(under.dataset.sound, under);
+    }
   });
   hand.addEventListener('pointercancel', () => {
     dragging = false;
+    overBin = null;
     hand.classList.remove('dragging');
     hand.style.transform = '';
+    for (const b of bins.querySelectorAll('.bin')) b.classList.remove('over');
   });
 
   root.append(node);
