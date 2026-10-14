@@ -1,4 +1,5 @@
-import { defineConfig } from 'vite';
+/* vitest's defineConfig is vite's with the `test` block typed as well */
+import { defineConfig } from 'vitest/config';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
@@ -38,4 +39,4 @@ export default defineConfig({
     }),
   ],
   test: { include: ['tests/**/*.spec.ts'], environment: 'node' },
-} as never);
+});
