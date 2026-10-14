@@ -12,11 +12,11 @@ import { GAMES } from './games/catalog';
    is fetched when it is first opened (src/games/catalog.ts). */
 const routes: Route[] = [
   { path: 'home', mount: home.mount },
-  ...GAMES.map((g) => ({ path: g.path, load: g.load })),
+  ...GAMES.map((g) => ({ path: g.path, title: g.name, load: g.load })),
   /* the settings, behind a button held for three seconds on the home screen */
-  { path: 'grown-ups', load: () => import('./games/grown-ups') },
+  { path: 'grown-ups', title: 'Grown-ups', load: () => import('./games/grown-ups') },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
-  { path: 'voices', load: () => import('./games/voices') },
+  { path: 'voices', title: 'Voices', load: () => import('./games/voices') },
 ];
 
 /* iOS keeps speech and audio locked until they are started inside a real

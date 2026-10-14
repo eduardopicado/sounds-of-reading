@@ -16,6 +16,8 @@ test.describe('home screen', () => {
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
       expect(page.url()).toContain('#/' + path);
+      /* the tab, the app switcher and a screen reader name the game */
+      await expect(page).toHaveTitle(`${GAMES.find((g) => g.path === path)!.name} · Sounds of Reading`);
       /* and back out again, the way a child leaves a game */
       await page.getByRole('button', { name: 'Back to the games' }).click();
       await expect(page.locator('.tiles').first()).toBeVisible();

@@ -40,6 +40,22 @@ test('Penalty Shootout mid-match has no accessibility violations', async ({ page
   expect(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.slice(0, 3).map((n) => n.html.slice(0, 120)) }))).toEqual([]);
 });
 
+/* A game that waits for Start shows only the Start tray when it opens, so
+   the check above never saw a question. Each is checked again with its
+   first question up: the choices, the picture, the feedback line. */
+for (const game of GAMES.filter((g) => g.ladder && g.path !== 'clock-trainer')) {
+  test(`${game.name}, with a question up, has no accessibility violations`, async ({ page }) => {
+    await openGame(page, game.path);
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.mx-board')).toBeVisible();
+    await page.waitForTimeout(400);
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.slice(0, 3).map((n) => n.html.slice(0, 120)) }))).toEqual([]);
+  });
+}
+
 test('every control can be reached and named', async ({ page }) => {
   await openGame(page, 'bingo');
   const unnamed = await page.locator('button, a, select').evaluateAll((nodes) =>

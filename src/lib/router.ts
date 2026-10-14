@@ -7,11 +7,18 @@ import { hushSfx } from './sfx';
 /** puts a screen into the page, and returns how to take it down again */
 export type Mount = (root: HTMLElement) => (() => void) | void;
 
-export type Route =
+export type Route = {
+  path: string;
+  /** what the browser tab, the app switcher and a screen reader call it */
+  title?: string;
+} & (
   /** a screen that is part of the main bundle: the home screen */
-  | { path: string; mount: Mount }
+  | { mount: Mount }
   /** a screen whose code is fetched the first time it is opened */
-  | { path: string; load: () => Promise<{ mount: Mount }> };
+  | { load: () => Promise<{ mount: Mount }> }
+);
+
+const APP = 'Sounds of Reading';
 
 let routes: Route[] = [];
 let unmount: (() => void) | void;
@@ -72,6 +79,7 @@ async function render(): Promise<void> {
   const route = routes.find((r) => r.path === path) ?? routes[0];
   leave();
   document.body.dataset.route = route.path;
+  document.title = route.title ? `${route.title} · ${APP}` : APP;
   let mount: Mount;
   try {
     mount = 'mount' in route ? route.mount : (await route.load()).mount;
