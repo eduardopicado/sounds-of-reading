@@ -213,13 +213,14 @@ vowels — then by tier, then by whether the voice works offline, and the
 grown-ups corner has a picker listing everything on offer, with a Try it
 button.
 
-What a web page is offered is not what Settings has installed. On the iPad
-this was built for, Safari offered the page only the super-compact Karen,
-however many better English voices had been downloaded, and Siri's voices are
-never available to the web at all. So downloading a voice is worth trying but
-may change nothing; `#/voices` (linked from nowhere) lists exactly what the
-browser offers, English and Portuguese, with each voice's tier and the one the
-app uses. The Portuguese commentator picks its own voice the same way, and
+What a web page is offered is not what Settings has installed. A new voice
+downloaded in Settings does reach the page, but only in its standard version:
+the Enhanced and Premium downloads never do, and Siri's voices are never
+available to the web at all. On the iPad this was built for, Safari offered
+the page only the super-compact Karen, however many better Karens had been
+downloaded. So a download can add another accent but never a clearer voice;
+`#/voices` (linked from nowhere) lists exactly what the browser offers,
+English and Portuguese, with each voice's tier and the one the app uses. The Portuguese commentator picks its own voice the same way, and
 can sound much better than the English one.
 
 The app can also play recordings of the words instead, made ahead of time by

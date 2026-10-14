@@ -213,14 +213,15 @@ export function mount(root: HTMLElement): () => void {
     }));
 
     /* We used to send the parent to Settings to download a better voice.
-       An iPad with three Karens installed offers this page exactly one, the
-       super-compact build, so that errand does not work — it just costs
-       several hundred megabytes. Say what is true instead. (This used to
-       add that the words are recorded in advance; none are shipped yet —
-       see public/audio/README.md.) */
+       A new voice downloaded there does reach this list, but only in its
+       standard version: an iPad with three Karens installed offers this page
+       exactly one, the super-compact build, so downloading an Enhanced or
+       Premium voice just costs several hundred megabytes. Say what is true
+       instead. (This used to add that the words are recorded in advance;
+       none are shipped yet — see public/audio/README.md.) */
     if (onlyCompactVoices()) {
       voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
-        text: 'These are the only voices Safari offers a web page. Downloading better ones in Settings does not change this list.' }));
+        text: 'Safari offers a web page only the standard version of each voice. A new voice downloaded in Settings shows up here, but its Enhanced and Premium versions never do.' }));
     }
   }
 

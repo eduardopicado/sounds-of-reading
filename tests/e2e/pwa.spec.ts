@@ -352,9 +352,9 @@ test.describe('speech', () => {
     await openGame(page, 'grown-ups');
     /* An iPad with three Karens installed still offers this page one, so the
        hint must not read as an errand: no path to follow, no promise. It may
-       still name Settings, to say that going there will not help. */
+       still name Settings, to say what a download there can and cannot do. */
     await expect(page.locator('.sound')).not.toContainText('Spoken Content');
-    await expect(page.locator('.sound')).toContainText('does not change this list');
+    await expect(page.locator('.sound')).toContainText('Enhanced and Premium versions never do');
   });
 
   test('each diagnostics row speaks in its own voice', async ({ page }) => {
@@ -445,7 +445,7 @@ test.describe('speech', () => {
     });
     await openGame(page, 'grown-ups');
     /* an Eloquence voice in the list must not be mistaken for "already better" */
-    await expect(page.locator('.sound .tag', { hasText: 'does not change this list' })).toBeVisible();
+    await expect(page.locator('.sound .tag', { hasText: 'Enhanced and Premium versions never do' })).toBeVisible();
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     expect(options.join(' | ')).toContain('Karen (en-AU) — standard');
     expect(options.join(' | ')).toContain('Reed (en-AU) — retro, robotic');
@@ -472,7 +472,7 @@ test.describe('speech', () => {
     expect(options.join(' | ')).toContain('Karen (en-AU)');
     expect(options.join(' | ')).toContain('Daniel (en-GB)');
     /* nothing a web page does can install a voice, so it explains where to */
-    await expect(page.locator('.sound .tag', { hasText: 'does not change this list' })).toBeVisible();
+    await expect(page.locator('.sound .tag', { hasText: 'Enhanced and Premium versions never do' })).toBeVisible();
   });
 
   test('survives a browser where touching speechSynthesis throws', async ({ page }) => {
