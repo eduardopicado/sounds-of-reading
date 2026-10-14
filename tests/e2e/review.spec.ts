@@ -6,24 +6,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import { fitsAnother, realWords, sound } from '../../src/content/index';
 import { noProblems, openGame, openSetup, recordSpeech, said, seed, watchPage } from './helpers';
+import { GAMES as ALL_GAMES } from '../../src/games/catalog';
 
-const GAMES = [
-  'memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash',
-  'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator',
-  'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty',
-  'team-buses',
-  'keepy-uppy',
-  'training-drills',
-  'half-time-oranges',
-  'jump-line',
-  'match-clock',
-  'fan-survey',
-  'fact-family',
-  'kit-shapes',
-  'coach-whiteboard',
-  'refs-call',
-  'match-maths',
-];
+/** every game, from the catalog, so a new one is covered as soon as it is added */
+const GAMES = ALL_GAMES.map((g) => g.path);
 
 /** leave the game the way he does, and check nothing is said after that */
 async function leaveAndListen(page: Page): Promise<void> {

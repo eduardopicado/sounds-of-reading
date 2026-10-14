@@ -78,8 +78,8 @@ describe("the coach's picks", () => {
   afterEach(() => { vi.unstubAllGlobals(); });
 
   const numberGames = async () => {
-    const { TILES } = await import('../../src/games/home');
-    return TILES.filter((t) => t.section === 'maths' || t.section === 'bjj').map((t) => t.path);
+    const { GAMES } = await import('../../src/games/catalog');
+    return GAMES.filter((t) => t.section === 'maths' || t.section === 'bjj').map((t) => t.path);
   };
 
   it('offers a maths or jiu-jitsu game not tried yet', async () => {

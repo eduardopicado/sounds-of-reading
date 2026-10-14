@@ -77,6 +77,11 @@ src/lib/               speech.ts (voices, and saying things), sfx.ts (synthesise
                        microphone, for Be the Commentator), dom.ts, random.ts
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
+src/games/catalog.ts   every game, once: its address, tile, section, ladder and
+                       where its code is. A new game is one entry here; the
+                       routes, the home tiles, the progress card and the
+                       tests are made from it. Each game's code is fetched
+                       when it is first opened
 src/games/             one file per game, plus home.ts (tiles by section, the
                        coach's picks) and grown-ups.ts (the settings, opened
                        by holding a button on home for three seconds)

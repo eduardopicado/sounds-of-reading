@@ -232,7 +232,7 @@ test.describe('Roll & Read', () => {
 
     /* the tally is the parent's signal, so it has to survive leaving the game */
     await page.goto('/#/home');
-    await page.goto('/#/roll-and-read');
+    await openGame(page, 'roll-and-read');
     await expect(page.locator('.bar .n')).toHaveText('1/2');
     await page.getByRole('button', { name: 'Set up this game' }).click();
     await page.getByRole('button', { name: 'Clear tally' }).click();

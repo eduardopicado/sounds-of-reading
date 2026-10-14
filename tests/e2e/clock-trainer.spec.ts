@@ -208,7 +208,7 @@ test.describe('Short Hand, Long Hand', () => {
     expect(await starCount(page)).toBe(5);
     await page.goto('/');
     await expect(page.locator('.sticker')).toHaveText(['🕰️']);
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await expect(page.locator('.mp-row[data-game="clock-trainer"] .mp-step')).toHaveText('quarters · step 3 of 5');
     noProblems(watch);
   });

@@ -11,45 +11,11 @@ import { el } from '../lib/dom';
 import { read } from '../lib/storage';
 import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say } from '../lib/speech';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
-import {
-  BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS,
-  HANDS_STEPS, JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, type Step,
-} from '../content/maths';
-import { MATCH_STEPS, REF_STEPS, SIGNAL_STEPS, WEIGH_STEPS } from '../content/bjj';
-import { SAYS_STEPS } from '../content/coach-says';
-import { BIG_STEPS } from '../content/big-words';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { strongSounds, weakSounds } from '../lib/coach';
-import { TILES } from './home';
-
-/** each game's ladder of steps, for the progress card; a test checks every
-    maths and jiu-jitsu tile has one */
-export const LADDERS: Record<string, readonly Step[]> = {
-  'coach-says': SAYS_STEPS,
-  'big-words': BIG_STEPS,
-  'flash-count': FLASH_STEPS,
-  'off-the-bench': BENCH_STEPS,
-  'scoreboard-sums': SUM_STEPS,
-  'number-line-penalty': LINE_STEPS,
-  'team-buses': BUS_STEPS,
-  'keepy-uppy': SKIP_STEPS,
-  'training-drills': DRILL_STEPS,
-  'half-time-oranges': FRACTION_STEPS,
-  'jump-line': JUMP_STEPS,
-  'match-clock': CLOCK_STEPS,
-  'clock-trainer': HANDS_STEPS,
-  'fan-survey': SURVEY_STEPS,
-  'fact-family': FACT_STEPS,
-  'kit-shapes': SHAPE_STEPS,
-  'coach-whiteboard': BOARD_STEPS,
-  'ice-cream-van': KIOSK_STEPS,
-  'refs-call': REF_STEPS,
-  'match-maths': MATCH_STEPS,
-  'weigh-in': WEIGH_STEPS,
-  'refs-signals': SIGNAL_STEPS,
-};
+import { GAMES } from './catalog';
 
 const card = (title: string, cls: string, ...children: (Node | null)[]): HTMLElement =>
   el('section', { class: `gu-card ${cls}` }, el('h2', { text: title }), ...children);
@@ -167,8 +133,8 @@ export function mount(root: HTMLElement): () => void {
     /* each maths game remembers the step reached (src/games/maths-kit.ts) */
     const played: HTMLElement[] = [];
     const untried: string[] = [];
-    for (const tile of TILES) {
-      const ladder = LADDERS[tile.path];
+    for (const tile of GAMES) {
+      const { ladder } = tile;
       if (!ladder) continue;
       const at = read<number | null>(`maths-step:${tile.path}`, null);
       if (typeof at !== 'number') { untried.push(tile.name); continue; }

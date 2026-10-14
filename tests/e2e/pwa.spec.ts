@@ -1,7 +1,8 @@
 /* The app-ness: installable, offline, and quiet on the network. */
 
 import { expect, test } from '@playwright/test';
-import { noProblems, watchPage } from './helpers';
+import { noProblems, openGame, watchPage } from './helpers';
+import { GAMES } from '../../src/games/catalog';
 
 test.describe('progressive web app', () => {
   test('has a manifest that makes it installable as a home screen app', async ({ page, request }) => {
@@ -42,6 +43,15 @@ test.describe('progressive web app', () => {
     await page.locator('.rack .tile').first().click();
     await expect(page.locator('.verdict')).toContainText(/real word|silly word/);
 
+    /* each game's code is its own file, fetched when it is first opened, so
+       every one of them has to have been cached for the car */
+    for (const { path } of GAMES) {
+      await page.goto(`/#/${path}`);
+      await expect(page.locator('.topbar h1'), path).toBeVisible();
+    }
+    await openGame(page, 'grown-ups');
+    await expect(page.locator('.topbar h1')).toBeVisible();
+
     await context.setOffline(false);
     noProblems(watch);
   });
@@ -49,7 +59,7 @@ test.describe('progressive web app', () => {
   test('asks the network for nothing but itself', async ({ page }) => {
     const watch = watchPage(page);
     await page.goto('/');
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'refs-call', 'match-maths']) {
+    for (const { path } of GAMES) {
       await page.goto('/#/' + path);
       await page.waitForTimeout(250);
     }
@@ -88,7 +98,7 @@ test.describe('speech', () => {
       });
     });
 
-    await page.goto('/#/word-builder');
+    await openGame(page, 'word-builder');
     await page.locator('.rack .tile').first().click();
     const spoken = await page.evaluate(() => (window as unknown as { __spoken: { text: string; lang: string; voice: string }[] }).__spoken);
     const real = spoken.filter((s) => s.text);
@@ -128,7 +138,7 @@ test.describe('speech', () => {
       });
     });
 
-    await page.goto('/#/word-builder');
+    await openGame(page, 'word-builder');
     await page.locator('.rack .tile').first().click();
     const spoken = await page.evaluate(() => (window as unknown as { __spoken: { voice: string }[] }).__spoken);
     const last = spoken.filter((s) => s.voice).pop();
@@ -162,7 +172,7 @@ test.describe('speech', () => {
       });
     });
 
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     const picker = page.getByLabel('Which voice reads the words');
     /* before any tap only the preinstalled voice is on offer */
     await expect(picker.locator('option')).toHaveCount(2);
@@ -193,7 +203,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     /* "Best available" plus Karen plus one Samantha */
     expect(options).toHaveLength(3);
@@ -216,7 +226,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/voices');
+    await openGame(page, 'voices');
     await expect(page.locator('.wrap')).toContainText('2 English voices');
     /* the identifier is the whole point of the screen */
     await expect(page.locator('.wrap')).toContainText('com.apple.voice.compact.en-AU.Karen');
@@ -239,7 +249,7 @@ test.describe('speech', () => {
         value: { getVoices: () => voices, speak: () => undefined, cancel: () => undefined, addEventListener: () => undefined },
       });
     });
-    await page.goto('/#/voices');
+    await openGame(page, 'voices');
     await expect(page.locator('.wrap')).toContainText('2 English voices');
     await expect(page.locator('.wrap')).toContainText('2 Portuguese voices');
     const using = page.locator('[data-using="1"]');
@@ -269,10 +279,10 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/voices');
+    await openGame(page, 'voices');
     await expect(page.locator('.wrap')).toContainText('read as: super-compact');
 
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     const samanthas = options.filter((o) => o.includes('Samantha'));
     /* both survive, and the parent can tell which is which */
@@ -303,7 +313,7 @@ test.describe('speech', () => {
     await page.goto('/');
     await expect(page.getByRole('link', { name: 'Which voices?' })).toHaveCount(0);
 
-    await page.goto('/#/voices');
+    await openGame(page, 'voices');
     await expect(page.locator('.wrap')).toContainText('offered to this page');
     await expect(page.locator('.wrap')).toContainText('com.apple.voice.super-compact.en-AU.Karen');
   });
@@ -323,7 +333,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     /* An iPad with three Karens installed still offers this page one, so the
        hint must not read as an errand: no path to follow, no promise. It may
        still name Settings, to say that going there will not help. */
@@ -357,7 +367,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/voices');
+    await openGame(page, 'voices');
     /* the second row is the one the app would never choose on its own, which
        is exactly why its button has to speak as itself */
     await page.locator('.paper').nth(1).getByRole('button', { name: 'Hear it' }).click();
@@ -395,7 +405,7 @@ test.describe('speech', () => {
       });
     });
 
-    await page.goto('/#/word-builder');
+    await openGame(page, 'word-builder');
     await page.locator('.rack .tile').first().click();
     const spoken = await page.evaluate(() => (window as unknown as { __spoken: { voice: string }[] }).__spoken);
     expect(spoken.filter((s) => s.voice).pop()?.voice).toBe('com.apple.voice.compact.en-AU.Karen');
@@ -417,7 +427,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     /* an Eloquence voice in the list must not be mistaken for "already better" */
     await expect(page.locator('.sound .tag', { hasText: 'does not change this list' })).toBeVisible();
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
@@ -441,7 +451,7 @@ test.describe('speech', () => {
         },
       });
     });
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     const options = await page.getByLabel('Which voice reads the words').locator('option').allTextContents();
     expect(options.join(' | ')).toContain('Karen (en-AU)');
     expect(options.join(' | ')).toContain('Daniel (en-GB)');
@@ -457,7 +467,7 @@ test.describe('speech', () => {
         get() { throw new Error('speech is not available here'); },
       });
     });
-    await page.goto('/#/real-or-silly');
+    await openGame(page, 'real-or-silly');
     await expect(page.locator('.theword')).toBeVisible();
     await page.locator('.ans.real').click();
     await expect(page.locator('.verdict')).not.toHaveClass(/idle/);
