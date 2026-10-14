@@ -14,9 +14,10 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    # the suite takes about ten minutes on four workers; this only catches a
-    # genuine hang (at 20 it was cutting off a healthy run of 600 tests)
-    timeout-minutes: 35
+    # the suite takes about sixteen minutes on four workers in Chromium and
+    # a third as long again in WebKit; this only catches a genuine hang (at
+    # 20 it was cutting off a healthy run of 600 tests)
+    timeout-minutes: 50
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -37,7 +38,7 @@ jobs:
         run: npm run build
 
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: End to end
         run: npx playwright test
