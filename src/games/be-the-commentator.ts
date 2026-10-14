@@ -294,6 +294,8 @@ export function mount(root: HTMLElement): () => void {
       reel.children[i]?.classList.add('playing');
       sfx.crowd(take.seconds + 0.6);
       await play(take);
+      /* leaving stops the take, which ends this wait: no roar after that */
+      if (!life.alive()) return;
       if (lines[i].mood === 'excited') sfx.cheer();
       reel.children[i]?.classList.remove('playing');
       await new Promise((r) => window.setTimeout(r, 450));
@@ -308,7 +310,8 @@ export function mount(root: HTMLElement): () => void {
   return () => {
     life.end();
     stopPlaying();
-    void recording?.stop();
+    /* a take still recording as he leaves is finished and thrown away */
+    void recording?.stop().then(forget);
     for (const t of takes) forget(t);
     closeMic(mic);
   };

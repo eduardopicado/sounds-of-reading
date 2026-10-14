@@ -7,6 +7,7 @@ export interface Route {
 }
 
 import { cancelSpeech } from './speech';
+import { hushSfx } from './sfx';
 
 let routes: Route[] = [];
 let unmount: (() => void) | void;
@@ -22,8 +23,10 @@ function render(): void {
   } catch {
     /* a game that fails to clean up must not stop the next one opening */
   }
-  /* a word being said as he leaves stops with the game that said it */
+  /* a word being said as he leaves stops with the game that said it, and
+     so does a crowd or a fanfare */
   cancelSpeech();
+  hushSfx();
   host.replaceChildren();
   /* a win's confetti should not rain on the next game */
   for (const layer of document.querySelectorAll('.confetti')) layer.remove();

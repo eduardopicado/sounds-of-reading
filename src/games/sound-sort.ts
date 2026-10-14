@@ -208,13 +208,22 @@ export function mount(root: HTMLElement): () => void {
   /* dragging, as well as tapping — the prototype supported both and the child
      reaches for the card first */
   let dragging = false;
+  /* The card being dragged sits under his finger, so the topmost thing at
+     that point is always the card itself. Look through it for the bin. */
+  const binAt = (x: number, y: number): HTMLElement | null => {
+    for (const n of document.elementsFromPoint(x, y)) {
+      const bin = n.closest('.bin');
+      if (bin instanceof HTMLElement && bins.contains(bin)) return bin;
+    }
+    return null;
+  };
   let startX = 0;
   let startY = 0;
   let moved = false;
   hand.addEventListener('pointerdown', (e) => {
     if (!current || busy) return;
     dragging = true; moved = false; startX = e.clientX; startY = e.clientY;
-    hand.setPointerCapture(e.pointerId);
+    try { hand.setPointerCapture(e.pointerId); } catch { /* a pointer the page did not start */ }
   });
   hand.addEventListener('pointermove', (e) => {
     if (!dragging) return;
@@ -224,8 +233,7 @@ export function mount(root: HTMLElement): () => void {
     if (!moved) return;
     hand.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.03}deg)`;
     for (const b of bins.querySelectorAll('.bin')) b.classList.remove('over');
-    const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bin');
-    under?.classList.add('over');
+    binAt(e.clientX, e.clientY)?.classList.add('over');
   });
   hand.addEventListener('pointerup', (e) => {
     if (!dragging) return;
@@ -234,8 +242,8 @@ export function mount(root: HTMLElement): () => void {
     hand.style.transform = '';
     for (const b of bins.querySelectorAll('.bin')) b.classList.remove('over');
     if (!moved) { if (current) say(current.text); return; }
-    const under = document.elementFromPoint(e.clientX, e.clientY)?.closest('.bin');
-    if (under instanceof HTMLElement && under.dataset.sound) drop(under.dataset.sound, under);
+    const under = binAt(e.clientX, e.clientY);
+    if (under?.dataset.sound) drop(under.dataset.sound, under);
   });
   hand.addEventListener('pointercancel', () => {
     dragging = false;

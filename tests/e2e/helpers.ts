@@ -56,12 +56,19 @@ export async function recordSpeech(page: Page): Promise<void> {
       constructor(text: string) { this.text = text; }
     }
     Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+    let current: FakeUtterance | null = null;
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
       value: {
         getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'karen' }],
-        speak: (u: FakeUtterance) => { if (u.text) spoken.push(u.text); window.setTimeout(() => u.onend?.(), 0); },
-        cancel: () => undefined,
+        speak: (u: FakeUtterance) => {
+          if (u.text) spoken.push(u.text);
+          current = u;
+          window.setTimeout(() => { if (current === u) { current = null; u.onend?.(); } }, 0);
+        },
+        /* a real engine reports the end of whatever it was stopped in the
+           middle of, a moment later — Chrome as an error, Safari as an end */
+        cancel: () => { const u = current; current = null; if (u) window.setTimeout(() => u.onerror?.(), 0); },
         addEventListener: () => undefined,
       },
     });

@@ -55,6 +55,30 @@ export function wakeSfx(): void {
 
 interface Note { hz: number; at: number; for: number; gain?: number; type?: OscillatorType }
 
+/* Everything scheduled and not yet finished, with when it ends, so leaving a
+   game can silence it: a crowd murmur runs as long as the take it sits
+   under, and a fanfare lasts most of a second. */
+const playing = new Map<AudioScheduledSourceNode, number>();
+
+function track(source: AudioScheduledSourceNode, end: number): void {
+  playing.set(source, end);
+  source.onended = () => playing.delete(source);
+}
+
+/** a tap's click is over almost before the next screen opens: let it finish */
+const MOMENT = 0.15;
+
+/** stop the sound effects still playing. Called when a game is left; the
+    click of the tap that left it is allowed to finish */
+export function hushSfx(): void {
+  const now = ctx?.currentTime ?? 0;
+  for (const [source, end] of playing) {
+    if (end - now <= MOMENT) continue;
+    try { source.stop(); } catch { /* not started, or already over */ }
+    playing.delete(source);
+  }
+}
+
 function play(notes: Note[]): void {
   if (!enabled) return;
   const ac = audio();
@@ -75,6 +99,7 @@ function play(notes: Note[]): void {
       osc.connect(vol).connect(ac.destination);
       osc.start(start);
       osc.stop(start + note.for + 0.02);
+      track(osc, start + note.for + 0.02);
     }
   } catch {
     /* a game without sound effects is still a game */
@@ -109,6 +134,7 @@ function noise(seconds: number, peak: number): void {
     source.connect(band).connect(vol).connect(ac.destination);
     source.start(now);
     source.stop(now + seconds + 0.02);
+    track(source, now + seconds + 0.02);
   } catch {
     /* no crowd, still a goal */
   }
