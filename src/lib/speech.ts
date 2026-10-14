@@ -189,15 +189,23 @@ export function setSpeechEnabled(on: boolean): void {
  * listening if it changed. That is a cheap hedge against slow loading, not a
  * way to summon a downloaded voice: an iPad with Karen Enhanced installed
  * still never offered her to the page, unlock or no unlock.
+ *
+ * An engine that is already saying something is already open, so nothing
+ * is started then. Queuing the empty utterance behind a word in progress
+ * froze the whole page in WebKit's Linux build: the next word's speak()
+ * never returned. Safari on the iPad has not been seen to, but there is no
+ * gate left to open, so there is nothing to lose by not asking.
  */
 export function unlockSpeech(): void {
   if (unlocked) return;
   const synth = engine();
   if (!synth) return;
   try {
-    const u = new SpeechSynthesisUtterance('');
-    u.volume = 0;
-    synth.speak(u);
+    if (!synth.speaking && !synth.pending) {
+      const u = new SpeechSynthesisUtterance('');
+      u.volume = 0;
+      synth.speak(u);
+    }
     unlocked = true;
     for (const delay of [0, 250, 750, 2000]) window.setTimeout(rescanVoices, delay);
   } catch {

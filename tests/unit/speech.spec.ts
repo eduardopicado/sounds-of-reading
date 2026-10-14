@@ -22,6 +22,8 @@ function fakeEngine(voices: FakeVoice[]) {
   let current: FakeUtterance | null = null;
   const engine = {
     said,
+    get speaking() { return current !== null; },
+    pending: false,
     getVoices: () => voices,
     speak: (u: FakeUtterance) => { said.push(u); current = u; },
     /* Chrome fires error on a stopped utterance and Safari fires end; either
@@ -163,5 +165,33 @@ describe('choosing a voice', () => {
     expect(plain.onlyCompactVoices()).toBe(true);
     const good = await load([voice('Karen', 'en-AU', 'com.apple.voice.premium.en-AU.Karen')]);
     expect(good.onlyCompactVoices()).toBe(false);
+  });
+});
+
+describe('the first tap', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('opens the gate with a silent utterance', async () => {
+    const speech = await load();
+    speech.unlockSpeech();
+    expect(engine.said.map((u) => u.text)).toEqual(['']);
+    expect(engine.said[0].volume).toBe(0);
+  });
+
+  it('starts nothing while a word is being said: the engine is already open', async () => {
+    const speech = await load();
+    speech.say('chain');
+    speech.unlockSpeech();
+    expect(engine.said.map((u) => u.text)).toEqual(['chain']);
+    /* and the next word is said as usual */
+    speech.say('hay');
+    expect(engine.said.map((u) => u.text)).toEqual(['chain', 'hay']);
+  });
+
+  it('only once', async () => {
+    const speech = await load();
+    speech.unlockSpeech();
+    speech.unlockSpeech();
+    expect(engine.said).toHaveLength(1);
   });
 });
