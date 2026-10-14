@@ -92,6 +92,8 @@ test.describe('Trace It', () => {
     await writeRound(page);
     await expect(page.locator('.tr-results li')).toHaveCount(4);
     await expect(page.locator('.tr-results li.miss')).toHaveCount(0);
+    /* writing earns a sticker of its own */
+    await expect(page.locator('.results .sticker')).toHaveText('✏️');
     noProblems(watch);
   });
 
@@ -251,6 +253,7 @@ test.describe('Tall, Small, Tail', () => {
     await expect(page.locator('.results')).toBeVisible({ timeout: 4000 });
     await expect(page.locator('.results')).toContainText('10 of 10 letters right first try');
     await expect(page.locator('.results')).toContainText(`Every ${target} found`);
+    await expect(page.locator('.results .sticker')).toHaveText('🦒');
     noProblems(watch);
   });
 

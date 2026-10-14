@@ -23,6 +23,7 @@
 import { el, prefersReducedMotion } from '../lib/dom';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
+import { awardFace } from '../lib/stickers';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import { shuffle } from '../lib/random';
@@ -98,8 +99,9 @@ export function mount(root: HTMLElement): () => void {
     el('div', { class: 'row tr-actions' }, showBtn));
 
   const resultList = el('ul', { class: 'tr-results' });
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', { text: 'Letters you wrote' }), resultList,
+    el('h2', {}, 'Letters you wrote ', prize), resultList,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       el('button', { class: 'btn', type: 'button', text: 'Write again', on: { click: () => start() } }),
       el('button', { class: 'btn ghost', type: 'button', text: '🖨 Print a practice sheet', on: { click: () => printSheet() } })),
@@ -390,6 +392,9 @@ export function mount(root: HTMLElement): () => void {
     resultList.replaceChildren(...log.map((entry) =>
       el('li', { class: entry.ok ? '' : 'miss' }, el('span', { class: 'tr-big', text: [...entry.item].join(' ') }),
         entry.ok ? '' : el('span', { class: 'mk', text: 'again' }))));
+    /* writing earns a sticker of its own: it practises no one sound */
+    prize.textContent = awardFace('trace-it', '✏️').face;
+    prize.hidden = false;
     results.hidden = false;
     stepEl.textContent = '';
     sfx.win();

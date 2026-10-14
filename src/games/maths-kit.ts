@@ -17,6 +17,7 @@ import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { awardFace } from '../lib/stickers';
+import { markPlayed } from '../lib/played';
 import { climb, type Climb, type Step } from '../content/maths';
 import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { narrationSelect } from './narration';
@@ -232,6 +233,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     board.hidden = true;
     const moved = to > from ? ` You went up to ${game.steps[to].name}!` : '';
     summary.textContent = `${right} of ${n} right first time.${moved}`;
+    markPlayed(game.id);
     const sticker = right * 2 >= n ? awardFace(game.id, game.face) : null;
     prize.hidden = !sticker;
     prize.textContent = sticker?.face ?? '';

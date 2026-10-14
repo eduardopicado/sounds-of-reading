@@ -80,6 +80,7 @@ test.describe('Be the Commentator', () => {
     }
 
     await expect(page.locator('.results')).toBeVisible();
+    await expect(page.locator('.results .sticker')).toHaveText('🎙️');
     await expect(page.locator('.cm-reel li.has-take')).toHaveCount(5);
     const before = await played(page);
     await page.getByRole('button', { name: '▶ Play the highlights' }).click();

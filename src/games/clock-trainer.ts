@@ -30,6 +30,7 @@ import { say } from '../lib/speech';
 import { settings } from '../lib/settings';
 import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
+import { markPlayed } from '../lib/played';
 import {
   HANDS_STEPS, clockHour, handsChoices, handsTarget, hourExplained, minuteExplained, minuteHint, moveMinute,
   sameTime, timeWords, type ClockTime,
@@ -245,6 +246,7 @@ export function mount(root: HTMLElement): () => void {
         if (done) return;
         if (c.ok) {
           done = true;
+          markPlayed(ID);
           b.classList.add('right');
           sfx.cheer();
           feedback('good', 'Yes! It is ', digits(want), '. We say ', el('b', { text: timeWords(want.h, want.m) }), '.');
@@ -272,6 +274,7 @@ export function mount(root: HTMLElement): () => void {
     const want = target;
     if (sameTime(t, want)) {
       done = true;
+      markPlayed(ID);
       locked = true;
       lockUI();
       sfx.cheer();

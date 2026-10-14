@@ -493,6 +493,8 @@ test.describe('Tricky Words', () => {
     await expect(page.locator('.results li')).toHaveCount(6);
     /* the review shows which letters were the liars */
     expect(await page.locator('.results li .gr').count()).toBeGreaterThan(0);
+    /* and the round wins the game's own sticker */
+    await expect(page.locator('.results .sticker')).toHaveText('🧠');
     noProblems(watch);
   });
 

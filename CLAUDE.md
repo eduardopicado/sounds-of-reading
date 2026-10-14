@@ -1,7 +1,7 @@
 # CLAUDE.md
 
-Phonics, writing and maths games web app for a 6-year-old, played on an iPad from the home screen
-and shared with his school friends. The original brief is `docs/HANDOVER.md`;
+Phonics, writing, maths and jiu-jitsu games web app for a 6-year-old, played
+on an iPad from the home screen and shared with his school friends. The original brief is `docs/HANDOVER.md`;
 the prototypes it came from are in `docs/original-games/`.
 
 ## Rules
@@ -25,7 +25,9 @@ the prototypes it came from are in `docs/original-games/`.
 - Run the content test before committing any content change.
 - A game schedules its timers through `lifetime()` (`src/lib/life.ts`) and
   ends it on unmount, so nothing it planned — a word, a fanfare, a
-  microphone — happens after he has left the game.
+  microphone — happens after he has left the game. Leaving also cancels
+  speech (whose `onEnd` then never runs) and stops sound effects still
+  playing; the router does both.
 - A round never shows the same word twice (`uniqueWords`), and a word offered
   between several sounds must fit only one of them (`fitsAnother`).
 
@@ -35,9 +37,12 @@ the prototypes it came from are in `docs/original-games/`.
 npm run dev              # local dev server
 npm run build            # typecheck, then build to dist/
 npm run validate:content # the content test on its own
-npm run test:unit        # unit tests for src/lib (audio, lifetime, coach, settings)
+npm run test:unit        # unit tests for the shared code (speech, audio, sfx, lifetime, coach, settings)
 npm test                 # content and unit tests, then the Playwright suite
 ```
+
+CI runs all of these on every pull request and push. GitHub Pages deploys
+only after CI has passed on a push to `main` (`.github/workflows/deploy.yml`).
 
 ## Layout
 
@@ -49,6 +54,9 @@ src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Sho
 src/content/near-words.ts the nearest real words, for wrong answers that need reading
 src/content/handwriting.ts how each letter is written: strokes, families, heights
 src/content/sort-sets.ts the sound sets Sound Sort offers
+src/content/spelling.ts the tiles for spelling a word, wrong ones included (Build the Word)
+src/content/contrasts.ts two spellings of one sound and the rule between them
+                       (Same Sound, Two Ways)
 src/content/big-words.ts two-syllable words from words.ts, each level worked out
                        from the spellings in its parts
 src/content/coach-says.ts Coach Says: the things, places and instructions from
@@ -59,8 +67,14 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask (Weigh-In's things and weight classes too),
                        every word in English and Portuguese
-src/lib/               speech, sound effects, storage, settings, colour, router,
-                       strokes.ts (judging a traced stroke), life.ts (a game's timers)
+src/lib/               speech.ts (voices, and saying things), sfx.ts (synthesised
+                       sound effects), audio.ts and clip-id.ts (recorded words;
+                       none ship yet, see public/audio/README.md), storage.ts,
+                       settings.ts, coach.ts (the record of how each sound is
+                       going), stickers.ts, colour.ts, highlight.ts (a word with
+                       its sound marked), router.ts, life.ts (a game's timers),
+                       strokes.ts (judging a traced stroke), recorder.ts (the
+                       microphone, for Be the Commentator), dom.ts, random.ts
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/             one file per game, plus home.ts (tiles by section, the
@@ -74,6 +88,10 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        bjj-art.ts draws the moves and the referee's signals;
                        bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
                        belt the BJJ games share
+                       teams.ts: the football teams, their flags and kits;
+                       narration.ts: the commentator ("Goooool do Brasil!")
+                       voices.ts: #/voices, the voice diagnostics, linked
+                       from nowhere
 tools/                 content maintenance scripts (not shipped)
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes
