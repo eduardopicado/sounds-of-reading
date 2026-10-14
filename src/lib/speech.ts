@@ -21,6 +21,18 @@
 import { hasClip, playClip, stopClips } from './audio';
 
 let cached: SpeechSynthesisVoice | null = null;
+/**
+ * The utterance being said now, if any.
+ *
+ * Two jobs. Its end is reported only while it is still this one: stopping
+ * speech makes the engine fire `error` (Chrome) or `end` (Safari) on whatever
+ * it was saying, and passing that on as "finished" let a game that had just
+ * been left carry on — the commentator's "Goooool!" was cut off on the way
+ * out and the word after it was then said over the home screen. And holding
+ * it here keeps it from being garbage-collected mid-sentence, which in some
+ * engines means its end never fires at all.
+ */
+let speaking: SpeechSynthesisUtterance | null = null;
 let unlocked = false;
 let enabled = true;
 /** a voice the parent chose by hand, which beats anything we would rank */
@@ -222,8 +234,10 @@ export function onVoicesChanged(fn: () => void): () => void {
   return () => voiceListeners.delete(fn);
 }
 
-/** silence: the device voice and any recording. Called when a game is left */
+/** silence: the device voice and any recording. Called when a game is left.
+ *  Whatever was being said is dropped, not finished: its onEnd never runs */
 export function cancelSpeech(): void {
+  speaking = null;
   stopClips();
   try {
     engine()?.cancel();
@@ -258,6 +272,15 @@ export interface SayOptions {
    * voice, which would mangle it — check canSpeak() first.
    */
   lang?: string;
+  /**
+   * Called once when it has been said, or at once if it cannot be said at all.
+   *
+   * Not called when it is stopped — by leaving the game, by turning speech
+   * off, or by something else being said over it — so a game never carries
+   * on from speech it did not hear the end of. Some engines never report an
+   * end even for speech that finished, so anything that has to happen next
+   * keeps a timer of its own as well (see narrate in src/games/narration.ts).
+   */
   onEnd?: () => void;
 }
 
@@ -313,6 +336,8 @@ function speakAloud(text: string, options: SayOptions): void {
   const synth = engine();
   if (!synth) { options.onEnd?.(); return; }
   try {
+    /* drop the one being said before the engine reports it stopped */
+    speaking = null;
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
     let voice: SpeechSynthesisVoice | null;
@@ -333,16 +358,24 @@ function speakAloud(text: string, options: SayOptions): void {
       /* fall back to lang alone */
     }
     u.lang = voice?.lang ?? options.lang ?? 'en-AU';
-    /* Apple's voices warble below about 0.8 and sound synthetic above a pitch
-       of 1, so stay inside that. Sounding it out is meant to be slow. */
+    /* a touch slower than normal for a beginner reader, and much slower for
+       "sound it out for me". Pitch stays at 1: above it Apple's voices sound
+       synthetic */
     u.rate = options.slow ? 0.45 : 0.9;
     u.pitch = 1;
-    if (options.onEnd) {
-      u.onend = () => options.onEnd?.();
-      u.onerror = () => options.onEnd?.();
-    }
+    /* an error that is not a stop (no voice, the engine failing) still ends
+       it, so a game waiting on it does not wait for ever */
+    const finished = (): void => {
+      if (speaking !== u) return;
+      speaking = null;
+      options.onEnd?.();
+    };
+    u.onend = finished;
+    u.onerror = finished;
+    speaking = u;
     synth.speak(u);
   } catch {
+    speaking = null;
     options.onEnd?.();
   }
 }

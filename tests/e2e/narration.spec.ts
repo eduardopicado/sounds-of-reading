@@ -5,9 +5,11 @@ import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
 
 type Said = { text: string; lang: string };
 
-/** a speech engine with an Australian voice, and a Brazilian one if asked */
-async function voices(page: Page, portuguese: boolean): Promise<void> {
-  await page.addInitScript((pt) => {
+/** a speech engine with an Australian voice, and a Brazilian one if asked.
+ *  `talk` is how long each line takes to say; a stopped line reports its end
+ *  a moment later, the way real engines do */
+async function voices(page: Page, portuguese: boolean, talk = 0): Promise<void> {
+  await page.addInitScript(([pt, ms]) => {
     const spoken: Said[] = [];
     (window as unknown as { __said: Said[] }).__said = spoken;
     class FakeUtterance {
@@ -18,19 +20,21 @@ async function voices(page: Page, portuguese: boolean): Promise<void> {
     const list = [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'com.apple.voice.compact.en-AU.Karen' }];
     if (pt) list.push({ name: 'Luciana', lang: 'pt-BR', localService: true, default: false, voiceURI: 'com.apple.voice.compact.pt-BR.Luciana' });
     Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+    let current: FakeUtterance | null = null;
     Object.defineProperty(window, 'speechSynthesis', {
       configurable: true,
       value: {
         getVoices: () => list,
         speak: (u: FakeUtterance) => {
           if (u.text) spoken.push({ text: u.text, lang: u.voice?.lang ?? u.lang });
-          window.setTimeout(() => u.onend?.(), 0);
+          current = u;
+          window.setTimeout(() => { if (current === u) { current = null; u.onend?.(); } }, ms);
         },
-        cancel: () => undefined,
+        cancel: () => { const u = current; current = null; if (u) window.setTimeout(() => u.onerror?.(), 0); },
         addEventListener: () => undefined,
       },
     });
-  }, portuguese);
+  }, [portuguese, talk] as const);
 }
 
 const said = (page: Page): Promise<Said[]> =>
@@ -116,6 +120,23 @@ test.describe('the commentator', () => {
     await expect(page.locator('.pk-banner')).toHaveText('GOAL!');
     await expect.poll(async () => (await said(page)).at(-1)?.text).toBe(word);
     expect((await said(page)).some((s) => s.lang === 'pt-BR')).toBe(false);
+  });
+
+  test('leaving in the middle of the call says nothing more over the home screen', async ({ page }) => {
+    const watch = watchPage(page);
+    /* every line takes a second and a half, so he can leave mid-shout */
+    await voices(page, true, 1500);
+    await seed(page, { 'shootout-team': 'brazil', 'shootout-rival': 'argentina' });
+    await kickOff(page);
+    await kick(page, true);
+    await expect.poll(async () => (await said(page)).map((s) => s.text)).toContainEqual(expect.stringMatching(/ do Brasil!$/));
+    const call = (await said(page)).length;
+    await page.getByRole('button', { name: 'Back to the games' }).click();
+    await expect(page.locator('.tiles').first()).toBeVisible();
+    /* long enough for the word that would have followed the call */
+    await page.waitForTimeout(3000);
+    expect((await said(page)).slice(call)).toEqual([]);
+    noProblems(watch);
   });
 
   test('Pass and Shoot has the commentator too', async ({ page }) => {

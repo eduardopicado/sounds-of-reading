@@ -141,6 +141,28 @@ test.describe('Sound Sort', () => {
     await page.waitForTimeout(250);
     expect(await page.locator('.hand .word .gr, .bin .tile .gr').count()).toBeGreaterThan(0);
   });
+
+  test('a word dragged onto a bin is sorted, the way he reaches for it', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'sound-sort');
+    const hand = page.locator('.hand');
+    const sorted = page.locator('.score b').first();
+    /* drag onto one bin, then the other: one of them is right */
+    for (const n of [0, 1]) {
+      if ((await sorted.textContent()) !== '0') break;
+      const from = (await hand.boundingBox())!;
+      const to = (await page.locator('.bin').nth(n).boundingBox())!;
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 10 });
+      /* the bin under his finger lights up while he holds the word over it */
+      await expect(page.locator('.bin.over')).toHaveCount(1);
+      await page.mouse.up();
+      await page.waitForTimeout(900);
+    }
+    await expect(sorted).toHaveText('1');
+    noProblems(watch);
+  });
 });
 
 test.describe('Word Builder', () => {
