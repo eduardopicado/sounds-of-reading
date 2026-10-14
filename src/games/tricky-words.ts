@@ -31,6 +31,7 @@ import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
+import { awardFace } from '../lib/stickers';
 import { marked, setMarked } from '../lib/highlight';
 import { ALL_SIGHT_WORDS, SIGHT_SETS, type SightWord } from '../content/index';
 import { tonesFor } from '../lib/colour';
@@ -138,8 +139,9 @@ export function mount(root: HTMLElement): () => void {
   });
 
   const resultList = el('ul', {});
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'How it went'), resultList,
+    el('h2', {}, 'How it went ', prize), resultList,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
   );
@@ -279,6 +281,9 @@ export function mount(root: HTMLElement): () => void {
       if (!entry.firstTry) li.append(el('span', { class: 'mk', text: 'again' }));
       resultList.append(li);
     }
+    /* a tricky word practises no sound, so the sticker is the game's own */
+    prize.textContent = awardFace('tricky-words', '🧠').face;
+    prize.hidden = false;
     results.hidden = false;
     sfx.win();
     confetti();

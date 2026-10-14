@@ -78,9 +78,12 @@ in a row, down after two wrong. The Year 2 levels sit at the top of each
 ladder. Each round waits for a tap on Start, so nothing is asked while the
 page is still loading. Coach Says and Big Words climb the same way.
 
-Finishing a round in most games wins a sticker: a reading game's is for the
-sound it practised most, and a maths or jiu-jitsu game's is the game's own.
-The stickers collect in a book on the home screen. There is nothing to lose —
+Finishing a round wins a sticker: a reading game's is for the sound it
+practised most, and every other game — maths, jiu-jitsu, handwriting, Tricky
+Words, the commentator — gives its own. A few ask a little more: a maths
+round needs half its answers right first time, a Sound Rocket flight five
+catches, a shootout a win or a draw, and the clock a star every five. The
+stickers collect in a book on the home screen. There is nothing to lose —
 every game is completable and no answer is ever marked with a red X.
 
 ## The grown-ups corner

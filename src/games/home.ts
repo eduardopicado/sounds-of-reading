@@ -13,6 +13,7 @@ import { sfx } from '../lib/sfx';
 import { PRACTICE_SOUNDS, sound, type Sound } from '../content/index';
 import { confetti } from '../ui/components';
 import { stickers } from '../lib/stickers';
+import { played } from '../lib/played';
 import { settings } from '../lib/settings';
 import { closeMove, maybeLevelUp, undoMove, unseenMove, weakSounds } from '../lib/coach';
 
@@ -68,6 +69,11 @@ export const TILES: Tile[] = [
   { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj' },
 ];
 
+/** a sound's label, or nothing much for one that has since been removed */
+const soundLabel = (id: string | undefined): string => {
+  try { return id ? sound(id).label : 'A'; } catch { return 'A'; }
+};
+
 /* ── the coach's picks ────────────────────────────────────────────────── */
 
 export interface Pick { tile: Tile; why: string }
@@ -99,15 +105,13 @@ export function coachPicks(seed = today()): Pick[] {
     why: weak.length ? `Practise ${labels(weak.slice(0, 3))}` : "This week's sounds",
   };
 
-  /* a maths game's sticker carries the game's own id, so it says when he
-     last finished a round of it */
-  const lastWon = new Map<string, number>();
-  for (const s of stickers()) lastWon.set(s.sound, Math.max(lastWon.get(s.sound) ?? 0, s.at));
+  /* when he last finished a round of each one, whatever the score */
+  const last = played();
   const numbers = [...of('maths'), ...of('bjj')];
-  const fresh = numbers.filter((t) => !lastWon.has(t.path));
+  const fresh = numbers.filter((t) => !(t.path in last));
   const maths: Pick = fresh.length
     ? { tile: nth(fresh, seed * 7 + 3), why: 'Not tried yet' }
-    : { tile: [...numbers].sort((a, b) => (lastWon.get(a.path) ?? 0) - (lastWon.get(b.path) ?? 0))[0], why: 'Not played for a while' };
+    : { tile: [...numbers].sort((a, b) => (last[a.path] ?? 0) - (last[b.path] ?? 0))[0], why: 'Not played for a while' };
 
   const writing: Pick = { tile: nth(of('writing'), seed * 3 + 1), why: 'Something different' };
   return [reading, maths, writing];
@@ -219,8 +223,7 @@ export function mount(root: HTMLElement): () => void {
   }
   /* newest last, so the one just won lands at the end */
   for (const sticker of earned.slice(-24)) {
-    let label = sticker.sound;
-    try { label = sound(sticker.sound).label; } catch { /* a removed sound, or a maths game */ }
+    const label = sticker.game ? `${TILES.find((t) => t.path === sticker.game)?.name ?? 'Game'}` : soundLabel(sticker.sound);
     book.append(el('span', { class: 'sticker', text: sticker.face, title: label, 'aria-label': `${label} sticker` }));
   }
   const bookTray = el('div', { class: 'tray' }, el('h2', {}, 'Your stickers'), book);

@@ -16,6 +16,7 @@
 import { el, replay } from '../lib/dom';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
+import { awardFace } from '../lib/stickers';
 import { pro } from '../lib/settings';
 import { pick, shuffle } from '../lib/random';
 import { HEIGHTS, MIRRORS, heightOf, type Height } from '../content/handwriting';
@@ -68,8 +69,9 @@ export function mount(root: HTMLElement): () => void {
   const hunt = el('div', { class: 'ts-board', hidden: 'hidden' }, huntTitle, grid, huntNote);
 
   const summary = el('p', {});
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', { text: 'Well spotted' }), summary,
+    el('h2', {}, 'Well spotted ', prize), summary,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
   );
@@ -221,6 +223,8 @@ export function mount(root: HTMLElement): () => void {
       bits.push(huntMisses ? `You found every ${huntTarget}, with ${huntMisses} wrong ${huntMisses === 1 ? 'tap' : 'taps'}.` : `Every ${huntTarget} found with no wrong taps!`);
     }
     summary.textContent = bits.join(' ');
+    prize.textContent = awardFace('tall-small-tail', '🦒').face;
+    prize.hidden = false;
     results.hidden = false;
     sfx.win();
     confetti();

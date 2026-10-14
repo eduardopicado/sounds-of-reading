@@ -28,6 +28,7 @@ import { el } from '../lib/dom';
 import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { sfx } from '../lib/sfx';
+import { awardFace } from '../lib/stickers';
 import { read } from '../lib/storage';
 import { ALL_COMMENTARY, LEVELS, type CommentaryLine, type Level, type Mood } from '../content/index';
 import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
@@ -76,8 +77,9 @@ export function mount(root: HTMLElement): () => void {
 
   const reel = el('ol', { class: 'cm-reel' });
   const reelBtn = el('button', { class: 'btn', type: 'button', text: '▶ Play the highlights' });
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'Your match highlights'), reel,
+    el('h2', {}, 'Your match highlights ', prize), reel,
     el('div', { class: 'row', style: { marginTop: '14px' } },
       reelBtn,
       el('button', { class: 'btn ghost', type: 'button', text: 'New match', on: { click: () => start() } })),
@@ -275,6 +277,8 @@ export function mount(root: HTMLElement): () => void {
     reel.replaceChildren(...lines.map((l, i) =>
       el('li', { class: takes[i] ? 'has-take' : '' }, `${MOODS[l.mood].face} ${fill(l.text)}`)));
     reelBtn.hidden = !takes.some(Boolean);
+    prize.textContent = awardFace('be-the-commentator', '🎙️').face;
+    prize.hidden = false;
     results.hidden = false;
     sfx.whistle();
     life.later(() => { sfx.win(); confetti(); }, 350);
