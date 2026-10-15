@@ -44,7 +44,8 @@ npm run test:unit        # unit tests for the shared code (speech, audio, sfx, l
 npm test                 # content and unit tests, then the Playwright suite
 ```
 
-CI runs all of these on every pull request and push. GitHub Pages deploys
+CI runs all of these on every pull request and push, the browser tests as
+one job per device, side by side. GitHub Pages deploys
 only after CI has passed on a push to `main` (`.github/workflows/deploy.yml`).
 
 ## Layout

@@ -498,12 +498,26 @@ test.describe('maths games', () => {
     const line = page.locator('.jl-line');
     const a = Number(await line.getAttribute('data-a'));
     const b = Number(await line.getAttribute('data-b'));
-    await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
-    await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    const one = page.getByRole('button', { name: 'Jump on 1', exact: true });
+    const asked = `the question was ${a} + ${b}`;
+    /* tap by tap, each one landing before the next */
+    await one.click();
+    await expect(line, asked).toHaveAttribute('data-at', String(a + 1));
+    /* from 9 a second jump would leave the line, which is refused, and
+       there is no way to miss by jumping on: that is all there is to see */
+    if (a + 2 > 10) {
+      await one.click();
+      await expect(line, asked).toHaveAttribute('data-at', String(a + 1));
+      await page.getByRole('button', { name: 'Undo a jump' }).click();
+      await expect(page.locator('.jl-arc.his')).toHaveCount(0);
+      return;
+    }
+    await one.click();
+    await expect(line, asked).toHaveAttribute('data-at', String(a + 2));
     await expect(page.locator('.jl-arc.his')).toHaveCount(2);
     await page.getByRole('button', { name: 'Undo a jump' }).click();
     await expect(page.locator('.jl-arc.his')).toHaveCount(1);
-    await expect(line).toHaveAttribute('data-at', String(a + 1));
+    await expect(line, asked).toHaveAttribute('data-at', String(a + 1));
     /* one jump is never right here: the smallest jump on is 1, so stop short unless it was 1 */
     if (b === 1) await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
     await page.getByRole('button', { name: 'Done ✓' }).click();
