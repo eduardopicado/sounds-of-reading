@@ -19,7 +19,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  /* a GitHub runner has four cores; at two workers the suite outgrew the job's time limit */
+  /* a GitHub runner has four cores; CI runs each device as its own job (.github/workflows/ci.yml) */
   workers: process.env.CI ? 4 : undefined,
   reporter: process.env.CI ? [['github'], ['list']] : 'list',
   timeout: 90_000,

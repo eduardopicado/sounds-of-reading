@@ -14,10 +14,7 @@ concurrency:
 jobs:
   check:
     runs-on: ubuntu-latest
-    # the suite takes about sixteen minutes on four workers in Chromium and
-    # a third as long again in WebKit; this only catches a genuine hang (at
-    # 20 it was cutting off a healthy run of 600 tests)
-    timeout-minutes: 50
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -37,15 +34,49 @@ jobs:
       - name: Typecheck and build
         run: npm run build
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium webkit
+  # The browser tests, one job per device, side by side. In one job they
+  # took 22 minutes: every test runs at four sizes, and a whole round of a
+  # game waits out its own pauses. Run apart they finish in the time of the
+  # slowest, and WebKit, the slowest, is split in two. The repository is
+  # public, so the extra runners cost nothing.
+  e2e:
+    name: e2e (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    # a healthy job takes under ten minutes; this only catches a genuine hang
+    timeout-minutes: 30
+    strategy:
+      # one device failing should not hide what the others found
+      fail-fast: false
+      matrix:
+        include:
+          - { name: ipad-portrait, project: ipad-portrait, browser: chromium, shard: 1/1 }
+          - { name: ipad-landscape, project: ipad-landscape, browser: chromium, shard: 1/1 }
+          - { name: phone, project: phone, browser: chromium, shard: 1/1 }
+          - { name: ipad-webkit 1 of 2, project: ipad-webkit, browser: webkit, shard: 1/2 }
+          - { name: ipad-webkit 2 of 2, project: ipad-webkit, browser: webkit, shard: 2/2 }
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # each job serves its own build; it takes seconds
+      - name: Build
+        run: npm run build
+
+      - name: Install the browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: End to end
-        run: npx playwright test
+        run: npx playwright test --project ${{ matrix.project }} --shard ${{ matrix.shard }}
 
+      # traces of what failed, to open with `npx playwright show-trace`
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: playwright-report
-          path: playwright-report/
+          name: traces-${{ matrix.project }}-${{ strategy.job-index }}
+          path: test-results/
           retention-days: 7
+          if-no-files-found: ignore
