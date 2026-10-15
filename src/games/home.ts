@@ -16,58 +16,9 @@ import { stickers } from '../lib/stickers';
 import { played } from '../lib/played';
 import { settings } from '../lib/settings';
 import { closeMove, maybeLevelUp, undoMove, unseenMove, weakSounds } from '../lib/coach';
+import { GAMES, SECTIONS, type Game, type Section } from './catalog';
 
-export type Section = 'reading' | 'writing' | 'maths' | 'bjj';
-
-export interface Tile { path: string; name: string; emoji: string; what: string; tone: string; section: Section }
-
-export const SECTIONS: { id: Section; title: string }[] = [
-  { id: 'reading', title: 'Reading and spelling' },
-  { id: 'writing', title: 'Handwriting' },
-  { id: 'maths', title: 'Maths' },
-  { id: 'bjj', title: 'Jiu-jitsu 🥋' },
-];
-
-export const TILES: Tile[] = [
-  { path: 'memory-match', name: 'Memory Match', emoji: '🃏', what: 'Find the pairs', tone: '#E4572E', section: 'reading' },
-  { path: 'bingo', name: 'Bingo', emoji: '🎯', what: 'Find the word you hear', tone: '#3D8FCB', section: 'reading' },
-  { path: 'sound-sort', name: 'Sound Sort', emoji: '🗂️', what: 'Drop it in the right bin', tone: '#79D3B0', section: 'reading' },
-  { path: 'word-builder', name: 'Word Builder', emoji: '🧱', what: 'Swap a part, make a word', tone: '#F3B229', section: 'reading' },
-  { path: 'roll-and-read', name: 'Roll & Read', emoji: '🎲', what: 'Roll it, read it out loud', tone: '#A87FD1', section: 'reading' },
-  { path: 'real-or-silly', name: 'Real or Silly?', emoji: '🤪', what: 'Is it a word or not?', tone: '#EF7A5A', section: 'reading' },
-  { path: 'sentence-smash', name: 'Sentence Smash', emoji: '💥', what: 'Build a silly sentence', tone: '#2FB5B5', section: 'reading' },
-  { path: 'same-sound', name: 'Same Sound, Two Ways', emoji: '🪞', what: 'Hear it, then spell it', tone: '#C77DBB', section: 'reading' },
-  { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A', section: 'reading' },
-  { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF', section: 'reading' },
-  { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E', section: 'reading' },
-  { path: 'pass-and-shoot', name: 'Pass and Shoot', emoji: '🥅', what: 'Say each sound, then shoot', tone: '#E0A43A', section: 'reading' },
-  { path: 'be-the-commentator', name: 'Be the Commentator', emoji: '🎙️', what: 'Read it like you mean it', tone: '#D9534F', section: 'reading' },
-  { path: 'build-the-word', name: 'Build the Word', emoji: '🔤', what: 'Hear it, then spell it', tone: '#6C8CD5', section: 'reading' },
-  { path: 'coach-says', name: 'Coach Says', emoji: '📣', what: 'Read it, then do it', tone: '#E07A3C', section: 'reading' },
-  { path: 'big-words', name: 'Big Words', emoji: '🐘', what: 'Long words in two parts', tone: '#8C7BD1', section: 'reading' },
-  { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing' },
-  { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing' },
-  { path: 'flash-count', name: 'Flash Count', emoji: '⚡', what: 'Look quickly: how many?', tone: '#F08A4B', section: 'maths' },
-  { path: 'off-the-bench', name: 'Off the Bench', emoji: '🧤', what: 'How many more make 10?', tone: '#3FA07A', section: 'maths' },
-  { path: 'scoreboard-sums', name: 'Scoreboard Sums', emoji: '🏟️', what: 'Goals in, goals out', tone: '#5AA0DC', section: 'maths' },
-  { path: 'number-line-penalty', name: 'Number Line Penalty', emoji: '🥅', what: 'Kick it to the number', tone: '#A87FD1', section: 'maths' },
-  { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', section: 'maths' },
-  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', section: 'maths' },
-  { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths' },
-  { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths' },
-  { path: 'jump-line', name: 'Jump Line', emoji: '🐸', what: 'Make the jumps, find the answer', tone: '#4FA3A5', section: 'maths' },
-  { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', section: 'maths' },
-  { path: 'clock-trainer', name: 'Short Hand, Long Hand', emoji: '🕰️', what: 'Move the hands, read the time', tone: '#D25A44', section: 'maths' },
-  { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths' },
-  { path: 'fact-family', name: 'Fact Family Formation', emoji: '👨‍👩‍👦', what: 'Know one fact, know them all', tone: '#5C8D4E', section: 'maths' },
-  { path: 'kit-shapes', name: 'Kit and Ball Shapes', emoji: '🔷', what: 'Circles, cones and hexagons', tone: '#5B7FD1', section: 'maths' },
-  { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths' },
-  { path: 'ice-cream-van', name: 'Ice Cream Van', emoji: '🍦', what: 'Pay with Aussie coins', tone: '#E58FB3', section: 'maths' },
-  { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj' },
-  { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj' },
-  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj' },
-  { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj' },
-];
+export type { Section } from './catalog';
 
 /** a sound's label, or nothing much for one that has since been removed */
 const soundLabel = (id: string | undefined): string => {
@@ -76,7 +27,7 @@ const soundLabel = (id: string | undefined): string => {
 
 /* ── the coach's picks ────────────────────────────────────────────────── */
 
-export interface Pick { tile: Tile; why: string }
+export interface Pick { tile: Game; why: string }
 
 /** a number for today, the same all day, so the picks do not reshuffle every
     time he comes back to the home screen */
@@ -96,7 +47,7 @@ const nth = <T>(list: T[], seed: number): T => list[((seed % list.length) + list
  * notes and the sticker book.
  */
 export function coachPicks(seed = today()): Pick[] {
-  const of = (section: Section): Tile[] => TILES.filter((t) => t.section === section);
+  const of = (section: Section): Game[] => GAMES.filter((t) => t.section === section);
   const labels = (ids: string[]): string => ids.map((id) => { try { return sound(id).label; } catch { return id; } }).join(', ');
 
   const weak = weakSounds();
@@ -153,7 +104,7 @@ function holdButton(label: string, onDone: () => void): { node: HTMLButtonElemen
 }
 
 export function mount(root: HTMLElement): () => void {
-  const tileLink = (tile: Tile): HTMLElement => el('a', {
+  const tileLink = (tile: Game): HTMLElement => el('a', {
     class: 'tile-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
     dataset: { game: tile.path },
     on: { click: () => sfx.tap() },
@@ -166,7 +117,7 @@ export function mount(root: HTMLElement): () => void {
   const sections = SECTIONS.flatMap((section) => [
     el('h2', { class: 'tiles-head', text: section.title }),
     el('div', { class: 'tiles', dataset: { section: section.id } },
-      ...TILES.filter((t) => t.section === section.id).map(tileLink)),
+      ...GAMES.filter((t) => t.section === section.id).map(tileLink)),
   ]);
 
   /* ── today's picks ──────────────────────────────────────────────────── */
@@ -223,7 +174,7 @@ export function mount(root: HTMLElement): () => void {
   }
   /* newest last, so the one just won lands at the end */
   for (const sticker of earned.slice(-24)) {
-    const label = sticker.game ? `${TILES.find((t) => t.path === sticker.game)?.name ?? 'Game'}` : soundLabel(sticker.sound);
+    const label = sticker.game ? `${GAMES.find((t) => t.path === sticker.game)?.name ?? 'Game'}` : soundLabel(sticker.sound);
     book.append(el('span', { class: 'sticker', text: sticker.face, title: label, 'aria-label': `${label} sticker` }));
   }
   const bookTray = el('div', { class: 'tray' }, el('h2', {}, 'Your stickers'), book);

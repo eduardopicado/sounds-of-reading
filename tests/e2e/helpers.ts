@@ -6,7 +6,13 @@ import { expect, type Page } from '@playwright/test';
 export function watchPage(page: Page): { errors: string[]; external: string[] } {
   const errors: string[] = [];
   const external: string[] = [];
-  page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+  /* with the address it was about, since "Failed to load resource" alone
+     does not say which */
+  page.on('console', (m) => {
+    if (m.type() !== 'error') return;
+    const where = m.location().url;
+    errors.push(where ? `${m.text()} (${where})` : m.text());
+  });
   page.on('pageerror', (e) => errors.push(String(e.message)));
   page.on('request', (r) => {
     const url = r.url();

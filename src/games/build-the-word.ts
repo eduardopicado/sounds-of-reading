@@ -17,6 +17,7 @@
  * that; Pro mode starts there. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
@@ -25,7 +26,7 @@ import { coachPick, mark } from '../lib/coach';
 import { award } from '../lib/stickers';
 import { picturable, realWords, sound, type Word } from '../content/index';
 import { answerFor, tilesFor, type TileMode } from '../content/spelling';
-import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
+import { celebrate, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 
 /** the longest word for letter tiles: more slots than this do not fit a phone */
 const MAX_LETTERS = 7;
@@ -62,11 +63,8 @@ export function mount(root: HTMLElement): () => void {
   const board = el('div', { class: 'bw-board' }, pic, hear, slotsEl, note, tray);
 
   const resultList = el('ul', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'Words you built ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray('Words you built', resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
   const empty = el('p', { class: 'tag', hidden: 'hidden',
     text: 'Not enough words with pictures here yet. Try adding a level or another sound.' });
@@ -79,7 +77,7 @@ export function mount(root: HTMLElement): () => void {
     }),
     setup.node,
     scoreLine(el('span', {}, pos.node, ' of ', totalEl), firstTry.node),
-    empty, board, results,
+    empty, board, results.node,
   );
 
   let queue: Word[] = [];
@@ -94,8 +92,9 @@ export function mount(root: HTMLElement): () => void {
   let firsts = 0;
   let busy = false;
   let log: { word: Word; ok: boolean }[] = [];
-  let timers: number[] = [];
-  const later = (fn: () => void, ms: number): void => { timers.push(window.setTimeout(fn, ms)); };
+  /* everything it plans goes through its lifetime, which leaving ends */
+  const life = lifetime();
+  const later = life.later;
 
   const mode = (): TileMode => modeSel.value as TileMode;
   /* one wrong tile per two right ones, at least two; one more in Pro */
@@ -250,13 +249,12 @@ export function mount(root: HTMLElement): () => void {
   /* ── the round ───────────────────────────────────────────────────────── */
 
   function start(): void {
-    for (const t of timers) window.clearTimeout(t);
-    timers = [];
+    life.clear();
     queue = coachPick(playable(), Number(lenSel.value));
     index = 0; firsts = 0; log = []; current = null;
     firstTry.set(0);
     totalEl.textContent = String(queue.length);
-    results.hidden = true;
+    results.hide();
     const none = !queue.length;
     empty.hidden = !none;
     board.hidden = none;
@@ -275,15 +273,11 @@ export function mount(root: HTMLElement): () => void {
       resultList.append(li);
     }
     const sticker = award(log.map((e) => e.word.sound));
-    prize.hidden = !sticker;
-    prize.textContent = sticker?.face ?? '';
-    results.hidden = false;
-    sfx.win();
-    confetti();
-    say(firsts === log.length ? 'Every one right!' : 'Good spelling!');
+    results.show(sticker);
+    celebrate(firsts === log.length ? 'Every one right!' : 'Good spelling!');
   }
 
   root.append(node);
   start();
-  return () => { for (const t of timers) window.clearTimeout(t); };
+  return life.end;
 }

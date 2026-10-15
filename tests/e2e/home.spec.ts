@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { expectTapTargets, noProblems, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, watchPage } from './helpers';
+import { GAMES, SECTIONS } from '../../src/games/catalog';
 
 test.describe('home screen', () => {
   test('shows every game and opens each one', async ({ page }) => {
@@ -7,35 +8,16 @@ test.describe('home screen', () => {
     await page.goto('/');
 
     const names = await page.locator('.tile-link .name').allTextContents();
-    expect(names).toEqual([
-      'Memory Match', 'Bingo', 'Sound Sort', 'Word Builder',
-      'Roll & Read', 'Real or Silly?', 'Sentence Smash', 'Same Sound, Two Ways',
-      'Tricky Words', 'Sound Rocket', 'Penalty Shootout', 'Pass and Shoot', 'Be the Commentator', 'Build the Word', 'Coach Says', 'Big Words',
-      'Trace It', 'Tall, Small, Tail',
-      'Flash Count', 'Off the Bench', 'Scoreboard Sums', 'Number Line Penalty',
-      'Team Buses',
-      'Keepy-Uppy Count',
-      'Training Drills',
-      'Half-Time Oranges',
-      'Jump Line',
-      'Match Clock',
-      'Short Hand, Long Hand',
-      'Fan Survey',
-      'Fact Family Formation',
-      'Kit and Ball Shapes',
-      "Coach's Whiteboard",
-      'Ice Cream Van',
-      "Ref's Call",
-      'Match Maths',
-      'Weigh-In',
-      "Ref's Signals",
-    ]);
+    /* every game in the catalog, section by section, in the catalog's order */
+    expect(names).toEqual(SECTIONS.flatMap((s) => GAMES.filter((g) => g.section === s.id).map((g) => g.name)));
 
-    for (const path of ['memory-match', 'bingo', 'sound-sort', 'word-builder', 'roll-and-read', 'real-or-silly', 'sentence-smash', 'same-sound', 'tricky-words', 'sound-rocket', 'penalty-shootout', 'pass-and-shoot', 'be-the-commentator', 'build-the-word', 'coach-says', 'big-words', 'trace-it', 'tall-small-tail', 'flash-count', 'off-the-bench', 'scoreboard-sums', 'number-line-penalty', 'team-buses', 'keepy-uppy', 'training-drills', 'half-time-oranges', 'jump-line', 'match-clock', 'clock-trainer', 'fan-survey', 'fact-family', 'kit-shapes', 'coach-whiteboard', 'ice-cream-van', 'refs-call', 'match-maths', 'weigh-in', 'refs-signals']) {
+    for (const { path } of GAMES) {
       await page.goto('/');
       await page.locator(`.tile-link[data-game="${path}"]`).click();
       await expect(page.locator('.topbar h1')).toBeVisible();
       expect(page.url()).toContain('#/' + path);
+      /* the tab, the app switcher and a screen reader name the game */
+      await expect(page).toHaveTitle(`${GAMES.find((g) => g.path === path)!.name} · Sounds of Reading`);
       /* and back out again, the way a child leaves a game */
       await page.getByRole('button', { name: 'Back to the games' }).click();
       await expect(page.locator('.tiles').first()).toBeVisible();
@@ -47,7 +29,7 @@ test.describe('home screen', () => {
     await page.goto('/');
     await expectTapTargets(page, '.tile-link');
     await expectTapTargets(page, '.pick-link');
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await expectTapTargets(page, '.week .chip');
   });
 
@@ -78,7 +60,7 @@ test.describe('home screen', () => {
     expect(tiles).toBeGreaterThan(20);
     await page.goto('/');
     await expect(page.locator('.tiles .tile-link')).toHaveCount(tiles);
-    await page.goto('/#/real-or-silly');
+    await openGame(page, 'real-or-silly');
     await expect(page.locator('.theword')).toBeVisible();
     noProblems(watch);
   });
@@ -87,7 +69,7 @@ test.describe('home screen', () => {
 test.describe("this week's sounds", () => {
   test('a change in the grown-ups corner reaches the games and survives a reload', async ({ page }) => {
     const watch = watchPage(page);
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
 
     /* pick level 4 only, then sh only */
     const levels = page.locator('.week .row').filter({ hasText: 'LEVELS' });
@@ -98,18 +80,18 @@ test.describe("this week's sounds", () => {
     expect(await levels.count()).toBeGreaterThan(0);
 
     /* a game opened now starts from that choice */
-    await page.goto('/#/roll-and-read');
+    await openGame(page, 'roll-and-read');
     const faces = await page.locator('.cube .face').allTextContents();
     expect(new Set(faces)).toEqual(new Set(['sh']));
 
     /* and it is still there after a reload, because it is in localStorage */
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await expect(page.locator('.week .now')).toHaveText(/Level 4 — sh/);
     noProblems(watch);
   });
 
   test('merging the two th sounds shows one chip instead of two', async ({ page }) => {
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await expect(page.locator('.week .chip', { hasText: 'th (them)' })).toBeVisible();
     await page.locator('.week .chip', { hasText: 'Merge the two th sounds' }).click();
     await expect(page.locator('.week .chip', { hasText: 'th (them)' })).toHaveCount(0);
@@ -123,7 +105,7 @@ test.describe('sticker book', () => {
     await page.goto('/');
     await expect(page.locator('.tray .empty', { hasText: 'first sticker' })).toBeVisible();
 
-    await page.goto('/#/word-builder');
+    await openGame(page, 'word-builder');
     const tiles = page.locator('.rack .tile');
     for (let i = 0, n = await tiles.count(); i < n; i += 1) {
       await tiles.nth(i).click({ timeout: 5000 }).catch(() => undefined);
@@ -139,11 +121,11 @@ test.describe('sticker book', () => {
 
     /* clearing it is a grown-up's job, and one tap only asks */
     await expect(page.getByRole('button', { name: 'Start a new sticker book' })).toHaveCount(0);
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await page.getByRole('button', { name: 'Start a new sticker book' }).click();
     await page.goto('/');
     await expect(page.locator('.sticker')).toHaveCount(1);
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await page.getByRole('button', { name: 'Start a new sticker book' }).click();
     await page.getByRole('button', { name: 'Tap again to clear every sticker' }).click();
     await page.goto('/');
@@ -180,7 +162,7 @@ test.describe('the grown-ups corner', () => {
   });
 
   test('groups the settings into cards', async ({ page }) => {
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Stickers']);
     /* the sounds of the two default levels, one line each */
     await expect(page.locator('.sound-group .group-name')).toHaveText(['Level 4', 'Level 5']);
@@ -191,7 +173,7 @@ test.describe('the grown-ups corner', () => {
       localStorage.setItem('sor:maths-step:team-buses', '2');
       localStorage.setItem('sor:maths-step:refs-call', '0');
     });
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     const rows = page.locator('.mp-row');
     await expect(rows).toHaveCount(2);
     await expect(rows.first()).toHaveAttribute('data-game', 'team-buses');
@@ -207,7 +189,7 @@ test.describe('the grown-ups corner', () => {
       for (const id of ids) localStorage.setItem(`sor:maths-step:${id}`, '0');
     }, paths as string[]);
     /* a new hash alone keeps the page; the reload runs the seeding */
-    await page.goto('/#/grown-ups');
+    await openGame(page, 'grown-ups');
     await page.reload();
     await expect(page.locator('.mp-row')).toHaveCount(paths.length);
   });
@@ -237,5 +219,22 @@ test.describe("the coach's picks", () => {
     await picks.nth(1).click();
     await expect(page.locator('.topbar h1')).toBeVisible();
     noProblems(watch);
+  });
+});
+
+test.describe('a game that will not open', () => {
+  /* with the offline worker out of the way, so the page asks for the file itself */
+  test.use({ serviceWorkers: 'block' });
+
+  test('says so, with a way back, instead of a blank page', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
+    await page.route('**/assets/sound-sort-*.js', (route) => route.abort());
+    await page.goto('/');
+    await page.locator('.tile-link[data-game="sound-sort"]').click();
+    await expect(page.locator('.route-error h1')).toHaveText('Oops!');
+    expect(errors.some((e) => e.includes('Could not open #/sound-sort'))).toBe(true);
+    await page.getByRole('button', { name: 'Back to the games' }).click();
+    await expect(page.locator('.tiles').first()).toBeVisible();
   });
 });

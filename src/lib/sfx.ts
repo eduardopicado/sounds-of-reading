@@ -4,10 +4,11 @@
  * to fetch, and the app stays offline-capable and request-free. Kept gentle:
  * a rising third for right, a soft low thud for wrong — never a buzzer. */
 
-import { read, write } from './storage';
 
 let ctx: AudioContext | null = null;
-let enabled = read('sfx', true);
+/* on or off is the grown-ups' setting (src/lib/settings.ts), which sets
+   this as the app starts */
+let enabled = true;
 
 function audio(): AudioContext | null {
   if (ctx) return ctx;
@@ -23,10 +24,7 @@ function audio(): AudioContext | null {
 
 export function setSfxEnabled(on: boolean): void {
   enabled = on;
-  write('sfx', on);
 }
-
-export const sfxEnabled = (): boolean => enabled;
 
 /** browsers suspend audio until a gesture, same as speech */
 export function unlockSfx(): void {

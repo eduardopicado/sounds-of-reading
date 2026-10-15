@@ -20,6 +20,7 @@
  * tap away. */
 
 import { el } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -29,7 +30,7 @@ import { coachPick, mark } from '../lib/coach';
 import { award } from '../lib/stickers';
 import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { nearWords } from '../content/near-words';
-import { confetti, createSetup, topbar } from '../ui/components';
+import { confetti, createSetup, resultsTray, topbar } from '../ui/components';
 import { read, write } from '../lib/storage';
 import { TEAMS, YOU, kit, label, player, teamById, type Team } from './teams';
 import { narrate, narrationSelect } from './narration';
@@ -133,12 +134,9 @@ export function mount(root: HTMLElement): () => void {
   /* ── the end ─────────────────────────────────────────────────────────── */
 
   const resultTitle = el('span', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const resultList = el('ul', {});
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, resultTitle, ' ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Rematch', on: { click: () => newMatch() } })),
+  const results = resultsTray(resultTitle, resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Rematch', on: { click: () => newMatch() } }),
   );
 
   const empty = el('p', { class: 'tag', hidden: 'hidden',
@@ -150,7 +148,7 @@ export function mount(root: HTMLElement): () => void {
       tagline: 'Read the word. Beat the keeper.',
       onSetup: (open) => setup.open(open),
     }),
-    setup.node, board, empty, cue, pitch, results,
+    setup.node, board, empty, cue, pitch, results.node,
   );
 
   /* ── state ───────────────────────────────────────────────────────────── */
@@ -168,10 +166,9 @@ export function mount(root: HTMLElement): () => void {
   let rival: Team = YOU;
   let shootBag: Word[] = [];
   let saveBag: Word[] = [];
-  let timers: number[] = [];
-
-  const later = (fn: () => void, ms: number): void => { timers.push(window.setTimeout(fn, ms)); };
-  const clearTimers = (): void => { for (const t of timers) window.clearTimeout(t); timers = []; };
+  /* everything it plans goes through its lifetime, which leaving ends */
+  const life = lifetime();
+  const later = life.later;
   const count = (xs: boolean[]): number => xs.filter(Boolean).length;
   /* with speech off, the save shows the picture instead — still reading,
      just a different way into the word */
@@ -399,7 +396,7 @@ export function mount(root: HTMLElement): () => void {
   /* ── the match ───────────────────────────────────────────────────────── */
 
   function newMatch(): void {
-    clearTimers();
+    life.clear();
     kicksEach = Number(kicksSel.value);
     rounds = 0; ours = []; theirs = []; log = [];
     current = null; busy = false;
@@ -418,7 +415,7 @@ export function mount(root: HTMLElement): () => void {
     empty.hidden = !none;
     pitch.hidden = none;
     cue.hidden = true;
-    results.hidden = true;
+    results.hide();
     if (none) return;
 
     phase = 'kickoff';
@@ -471,9 +468,7 @@ export function mount(root: HTMLElement): () => void {
     /* a sticker for a win or a draw — the words were read either way, but a
        win should feel like one */
     const sticker = won || level ? award(log.map((k) => k.word.sound)) : null;
-    prize.hidden = !sticker;
-    prize.textContent = sticker?.face ?? '';
-    results.hidden = false;
+    results.show(sticker);
     sfx.whistle();
     if (won || level) {
       later(() => { sfx.win(); confetti(); }, 350);
@@ -509,5 +504,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   newMatch();
-  return () => clearTimers();
+  return life.end;
 }

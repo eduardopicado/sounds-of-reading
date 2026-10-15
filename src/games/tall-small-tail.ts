@@ -14,13 +14,14 @@
  * goes in Trace It. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
 import { pro } from '../lib/settings';
 import { pick, shuffle } from '../lib/random';
 import { HEIGHTS, MIRRORS, heightOf, type Height } from '../content/handwriting';
-import { confetti, counter, scoreLine, topbar } from '../ui/components';
+import { celebrate, counter, resultsTray, scoreLine, topbar } from '../ui/components';
 import { letterCard } from '../ui/writing';
 
 const KINDS: { h: Height; label: string; face: string; why: string }[] = [
@@ -69,11 +70,8 @@ export function mount(root: HTMLElement): () => void {
   const hunt = el('div', { class: 'ts-board', hidden: 'hidden' }, huntTitle, grid, huntNote);
 
   const summary = el('p', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'Well spotted ', prize), summary,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray('Well spotted', summary,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
 
   const score = scoreLine(el('span', {}, pos.node, ' of ', totalEl), right.node);
@@ -83,7 +81,7 @@ export function mount(root: HTMLElement): () => void {
       tagline: 'Where does each letter sit on the lines?',
       onSetup: (open) => { panel.hidden = !open; },
     }),
-    panel, score, heights, hunt, results,
+    panel, score, heights, hunt, results.node,
   );
 
   let queue: string[] = [];
@@ -94,8 +92,9 @@ export function mount(root: HTMLElement): () => void {
   let missedLetters: string[] = [];
   let huntMisses = 0;
   let huntTarget = '';
-  let timers: number[] = [];
-  const later = (fn: () => void, ms: number): void => { timers.push(window.setTimeout(fn, ms)); };
+  /* everything it plans goes through its lifetime, which leaving ends */
+  const life = lifetime();
+  const later = life.later;
 
   /* ── tall, small or tail ─────────────────────────────────────────────── */
 
@@ -196,11 +195,10 @@ export function mount(root: HTMLElement): () => void {
   /* ── the round ───────────────────────────────────────────────────────── */
 
   function start(): void {
-    for (const t of timers) window.clearTimeout(t);
-    timers = [];
+    life.clear();
     index = 0; firsts = 0; huntMisses = 0; missedLetters = []; huntTarget = '';
     right.set(0);
-    results.hidden = true;
+    results.hide();
     hunt.hidden = true;
     heights.hidden = false;
     score.hidden = false;
@@ -223,15 +221,11 @@ export function mount(root: HTMLElement): () => void {
       bits.push(huntMisses ? `You found every ${huntTarget}, with ${huntMisses} wrong ${huntMisses === 1 ? 'tap' : 'taps'}.` : `Every ${huntTarget} found with no wrong taps!`);
     }
     summary.textContent = bits.join(' ');
-    prize.textContent = awardFace('tall-small-tail', '🦒').face;
-    prize.hidden = false;
-    results.hidden = false;
-    sfx.win();
-    confetti();
-    say('Well spotted!');
+    results.show(awardFace('tall-small-tail', '🦒'));
+    celebrate('Well spotted!');
   }
 
   root.append(node);
   start();
-  return () => { for (const t of timers) window.clearTimeout(t); };
+  return life.end;
 }

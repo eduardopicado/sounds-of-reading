@@ -35,7 +35,7 @@ import { awardFace } from '../lib/stickers';
 import { marked, setMarked } from '../lib/highlight';
 import { ALL_SIGHT_WORDS, SIGHT_SETS, type SightWord } from '../content/index';
 import { tonesFor } from '../lib/colour';
-import { chip, confetti, counter, scoreLine, topbar } from '../ui/components';
+import { celebrate, chip, counter, resultsTray, scoreLine, topbar } from '../ui/components';
 import { pro, settings } from '../lib/settings';
 
 /* Tricky words practise no sound, so there is no sound's colour to borrow.
@@ -139,11 +139,8 @@ export function mount(root: HTMLElement): () => void {
   });
 
   const resultList = el('ul', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, 'How it went ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray('How it went', resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
 
   const node = el('div', { class: 'wrap' },
@@ -156,7 +153,7 @@ export function mount(root: HTMLElement): () => void {
     scoreLine(el('span', {}, done.node, ' of ', totalEl), rightFirst.node),
     stage, askEl,
     el('div', { class: 'row', style: { justifyContent: 'center' } }, lookBtn),
-    choices, results,
+    choices, results.node,
   );
 
   let queue: SightWord[] = [];
@@ -166,19 +163,20 @@ export function mount(root: HTMLElement): () => void {
   let firstTry = 0;
   let busy = false;
   let log: { word: SightWord; firstTry: boolean }[] = [];
-  let hideTimer = 0;
+  /** cancels the word disappearing, when it no longer should */
+  let keepWord: () => void = () => undefined;
 
   const pool = (): SightWord[] => ALL_SIGHT_WORDS.filter((w) => chosen.includes(w.set));
 
   function start(): void {
     life.clear();
-    window.clearTimeout(hideTimer);
+    keepWord();
     const words = pool();
     queue = shuffle(words).slice(0, Number(lenSel.value));
 
     found = 0; firstTry = 0; log = []; busy = false; current = null;
     done.set(0); rightFirst.set(0); totalEl.textContent = String(queue.length);
-    results.hidden = true;
+    results.hide();
     resultList.replaceChildren();
     hand.style.display = '';
     next();
@@ -186,7 +184,7 @@ export function mount(root: HTMLElement): () => void {
 
   /** the look: the word, plainly, with nothing marked to lean on */
   function showWord(word: SightWord): void {
-    window.clearTimeout(hideTimer);
+    keepWord();
     wordEl.classList.remove('gone');
     wordEl.textContent = word.text;
     askEl.hidden = true;
@@ -201,7 +199,7 @@ export function mount(root: HTMLElement): () => void {
        the memory, not the hurry */
     const look = pro() ? PRO_LOOK_MS : LOOK_MS;
     const ms = prefersReducedMotion() ? look * 1.5 : look;
-    hideTimer = window.setTimeout(() => {
+    keepWord = life.later(() => {
       wordEl.classList.add('gone');
       wordEl.textContent = '?';
       askEl.hidden = false;
@@ -240,7 +238,7 @@ export function mount(root: HTMLElement): () => void {
 
     if (picked.text === word.text) {
       busy = true;
-      window.clearTimeout(hideTimer);
+      keepWord();
       sfx.right();
       hand.classList.add('right');
       askEl.hidden = true;
@@ -269,7 +267,7 @@ export function mount(root: HTMLElement): () => void {
 
   function finish(): void {
     current = null;
-    window.clearTimeout(hideTimer);
+    keepWord();
     hand.style.display = 'none';
     askEl.hidden = true;
     choices.classList.remove('waiting');
@@ -282,16 +280,12 @@ export function mount(root: HTMLElement): () => void {
       resultList.append(li);
     }
     /* a tricky word practises no sound, so the sticker is the game's own */
-    prize.textContent = awardFace('tricky-words', '🧠').face;
-    prize.hidden = false;
-    results.hidden = false;
-    sfx.win();
-    confetti();
-    say(firstTry === log.length ? 'Every one!' : 'Good looking!');
+    results.show(awardFace('tricky-words', '🧠'));
+    celebrate(firstTry === log.length ? 'Every one!' : 'Good looking!');
   }
 
   drawSets();
   root.append(node);
   start();
-  return () => { life.end(); window.clearTimeout(hideTimer); };
+  return life.end;
 }

@@ -6,91 +6,17 @@ import { unlockSpeech, watchVoices } from './lib/speech';
 import { loadClips } from './lib/audio';
 import { unlockSfx, wakeSfx } from './lib/sfx';
 import * as home from './games/home';
-import * as memoryMatch from './games/sound-match';
-import * as bingo from './games/sound-bingo';
-import * as soundSort from './games/sound-sort';
-import * as wordBuilder from './games/word-builder';
-import * as rollAndRead from './games/roll-and-read';
-import * as realOrSilly from './games/real-or-silly';
-import * as sentenceSmash from './games/sentence-smash';
-import * as sameSound from './games/same-sound';
-import * as trickyWords from './games/tricky-words';
-import * as soundRocket from './games/sound-rocket';
-import * as penaltyShootout from './games/penalty-shootout';
-import * as passAndShoot from './games/pass-and-shoot';
-import * as beTheCommentator from './games/be-the-commentator';
-import * as buildTheWord from './games/build-the-word';
-import * as traceIt from './games/trace-it';
-import * as tallSmallTail from './games/tall-small-tail';
-import * as offTheBench from './games/off-the-bench';
-import * as scoreboardSums from './games/scoreboard-sums';
-import * as numberLinePenalty from './games/number-line-penalty';
-import * as flashCount from './games/flash-count';
-import * as teamBuses from './games/team-buses';
-import * as keepyUppy from './games/keepy-uppy';
-import * as trainingDrills from './games/training-drills';
-import * as halfTimeOranges from './games/half-time-oranges';
-import * as jumpLine from './games/jump-line';
-import * as matchClock from './games/match-clock';
-import * as clockTrainer from './games/clock-trainer';
-import * as fanSurvey from './games/fan-survey';
-import * as factFamily from './games/fact-family';
-import * as kitShapes from './games/kit-shapes';
-import * as coachWhiteboard from './games/coach-whiteboard';
-import * as iceCreamVan from './games/ice-cream-van';
-import * as refsCall from './games/refs-call';
-import * as matchMaths from './games/match-maths';
-import * as weighIn from './games/weigh-in';
-import * as refsSignals from './games/refs-signals';
-import * as coachSays from './games/coach-says';
-import * as bigWords from './games/big-words';
-import * as grownUps from './games/grown-ups';
-import * as voices from './games/voices';
+import { GAMES } from './games/catalog';
 
+/* The home screen is in the main bundle, so it comes up at once; every game
+   is fetched when it is first opened (src/games/catalog.ts). */
 const routes: Route[] = [
   { path: 'home', mount: home.mount },
-  { path: 'memory-match', mount: memoryMatch.mount },
-  { path: 'bingo', mount: bingo.mount },
-  { path: 'sound-sort', mount: soundSort.mount },
-  { path: 'word-builder', mount: wordBuilder.mount },
-  { path: 'roll-and-read', mount: rollAndRead.mount },
-  { path: 'real-or-silly', mount: realOrSilly.mount },
-  { path: 'sentence-smash', mount: sentenceSmash.mount },
-  { path: 'same-sound', mount: sameSound.mount },
-  { path: 'tricky-words', mount: trickyWords.mount },
-  { path: 'sound-rocket', mount: soundRocket.mount },
-  { path: 'penalty-shootout', mount: penaltyShootout.mount },
-  { path: 'pass-and-shoot', mount: passAndShoot.mount },
-  { path: 'be-the-commentator', mount: beTheCommentator.mount },
-  { path: 'build-the-word', mount: buildTheWord.mount },
-  { path: 'coach-says', mount: coachSays.mount },
-  { path: 'big-words', mount: bigWords.mount },
-  { path: 'trace-it', mount: traceIt.mount },
-  { path: 'tall-small-tail', mount: tallSmallTail.mount },
-  { path: 'off-the-bench', mount: offTheBench.mount },
-  { path: 'scoreboard-sums', mount: scoreboardSums.mount },
-  { path: 'number-line-penalty', mount: numberLinePenalty.mount },
-  { path: 'flash-count', mount: flashCount.mount },
-  { path: 'team-buses', mount: teamBuses.mount },
-  { path: 'keepy-uppy', mount: keepyUppy.mount },
-  { path: 'training-drills', mount: trainingDrills.mount },
-  { path: 'half-time-oranges', mount: halfTimeOranges.mount },
-  { path: 'jump-line', mount: jumpLine.mount },
-  { path: 'match-clock', mount: matchClock.mount },
-  { path: 'clock-trainer', mount: clockTrainer.mount },
-  { path: 'fan-survey', mount: fanSurvey.mount },
-  { path: 'fact-family', mount: factFamily.mount },
-  { path: 'kit-shapes', mount: kitShapes.mount },
-  { path: 'coach-whiteboard', mount: coachWhiteboard.mount },
-  { path: 'ice-cream-van', mount: iceCreamVan.mount },
-  { path: 'refs-call', mount: refsCall.mount },
-  { path: 'match-maths', mount: matchMaths.mount },
-  { path: 'weigh-in', mount: weighIn.mount },
-  { path: 'refs-signals', mount: refsSignals.mount },
+  ...GAMES.map((g) => ({ path: g.path, title: g.name, load: g.load })),
   /* the settings, behind a button held for three seconds on the home screen */
-  { path: 'grown-ups', mount: grownUps.mount },
+  { path: 'grown-ups', title: 'Grown-ups', load: () => import('./games/grown-ups') },
   /* diagnostics, linked from nowhere — see src/games/voices.ts */
-  { path: 'voices', mount: voices.mount },
+  { path: 'voices', title: 'Voices', load: () => import('./games/voices') },
 ];
 
 /* iOS keeps speech and audio locked until they are started inside a real

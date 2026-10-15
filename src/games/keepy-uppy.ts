@@ -55,6 +55,10 @@ function build(kit: Kit) {
       touches.replaceChildren();
       touches.classList.remove('show-hops');
       touches.dataset.answer = String(q.seq[q.gap]);
+      /* the picture has a name from the start, not only once every touch is
+         in: a screen reader reaching it mid-bounce otherwise heard nothing,
+         or the last question's numbers */
+      touches.setAttribute('aria-label', 'Keep it up!');
       ask.textContent = 'Keep it up!';
       const balls: HTMLElement[] = [];
       /* one bounce at a time; the gap is a ball with a question mark */
@@ -64,6 +68,7 @@ function build(kit: Kit) {
         const ball = el('span', { class: `ku-ball${i === q.gap ? ' gap' : ''}`, text: i === q.gap ? '?' : String(n) });
         touches.append(ball);
         balls.push(ball);
+        touches.setAttribute('aria-label', spoken({ ...q, seq: q.seq.slice(0, i + 1) }, false));
         sfx.tap();
         await kit.wait(beat);
       }

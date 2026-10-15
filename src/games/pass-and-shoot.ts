@@ -19,6 +19,7 @@
  * different team each match. */
 
 import { el, replay } from '../lib/dom';
+import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
@@ -30,7 +31,7 @@ import { coachPick, mark } from '../lib/coach';
 import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../content/index';
 import { nearWords } from '../content/near-words';
 import { pieces, type Piece } from '../content/graphemes';
-import { confetti, counter, createSetup, scoreLine, topbar } from '../ui/components';
+import { confetti, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 import { TEAMS, YOU, label, player, teamById, type Team } from './teams';
 import { narrate, narrationSelect } from './narration';
 
@@ -87,12 +88,9 @@ export function mount(root: HTMLElement): () => void {
   const pitch = el('div', { class: 'ps-pitch' }, goal, line, ball, made, banner);
 
   const resultList = el('ul', {});
-  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
   const resultTitle = el('span', {});
-  const results = el('div', { class: 'tray results', hidden: 'hidden' },
-    el('h2', {}, resultTitle, ' ', prize), resultList,
-    el('div', { class: 'row', style: { marginTop: '14px' } },
-      el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } })),
+  const results = resultsTray(resultTitle, resultList,
+    el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
 
   const empty = el('p', { class: 'tag', hidden: 'hidden',
@@ -106,7 +104,7 @@ export function mount(root: HTMLElement): () => void {
     }),
     setup.node,
     scoreLine(el('span', {}, goals.node, ' of ', totalEl)),
-    empty, cue, pitch, results,
+    empty, cue, pitch, results.node,
   );
 
   /* ── state ───────────────────────────────────────────────────────────── */
@@ -122,10 +120,9 @@ export function mount(root: HTMLElement): () => void {
   let log: { word: Word; ok: boolean }[] = [];
   let us: Team = YOU;
   let rival: Team = YOU;
-  let timers: number[] = [];
-
-  const later = (fn: () => void, ms: number): void => { timers.push(window.setTimeout(fn, ms)); };
-  const clearTimers = (): void => { for (const t of timers) window.clearTimeout(t); timers = []; };
+  /* everything it plans goes through its lifetime, which leaving ends */
+  const life = lifetime();
+  const later = life.later;
 
   function levelsUpTo(): Level[] {
     const chosen = setup.filter().levels;
@@ -292,7 +289,7 @@ export function mount(root: HTMLElement): () => void {
   /* ── the round ───────────────────────────────────────────────────────── */
 
   function start(): void {
-    clearTimers();
+    life.clear();
     const pool = playable();
     queue = coachPick(pool, Number(lenSel.value));
     us = teamById(teamSel.value) ?? YOU;
@@ -300,7 +297,7 @@ export function mount(root: HTMLElement): () => void {
     scored = 0; log = []; current = null; busy = false;
     goals.set(0);
     totalEl.textContent = String(queue.length);
-    results.hidden = true;
+    results.hide();
     const none = queue.length === 0;
     empty.hidden = !none;
     pitch.hidden = none;
@@ -323,9 +320,7 @@ export function mount(root: HTMLElement): () => void {
       resultList.append(li);
     }
     const sticker = award(log.map((e) => e.word.sound));
-    prize.hidden = !sticker;
-    prize.textContent = sticker?.face ?? '';
-    results.hidden = false;
+    results.show(sticker);
     sfx.whistle();
     later(() => { sfx.win(); confetti(); }, 350);
     say(scored === log.length ? 'Every one a goal!' : 'Good passing!');
@@ -341,5 +336,5 @@ export function mount(root: HTMLElement): () => void {
 
   root.append(node);
   start();
-  return () => { clearTimers(); window.removeEventListener('resize', onResize); };
+  return () => { life.end(); window.removeEventListener('resize', onResize); };
 }

@@ -10,8 +10,9 @@
  * ends it when it unmounts. Anything async checks `alive()` when it wakes. */
 
 export interface Life {
-  /** setTimeout that is cancelled when the game ends */
-  later: (fn: () => void, ms: number) => void;
+  /** setTimeout that is cancelled when the game ends; returns a way to
+      cancel just this one sooner */
+  later: (fn: () => void, ms: number) => () => void;
   /** cancel everything scheduled so far, but keep living (a new round) */
   clear: () => void;
   /** false once the game has been left */
@@ -29,9 +30,10 @@ export function lifetime(): Life {
   };
   return {
     later: (fn, ms) => {
-      if (!alive) return;
+      if (!alive) return () => undefined;
       const t = window.setTimeout(() => { timers.delete(t); if (alive) fn(); }, ms);
       timers.add(t);
+      return () => { window.clearTimeout(t); timers.delete(t); };
     },
     clear,
     alive: () => alive,

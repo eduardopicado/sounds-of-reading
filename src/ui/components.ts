@@ -7,6 +7,7 @@ import { go } from '../lib/router';
 import { sfx } from '../lib/sfx';
 import { LEVELS, PRACTICE_SOUNDS, type Level, type Sound } from '../content/index';
 import { settings, updateSettings } from '../lib/settings';
+import { say } from '../lib/speech';
 
 /* ── header ───────────────────────────────────────────────────────────── */
 
@@ -323,4 +324,41 @@ export const scoreLine = (...parts: (Node | string)[]): HTMLElement => el('div',
 export function counter(label: string, initial = '0'): { node: HTMLElement; set: (v: string | number) => void } {
   const b = el('b', { text: String(initial) });
   return { node: el('span', {}, label + ' ', b), set: (v) => { b.textContent = String(v); } };
+}
+
+/* ── the end of a round ───────────────────────────────────────────────── */
+
+export interface ResultsTray {
+  node: HTMLElement;
+  /** show it, with the sticker just won — none for a round that won none */
+  show: (sticker?: { face: string } | null) => void;
+  hide: () => void;
+}
+
+/**
+ * The tray at the end of a round, the same in every game that has one: a
+ * heading with the sticker beside it, what happened, and what to do next.
+ * One copy, so a fix to it — the sticker it shows, say — is made once.
+ */
+export function resultsTray(title: string | Node, body: Node, ...actions: HTMLElement[]): ResultsTray {
+  const prize = el('span', { class: 'sticker fresh', hidden: 'hidden' });
+  const node = el('div', { class: 'tray results', hidden: 'hidden' },
+    el('h2', {}, title, ' ', prize), body,
+    el('div', { class: 'row', style: { marginTop: '14px' } }, ...actions));
+  return {
+    node,
+    show: (sticker) => {
+      prize.hidden = !sticker;
+      prize.textContent = sticker?.face ?? '';
+      node.hidden = false;
+    },
+    hide: () => { node.hidden = true; },
+  };
+}
+
+/** a round is over: the fanfare, the confetti, and a word for him */
+export function celebrate(line?: string): void {
+  sfx.win();
+  confetti();
+  if (line) say(line);
 }

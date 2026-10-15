@@ -128,6 +128,19 @@ describe('lifetime', () => {
     expect(old).not.toHaveBeenCalled();
     expect(fresh).toHaveBeenCalledTimes(1);
   });
+
+  it('can cancel one plan and keep the rest', async () => {
+    const { lifetime } = await import('../../src/lib/life');
+    const life = lifetime();
+    const dropped = vi.fn();
+    const kept = vi.fn();
+    const cancel = life.later(dropped, 500);
+    life.later(kept, 500);
+    cancel();
+    vi.advanceTimersByTime(600);
+    expect(dropped).not.toHaveBeenCalled();
+    expect(kept).toHaveBeenCalledTimes(1);
+  });
 });
 
 /* ── the coach's picks ─────────────────────────────────────────────────── */

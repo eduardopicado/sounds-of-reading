@@ -72,7 +72,6 @@ export function cleanSettings(raw: unknown): Partial<Settings> {
 }
 
 let current: Settings = { ...DEFAULTS, ...cleanSettings(read<unknown>('settings', {})) };
-const listeners = new Set<(s: Settings) => void>();
 
 setSpeechEnabled(current.speech);
 setSfxEnabled(current.sfx);
@@ -86,16 +85,4 @@ export function updateSettings(patch: Partial<Settings>): void {
   if (patch.speech !== undefined) setSpeechEnabled(patch.speech);
   if (patch.sfx !== undefined) setSfxEnabled(patch.sfx);
   if (patch.voiceURI !== undefined) setPreferredVoice(patch.voiceURI);
-  for (const fn of listeners) fn(current);
-}
-
-export function onSettingsChange(fn: (s: Settings) => void): () => void {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
-
-export function resetSettings(): void {
-  current = { ...DEFAULTS };
-  write('settings', current);
-  for (const fn of listeners) fn(current);
 }

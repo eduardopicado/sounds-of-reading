@@ -13,10 +13,7 @@ reproducible from `words.ts` at any time.
 None ship yet. `speak()` in `tools/make-audio.ts` is the one function that
 talks to a text-to-speech service, and it has not been wired to one, so the
 generator stops with an error and the manifest stays empty. Before clips are
-deployed, two more things need doing:
-
-- run the generator in the deploy workflow (or commit its output), since a
-  fresh checkout has no clips;
-- add `m4a` and `json` to `globPatterns` in `vite.config.ts`, so the clips
-  are cached for offline use like everything else — today they would play
-  only with a signal.
+deployed, the generator has to run in the deploy workflow (or its output be
+committed), since a fresh checkout has no clips. The offline worker already
+caches `clips.json` and any `.m4a` beside it, so once they are built they
+play with no signal like everything else.

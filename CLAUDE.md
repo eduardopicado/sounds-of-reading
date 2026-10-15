@@ -7,9 +7,12 @@ the prototypes it came from are in `docs/original-games/`.
 ## Rules
 
 - No accounts, analytics, ads, or third-party network requests. Fonts are
-  self-hosted. Nothing leaves the device.
-- Static site, offline-capable PWA. State in `localStorage` only, always
-  wrapped in try/catch.
+  self-hosted. Nothing leaves the device. The built page carries a
+  Content-Security-Policy (`vite.config.ts`) that makes the browser refuse
+  any other origin; a new kind of resource has to be allowed there.
+- Static site, offline-capable PWA. State in `localStorage` only, through
+  `src/lib/storage.ts`, which guards every call and returns the fallback for
+  a saved value of the wrong kind.
 - One shared content file: `src/content/words.ts`. Never duplicate word lists
   per game.
 - Grapheme highlights use the explicit positions in the content file, never
@@ -77,6 +80,11 @@ src/lib/               speech.ts (voices, and saying things), sfx.ts (synthesise
                        microphone, for Be the Commentator), dom.ts, random.ts
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
+src/games/catalog.ts   every game, once: its address, tile, section, ladder and
+                       where its code is. A new game is one entry here; the
+                       routes, the home tiles, the progress card and the
+                       tests are made from it. Each game's code is fetched
+                       when it is first opened
 src/games/             one file per game, plus home.ts (tiles by section, the
                        coach's picks) and grown-ups.ts (the settings, opened
                        by holding a button on home for three seconds)
