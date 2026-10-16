@@ -1640,3 +1640,42 @@
 .ct-fb.hint { border: 2px solid var(--mustard); }
 .ct-fb .ct-digits { font-size: 1.15em; }
 .ct-prize { margin: 8px 0 0; font-size: 20px; }
+
+/* ── Times Table Sprint ────────────────────────────────────────────────── */
+
+/* the sum, with what he has typed in its box */
+.ts-sum { display: flex; align-items: center; gap: .3em; }
+.ts-entry {
+  display: inline-grid; place-items: center; min-width: 2.6em; padding: 0 .2em; border-radius: 14px;
+  background: var(--paper); color: var(--ink);
+}
+.ts-entry.right { background: var(--mint); }
+.ts-entry.wrong { background: #F3C3B4; }
+
+/* the time to answer, running down; it never stops him answering */
+.ts-bar { width: min(100%, 420px); height: 14px; border-radius: 99px; background: rgba(255, 246, 231, .18); overflow: hidden; }
+.ts-fill { width: 100%; height: 100%; border-radius: inherit; background: var(--mustard); transform-origin: left; }
+.ts-fill.run { animation: ts-run var(--ms, 8000ms) linear forwards; }
+.ts-bar.late .ts-fill { background: rgba(255, 246, 231, .35); }
+.ts-fill.stopped { animation-play-state: paused; }
+@keyframes ts-run { to { transform: scaleX(0); } }
+
+/* the number pad: big keys, a phone's layout */
+.ts-pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: min(100%, 330px); }
+.ts-key {
+  min-height: 64px; border: 0; border-radius: 16px; background: var(--paper); color: var(--ink);
+  font-family: var(--display); font-weight: 800; font-size: 32px; box-shadow: 0 5px 0 rgba(0, 0, 0, .3); cursor: pointer;
+}
+.ts-key:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0, 0, 0, .3); }
+.ts-key.ts-go { background: var(--mustard); box-shadow: 0 5px 0 var(--mustard-dark); }
+.ts-key.ts-del { font-size: 28px; }
+
+/* a wrong answer: the fact as rows of dots, its two easier parts in two colours */
+.ts-help { padding: 12px; border-radius: var(--radius); background: var(--paper); }
+.ts-help:empty { display: none; }
+.ts-array { width: min(76vw, 320px, calc(260px * var(--aspect, 1))); }
+.ts-more { fill: var(--mint); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ts-fill.run { animation: none; }
+}
