@@ -6,10 +6,14 @@
  * Year 2: a handful of mixed coins, picking coins from his purse to pay the
  * exact price, and the change from a $5 or $10 note.
  *
- * The coins are drawn at their real sizes relative to each other, with the
- * value on them as on the real ones; the designs are left off. */
+ * The coins are shown at their real sizes relative to each other. They are
+ * photographs of the real coins by default — the echidna, the lyrebird, the
+ * platypus, the coat of arms, the kangaroos and the Aboriginal elder — so
+ * what he learns here is what is in his pocket. A grown-up can switch to the
+ * plain drawn coins, which show just the value, in setup. */
 
 import { el } from '../lib/dom';
+import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import {
@@ -17,6 +21,20 @@ import {
 } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
+import photo5 from '../assets/coins/5.webp';
+import photo10 from '../assets/coins/10.webp';
+import photo20 from '../assets/coins/20.webp';
+import photo50 from '../assets/coins/50.webp';
+import photo100 from '../assets/coins/100.webp';
+import photo200 from '../assets/coins/200.webp';
+
+/** the tails side of each coin in circulation, photographed */
+const PHOTOS: Record<number, string> = { 5: photo5, 10: photo10, 20: photo20, 50: photo50, 100: photo100, 200: photo200 };
+
+const LOOK_KEY = 'coin-look';
+export type CoinLook = 'real' | 'drawn';
+/** photographs unless a grown-up chose the drawn coins */
+export const coinLook = (): CoinLook => (read<string>(LOOK_KEY, 'real') === 'drawn' ? 'drawn' : 'real');
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<KioskStep>({
@@ -26,16 +44,33 @@ export function mount(root: HTMLElement): () => void {
     tagline: 'Pay for an ice cream with Australian coins.',
     steps: KIOSK_STEPS,
     face: '🍦',
-    build,
+    build: (kit) => ({ ...build(kit), setup: lookSelect() }),
   }, root);
 }
 
 const INK = '#1E2B2A';
 
+/** the grown-up's choice of coins, in the setup panel */
+function lookSelect(): HTMLSelectElement {
+  const sel = el('select', { 'aria-label': 'Coins' },
+    el('option', { value: 'real', text: 'Coins: real photos' }),
+    el('option', { value: 'drawn', text: 'Coins: drawn' }),
+  );
+  sel.value = coinLook();
+  sel.addEventListener('change', () => write(LOOK_KEY, sel.value));
+  return sel;
+}
+
 /** a coin at its real size: 1 mm is 3.2 px, so the 50c is about 100 px across */
-export function coinPic(cents: number): SVGSVGElement {
+export function coinPic(cents: number): Element {
   const c = coinOf(cents);
   const d = c.mm * 3.2;
+  if (coinLook() === 'real') {
+    return el('img', {
+      class: 'iv-coin iv-photo', src: PHOTOS[cents], alt: money(cents), width: String(Math.round(d)), height: String(Math.round(d)),
+      draggable: 'false', decoding: 'async',
+    });
+  }
   const r = d / 2 - 2;
   const pic = svg('svg', {
     class: 'iv-coin', width: d, height: d, viewBox: `0 0 ${d} ${d}`, role: 'img', 'aria-label': money(cents),
