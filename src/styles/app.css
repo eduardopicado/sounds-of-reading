@@ -42,6 +42,16 @@ html, body {
   overscroll-behavior-y: none;
 }
 
+/* A tap is a tap. Two quick taps on the same spot are a double-tap zoom to
+   Safari, and the second of them never reaches the game: +1, +1 on the
+   number line was one jump. Pinching to zoom and scrolling still work.
+   Set on the page and again on everything tappable, so a scrolling box in
+   between cannot bring the zoom back; the drag areas keep their own
+   touch-action: none, which still wins. */
+html, button, a, input, select, label, summary, [role="button"] {
+  touch-action: manipulation;
+}
+
 body {
   background:
     radial-gradient(circle at 12% 6%, rgba(121, 211, 176, .16), transparent 42%),
