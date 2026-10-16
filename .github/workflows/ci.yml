@@ -34,24 +34,27 @@ jobs:
       - name: Typecheck and build
         run: npm run build
 
-  # The browser tests, one job per device, side by side. In one job they
-  # took 22 minutes: every test runs at four sizes, and a whole round of a
-  # game waits out its own pauses. Run apart they finish in the time of the
-  # slowest, and WebKit, the slowest, is split in two. The repository is
-  # public, so the extra runners cost nothing.
+  # The browser tests, each device in two halves, side by side. In one job
+  # they took 22 minutes: every test runs at four sizes, and a whole round
+  # of a game waits out its own pauses. Run apart they finish in the time of
+  # the slowest half. The repository is public, so the extra runners cost
+  # nothing (the free plan runs 20 jobs at once; this is 9).
   e2e:
     name: e2e (${{ matrix.name }})
     runs-on: ubuntu-latest
-    # a healthy job takes under ten minutes; this only catches a genuine hang
+    # a healthy job takes about five minutes; this only catches a genuine hang
     timeout-minutes: 30
     strategy:
       # one device failing should not hide what the others found
       fail-fast: false
       matrix:
         include:
-          - { name: ipad-portrait, project: ipad-portrait, browser: chromium, shard: 1/1 }
-          - { name: ipad-landscape, project: ipad-landscape, browser: chromium, shard: 1/1 }
-          - { name: phone, project: phone, browser: chromium, shard: 1/1 }
+          - { name: ipad-portrait 1 of 2, project: ipad-portrait, browser: chromium, shard: 1/2 }
+          - { name: ipad-portrait 2 of 2, project: ipad-portrait, browser: chromium, shard: 2/2 }
+          - { name: ipad-landscape 1 of 2, project: ipad-landscape, browser: chromium, shard: 1/2 }
+          - { name: ipad-landscape 2 of 2, project: ipad-landscape, browser: chromium, shard: 2/2 }
+          - { name: phone 1 of 2, project: phone, browser: chromium, shard: 1/2 }
+          - { name: phone 2 of 2, project: phone, browser: chromium, shard: 2/2 }
           - { name: ipad-webkit 1 of 2, project: ipad-webkit, browser: webkit, shard: 1/2 }
           - { name: ipad-webkit 2 of 2, project: ipad-webkit, browser: webkit, shard: 2/2 }
     steps:
