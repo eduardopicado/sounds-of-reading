@@ -83,6 +83,19 @@ test.describe('progressive web app', () => {
   });
 });
 
+test.describe('tapping', () => {
+  test('quick taps are taps, not a double-tap zoom, and the drag areas still drag', async ({ page }) => {
+    await openGame(page, 'jump-line');
+    const touch = (selector: string) => page.locator(selector).first().evaluate((n) => getComputedStyle(n).touchAction);
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).touchAction)).toBe('manipulation');
+    expect(await touch('.topbar button')).toBe('manipulation');
+    await openGame(page, 'sound-sort');
+    expect(await touch('.bin')).toBe('manipulation');
+    /* the card he drags still keeps every gesture for itself */
+    expect(await touch('.hand')).toBe('none');
+  });
+});
+
 test.describe('speech', () => {
   test('never inherits the device language and prefers an Australian voice', async ({ page }) => {
     await page.addInitScript(() => {
