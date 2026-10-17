@@ -1,7 +1,8 @@
 /* Ice Cream Van: Australian coins. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { coinOf, money } from '../../src/content/maths';
 
 async function startAt(page: Page, step: number): Promise<void> {
   await seed(page, { 'maths-step:ice-cream-van': step });
@@ -80,5 +81,39 @@ test.describe('Ice Cream Van', () => {
     await expect(page.locator('.iv-note')).toBeVisible({ timeout: 8000 });
     await answer(page);
     await expect(page.locator('.mx-note')).toContainText('the change is');
+  });
+
+  test('the coins are photographs of the real ones, at their real sizes', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 3);
+    const photos = page.locator('.iv-stage img.iv-photo');
+    await expect(photos.first()).toBeVisible({ timeout: 8000 });
+    const shown = await photos.evaluateAll((ns) => ns.map((n) => {
+      const img = n as HTMLImageElement;
+      return { alt: img.alt, loaded: img.complete && img.naturalWidth > 0, width: img.getBoundingClientRect().width };
+    }));
+    expect(shown.length).toBeGreaterThan(1);
+    const cents = await page.locator('.iv-stage .iv-slot').evaluateAll((ns) => ns.map((n) => Number((n as HTMLElement).dataset.cents)));
+    for (const [i, c] of cents.entries()) {
+      /* named for a screen reader, drawn, and as big as the real coin is, next to the others */
+      expect(shown[i].alt).toBe(money(c));
+      expect(shown[i].loaded, money(c)).toBe(true);
+      expect(shown[i].width).toBeCloseTo(coinOf(c).mm * 3.2, -0.5);
+    }
+    noProblems(watch);
+  });
+
+  test('a grown-up can switch to the drawn coins in setup, and it is remembered', async ({ page }) => {
+    await openGame(page, 'ice-cream-van');
+    await openSetup(page);
+    await page.getByLabel('Coins').selectOption('drawn');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.iv-pick svg.iv-coin').first()).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.iv-photo')).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator('.topbar h1')).toBeVisible();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.iv-pick svg.iv-coin').first()).toBeVisible({ timeout: 8000 });
   });
 });

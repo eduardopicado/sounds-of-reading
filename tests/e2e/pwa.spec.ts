@@ -52,6 +52,13 @@ test.describe('progressive web app', () => {
     await openGame(page, 'grown-ups');
     await expect(page.locator('.topbar h1')).toBeVisible();
 
+    /* the photographs of the coins come from the cache too */
+    await openGame(page, 'ice-cream-van');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    const coin = page.locator('img.iv-photo').first();
+    await expect(coin).toBeVisible({ timeout: 8000 });
+    expect(await coin.evaluate((n) => (n as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+
     await context.setOffline(false);
     noProblems(watch);
   });

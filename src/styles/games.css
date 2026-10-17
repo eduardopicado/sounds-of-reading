@@ -1478,6 +1478,13 @@
 .iv-pick.right { border-color: var(--mint); background: rgba(121, 211, 176, .3); }
 .iv-pick.wrong { border-color: var(--tomato); animation: shake .4s; }
 .iv-slot { position: relative; display: grid; place-items: center; }
+/* the photographs: a tap goes to the coin's button, and a long press on the
+   iPad does not pick the picture up or offer to save it */
+.iv-photo {
+  display: block; pointer-events: none; user-select: none; -webkit-user-select: none;
+  -webkit-user-drag: none; -webkit-touch-callout: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35));
+}
 .counted .iv-slot::after {
   content: attr(data-run); position: absolute; bottom: -18px; left: 50%; translate: -50% 0;
   font-family: var(--display); font-weight: 800; font-size: 13px; color: var(--mustard);
