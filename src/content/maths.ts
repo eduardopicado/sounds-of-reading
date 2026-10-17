@@ -17,6 +17,9 @@
  * The Year 2 steps sit at the top of each ladder, so he only meets them by
  * climbing there — or a grown-up starts him there in setup.
  *
+ * Times Table Sprint goes further, into Years 3 and 4 (Stage 2): the times
+ * tables to 12 × 12, by heart, and the same facts as division.
+ *
  * Each game has a short ladder of steps. A round starts on the step he
  * reached last time and moves up after three right in a row, down after two
  * wrong, so the questions stay just hard enough. Everything here is plain
@@ -1289,3 +1292,151 @@ export function minuteExplained(m: number): { text: string; fives: number[]; ext
   }
   return { text: `The long hand is ${steps(extra)} past the red ${base / 5}. Count in fives, then add the little steps:`, fives, extra, total };
 }
+
+/* ── Times Table Sprint: the times tables to 12 × 12 (Stage 2) ────────────
+ *
+ * Years 3 and 4 (NSW Stage 2) recall the multiplication facts. Knowing them
+ * by heart is a different job from working them out, so this is quick-fire:
+ * he types the answer, and only a quick one counts. A table at a time, in
+ * the order schools teach them — the easy patterns first (×2, ×10, ×5),
+ * then ×3 and ×4, then the hard middle — with the tables before it coming
+ * back as review, then all of them mixed, then the same facts the other way
+ * round as division. Each fact is remembered on its own (see timesQuestion),
+ * so the ones he is slow on come back more often than the ones he knows. */
+
+export interface TimesStep extends Step {
+  /** the tables this step practises */
+  tables: number[];
+  /** tables from earlier steps, mixed in to keep them fresh */
+  review: number[];
+  /** the facts the other way round: 42 ÷ 6 */
+  divide?: boolean;
+}
+
+const TIMES_ORDER = [[2, 10], [5], [3], [4], [6], [8], [7], [9], [11], [12]];
+const ALL_TABLES = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+export const TIMES_STEPS: TimesStep[] = [
+  ...TIMES_ORDER.map((tables, i): TimesStep => ({
+    name: tables.map((t) => `× ${t}`).join(' and '),
+    tables,
+    review: TIMES_ORDER.slice(0, i).flat(),
+  })),
+  { name: 'Every table to 12 × 12', tables: ALL_TABLES, review: [] },
+  { name: 'The other way round: ÷', tables: ALL_TABLES, review: [], divide: true },
+];
+
+/** the biggest number a table goes up to: 12 × 12 */
+export const TIMES_TOP = 12;
+/** how often a question comes from the review tables */
+export const REVIEW_SHARE = 0.25;
+/** a fact is known once it sits in this box: answered quickly twice */
+export const KNOWN_BOX = 2;
+const TOP_BOX = 4;
+
+export interface TimesQuestion {
+  /** shown left to right: a × b = answer, or a ÷ b = answer */
+  a: number;
+  b: number;
+  op: '×' | '÷';
+  answer: number;
+  /** the table it belongs to, and how many of it: 7 × 6 in the ×6 table is 7 lots of 6 */
+  table: number;
+  lots: number;
+  /** the same fact whichever way round it is shown */
+  fact: string;
+}
+
+/** 6 × 7 and 7 × 6 are one fact to learn; division facts are kept apart */
+export const factKey = (x: number, y: number, divide = false): string =>
+  `${divide ? '÷' : '×'}${Math.min(x, y)}-${Math.max(x, y)}`;
+
+/** every fact a step practises */
+export function timesFacts(tables: number[], divide = false): string[] {
+  const out = new Set<string>();
+  for (const t of tables) for (let k = 1; k <= TIMES_TOP; k += 1) out.add(factKey(t, k, divide));
+  return [...out];
+}
+
+/** where a fact moves after an answer: up a box when quick and right, back
+    to the start when wrong, and where it was when right but slow */
+export function nextBox(box: number, right: boolean, quick: boolean): number {
+  if (!right) return 0;
+  return quick ? Math.min(TOP_BOX, box + 1) : box;
+}
+
+/** has he got every fact of this step by heart? */
+export function knowsStep(step: TimesStep, boxes: Readonly<Record<string, number>>): boolean {
+  return timesFacts(step.tables, step.divide).every((f) => (boxes[f] ?? 0) >= KNOWN_BOX);
+}
+
+/** how much more often a fact comes up for each box it is in */
+const WEIGHT = [8, 5, 3, 2, 1];
+
+/**
+ * The next question. Facts he has not got yet are picked more often than
+ * the ones he has, and none of the last few comes straight back. A quarter
+ * of the time it is a review of an earlier table.
+ */
+export function timesQuestion(
+  step: TimesStep, boxes: Readonly<Record<string, number>>, recent: readonly string[] = [], random: () => number = Math.random,
+): TimesQuestion {
+  const reviewing = step.review.length > 0 && random() < REVIEW_SHARE;
+  const tables = reviewing ? step.review : step.tables;
+  const all: { table: number; lots: number; fact: string }[] = [];
+  for (const table of tables) {
+    for (let lots = 1; lots <= TIMES_TOP; lots += 1) all.push({ table, lots, fact: factKey(table, lots, step.divide) });
+  }
+  const fresh = all.filter((c) => !recent.includes(c.fact));
+  const pool = fresh.length ? fresh : all;
+  const weights = pool.map((c) => WEIGHT[Math.min(TOP_BOX, boxes[c.fact] ?? 0)]);
+  let r = random() * weights.reduce((s, w) => s + w, 0);
+  let chosen = pool[pool.length - 1];
+  for (const [i, c] of pool.entries()) {
+    r -= weights[i];
+    if (r < 0) { chosen = c; break; }
+  }
+  const { table, lots, fact } = chosen;
+  if (step.divide) return { a: table * lots, b: table, op: '÷', answer: lots, table, lots, fact };
+  /* either way round: 7 × 6 and 6 × 7 are the same fact */
+  const flip = random() < 0.5;
+  return { a: flip ? table : lots, b: flip ? lots : table, op: '×', answer: table * lots, table, lots, fact };
+}
+
+/** the question the same fact asks when it comes back later in the round */
+export function askAgain(q: TimesQuestion, random: () => number = Math.random): TimesQuestion {
+  if (q.op === '÷') return q;
+  const flip = random() < 0.5;
+  return { ...q, a: flip ? q.table : q.lots, b: flip ? q.lots : q.table };
+}
+
+/**
+ * How to get there from facts he knows, for a wrong answer: 7 lots of 6 is
+ * 5 lots and 2 more lots; 12 lots is 10 lots and 2 more; up to 5 lots, or
+ * any lots of 10, he counts on in the table. `parts` are the two blocks of
+ * rows drawn on the array (the second is 0 when there is no split).
+ */
+export function timesHelp(q: TimesQuestion): { text: string; parts: [number, number] } {
+  const { table: t, lots: k } = q;
+  const fact = q.op === '÷'
+    ? `${q.a} ÷ ${t} = ${k}, because ${k} × ${t} = ${q.a}.`
+    : `${q.a} × ${q.b} = ${q.answer}.`;
+  let how: string;
+  let parts: [number, number] = [k, 0];
+  if (t === 10) {
+    how = `${k} lots of 10 is ${k} tens: ${k * 10}.`;
+  } else if (k <= 5 || k === 10) {
+    const counted = Array.from({ length: k }, (_, i) => (i + 1) * t);
+    how = k === 1 ? `1 lot of ${t} is just ${t}.` : `Count in ${t}s: ${counted.join(', ')}.`;
+  } else {
+    const first = k < 10 ? 5 : 10;
+    const rest = k - first;
+    parts = [first, rest];
+    how = `${k} lots of ${t} is ${first} lots and ${rest} more: ${first * t} and ${rest * t} make ${k * t}.`;
+  }
+  return { text: `${fact} ${how}`, parts };
+}
+
+/** how long an answer may take and still count as quick, by the grown-up's pace */
+export type SprintPace = 'relaxed' | 'steady' | 'quick';
+export const SPRINT_MS: Record<SprintPace, number> = { relaxed: 12000, steady: 8000, quick: 5000 };

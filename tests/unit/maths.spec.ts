@@ -12,6 +12,7 @@ import {
   DRILL_STEPS, drillChoices, drillQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
+  TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -557,6 +558,120 @@ describe("Coach's Whiteboard", () => {
         }
         if (step.task === 'turn') expect(q.answer).toBe(turned(q.facing, q.turn));
       }
+    }
+  });
+});
+
+describe('Times Table Sprint', () => {
+  const none: Record<string, number> = {};
+
+  it('climbs the tables in the order they are taught, to 12 × 12, then divides', () => {
+    expect(TIMES_STEPS.map((s) => s.tables)).toEqual([
+      [2, 10], [5], [3], [4], [6], [8], [7], [9], [11], [12],
+      [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    ]);
+    expect(TIMES_STEPS.at(-1)!.divide).toBe(true);
+    /* each table step reviews every table before it */
+    expect(TIMES_STEPS[0].review).toEqual([]);
+    expect(TIMES_STEPS[3].review).toEqual([2, 10, 5, 3]);
+  });
+
+  it('asks only the step’s tables (or its review), up to 12 lots, with the right answer', () => {
+    for (const step of TIMES_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = timesQuestion(step, none);
+        expect([...step.tables, ...step.review]).toContain(q.table);
+        expect(q.lots).toBeGreaterThanOrEqual(1);
+        expect(q.lots).toBeLessThanOrEqual(TIMES_TOP);
+        if (q.op === '×') {
+          expect(q.answer).toBe(q.a * q.b);
+          expect(q.a * q.b).toBe(q.table * q.lots);
+          expect([q.a, q.b].sort((x, y) => x - y)).toEqual([q.table, q.lots].sort((x, y) => x - y));
+        } else {
+          expect(step.divide).toBe(true);
+          expect(q.a / q.b).toBe(q.answer);
+          expect(q.b).toBe(q.table);
+        }
+      }
+    }
+  });
+
+  it('reviews earlier tables about a quarter of the time', () => {
+    const step = TIMES_STEPS[4];
+    let review = 0;
+    for (let i = 0; i < 4000; i += 1) if (step.review.includes(timesQuestion(step, none).table)) review += 1;
+    expect(review / 4000).toBeGreaterThan(0.18);
+    expect(review / 4000).toBeLessThan(0.32);
+  });
+
+  it('6 × 7 and 7 × 6 are one fact; 42 ÷ 6 is a fact of its own', () => {
+    expect(factKey(6, 7)).toBe(factKey(7, 6));
+    expect(factKey(6, 7, true)).not.toBe(factKey(6, 7));
+    expect(timesFacts([2, 10])).toHaveLength(23);
+  });
+
+  it('asks the facts he does not know far more often than the ones he does', () => {
+    const step = TIMES_STEPS[1];
+    const boxes: Record<string, number> = {};
+    for (const f of timesFacts(step.tables)) boxes[f] = 4;
+    boxes[factKey(5, 7)] = 0;
+    let weak = 0;
+    const tries = 3000;
+    const noReview = { ...step, review: [] };
+    for (let i = 0; i < tries; i += 1) if (timesQuestion(noReview, boxes).fact === factKey(5, 7)) weak += 1;
+    /* one fact of twelve, weighted 8 to the others' 1: about two in five */
+    expect(weak / tries).toBeGreaterThan(0.3);
+  });
+
+  it('never asks one of the last few facts straight back', () => {
+    const step = { ...TIMES_STEPS[1], review: [] };
+    const recent = timesFacts([5]).slice(0, 4);
+    for (let i = 0; i < MANY; i += 1) expect(recent).not.toContain(timesQuestion(step, none, recent).fact);
+  });
+
+  it('moves a fact up a box when quick, keeps it when slow, and starts it again when wrong', () => {
+    expect(nextBox(1, true, true)).toBe(2);
+    expect(nextBox(4, true, true)).toBe(4);
+    expect(nextBox(2, true, false)).toBe(2);
+    expect(nextBox(3, false, true)).toBe(0);
+  });
+
+  it('knows a step only when every one of its facts is known', () => {
+    const step = TIMES_STEPS[1];
+    const boxes: Record<string, number> = {};
+    for (const f of timesFacts(step.tables)) boxes[f] = KNOWN_BOX;
+    expect(knowsStep(step, boxes)).toBe(true);
+    boxes[factKey(5, 9)] = KNOWN_BOX - 1;
+    expect(knowsStep(step, boxes)).toBe(false);
+  });
+
+  it('a miss is built from facts he knows, and the parts add up', () => {
+    for (const step of TIMES_STEPS) {
+      for (let i = 0; i < 200; i += 1) {
+        const q = timesQuestion(step, none);
+        const help = timesHelp(q);
+        expect(help.text).toContain(String(q.op === '×' ? q.answer : q.a));
+        const [first, more] = help.parts;
+        expect(first + more).toBe(q.lots);
+        if (more) {
+          expect([5, 10]).toContain(first);
+          expect(help.text).toContain(`${first * q.table} and ${more * q.table} make ${q.lots * q.table}`);
+        }
+      }
+    }
+    const seven = timesHelp({ a: 7, b: 6, op: '×', answer: 42, table: 6, lots: 7, fact: factKey(6, 7) });
+    expect(seven.text).toBe('7 × 6 = 42. 7 lots of 6 is 5 lots and 2 more: 30 and 12 make 42.');
+    expect(seven.parts).toEqual([5, 2]);
+    const share = timesHelp({ a: 42, b: 6, op: '÷', answer: 7, table: 6, lots: 7, fact: factKey(6, 7, true) });
+    expect(share.text.startsWith('42 ÷ 6 = 7, because 7 × 6 = 42.')).toBe(true);
+  });
+
+  it('asking again keeps the fact, and may turn it round', () => {
+    const q = timesQuestion(TIMES_STEPS[6], none);
+    for (let i = 0; i < 50; i += 1) {
+      const back = askAgain(q);
+      expect(back.fact).toBe(q.fact);
+      expect(back.answer).toBe(q.answer);
     }
   });
 });

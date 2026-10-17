@@ -58,6 +58,14 @@ export interface MathsGame<S extends Step> {
   /** said at full time when not every answer was right; a reading game
       using this frame says something other than "Good counting!" */
   cheer?: string;
+  /** how many questions a round can be, the first being the usual (8 or 12) */
+  lengths?: number[];
+  /** what a right answer counts as, for the score and the results:
+      "Right first time" unless the game asks for more, such as speed */
+  counts?: string;
+  /** a ladder of its own, for a game that climbs by what he knows rather
+      than by three in a row (Times Table Sprint) */
+  climb?: (c: Climb, ok: boolean, steps: number) => Climb;
   build: (kit: Kit) => Question<S>;
 }
 
@@ -121,8 +129,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   const saved = (): number => Math.min(game.steps.length - 1, Math.max(0, read<number>(key, 0) || 0));
 
   const lenSel = el('select', { 'aria-label': 'How many questions' },
-    el('option', { value: '8', text: '8 questions' }),
-    el('option', { value: '12', text: '12 questions' }),
+    ...(game.lengths ?? [8, 12]).map((n) => el('option', { value: String(n), text: `${n} questions` })),
   );
   const stepSel = el('select', { 'aria-label': 'Start at' },
     ...game.steps.map((s, i) => el('option', { value: String(i), text: `Start at: ${s.name}` })));
@@ -136,7 +143,8 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
 
   const pos = counter('Question');
   const totalEl = el('span', { text: '0' });
-  const firsts = counter('Right first time');
+  const counts = game.counts ?? 'Right first time';
+  const firsts = counter(counts);
   const stepEl = el('span', { class: 'mx-step' });
   const noteEl = el('p', { class: 'mx-note', 'aria-live': 'polite' });
   const choices = choiceRow();
@@ -199,7 +207,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
       const ok = await question.ask(game.steps[c.step]);
       if (me !== round || !life.alive()) return;
       if (ok) { right += 1; firsts.set(right); }
-      c = climb(c, ok, game.steps.length);
+      c = (game.climb ?? climb)(c, ok, game.steps.length);
       write(key, c.step);
     }
     finish(right, n, startStep, c.step);
@@ -232,7 +240,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   function finish(right: number, n: number, from: number, to: number): void {
     board.hidden = true;
     const moved = to > from ? ` You went up to ${game.steps[to].name}!` : '';
-    summary.textContent = `${right} of ${n} right first time.${moved}`;
+    summary.textContent = `${right} of ${n} ${counts.toLowerCase()}.${moved}`;
     markPlayed(game.id);
     const sticker = right * 2 >= n ? awardFace(game.id, game.face) : null;
     prize.hidden = !sticker;

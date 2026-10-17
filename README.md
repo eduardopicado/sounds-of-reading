@@ -51,6 +51,7 @@ coach's picks for today at the top.
 | **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. |
 | **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. |
 | **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |
+| **Times Table Sprint** | The times tables to 12 × 12, by heart (Years 3–4): types the answer on a number pad before the bar runs out. A table at a time (×2 and ×10, ×5, ×3, ×4, ×6, ×8, ×7, ×9, ×11, ×12), the earlier ones coming back as review, then all of them mixed, then the same facts as division. Every fact is remembered on its own: the slow and missed ones come back most, and he moves up a table only when he knows every fact in it. A miss shows the fact built from easier ones (7 lots of 6 is 5 lots and 2 more) on rows of dots. |
 | **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group. |
 | **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. |
 | **Match Clock** | Reads and sets o'clock and half past, and the days of the week in order; then (Year 2) quarter past and quarter to, the months, and the Australian seasons. |
@@ -75,8 +76,10 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 The maths and jiu-jitsu games follow the NSW Mathematics K–10 syllabus from
 Kindergarten to Year 2, and each climbs its own levels: up after three right
 in a row, down after two wrong. The Year 2 levels sit at the top of each
-ladder. Each round waits for a tap on Start, so nothing is asked while the
-page is still loading. Coach Says and Big Words climb the same way.
+ladder. Times Table Sprint goes on into Years 3 and 4 (Stage 2), and climbs
+by what he knows rather than by three in a row. Each round waits for a tap on
+Start, so nothing is asked while the page is still loading. Coach Says and
+Big Words climb the same way.
 
 Finishing a round wins a sticker: a reading game's is for the sound it
 practised most, and every other game — maths, jiu-jitsu, handwriting, Tricky
