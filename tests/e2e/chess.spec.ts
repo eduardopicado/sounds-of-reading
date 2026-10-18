@@ -41,7 +41,7 @@ test.describe('Meet the Pieces', () => {
   test('the home screen has a chess section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: 'Chess' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(6);
+    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(8);
   });
 
   test('a whole round of moving the piece to the ball, to the sticker', async ({ page }) => {
@@ -317,5 +317,78 @@ test.describe('Set Up the Board', () => {
     await expect(page.locator('.mx-note')).toContainText(`goes on ${answer}.`);
     await expect(square(page, 'e4')).toHaveClass(/miss/);
     await expect(square(page, answer)).toHaveClass(/hit/);
+  });
+});
+
+test.describe('Check!', () => {
+  test('is it check: yes or no, with the attacker shown', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 'chess-check', 0);
+    await expect(page.locator('.mx-choice')).toHaveText(['Yes', 'No'], { timeout: 8000 });
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(answer === 'Yes' ? 'can take the king' : 'no black piece can reach');
+    if (answer === 'Yes') expect(await page.locator('.ch-sq.dot').count()).toBeGreaterThan(0);
+    noProblems(watch);
+  });
+
+  test('tap the piece giving check', async ({ page }) => {
+    await startAt(page, 'chess-check', 1);
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await square(page, answer).click();
+    await expect(page.locator('.mx-note.good')).toContainText('gives check: it can reach the king.');
+  });
+
+  test('get the king out: a safe square works, an attacked one is shown', async ({ page }) => {
+    await startAt(page, 'chess-check', 2);
+    const stage = page.locator('.mx-stage');
+    const safe = ((await stage.getAttribute('data-answer')) ?? '').split(' ');
+    await square(page, safe[0]).click();
+    await expect(page.locator('.mx-note.good')).toContainText('The king is safe there.');
+    await expect(square(page, safe[0])).toHaveAttribute('data-piece', 'K');
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    /* now a square next to the king that is not safe */
+    const king = (await stage.getAttribute('data-king'))!;
+    const answer = ((await stage.getAttribute('data-answer')) ?? '').split(' ');
+    const near = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]]
+      .map(([f, r]) => String.fromCharCode(king.charCodeAt(0) + f) + (Number(king[1]) + r))
+      .filter((sq) => /^[a-h][1-8]$/.test(sq) && !answer.includes(sq));
+    const free = [];
+    for (const sq of near) if ((await square(page, sq).getAttribute('data-piece')) !== 'K' && !(await square(page, sq).getAttribute('aria-label'))!.includes('white')) free.push(sq);
+    await square(page, free[0]).click();
+    await expect(page.locator('.mx-note')).toContainText('The safe squares are ringed.');
+    expect(await page.locator('.ch-sq.hit').count()).toBe(answer.length);
+  });
+});
+
+test.describe('Mate in One', () => {
+  for (const step of [0, 1, 2]) {
+    test(`step ${step + 1}: the mating move wins`, async ({ page }) => {
+      const watch = watchPage(page);
+      await startAt(page, 'chess-mate', step);
+      const [mate] = ((await page.locator('.mx-stage').getAttribute('data-mates')) ?? '').split(' ');
+      const [from, to] = mate.split('-');
+      await square(page, from).click();
+      await expect(square(page, from)).toHaveClass(/picked/);
+      expect(await page.locator('.ch-sq.dot').count()).toBeGreaterThan(0);
+      await square(page, to).click();
+      await expect(page.locator('.mx-note.good')).toContainText('Checkmate!');
+      noProblems(watch);
+    });
+  }
+
+  test('a move that is not mate says why, and shows the mate', async ({ page }) => {
+    await startAt(page, 'chess-mate', 0);
+    const stage = page.locator('.mx-stage');
+    const mates = ((await stage.getAttribute('data-mates')) ?? '').split(' ');
+    /* the white king's move is never the mate in these puzzles */
+    const king = (await page.locator('.ch-sq[data-piece="K"]').evaluateAll((ns) =>
+      ns.filter((n) => (n.getAttribute('aria-label') ?? '').includes('white king')).map((n) => (n as HTMLElement).dataset.sq)))[0]!;
+    await square(page, king).click();
+    const dots = await page.locator('.ch-sq.dot').evaluateAll((ns) => ns.map((n) => (n as HTMLElement).dataset.sq!));
+    const to = dots.find((sq) => !mates.includes(`${king}-${sq}`))!;
+    await square(page, to).click();
+    await expect(page.locator('.mx-note')).toContainText('The checkmate is the');
+    await expect(page.locator('.mx-note')).toContainText(mates[0].split('-')[1]);
   });
 });

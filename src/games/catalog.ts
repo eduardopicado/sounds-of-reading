@@ -20,7 +20,7 @@ import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
-import { BALL_STEPS, CAPTURE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
+import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'bjj' | 'chess';
 
@@ -144,6 +144,10 @@ export const GAMES: Game[] = [
     load: () => import('./chess-capture') },
   { path: 'chess-pawns', name: 'Pawn Wars', emoji: '🏁', what: 'Pawns only: first to the other end', tone: '#4E6E8E', section: 'chess', ladder: PAWN_STEPS,
     load: () => import('./chess-pawns') },
+  { path: 'chess-check', name: 'Check!', emoji: '👑', what: 'Is the king attacked? Get him out', tone: '#A0524B', section: 'chess', ladder: CHECK_STEPS,
+    load: () => import('./chess-check') },
+  { path: 'chess-mate', name: 'Mate in One', emoji: '🏆', what: 'Win the game in one move', tone: '#B8862E', section: 'chess', ladder: MATE_STEPS,
+    load: () => import('./chess-mate') },
 ];
 
 export const gameByPath = (path: string | undefined): Game | undefined => GAMES.find((g) => g.path === path);
