@@ -5,7 +5,7 @@ import {
   BOARD_STEPS, GRID, STEP_OF, boardQuestion, compassHelp, gridRef, refSquare, turnPath, turnWhy, turned,
   SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
-  SURVEY_STEPS, surveyQuestion,
+  SURVEY_STEPS, countIn, surveyChoices, surveyQuestion,
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
   JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
@@ -788,13 +788,44 @@ describe('Fan Survey', () => {
         else if (step.task === 'more') {
           expect(q.votes[q.other]).toBeLessThan(q.votes[q.team]);
           expect(q.answer).toBe(q.votes[q.team] - q.votes[q.other]);
-        } else expect(q.answer).toBe(q.votes[q.team]);
+        } else if (step.task === 'total') expect(q.answer).toBe(q.votes.reduce((a, b) => a + b, 0));
+        else expect(q.answer).toBe(q.votes[q.team]);
       }
     }
   });
 
   it('keeps column graphs for Year 2', () => {
     expect(SURVEY_STEPS.slice(0, 3).map((s) => s.task)).toEqual(['count', 'tally', 'most']);
+  });
+
+  it('goes on, for Years 3–4, to pictures of many fans, a scale, and tables', () => {
+    const top = SURVEY_STEPS.slice(5);
+    expect(top.map((s) => [s.task, s.key])).toEqual([['key', 2], ['key', 5], ['key', 10], ['scale', 5], ['table', undefined], ['total', undefined]]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = surveyQuestion(step);
+        /* with a key, whole pictures only */
+        if (step.key) for (const v of q.votes) expect(v % step.key).toBe(0);
+        /* the scale is about the lines with no number on */
+        if (step.task === 'scale') expect(q.votes[q.team] % 10).toBe(5);
+        /* the tally asked has a gate of five in it */
+        if (step.task === 'table') expect(q.votes[q.team]).toBeGreaterThanOrEqual(6);
+        const c = surveyChoices(step, q);
+        expect(c).toHaveLength(4);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) expect(x).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it('offers the slips: the pictures counted, not the fans; a gate as one mark; a row left out', () => {
+    const at = (task: string): (typeof SURVEY_STEPS)[number] => SURVEY_STEPS.find((s) => s.task === task && (task !== 'key' || s.key === 5))!;
+    expect(surveyChoices(at('key'), { votes: [20, 5, 10, 15], team: 0, other: 0, answer: 20 })).toContain(4);
+    expect(surveyChoices(at('scale'), { votes: [35, 10, 20, 45], team: 0, other: 0, answer: 35 })).toEqual(expect.arrayContaining([30, 40, 7]));
+    expect(surveyChoices(at('table'), { votes: [18, 4, 9, 22], team: 0, other: 0, answer: 18 })).toEqual(expect.arrayContaining([6, 15]));
+    expect(surveyChoices(at('total'), { votes: [12, 9, 15, 7], team: 0, other: 0, answer: 43 })).toContain(36);
+    expect(countIn(5, 4)).toBe('5, 10, 15, 20');
   });
 });
 

@@ -1291,6 +1291,17 @@
 .fs-scale { fill: var(--ink); font: 800 20px var(--display); text-anchor: end; }
 .fs-bar { stroke: var(--ink); stroke-width: 2.5; }
 .fs-flag { font-size: 34px; text-anchor: middle; }
+.fs-key.big { font: 800 17px var(--display); color: var(--ink); }
+.fs-sheet { width: 100%; border-collapse: collapse; font: 700 clamp(15px, 4vw, 19px) var(--display); }
+.fs-sheet th { padding: 6px 8px; border-bottom: 3px solid var(--ink); text-align: left; }
+.fs-sheet td { padding: 6px 8px; border-bottom: 1px solid #D9CFC0; vertical-align: middle; }
+.fs-sheet .fs-n, .fs-sheet .fs-gap, .fs-sheet th:last-child { text-align: center; }
+.fs-sheet .fs-gap { color: #A3301A; font-size: 1.2em; }
+.fs-sheet .fs-gap.filled { color: #1B6B48; }
+/* in a table the tallies go to 30, six gates: they scale with the screen, not their own width */
+.fs-sheet .fs-tally { width: auto !important; height: clamp(14px, 3.8vw, 30px); }
+.fs-sheet th, .fs-sheet td { padding-inline: clamp(3px, 1.2vw, 8px); }
+.fs-sheet .fs-total td { border-top: 3px solid var(--ink); border-bottom: 0; font-weight: 800; }
 .fs-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 700 15px var(--display); }
 .mx-choice.word { font-size: clamp(20px, 5vw, 28px); }
 
