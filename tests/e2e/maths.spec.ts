@@ -739,6 +739,80 @@ test.describe('maths games', () => {
     noProblems(watch);
   });
 
+  test('Years 3–4: Jump Line jumps a hundred at a time, to 1000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 7 });
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Jump on 100', exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Jump on 10', exact: true })).toBeVisible();
+    await expect(page.locator('.jl-label').last()).toHaveText('1000');
+    const b = Number(await page.locator('.jl-line').getAttribute('data-b'));
+    for (let i = 0; i < b / 100; i += 1) await page.getByRole('button', { name: 'Jump on 100', exact: true }).click();
+    await expect(page.locator('.jl-hop')).toHaveCount(b / 100);
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(/jumps? of a hundred/);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Jump Line goes to the next ten first, then jumps the rest', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 10 });
+    await startGame(page, 'jump-line');
+    await expect(page.locator('.mx-ask')).toContainText('how far is it to the next ten?', { timeout: 10000 });
+    const line = page.locator('.jl-line');
+    const [a, b, first] = await Promise.all(['data-a', 'data-b', 'data-bridge'].map(async (k) => Number(await line.getAttribute(k))));
+    expect((a + first) % 10).toBe(0);
+    await tapNumber(page, first);
+    /* the jump to the ten is drawn, and the ball is on the ten */
+    await expect(line).toHaveAttribute('data-at', String(a + first));
+    await expect(page.locator('.mx-ask')).toHaveText(`Now jump the rest: ${b - first} more.`);
+    const rest = b - first;
+    for (let i = 0; i < Math.floor(rest / 10); i += 1) await page.getByRole('button', { name: 'Jump on 10', exact: true }).click();
+    for (let i = 0; i < rest % 10; i += 1) await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toHaveText(`Yes! ${a} + ${b}: ${first} to ${a + first}, then ${rest} more is ${a + b}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: back to the ten first, and the other part of the ten is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:jump-line': 11 });
+    await startGame(page, 'jump-line');
+    await expect(page.locator('.mx-ask')).toContainText('how far is it back to the ten?', { timeout: 10000 });
+    const line = page.locator('.jl-line');
+    const [a, b, first] = await Promise.all(['data-a', 'data-b', 'data-bridge'].map(async (k) => Number(await line.getAttribute(k))));
+    /* 63: 3 back to 60, and the 7 that makes the ten is offered too */
+    await tapNumber(page, 10 - first);
+    await expect(page.locator('.mx-note')).toHaveText(`${a} is ${first} from ${a - first}.`);
+    await expect(line).toHaveAttribute('data-at', String(a - first), { timeout: 4000 });
+    const rest = b - first;
+    for (let i = 0; i < Math.floor(rest / 10); i += 1) await page.getByRole('button', { name: 'Jump back 10', exact: true }).click();
+    for (let i = 0; i < rest % 10; i += 1) await page.getByRole('button', { name: 'Jump back 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    /* he got there, but not by knowing the first jump: it does not count, and the way is said */
+    await expect(page.locator('.mx-note')).toHaveText(`${a} − ${b}: back ${first} to ${a - first}, then ${rest} more back is ${a - b}.`);
+    await expect(page.locator('.mx-note')).not.toHaveClass(/good/);
+  });
+
+  test('Years 3–4: Jump Line to 10 000 in thousands and hundreds', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 13 });
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Jump on 1000', exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.jl-label').last()).toHaveText('10 000');
+    /* the last number fits inside the line */
+    const svgBox = (await page.locator('.jl-line').boundingBox())!;
+    const label = (await page.locator('.jl-label').last().boundingBox())!;
+    expect(label.x + label.width).toBeLessThanOrEqual(svgBox.x + svgBox.width + 1);
+    const b = Number(await page.locator('.jl-line').getAttribute('data-b'));
+    for (let i = 0; i < Math.floor(b / 1000); i += 1) await page.getByRole('button', { name: 'Jump on 1000', exact: true }).click();
+    for (let i = 0; i < (b % 1000) / 100; i += 1) await page.getByRole('button', { name: 'Jump on 100', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(/of a thousand and \d+ of a hundred on/);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+    noProblems(watch);
+  });
+
   test('Match Clock: a whole round of reading the clock', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'match-clock');
