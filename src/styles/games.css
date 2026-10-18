@@ -1791,3 +1791,63 @@
   .ws-plist li { margin: 0 0 3mm; }
   .ws-box { margin-right: 2mm; }
 }
+
+/* ── Foosball Words ───────────────────────────────────────────────────── */
+
+.fb-ask { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 12px; }
+.fb-picture { font-size: 46px; line-height: 1; }
+/* the table: arrows above and below each rod, five players' height of rod
+   between them, and the shooting lane across the middle one */
+.fb-table {
+  --h: clamp(50px, 7vh, 62px); --btn: 46px; --pad: 10px;
+  position: relative; display: flex; width: min(100%, 560px); padding: var(--pad) 58px var(--pad) 8px;
+  border-radius: 18px; background: #2E8F52; box-shadow: inset 0 0 0 6px #1F6B3B, 0 6px 0 rgba(0, 0, 0, .25);
+}
+.fb-lane {
+  position: absolute; left: 6px; right: 6px; top: calc(var(--pad) + var(--btn) + 2 * var(--h)); height: var(--h);
+  background: rgba(255, 255, 255, .16); border-block: 3px solid rgba(255, 255, 255, .6);
+}
+.fb-rods { position: relative; z-index: 1; display: flex; flex: 1; justify-content: space-around; }
+.fb-col { display: flex; flex-direction: column; align-items: center; width: clamp(60px, 17vw, 84px); }
+.fb-up, .fb-down {
+  width: 46px; height: var(--btn); border: 0; border-radius: 12px; cursor: pointer;
+  background: var(--paper); color: var(--ink); font-size: 20px; box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.fb-up:disabled, .fb-down:disabled { opacity: .35; cursor: default; }
+.fb-track { position: relative; width: 100%; height: calc(5 * var(--h)); overflow: hidden; touch-action: none; cursor: grab; }
+.fb-bar {
+  position: absolute; left: 50%; top: 0; bottom: 0; width: 8px; translate: -50% 0; border-radius: 4px;
+  background: linear-gradient(90deg, #8F989F, #E6EAED, #8F989F);
+}
+.fb-men { position: absolute; inset: 0 0 auto; display: grid; transform: translateY(calc((2 - var(--at, 0)) * var(--h))); transition: transform .25s ease-out; }
+.fb-man { position: relative; display: grid; place-items: center; height: var(--h); }
+.fb-head { position: absolute; top: 1px; left: 50%; z-index: 2; width: 14px; height: 14px; translate: -50% 0; border-radius: 50%; background: #F1C7A1; box-shadow: 0 0 0 2px var(--ink); }
+.fb-shirt {
+  display: grid; place-items: center; min-width: 52px; height: calc(var(--h) - 12px); margin-top: 6px; padding: 0 6px;
+  border: 5px solid var(--team); border-radius: 14px; background: var(--paper); color: var(--ink);
+  font: 700 clamp(20px, 3.4vh, 28px) var(--reading); box-shadow: 0 3px 0 rgba(0, 0, 0, .3);
+}
+/* a wobble of its own: the rod's place is its transform, so this moves by translate */
+.fb-col.wrong .fb-men { animation: fb-wobble .45s; }
+@keyframes fb-wobble { 25% { translate: -7px 0; } 75% { translate: 7px 0; } }
+.fb-goal {
+  position: absolute; right: 8px; top: calc(var(--pad) + var(--btn) + 1.5 * var(--h)); width: 36px; height: calc(2 * var(--h));
+  border: 5px solid #fff; border-left: 0; border-radius: 0 12px 12px 0;
+  background: repeating-linear-gradient(45deg, rgba(255, 255, 255, .3) 0 2px, transparent 2px 8px);
+}
+.fb-ball { position: absolute; z-index: 3; left: 4px; top: calc(var(--pad) + var(--btn) + 2.5 * var(--h)); translate: 0 -50%; font-size: 26px; opacity: 0; pointer-events: none; }
+.fb-ball.in { animation: fb-in .7s ease-in forwards; }
+.fb-ball.post { animation: fb-post .7s ease-out forwards; }
+@keyframes fb-in { from { opacity: 1; left: 4px; } to { opacity: 1; left: calc(100% - 40px); } }
+@keyframes fb-post {
+  from { opacity: 1; left: 4px; }
+  60% { opacity: 1; left: calc(100% - 70px); top: calc(var(--pad) + var(--btn) + 1.6 * var(--h)); }
+  to { opacity: 0; left: calc(100% - 150px); top: calc(var(--pad) + var(--btn) + 1.2 * var(--h)); }
+}
+.fb-reads { min-height: 44px; margin: 4px 0; font: 700 34px var(--reading); letter-spacing: 1px; }
+.fb-shoot { font-size: 22px; }
+@media (prefers-reduced-motion: reduce) {
+  .fb-men { transition: none; }
+  .fb-col.wrong .fb-men { animation: none; }
+  .fb-ball.in, .fb-ball.post { animation: none; opacity: 1; }
+}

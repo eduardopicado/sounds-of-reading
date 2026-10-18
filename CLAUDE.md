@@ -65,6 +65,8 @@ src/content/big-words.ts two-syllable words from words.ts, each level worked out
                        from the spellings in its parts
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
+src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
+                       rod each, with the swaps that make other real words
 src/content/word-search.ts Word Search: the themed lists from words.ts, the grid
                        steps, and the grids, checked so no blocked word is
                        spelt by chance and every hidden word appears once

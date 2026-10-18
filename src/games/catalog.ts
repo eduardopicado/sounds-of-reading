@@ -19,6 +19,7 @@ import { MATCH_STEPS, REF_STEPS, SIGNAL_STEPS, WEIGH_STEPS } from '../content/bj
 import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
+import { FOOS_STEPS } from '../content/foosball';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'bjj';
 
@@ -81,6 +82,8 @@ export const GAMES: Game[] = [
     load: () => import('./big-words') },
   { path: 'word-search', name: 'Word Search', emoji: '🔎', what: 'Find the hidden words', tone: '#3E9E8F', section: 'reading', ladder: SEARCH_STEPS,
     load: () => import('./word-search') },
+  { path: 'foosball-words', name: 'Foosball Words', emoji: '🕹️', what: 'Slide the rods, spell the word', tone: '#2E8F52', section: 'reading', ladder: FOOS_STEPS,
+    load: () => import('./foosball-words') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',
