@@ -1072,7 +1072,20 @@ export function shapeQuestion(step: ShapeStep, last?: ShapeQuestion): ShapeQuest
 
 export type Dir = 'up' | 'right' | 'down' | 'left';
 export const DIRS: Dir[] = ['up', 'right', 'down', 'left'];
-const STEP: Record<Dir, [number, number]> = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };
+
+/** the points of the compass, clockwise from north; on the whiteboard, as on
+    a map, north is up */
+export type Compass = 'north' | 'north-east' | 'east' | 'south-east' | 'south' | 'south-west' | 'west' | 'north-west';
+export const COMPASS: Compass[] = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+/** the four main points, by the way they face on the board */
+export const NORTH_OF: Record<Dir, Compass> = { up: 'north', right: 'east', down: 'south', left: 'west' };
+
+/** one square's move in each direction: [across, down] */
+export const STEP_OF: Record<Dir | Compass, [number, number]> = {
+  up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0],
+  north: [0, -1], 'north-east': [1, -1], east: [1, 0], 'south-east': [1, 1],
+  south: [0, 1], 'south-west': [-1, 1], west: [-1, 0], 'north-west': [-1, -1],
+};
 
 export interface BoardStep extends Step {
   /**
@@ -1080,8 +1093,16 @@ export interface BoardStep extends Step {
    * move / moves: follow one move (or two) on the grid and tap where he lands;
    * turn: a quarter or half turn, which way is he facing now;
    * transform: was the shape flipped, slid or turned?
+   * gridref: find C3 on a grid with letters across and numbers down, or say
+   *   which square the ball is on;
+   * compass: follow moves given as compass points;
+   * angle: is the corner a right angle, or smaller, or bigger?
    */
-  task: 'side' | 'move' | 'moves' | 'turn' | 'transform';
+  task: 'side' | 'move' | 'moves' | 'turn' | 'transform' | 'gridref' | 'compass' | 'angle';
+  /** compass: north, south, east and west, or the points in between */
+  points?: 4 | 8;
+  /** turn: faces north, east, south or west, and turns three quarters too */
+  compass?: boolean;
 }
 
 export const BOARD_STEPS: BoardStep[] = [
@@ -1091,31 +1112,105 @@ export const BOARD_STEPS: BoardStep[] = [
   /* Year 2: turns, and flips, slides and turns of a shape */
   { name: 'Quarter and half turns', task: 'turn' },
   { name: 'Flip, slide or turn?', task: 'transform' },
+  /* Years 3–4: grid references, the compass, right angles */
+  { name: 'Grid references', task: 'gridref' },
+  { name: 'North, south, east and west', task: 'compass', points: 4 },
+  { name: 'Right angles', task: 'angle' },
+  { name: 'Three-quarter turns', task: 'turn', compass: true },
+  { name: 'North-east and the points between', task: 'compass', points: 8 },
 ];
 
 /** the grid on the whiteboard: GRID by GRID squares */
 export const GRID = 5;
 
-export interface Move { dir: Dir; n: number }
+export interface Move { dir: Dir | Compass; n: number }
+
+export type Turn = 'quarter-clockwise' | 'quarter-anticlockwise' | 'half'
+  | 'three-quarter-clockwise' | 'three-quarter-anticlockwise';
+
+/** angles drawn for "is it a right angle?": never so close to one that it
+    takes a protractor to tell */
+export const ANGLES = { smaller: [30, 45, 60], bigger: [120, 135, 150] };
 
 export interface BoardQuestion {
   /** side: where the keeper and the ball are, along a row of GRID spots */
   keeper: number;
   ball: number;
-  /** move(s): where he starts, the moves, where he ends */
+  /** move(s), compass: where he starts, the moves, where he ends; gridref:
+      the square asked about is the end */
   start: [number, number];
   moves: Move[];
   end: [number, number];
   /** turn: which way he faces, the turn, and which way he faces after */
   facing: Dir;
-  turn: 'quarter-clockwise' | 'quarter-anticlockwise' | 'half';
+  turn: Turn;
   /** transform: what was done to the shape */
   done: 'flip' | 'slide' | 'turn';
+  /** gridref: tap the square named, or name the square the ball is on, in turn */
+  way: 'tap' | 'name';
+  /** gridref, name: the four squares offered */
+  refs: string[];
+  /** angle: how wide, in degrees, and how far round it is drawn */
+  angle: number;
+  tilt: number;
   answer: string;
 }
 
-export const turned = (d: Dir, turn: BoardQuestion['turn']): Dir =>
-  DIRS[(DIRS.indexOf(d) + (turn === 'half' ? 2 : turn === 'quarter-clockwise' ? 1 : 3)) % 4];
+/** quarter turns clockwise in each turn */
+const QUARTERS: Record<Turn, number> = {
+  'quarter-clockwise': 1, 'quarter-anticlockwise': 3, half: 2,
+  'three-quarter-clockwise': 3, 'three-quarter-anticlockwise': 1,
+};
+
+export const turned = (d: Dir, turn: Turn): Dir => DIRS[(DIRS.indexOf(d) + QUARTERS[turn]) % 4];
+
+/** the way he faces after each quarter of the turn, in order: a half turn
+    goes round clockwise */
+export function turnPath(d: Dir, turn: Turn): Dir[] {
+  const back = turn.endsWith('-anticlockwise');
+  const count = turn === 'half' ? 2 : turn.startsWith('three-quarter') ? 3 : 1;
+  return Array.from({ length: count }, (_, i) => DIRS[(DIRS.indexOf(d) + (back ? 3 : 1) * (i + 1)) % 4]);
+}
+
+export const TURN_NAME: Record<Turn, string> = {
+  'quarter-clockwise': 'a quarter turn clockwise', 'quarter-anticlockwise': 'a quarter turn anticlockwise',
+  half: 'a half turn', 'three-quarter-clockwise': 'a three-quarter turn clockwise',
+  'three-quarter-anticlockwise': 'a three-quarter turn anticlockwise',
+};
+
+/** a turn counted out in quarters, in compass points: "From north, a
+    three-quarter turn clockwise is 3 quarter turns: east, south, west. He
+    faces west." A quarter turn just "goes to east". */
+export function turnWhy(d: Dir, turn: Turn): string {
+  const path = turnPath(d, turn).map((x) => NORTH_OF[x]);
+  const from = `From ${NORTH_OF[d]}, ${TURN_NAME[turn]}`;
+  if (path.length === 1) return `${from} goes to ${path[0]}.`;
+  return `${from} is ${path.length} quarter turns: ${path.join(', ')}. He faces ${path[path.length - 1]}.`;
+}
+
+/** a square's grid reference: letters across, numbers down, A1 at the top left */
+export const gridRef = ([x, y]: [number, number]): string => `${'ABCDE'[x]}${y + 1}`;
+
+/** the square a grid reference names */
+export function refSquare(ref: string): [number, number] {
+  return ['ABCDE'.indexOf(ref[0]), Number(ref.slice(1)) - 1];
+}
+
+/** three wrong squares to offer beside the right one: the letter or the number
+    one out, and both */
+function nearRefs(at: [number, number]): string[] {
+  const near: [number, number][] = [];
+  for (const [dx, dy] of shuffle([[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as [number, number][])) {
+    const x = at[0] + dx;
+    const y = at[1] + dy;
+    if (x >= 0 && x < GRID && y >= 0 && y < GRID) near.push([x, y]);
+  }
+  /* one with the letter wrong, one with the number wrong, and one more */
+  const letter = near.find(([, y]) => y === at[1])!;
+  const number = near.find(([x]) => x === at[0])!;
+  const more = near.find((p) => p !== letter && p !== number)!;
+  return shuffle([at, letter, number, more].map(gridRef));
+}
 
 export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuestion {
   for (;;) {
@@ -1125,33 +1220,69 @@ export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuest
     const start: [number, number] = [rand(0, GRID - 1), rand(0, GRID - 1)];
     const moves: Move[] = [];
     let end: [number, number] = [...start];
-    if (step.task === 'move' || step.task === 'moves') {
-      const axes = shuffle([['left', 'right'], ['up', 'down']] as Dir[][]).slice(0, step.task === 'move' ? 1 : 2);
+    if (step.task === 'move' || step.task === 'moves' || step.task === 'compass') {
+      const lines: (Dir | Compass)[][] = step.task === 'compass' && step.points === 8
+        ? [['north-east', 'south-east', 'south-west', 'north-west']]
+        : step.task === 'compass' ? [['west', 'east'], ['north', 'south']] : [['left', 'right'], ['up', 'down']];
+      const axes = shuffle(lines).slice(0, step.task === 'move' || step.points === 8 ? 1 : 2);
       for (const axis of axes) {
         const dir = pick(axis);
-        const room = dir === 'right' ? GRID - 1 - end[0] : dir === 'left' ? end[0] : dir === 'down' ? GRID - 1 - end[1] : end[1];
+        const [dx, dy] = STEP_OF[dir];
+        const roomX = dx > 0 ? GRID - 1 - end[0] : dx < 0 ? end[0] : GRID;
+        const roomY = dy > 0 ? GRID - 1 - end[1] : dy < 0 ? end[1] : GRID;
+        const room = Math.min(roomX, roomY);
         if (!room) continue;
         const n = rand(1, Math.min(3, room));
         moves.push({ dir, n });
-        end = [end[0] + STEP[dir][0] * n, end[1] + STEP[dir][1] * n];
+        end = [end[0] + dx * n, end[1] + dy * n];
       }
       if (moves.length !== axes.length) continue;
     }
+    if (step.task === 'gridref') end = [rand(0, GRID - 1), rand(0, GRID - 1)];
+    /* find a square, then name one, in turn */
+    const way: BoardQuestion['way'] = last?.way === 'tap' ? 'name' : 'tap';
+    const refs = step.task === 'gridref' && way === 'name' ? nearRefs(end) : [];
     const facing = pick(DIRS);
-    const turn = pick(['quarter-clockwise', 'quarter-anticlockwise', 'half'] as const);
+    const turn: Turn = pick(step.compass
+      ? ['quarter-clockwise', 'quarter-anticlockwise', 'half', 'three-quarter-clockwise', 'three-quarter-anticlockwise']
+      : ['quarter-clockwise', 'quarter-anticlockwise', 'half']);
     const done = pick(['flip', 'slide', 'turn'] as const);
+    /* a right angle a third of the time */
+    const angle = pick([90, 90, 90, ...ANGLES.smaller, ...ANGLES.bigger]);
+    const tilt = 15 * rand(0, 23);
     const answer = step.task === 'side' ? (ball < keeper ? 'left' : 'right')
       : step.task === 'turn' ? turned(facing, turn)
         : step.task === 'transform' ? done
-          : `${end[0]},${end[1]}`;
-    const q = { keeper, ball, start, moves, end, facing, turn, done, answer };
+          : step.task === 'angle' ? (angle < 90 ? 'smaller' : angle > 90 ? 'bigger' : 'right')
+            : step.task === 'gridref' && way === 'name' ? gridRef(end)
+              : `${end[0]},${end[1]}`;
+    const q = { keeper, ball, start, moves, end, facing, turn, done, way, refs, angle, tilt, answer };
     if (last && last.answer === answer && last.start.join() === start.join()) continue;
+    if (last && step.task === 'gridref' && last.end.join() === end.join()) continue;
     return q;
   }
 }
 
-/** a move as it is said: "2 squares up" */
+/** a move as it is said: "2 squares up", "1 square north-east" */
 export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : 'squares'} ${m.dir}`;
+
+const WAY_ON_BOARD: Record<Compass, string> = {
+  north: 'up', south: 'down', east: 'to the right', west: 'to the left',
+  'north-east': 'up and to the right', 'south-east': 'down and to the right',
+  'south-west': 'down and to the left', 'north-west': 'up and to the left',
+};
+
+/** which way each compass point in the moves goes on the board: "North is up
+    and west is to the left." or "North-east is between north and east: up
+    and to the right." */
+export function compassHelp(moves: Move[]): string {
+  const dirs = [...new Set(moves.map((m) => m.dir))] as Compass[];
+  const cap = (t: string): string => t[0].toUpperCase() + t.slice(1);
+  if (dirs.some((d) => d.includes('-'))) {
+    return dirs.map((d) => `${cap(d)} is between ${d.split('-').join(' and ')}: ${WAY_ON_BOARD[d]}.`).join(' ');
+  }
+  return `${cap(dirs.map((d) => `${d} is ${WAY_ON_BOARD[d]}`).join(' and '))}.`;
+}
 
 /* ── Ice Cream Van: Australian coins ─────────────────────────────────── */
 
@@ -1160,6 +1291,11 @@ export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : '
  * value), pay with one coin, and count a handful of the same coin. Year 2
  * counts mixed coins, picks coins that make a price exactly, and works out
  * the change.
+ *
+ * Years 3 and 4 read and write dollars and cents ($3.05 is not $3.50), pay
+ * prices to the 5 cents, tell which of two prices is cheaper, add two
+ * prices, and count up the change from a $5, $10 or $20 note, the way a
+ * shopkeeper does.
  *
  * Everything is in cents so there is no rounding; money() writes it the way
  * a price tag does: 50c, $2, $3.50. */
@@ -1214,9 +1350,15 @@ export interface KioskStep extends Step {
    * count: how much is a handful of the same coin;
    * mixed: how much is a handful of different coins;
    * pay: tap coins that make the price exactly;
-   * change: pay with a note, how much change
+   * change: pay with a note, how much change;
+   * read: which price tag says "3 dollars and 45 cents";
+   * cheaper: which of two treats costs less;
+   * total: how much for two treats together
    */
-  task: 'more' | 'one' | 'count' | 'mixed' | 'pay' | 'change';
+  task: 'more' | 'one' | 'count' | 'mixed' | 'pay' | 'change' | 'read' | 'cheaper' | 'total';
+  /** Years 3–4: prices to the 5 cents (but $3.45 against $3.54 to say which
+      is cheaper), and change from a $20 note too */
+  fives?: boolean;
 }
 
 export const KIOSK_STEPS: KioskStep[] = [
@@ -1227,6 +1369,12 @@ export const KIOSK_STEPS: KioskStep[] = [
   { name: 'Count mixed coins', task: 'mixed' },
   { name: 'Pay the exact price', task: 'pay' },
   { name: 'How much change?', task: 'change' },
+  /* Years 3–4 */
+  { name: 'Dollars and cents', task: 'read', fives: true },
+  { name: 'Pay to the 5 cents', task: 'pay', fives: true },
+  { name: 'Which is cheaper?', task: 'cheaper', fives: true },
+  { name: 'Two treats', task: 'total', fives: true },
+  { name: 'Change from $5, $10 and $20', task: 'change', fives: true },
 ];
 
 export interface KioskQuestion {
@@ -1238,6 +1386,9 @@ export interface KioskQuestion {
   coins: number[];
   /** for change: the note he pays with, in cents */
   paid?: number;
+  /** cheaper, total: a second treat and its price */
+  other?: Treat;
+  otherPrice?: number;
   /** cents; for more, the coin worth more */
   answer: number;
   options: number[];
@@ -1291,12 +1442,34 @@ export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuest
       const answer = coins.reduce((s, c) => s + c, 0);
       q = { task: 'mixed', treat, price: answer, coins, answer, options: moneyChoices(answer, pick([10, 50])) };
     } else if (step.task === 'pay') {
-      /* a price in tens of cents up to $5, and a purse that can make it */
-      const price = rand(5, 50) * 10;
-      const exact = makeUp(price, [200, 100, 50, 20, 10]);
+      /* a price in tens of cents up to $5 (to the 5 cents, Years 3–4), and a
+         purse that can make it */
+      const price = step.fives ? 10 * rand(20, 59) + pick([5, 5, 0]) : rand(5, 50) * 10;
+      const exact = makeUp(price, step.fives ? [200, 100, 50, 20, 10, 5] : [200, 100, 50, 20, 10]);
       const extra = shuffle([200, 100, 50, 20, 10, 5]).slice(0, 2);
       const coins = [...exact, ...extra].sort((a, b) => b - a);
       q = { task: 'pay', treat, price, coins, answer: price, options: [] };
+    } else if (step.task === 'read') {
+      const price = 100 * rand(1, 9) + pick([5, 5, 10 * rand(1, 9), 5 * rand(1, 19)]);
+      q = { task: 'read', treat, price, coins: [], answer: price, options: priceSlips(price) };
+    } else if (step.task === 'cheaper') {
+      const [a, b] = cheaperPair();
+      const other = pick(TREATS.filter((t) => t !== treat));
+      q = { task: 'cheaper', treat, price: a, other, otherPrice: b, coins: [], answer: Math.min(a, b), options: [] };
+    } else if (step.task === 'total') {
+      const a = 100 * rand(1, 4) + 5 * rand(1, 19);
+      const b = 100 * rand(1, 4) + 5 * rand(1, 19);
+      const other = pick(TREATS.filter((t) => t !== treat));
+      const answer = a + b;
+      /* the slip to catch: the cents make more than a dollar, and it is lost */
+      const lost = (a % 100) + (b % 100) >= 100 ? answer - 100 : answer + 100;
+      q = { task: 'total', treat, price: a, other, otherPrice: b, coins: [], answer, options: withSlip(answer, lost, 10) };
+    } else if (step.fives) {
+      const paid = pick([500, 1000, 2000]);
+      const price = paid / 2 + 5 * rand(1, paid / 10 - 1);
+      const answer = paid - price;
+      /* the slip: forgetting that the cents took a dollar */
+      q = { task: 'change', treat, price, coins: [], paid, answer, options: withSlip(answer, answer + 100, 10) };
     } else {
       const paid = pick([500, 1000]);
       const price = rand(paid === 500 ? 3 : 10, paid === 500 ? 9 : 19) * 50;
@@ -1304,8 +1477,95 @@ export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuest
       q = { task: 'change', treat, price, coins: [], paid, answer, options: moneyChoices(answer, 50) };
     }
     if (last && last.answer === q.answer && last.task === q.task) continue;
+    /* a price like $5.05 has fewer slips than four tags need */
+    if (q.task === 'read' && q.options.length < 4) continue;
     return q;
   }
+}
+
+/** the right amount, the slip a child makes, and two more near it */
+function withSlip(answer: number, slip: number, step: number): number[] {
+  const out = new Set([answer, slip]);
+  for (const x of moneyChoices(answer, step)) if (out.size < 4) out.add(x);
+  return [...out].sort((a, b) => a - b);
+}
+
+/** price tags for "3 dollars and 45 cents": the right one, and the ones a
+    child writes by mistake — $3.54, $45.03, $345, and the lost or added nought
+    ($3.50 for 3 dollars and 5 cents, $3.04 for 3 dollars and 40 cents) */
+function priceSlips(price: number): number[] {
+  const d = Math.floor(price / 100);
+  const c = price % 100;
+  const nought = c < 10 ? d * 100 + c * 10 : c % 10 === 0 ? d * 100 + c / 10 : -1;
+  const swapped = c >= 10 && c % 10 ? d * 100 + (c % 10) * 10 + Math.floor(c / 10) : -1;
+  const slips = [nought, swapped, c * 100 + d, price * 100].filter((x) => x > 0 && x !== price);
+  return shuffle([price, ...[...new Set(slips)].slice(0, 3)]);
+}
+
+/** a price said with its "and": 3 dollars and 45 cents */
+export const priceWords = (cents: number): string =>
+  moneyWords(cents).replace(/(dollars?) (\d)/, '$1 and $2');
+
+/** how dollars and cents are written */
+export function priceWhy(price: number): string {
+  const c = price % 100;
+  const rule = c < 10
+    ? `${c} cents is written .0${c}, with a nought: there are always two digits after the point.`
+    : 'The dollars go before the point and the cents after it.';
+  return `${priceWords(price)} is ${money(price)}. ${rule}`;
+}
+
+/** two prices that need reading carefully to say which is less: the cents
+    swapped round, $3.05 against $3.50, or fewer dollars but more cents */
+function cheaperPair(): [number, number] {
+  const d = rand(1, 8);
+  const kind = pick(['swap', 'nought', 'dollar'] as const);
+  let pair: [number, number];
+  if (kind === 'swap') {
+    const [x, y] = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    pair = [d * 100 + x * 10 + y, d * 100 + y * 10 + x];
+  } else if (kind === 'nought') {
+    const x = rand(1, 9);
+    pair = [d * 100 + x, d * 100 + x * 10];
+  } else {
+    pair = [d * 100 + 5 * rand(12, 19), (d + 1) * 100 + 5 * rand(1, 8)];
+  }
+  return shuffle(pair) as [number, number];
+}
+
+/** why one price is less: dollars first, then cents */
+export function cheaperWhy(a: number, b: number): string {
+  const [lo, hi] = a < b ? [a, b] : [b, a];
+  const d = Math.floor(lo / 100);
+  if (d === Math.floor(hi / 100)) {
+    return `Both are ${d} ${d === 1 ? 'dollar' : 'dollars'}, and ${lo % 100} cents is less than ${hi % 100} cents, so ${money(lo)} is cheaper.`;
+  }
+  return `${money(lo)} is less than ${money((d + 1) * 100)}, and ${money(hi)} is more, so ${money(lo)} is cheaper.`;
+}
+
+/** adding two prices: dollars, then cents, then both together */
+export function totalWhy(a: number, b: number): string {
+  const dollars = Math.floor(a / 100) * 100 + Math.floor(b / 100) * 100;
+  const cents = (a % 100) + (b % 100);
+  return `Dollars: ${money(Math.floor(a / 100) * 100)} + ${money(Math.floor(b / 100) * 100)} = ${money(dollars)}. `
+    + `Cents: ${money(a % 100)} + ${money(b % 100)} = ${money(cents)}. Together: ${money(a + b)}.`;
+}
+
+/** the change, counted up from the price the way a shopkeeper does: to the
+    next ten cents, to the next dollar, then to the note */
+export function countUp(price: number, paid: number): { jumps: number[]; text: string } {
+  const jumps: number[] = [];
+  const said: string[] = [];
+  let at = price;
+  for (const to of [Math.ceil(at / 10) * 10, Math.ceil(at / 100) * 100, paid]) {
+    if (to <= at) continue;
+    jumps.push(to - at);
+    said.push(`${money(to - at)} makes ${money(to)}`);
+    at = to;
+  }
+  const list = said.length > 1 ? `${said.slice(0, -1).join(', ')}, and ${said[said.length - 1]}` : said[0];
+  const sum = jumps.length > 1 ? `${jumps.map(money).join(' + ')} = ${money(paid - price)}` : money(paid - price);
+  return { jumps, text: `Count up from ${money(price)}: ${list}. The change is ${sum}.` };
 }
 
 /** do these coins make the price exactly? */

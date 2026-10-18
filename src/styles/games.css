@@ -1329,6 +1329,24 @@
 .cw-shape { fill: #2E6FB0; stroke: var(--ink); stroke-width: 3; }
 .cw-shape.after { fill: #E0703A; }
 .cw-move { fill: none; stroke: #7A8590; stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; }
+/* Years 3–4: the compass beside the grid (above it on a phone), grid
+   references, and corners */
+.cw-pair { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; width: 100%; }
+.cw-rose { flex: none; width: clamp(80px, 22vw, 128px); height: auto; aspect-ratio: 1; }
+.cw-rose-main { fill: var(--ink); }
+.cw-rose-north { fill: #C9452E; }
+.cw-rose-between { fill: #7A8590; }
+.cw-rose-letter { fill: var(--ink); font: 800 22px var(--display); text-anchor: middle; dominant-baseline: central; }
+.cw-grid.ref { grid-template-columns: 30px repeat(5, 1fr); width: min(100%, 390px); }
+.cw-head { display: grid; place-items: center; border-radius: 8px; color: var(--ink); font: 800 24px var(--display); }
+.cw-head.on { background: var(--mint); }
+.cw-cell.still { cursor: default; }
+.cw-turn-sign { white-space: nowrap; }
+.cw-turn .cw-rose + .cw-facing { width: min(28vw, 160px); }
+.cw-corner { width: min(52vw, 260px); height: auto; aspect-ratio: 1; }
+.cw-angle { fill: none; stroke: #2E6FB0; stroke-width: 9; stroke-linecap: round; stroke-linejoin: round; }
+.cw-angle-fill { fill: #C9DCF0; }
+.cw-right { fill: none; stroke: #C9452E; stroke-width: 4; stroke-dasharray: 9 7; }
 @media (prefers-reduced-motion: reduce) { .cw-arrow { transition: none; } }
 
 /* ── Jiu-jitsu: Ref's Call and Match Maths ─────────────────────────────── */
@@ -1521,6 +1539,16 @@
   font-family: var(--display); font-weight: 800; font-size: 13px; color: var(--mustard);
 }
 .counted .iv-coins { padding-bottom: 24px; }
+/* Years 3–4: two treats side by side, to tap the cheaper or add them up */
+.iv-two { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
+.iv-pick.iv-offer { display: grid; justify-items: center; gap: 8px; padding: 12px 16px; border-radius: 18px; background: rgba(255, 246, 231, .08); }
+.iv-offer .iv-treat { font-size: 64px; }
+.iv-plus { font: 800 32px var(--display); color: var(--paper); }
+@media (max-width: 480px) {
+  .iv-counter:has(.iv-plus) { gap: 6px; }
+  .iv-counter:has(.iv-plus) .iv-treat { font-size: 36px; }
+  .iv-counter:has(.iv-plus) .iv-tag { font-size: 20px; padding: 4px 8px; }
+}
 
 /* ── Big Words ────────────────────────────────────────────────────────── */
 
