@@ -44,7 +44,7 @@ coach's picks for today at the top.
 
 | Game | What the child does |
 |---|---|
-| **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many. |
+| **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many; then (Year 2) rows and columns; then (Years 3–4) arrays that are times-table facts, up to 12 rows of 12, drawn in blocks of five so 7 rows reads as 5 and 2. A miss splits the array into those two easier parts. |
 | **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? |
 | **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20. |
 | **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000. |

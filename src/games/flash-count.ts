@@ -9,6 +9,12 @@
  * In Year 2 the dots come in rows and columns, an array: "3 rows of 4" is
  * seen as a shape too, and it is where multiplying starts.
  *
+ * In Years 3 and 4 the arrays are the times-table facts, up to 12 rows of 12.
+ * They are drawn in blocks of five, a gap after every fifth row and column,
+ * so 7 rows of 6 is seen as 5 rows and 2 more rather than counted. The
+ * numbers to choose from are the slips made with a fact — a row too many or
+ * too few — and a miss splits the array into those two easier parts.
+ *
  * The numbers to choose from only appear once the dots have gone, so the
  * dots have to be remembered, not counted. A wrong answer shows them again,
  * and counts them. */
@@ -18,7 +24,10 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
-import { DICE, FLASH_STEPS, choices, flashLowest, flashMs, flashQuestion, type FlashQuestion, type FlashSpeed, type FlashStep } from '../content/maths';
+import {
+  DICE, FLASH_STEPS, choices, factChoices, factKey, flashLowest, flashMs, flashQuestion, timesHelp,
+  type FlashQuestion, type FlashSpeed, type FlashStep,
+} from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
 
@@ -56,14 +65,27 @@ function frame(n: number): SVGSVGElement {
   return f;
 }
 
-/** rows and columns of dots, evenly spaced */
-function array(rows: number, cols: number): SVGSVGElement {
+/** the extra space after every fifth row or column of a times-table array */
+const BLOCK = 18;
+
+/**
+ * Rows and columns of dots, evenly spaced. A times-table array is drawn in
+ * blocks of five, and can colour its rows from `split` on in a second colour,
+ * to show the fact as two easier parts.
+ */
+function array(rows: number, cols: number, blocks = false, split = rows): SVGSVGElement {
   const gap = 40;
-  const a = svg('svg', { class: 'mx-array', viewBox: `0 0 ${cols * gap} ${rows * gap}` });
-  a.style.setProperty('--aspect', String(cols / rows));
+  const extra = (i: number): number => (blocks ? Math.floor(i / 5) * BLOCK : 0);
+  const w = cols * gap + extra(cols - 1);
+  const h = rows * gap + extra(rows - 1);
+  const a = svg('svg', { class: blocks ? 'mx-array facts' : 'mx-array', viewBox: `0 0 ${w} ${h}` });
+  a.style.setProperty('--aspect', String(w / h));
   for (let r = 0; r < rows; r += 1) {
     for (let c = 0; c < cols; c += 1) {
-      a.append(svg('circle', { cx: gap / 2 + c * gap, cy: gap / 2 + r * gap, r: 13, class: 'mx-dot' }));
+      a.append(svg('circle', {
+        cx: gap / 2 + c * gap + extra(c), cy: gap / 2 + r * gap + extra(r), r: 13,
+        class: r < split ? 'mx-dot' : 'mx-dot more',
+      }));
     }
   }
   return a;
@@ -88,11 +110,12 @@ function build(kit: Kit) {
   speedSel.value = saved === 'slow' || saved === 'normal' || saved === 'quick' ? saved : pro() ? 'quick' : 'normal';
   speedSel.addEventListener('change', () => write('flash-speed', speedSel.value));
 
-  function show(q: FlashQuestion, step: FlashStep): void {
+  function show(q: FlashQuestion, step: FlashStep, split?: number): void {
     card.classList.remove('gone');
     card.replaceChildren(...(step.look === 'frame' ? [frame(q.n)]
       : step.look === 'array' ? [array(q.parts[0], q.parts[1])]
-        : q.parts.map(die)));
+        : step.look === 'facts' ? [array(q.parts[0], q.parts[1], true, split)]
+          : q.parts.map(die)));
     card.setAttribute('aria-label', `${q.n} dots`);
   }
 
@@ -113,20 +136,32 @@ function build(kit: Kit) {
       card.replaceChildren(el('span', { class: 'mx-big', text: '?' }));
       card.setAttribute('aria-label', 'hidden');
       ask.textContent = 'How many did you see?';
-      const picked = await kit.choices.ask(choices(q.n, flashLowest(step), step.max));
+      const facts = step.look === 'facts';
+      const [rows, cols] = q.parts;
+      const picked = await kit.choices.ask(facts ? factChoices(rows, cols) : choices(q.n, flashLowest(step), step.max));
       kit.choices.reveal(q.n, picked);
       show(q, step);
       if (picked === q.n) {
         sfx.right();
-        kit.note(`Yes, ${q.n}!`, true);
-        say(String(q.n));
+        const yes = facts ? `Yes! ${rows} rows of ${cols} make ${q.n}.` : `Yes, ${q.n}!`;
+        kit.note(yes, true);
+        say(facts ? yes : String(q.n));
         streak += 1;
-        await kit.wait(1300);
+        await kit.wait(facts ? 1800 : 1300);
         return true;
       }
       sfx.wrong();
       /* a miss gives him the long look back */
       streak = 0;
+      if (facts) {
+        /* the fact in two easier parts: 7 rows of 6 is 5 rows and 2 more */
+        const help = timesHelp({ a: rows, b: cols, op: '×', answer: q.n, table: cols, lots: rows, fact: factKey(rows, cols) }, 'rows');
+        show(q, step, help.parts[1] ? help.parts[0] : rows);
+        kit.note(help.text);
+        say(help.text.replace(/×/g, 'times').replace(/=/g, 'is'));
+        await kit.wait(5000);
+        return false;
+      }
       const how = step.look === 'two-dice' ? `${q.parts[0]} and ${q.parts[1]} make ${q.n}.`
         : step.look === 'array' ? `${q.parts[0]} rows of ${q.parts[1]} make ${q.n}.`
           : `There were ${q.n}.`;
