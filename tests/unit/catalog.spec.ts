@@ -21,8 +21,8 @@ describe('the games', () => {
     }
   });
 
-  it('every maths and jiu-jitsu game has the steps it climbs, for the progress card', () => {
-    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'bjj')) {
+  it('every maths, geography and jiu-jitsu game has the steps it climbs, for the progress card', () => {
+    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj')) {
       expect(g.ladder?.length, g.path).toBeGreaterThan(1);
     }
   });

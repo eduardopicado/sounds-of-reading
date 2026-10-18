@@ -1974,3 +1974,63 @@
 .bt-arrow { fill: var(--mustard); stroke: var(--deep); stroke-width: .35; stroke-linejoin: round; }
 .bt-ghost { fill: rgba(255, 255, 255, .18); stroke: #fff; stroke-width: .5; stroke-dasharray: 1.2 .8; }
 .bt-ghost[hidden], .bt-keeper[hidden] { display: none; }
+
+/* ── World Map ─────────────────────────────────────────────────────────── */
+
+.wm-stage { gap: 8px; }
+.wm-wrap {
+  position: relative;
+  width: min(100%, 1000px, calc((100vh - 300px) * 1.92));
+  width: min(100%, 1000px, calc((100svh - 300px) * 1.92));
+}
+.wm-map {
+  display: block; width: 100%; height: auto; aspect-ratio: 1000 / 520;
+  user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer;
+}
+.wm-edge { fill: #A9D6F2; }
+.wm-rim { fill: none; stroke: #2B5F7F; stroke-width: 1.2; pointer-events: none; }
+.wm-ocean[data-place="pacific"] { fill: #8EC9EC; }
+.wm-ocean[data-place="atlantic"] { fill: #A9D6F2; }
+.wm-ocean[data-place="indian"] { fill: #7DBCE6; }
+.wm-ocean[data-place="southern"] { fill: #BCDFF4; }
+.wm-ocean[data-place="arctic"] { fill: #CFE9F8; }
+.wm-sea { fill: #A9D6F2; }
+.wm-land path { stroke: rgba(255, 255, 255, .75); stroke-width: .5; stroke-linejoin: round; }
+.wm-land[data-place="africa"] { fill: #F2BC48; }
+.wm-land[data-place="antarctica"] { fill: #F4F7FA; }
+.wm-land[data-place="antarctica"] path { stroke: #9FB3C2; }
+.wm-land[data-place="asia"] { fill: #E9785F; }
+.wm-land[data-place="australia"] { fill: #EE86A7; }
+.wm-land[data-place="europe"] { fill: #A78AD8; }
+.wm-land[data-place="north-america"] { fill: #79BE6F; }
+.wm-land[data-place="south-america"] { fill: #45AE9F; }
+.wm-nowhere { fill: #CFC6B4; pointer-events: none; }
+/* looking for an ocean, a tap on a little island goes through to the sea round it */
+.wm-map.wants-ocean .wm-island { pointer-events: none; }
+
+/* the answer, a wrong tap, and the place to name */
+.wm-ocean.right { fill: #3D97D6; }
+.wm-land.right path { stroke: #14312F; stroke-width: 1.6; }
+.wm-land.wrong { fill: #B4BAC0; }
+.wm-ocean.wrong, .wm-sea.wrong { fill: #C9CED3; }
+/* everything else faded while one place glows; opaque, since the oceans run on under the land */
+.wm-map:has(.glow) .wm-land:not(.glow) { fill: #DADFE3; }
+.wm-map:has(.glow) .wm-ocean:not(.glow), .wm-map:has(.glow) .wm-sea { fill: #D7E8F2; }
+.wm-ocean.glow { fill: #2F86C8; animation: wm-glow 1.4s ease-in-out infinite; }
+.wm-land.glow path { stroke: #14312F; stroke-width: 1.8; animation: wm-glow 1.4s ease-in-out infinite; }
+@keyframes wm-glow { 50% { opacity: .7; } }
+
+.wm-labels { position: absolute; inset: 0; pointer-events: none; }
+.wm-label {
+  position: absolute; transform: translate(-50%, -50%); display: none;
+  width: min-content; text-align: center; white-space: normal;
+  font: 700 clamp(10px, 1.7vw, 17px) / 1.05 var(--reading); color: var(--ink);
+  background: rgba(255, 246, 231, .9); padding: 2px 5px; border-radius: 6px;
+}
+.wm-wrap[data-names="both"] .wm-label, .wm-wrap[data-names="continent"] .wm-label.continent,
+.wm-wrap[data-names="ocean"] .wm-label.ocean, .wm-label.shown, .wm-label.given { display: block; }
+.wm-label.shown { box-shadow: 0 0 0 2px var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .wm-ocean.glow, .wm-land.glow path { animation: none; }
+}

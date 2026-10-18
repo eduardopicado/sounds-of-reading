@@ -46,6 +46,7 @@ import { clipId, speakable } from '../src/lib/clip-id';
 import { THEMES } from '../src/content/word-search';
 import { BOTAO_STEPS, HOW } from '../src/content/botao';
 import { refereeLines } from '../src/content/bjj';
+import { mapLines } from '../src/content/world';
 import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../src/content/commentary';
 import { TEAMS } from '../src/games/teams';
 
@@ -112,6 +113,8 @@ export function clips(): Clip[] {
   for (const t of THEMES) for (const w of t.words) add(w.shown);
   for (const line of [...UI_LINES, ...GAME_LINES]) add(line);
   for (const step of BOTAO_STEPS) add(step.tell);
+  /* World Map: where each place is, what it is called, and the directions */
+  for (const line of mapLines()) add(line);
   for (const line of Object.values(HOW)) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */

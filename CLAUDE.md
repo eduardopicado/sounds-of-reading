@@ -84,6 +84,12 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
                        timeWords(), the one way the app says a time
 src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
                        and the first chess games' questions
+src/content/world.ts   World Map: the continents and oceans, a fact for each,
+                       and the direction and "between" questions;
+                       world-shapes.ts is the map itself (made by
+                       tools/make-world.ts from Natural Earth, never edited),
+                       projection.ts puts a longitude and latitude on it, and
+                       seas.ts says which ocean a point of water is in
 src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (only
                        + − × ÷ and square roots, so a flick does the same thing
                        everywhere), the three-touch rule, and set pieces that

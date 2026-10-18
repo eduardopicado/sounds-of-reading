@@ -65,6 +65,16 @@ coach's picks for today at the top.
 | **Futebol de Botão** | The Brazilian table game. Pulls back one of his buttons and lets go: it slides, and the ball goes off along the line through the middle of the button and the middle of the ball, so to shoot at the goal he hits the ball on its far side. Three touches, as in the regra carioca, and the third has to be another button. Open goal, then the side of the ball, then past the goleiro, off the wall round a defender, a pass first, and a whole team; the ball's way shows while he aims at first, then only a little, then not at all. Out of touches, or stuck, the table is set back and a way to score is played for him. |
 | **Ice Cream Van** | Which Australian coin is worth more (the $2 is smaller than the 50c), which coin pays exactly; then (Year 2) a handful of mixed coins, paying the exact price from his purse, and change from a note. Years 3–4: which price tag says "3 dollars and 5 cents" ($3.05, not $3.50), paying to the 5 cents, which of two treats is cheaper ($3.45 or $3.54), the total of two treats, and the change from a $5, $10 or $20 note, counted up the way a shopkeeper does. |
 
+### Geography 🌏
+
+| Game | What the child does |
+|---|---|
+| **World Map** | A map of the whole world, each continent its own colour and the oceans in blues. Finds the seven continents with their names on the map, then the five oceans, then both with no names; then reads which name belongs to the place that glows. Year 2: what is north, south, east and west of Australia (Asia, Antarctica and the Southern Ocean, the Indian, the Pacific), which ocean is between two continents, and north, south, east and west across the world. Each place he finds comes with one true thing about it. A tap just off a coast counts for that continent. |
+
+The map is drawn from Natural Earth's countries (public domain), in the
+Natural Earth projection, inside the app. The Southern Ocean is south of
+Australia the way Australian maps draw it.
+
 ### Jiu-jitsu 🥋
 
 In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-question too.
