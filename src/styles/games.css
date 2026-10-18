@@ -1901,3 +1901,8 @@
 .ch-sq.miss { box-shadow: inset 0 0 0 5px var(--tomato); }
 .ch-count { margin: 0; color: var(--on-deep-soft); font: 700 16px var(--display); }
 .ch-tools { justify-content: center; }
+.ch-frame.blind .ch-ranks, .ch-frame.blind .ch-files { visibility: hidden; }
+/* the piece he is holding, waiting to be put down */
+.ch-holding { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 14px; background: #769656; }
+.ch-holding:empty { visibility: hidden; }
+.ch-holding .ch-piece { width: 90%; height: 90%; }
