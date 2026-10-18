@@ -1043,7 +1043,7 @@ test.describe('maths games', () => {
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(17);
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(18);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
     await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
   });
