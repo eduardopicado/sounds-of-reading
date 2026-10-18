@@ -10,6 +10,7 @@ import {
   JUMP_STEPS, jumpQuestion, jumpsFor,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
+  bigSumChoices, crosses, sumWhy, type SumQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
@@ -179,6 +180,57 @@ describe('Scoreboard Sums', () => {
   it('starts with adding, and only takes away from the take-away steps on', () => {
     expect(SUM_STEPS[0].op).toBe('+');
     expect(SUM_STEPS.findIndex((s) => s.op === '-')).toBeGreaterThan(1);
+  });
+
+  it('goes on, for Years 3–4, to the crowd: to 1000, then 10 000', () => {
+    const big = SUM_STEPS.filter((s) => s.big);
+    expect(SUM_STEPS.slice(-big.length)).toEqual(big);
+    expect(big.map((s) => s.max)).toEqual([1000, 1000, 1000, 1000, 1000, 10000, 10000]);
+    for (const step of big) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = sumQuestion(step);
+        const what = `${q.a} ${q.op} ${q.b}`;
+        expect(q.answer, what).toBeLessThan(step.max);
+        /* three-figure numbers to 1000, four to 10 000 */
+        const figures = step.max === 1000 ? 3 : 4;
+        expect(String(q.a)).toHaveLength(figures);
+        expect(String(q.b)).toHaveLength(figures);
+        if (step.big === 'round') {
+          expect(q.b % 100, what).toBe(0);
+          expect(q.a % (step.max === 1000 ? 10 : 100), what).toBe(0);
+        } else {
+          /* every place of the second number is a step of the working */
+          expect(String(q.b)).not.toContain('0');
+          expect(crosses(q.a, q.b, q.op), what).toBe(step.big === 'carry');
+        }
+        const c = bigSumChoices(q, step.max);
+        expect(c).toHaveLength(4);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) { expect(x).toBeGreaterThan(0); expect(x).toBeLessThan(step.max); }
+        /* the working ends at the answer */
+        expect(sumWhy(q).endsWith(` ${lineText(q.answer)}.`), sumWhy(q)).toBe(true);
+      }
+    }
+  });
+
+  it('splits the second number a place at a time, the way Year 2 splits tens and ones', () => {
+    const q = (a: number, b: number, op: '+' | '-'): SumQuestion => ({ a, b, op, answer: op === '+' ? a + b : a - b });
+    expect(sumWhy(q(38, 25, '+'))).toBe('38 and 20 is 58, and 5 more is 63.');
+    expect(sumWhy(q(52, 27, '-'))).toBe('52 take away 20 is 32, take away 7 more is 25.');
+    expect(sumWhy(q(30, 20, '+'))).toBe('30 and 20 make 50.');
+    expect(sumWhy(q(368, 257, '+'))).toBe('368 and 200 is 568, and 50 more is 618, and 7 more is 625.');
+    expect(sumWhy(q(652, 278, '-'))).toBe('652 take away 200 is 452, take away 70 more is 382, take away 8 more is 374.');
+    expect(sumWhy(q(2365, 1478, '+'))).toBe('2365 and 1000 is 3365, and 400 more is 3765, and 70 more is 3835, and 8 more is 3843.');
+  });
+
+  it('offers the slips made with big numbers: forgetting to carry, the smaller digit from the bigger', () => {
+    const q = (a: number, b: number, op: '+' | '-'): SumQuestion => ({ a, b, op, answer: op === '+' ? a + b : a - b });
+    expect(bigSumChoices(q(368, 257, '+'), 1000)).toContain(515);
+    expect(bigSumChoices(q(652, 278, '-'), 1000)).toContain(426);
+    expect(bigSumChoices(q(3800, 2500, '+'), 10000)).toContain(5300);
+    /* whole hundreds have only slips of a hundred or more */
+    for (const x of bigSumChoices(q(3400, 2500, '+'), 10000)) expect(x % 100).toBe(0);
   });
 });
 

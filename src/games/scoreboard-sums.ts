@@ -12,12 +12,20 @@
  *
  * Year 2 goes to 100 over a season of goals. The balls come in racks of ten
  * and loose ones, tens and ones, and a wrong answer splits the second number
- * the same way: 38 and 20 is 58, and 5 more is 63. */
+ * the same way: 38 and 20 is 58, and 5 more is 63.
+ *
+ * Years 3 and 4 count the crowd at the ground instead, to 1000 and then
+ * 10 000: fans coming through the gates, and fans going home at half-time.
+ * At first the fans come in crates of a hundred, racks of ten and loose
+ * ones; then it is in his head. A wrong answer splits the second number into
+ * hundreds, tens and ones, and the wrong choices are the slips made with
+ * big numbers: forgetting to carry, taking the smaller digit from the
+ * bigger, a ten or a hundred out. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
-import { SUM_STEPS, choices, sumQuestion, type SumQuestion, type SumStep } from '../content/maths';
+import { SUM_STEPS, bigSumChoices, choices, crosses, lineText, sumQuestion, sumWhy, type SumQuestion, type SumStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { narrate } from './narration';
 import { kit as shirt } from './teams';
@@ -45,11 +53,17 @@ function build(kit: Kit) {
 
   const ball = (cls = ''): HTMLElement => el('span', { class: `mx-ball ${cls}`, text: '⚽', 'aria-hidden': 'true' });
 
-  /** a number as racks of ten and loose ones; the last `cross` of each are offside */
-  function bundle(n: number, cls = '', cross = 0): HTMLElement {
-    const g = el('span', { class: 'mx-group' });
-    const tens = Math.floor(n / 10);
+  /** a number as racks of ten and loose ones, and crates of a hundred when
+      `crates`; the last `cross` of each are offside */
+  function bundle(n: number, cls = '', cross = 0, crates = false): HTMLElement {
+    const g = el('span', { class: crates ? 'mx-group big' : 'mx-group' });
+    const hundreds = crates ? Math.floor(n / 100) : 0;
+    const tens = Math.floor((n - hundreds * 100) / 10);
     const ones = n % 10;
+    for (let i = 0; i < hundreds; i += 1) {
+      g.append(el('span', { class: `mx-hundred ${cls}${i >= hundreds - Math.floor(cross / 100) ? ' offside' : ''}`, text: '100', 'aria-hidden': 'true' }));
+    }
+    if (crates) cross %= 100;
     for (let i = 0; i < tens; i += 1) {
       const rack = el('span', { class: `mx-ten ${cls}`, 'aria-hidden': 'true' });
       for (let j = 0; j < 10; j += 1) rack.append(el('i', {}));
@@ -64,17 +78,19 @@ function build(kit: Kit) {
     return g;
   }
 
-  /** the balls on the board: all, only the added ones, tens and ones, or none */
+  /** the balls on the board: all, only the added ones, tens and ones,
+      hundreds too, or none */
   function drawBalls(q: SumQuestion, show: SumStep['show']): void {
     balls.replaceChildren();
     if (show === 'none') { balls.setAttribute('aria-label', 'no balls shown'); return; }
-    if (show === 'bundles') {
-      if (q.op === '+') balls.append(bundle(q.a), el('span', { class: 'mx-plus', text: '+' }), bundle(q.b, 'new'));
-      /* take the tens and ones away from the first number, where it has
-         enough ones; past a ten, show what is left and what went */
-      else if (q.a % 10 >= q.b % 10) balls.append(bundle(q.a, '', q.b));
-      else balls.append(bundle(q.answer), bundle(q.b, '', q.b));
-      balls.setAttribute('aria-label', `${q.a} ${q.op === '+' ? 'and' : 'take away'} ${q.b}, in tens and ones`);
+    if (show === 'bundles' || show === 'blocks') {
+      const crates = show === 'blocks';
+      if (q.op === '+') balls.append(bundle(q.a, '', 0, crates), el('span', { class: 'mx-plus', text: '+' }), bundle(q.b, 'new', 0, crates));
+      /* take them away from the first number, where it has enough in each
+         place; past a ten or a hundred, show what is left and what went */
+      else if (!crosses(q.a, q.b, '-')) balls.append(bundle(q.a, '', q.b, crates));
+      else balls.append(bundle(q.answer, '', 0, crates), bundle(q.b, '', q.b, crates));
+      balls.setAttribute('aria-label', `${q.a} ${q.op === '+' ? 'and' : 'take away'} ${q.b}, in ${crates ? 'hundreds, ' : ''}tens and ones`);
       return;
     }
     if (q.op === '+') {
@@ -97,9 +113,16 @@ function build(kit: Kit) {
       const name = us.kind === 'you' ? 'Your team' : us.name;
       team.replaceChildren(shirt(us, 40), el('span', { text: name }));
       drawBalls(q, step.show);
-      sum.textContent = `${q.a} ${q.op === '+' ? '+' : '−'} ${q.b} = ?`;
+      const [a, b, answer] = [q.a, q.b, q.answer].map((v) => lineText(v));
+      sum.textContent = `${a} ${q.op === '+' ? '+' : '−'} ${b} = ?`;
       const season = step.max > 20;
-      const text = season
+      const crowd = step.max >= 1000;
+      const fans = us.kind === 'you' ? 'fans' : `${us.name} fans`;
+      const text = crowd
+        ? q.op === '+'
+          ? `${a} ${fans} are at the ground. ${b} more come through the gates! How many fans now?`
+          : `${a} ${fans} came to the game. ${b} went home at half-time. How many are still there?`
+        : season
         ? q.op === '+'
           ? `${name} have scored ${q.a} goals this season. They score ${q.b} more! How many goals now?`
           : `${name} scored ${q.a} goals this season, but ${q.b} were ruled out! How many goals count?`
@@ -109,17 +132,12 @@ function build(kit: Kit) {
       story.textContent = text;
       say(text);
 
-      const picked = await kit.choices.ask(choices(q.answer, 0, step.max));
+      const picked = await kit.choices.ask(step.big ? bigSumChoices(q, step.max) : choices(q.answer, 0, step.max));
       kit.choices.reveal(q.answer, picked);
-      sum.textContent = `${q.a} ${q.op === '+' ? '+' : '−'} ${q.b} = ${q.answer}`;
-      const sentence = q.op === '+' ? `${q.a} and ${q.b} make ${q.answer}.` : `${q.a} take away ${q.b} is ${q.answer}.`;
-      /* to 100, the way to get there: the tens of the second number, then its ones */
-      const tens = q.b - (q.b % 10);
-      const ones = q.b % 10;
-      const split = !season || !tens || !ones ? sentence
-        : q.op === '+'
-          ? `${q.a} and ${tens} is ${q.a + tens}, and ${ones} more is ${q.answer}.`
-          : `${q.a} take away ${tens} is ${q.a - tens}, take away ${ones} more is ${q.answer}.`;
+      sum.textContent = `${a} ${q.op === '+' ? '+' : '−'} ${b} = ${answer}`;
+      const sentence = q.op === '+' ? `${a} and ${b} make ${answer}.` : `${a} take away ${b} is ${answer}.`;
+      /* to 100 and beyond, the way to get there: the second number a place at a time */
+      const split = season ? sumWhy(q) : sentence;
       if (picked === q.answer) {
         sfx.cheer();
         kit.note(`Yes! ${sentence}`, true);
@@ -129,8 +147,8 @@ function build(kit: Kit) {
         return true;
       }
       sfx.wrong();
-      /* every ball back on the board, to count together */
-      drawBalls(q, season ? 'bundles' : 'all');
+      /* every ball back on the board, to count together; to 10 000 there are too many */
+      drawBalls(q, step.max === 10000 ? 'none' : crowd ? 'blocks' : season ? 'bundles' : 'all');
       kit.note(split);
       say(season ? split : `Let's count. ${sentence}`);
       await kit.wait(3200);
