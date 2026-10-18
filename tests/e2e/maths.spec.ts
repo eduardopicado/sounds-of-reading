@@ -511,6 +511,62 @@ test.describe('maths games', () => {
     await expect(page.locator('.tb-bus')).toHaveCount(Math.floor(n / 10) - 1);
   });
 
+  test('Years 3–4: Team Buses reads planes of 1000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:team-buses': 7 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-plane')).toHaveCount(Math.floor(n / 1000));
+    await expect(page.locator('.tb-train')).toHaveCount(Math.floor(n / 100) % 10);
+    await tapNumber(page, n);
+    await expect(page.locator('.mx-note')).toContainText(`That's ${n}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Team Buses builds a crowd to 10 000 with planes', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 8 });
+    await startGame(page, 'team-buses');
+    await expect(page.getByRole('button', { name: 'Add a plane of 1000' })).toBeVisible();
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    for (let i = 0; i < Math.floor(n / 1000); i += 1) await page.getByRole('button', { name: 'Add a plane of 1000' }).click();
+    for (let i = 0; i < Math.floor(n / 100) % 10; i += 1) await page.getByRole('button', { name: 'Add a train of 100' }).click();
+    for (let i = 0; i < Math.floor(n / 10) % 10; i += 1) await page.getByRole('button', { name: 'Add a bus of 10' }).click();
+    for (let i = 0; i < n % 10; i += 1) await page.getByRole('button', { name: 'Add a fan' }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(`Yes! ${n} is`);
+  });
+
+  test('Years 3–4: no trains, so 350 fans need 35 buses; reading only the tens is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 9 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-train.broken')).toHaveCount(Math.floor(n / 100));
+    const tens = Math.floor(n / 10) % 10;
+    await tapNumber(page, tens);
+    await expect(page.locator('.mx-note')).toContainText(`${n} is ${n / 10} tens!`);
+    await expect(page.locator('.tb-bus')).toHaveCount(n / 10);
+    await expect(page.locator('.tb-train')).toHaveCount(0);
+  });
+
+  test('Years 3–4: no plane, so 1250 fans need 12 trains and 5 buses', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:team-buses': 10 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-plane.broken')).toHaveCount(Math.floor(n / 1000));
+    const trains = Math.floor(n / 100);
+    const buses = (n % 100) / 10;
+    await tapNumber(page, trains);
+    await expect(page.locator('.mx-note')).toContainText(`Yes! A plane is 10 trains`);
+    await expect(page.locator('.mx-note')).toContainText(`${n} is ${trains} hundreds and ${buses} ${buses === 1 ? 'ten' : 'tens'}!`);
+    await expect(page.locator('.tb-train')).toHaveCount(trains);
+    await expect(page.locator('.tb-bus')).toHaveCount(buses);
+    noProblems(watch);
+  });
+
   test('Keepy-Uppy Count: a whole round, filling the gaps', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'keepy-uppy');
