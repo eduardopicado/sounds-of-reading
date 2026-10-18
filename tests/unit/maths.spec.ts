@@ -468,13 +468,13 @@ describe('Training Drills', () => {
 
 describe('Half-Time Oranges', () => {
   it('shares bibs exactly, and names the pieces', () => {
-    for (const step of FRACTION_STEPS) {
+    for (const step of FRACTION_STEPS.filter((s) => s.task !== 'many' && s.task !== 'equal')) {
       for (let i = 0; i < MANY; i += 1) {
         const q = fractionQuestion(step);
         expect(step.parts).toContain(q.parts);
         expect(q.total % q.parts).toBe(0);
         expect(q.total).toBeGreaterThanOrEqual(q.parts);
-        expect(q.total).toBeLessThanOrEqual(q.parts === 2 ? 20 : 40);
+        expect(q.total).toBeLessThanOrEqual(q.parts === 2 ? 20 : q.parts === 3 ? 15 : q.parts === 5 ? 25 : 40);
         expect(q.answer).toBe(step.task === 'part-of' ? q.total / q.parts : q.parts);
       }
     }
@@ -485,6 +485,28 @@ describe('Half-Time Oranges', () => {
     const fair = Array.from({ length: 400 }, () => fractionQuestion(step).fair).filter(Boolean).length;
     expect(fair).toBeGreaterThan(120);
     expect(fair).toBeLessThan(280);
+  });
+
+  it('goes on, for Years 3–4, to thirds and fifths, more than one piece, and the same amount', () => {
+    expect(FRACTION_STEPS.slice(6).map((s) => s.task)).toEqual(['name', 'part-of', 'many', 'equal']);
+    for (const step of FRACTION_STEPS.slice(6)) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = fractionQuestion(step);
+        if (step.task === 'many') {
+          expect(q.k).toBeGreaterThanOrEqual(2);
+          expect(q.k).toBeLessThan(q.parts);
+          expect(q.answer).toBe((q.total / q.parts) * q.k);
+          /* the slip of one share only is always offered */
+          expect(q.options).toContain(q.total / q.parts);
+          expect(q.options).toContain(q.answer);
+          expect(new Set(q.options).size).toBe(q.options!.length);
+        }
+        if (step.task === 'equal') {
+          const o = q.other!;
+          expect(q.same).toBe(q.k * o.parts === o.k * q.parts);
+        }
+      }
+    }
   });
 
   it('is halves only until Year 2', () => {
