@@ -540,13 +540,20 @@ export interface BusStep extends Step {
    * load: a crowd of fans, how many full buses and how many left over;
    * build: make the number from trains of 100, buses of 10 and fans;
    * another: the same number another way, when a bus breaks down
-   * (3 tens and 4 is 2 tens and 14).
+   * (3 tens and 4 is 2 tens and 14);
+   * regroup: the same again with bigger numbers (Years 3–4): with no trains,
+   * how many buses carry 350 (35); with no plane, how many trains carry
+   * 1250 (12, and 5 buses).
    */
-  task: 'read' | 'load' | 'build' | 'another';
+  task: 'read' | 'load' | 'build' | 'another' | 'regroup';
   lo: number;
   hi: number;
   /** trains of 100 as well as buses of 10 (Year 2) */
   trains: boolean;
+  /** planes of 1000 as well (Years 3–4) */
+  planes?: boolean;
+  /** regroup: everyone goes by bus (10) or by train (100) */
+  unit?: 10 | 100;
 }
 
 export const BUS_STEPS: BusStep[] = [
@@ -558,17 +565,41 @@ export const BUS_STEPS: BusStep[] = [
   { name: 'Trains of 100', task: 'read', lo: 101, hi: 999, trains: true },
   { name: 'Build the crowd', task: 'build', lo: 101, hi: 999, trains: true },
   { name: 'A bus breaks down', task: 'another', lo: 21, hi: 99, trains: false },
+  /* Years 3–4: planes of 1000, and a number made more than one way */
+  { name: 'Planes of 1000', task: 'read', lo: 1001, hi: 9999, trains: true, planes: true },
+  { name: 'Build the crowd to 10 000', task: 'build', lo: 1001, hi: 9999, trains: true, planes: true },
+  /* small enough to see every bus (up to 29) and train (up to 19) */
+  { name: 'No trains: everyone by bus', task: 'regroup', lo: 110, hi: 290, trains: true, unit: 10 },
+  { name: 'No plane: everyone by train', task: 'regroup', lo: 1100, hi: 1990, trains: true, planes: true, unit: 100 },
 ];
 
-export interface Places { hundreds: number; tens: number; ones: number }
+export interface Places { thousands?: number; hundreds: number; tens: number; ones: number }
 
-/** a number as hundreds, tens and ones; without trains, 112 is 11 tens and 2 */
-export function places(n: number, trains = true): Places {
-  const hundreds = trains ? Math.floor(n / 100) : 0;
-  return { hundreds, tens: Math.floor((n - hundreds * 100) / 10), ones: n % 10 };
+/** a number as hundreds, tens and ones; without trains, 112 is 11 tens and 2;
+    with planes, thousands too */
+export function places(n: number, trains = true, planes = false): Places {
+  const thousands = planes ? Math.floor(n / 1000) : 0;
+  const hundreds = trains ? Math.floor((n - thousands * 1000) / 100) : 0;
+  const p: Places = { hundreds, tens: Math.floor((n - thousands * 1000 - hundreds * 100) / 10), ones: n % 10 };
+  return planes ? { thousands, ...p } : p;
 }
 
-export const valueOf = (p: Places): number => p.hundreds * 100 + p.tens * 10 + p.ones;
+export const valueOf = (p: Places): number => (p.thousands ?? 0) * 1000 + p.hundreds * 100 + p.tens * 10 + p.ones;
+
+/**
+ * The choices for "how many buses (or trains)": the answer, then the slip of
+ * reading only one digit (5 buses for 350, 2 trains for 1250), then one or
+ * ten out.
+ */
+export function regroupChoices(n: number, unit: 10 | 100): number[] {
+  const answer = Math.floor(n / unit);
+  const out = [answer];
+  for (const x of [answer % 10, answer + 1, answer - 1, answer + 10, answer - 10, answer + 2]) {
+    if (out.length >= 4) break;
+    if (x >= 1 && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
 
 export function busQuestion(step: BusStep, last?: number): number {
   for (;;) {
@@ -579,6 +610,11 @@ export function busQuestion(step: BusStep, last?: number): number {
     /* loading needs fans left over half the time at least; a whole number of
        buses is a fine question, but not every time */
     if (step.task === 'load' && n % 10 === 0 && Math.random() < 0.7) continue;
+    /* regrouping: a whole number of buses, with some in each place, so the
+       digit alone is the wrong answer: 350, 1250 */
+    if (step.task === 'regroup') {
+      if (n % 10 !== 0 || Math.floor(n / 10) % 10 === 0 || Math.floor(n / 100) % 10 === 0) continue;
+    }
     return n;
   }
 }
@@ -591,7 +627,7 @@ export function busQuestion(step: BusStep, last?: number): number {
 export function placeChoices(n: number, top: number): number[] {
   const p = places(n);
   const swapped = p.hundreds * 100 + p.ones * 10 + p.tens;
-  const slips = shuffle([n + 10, n - 10, swapped, ...(top > 200 ? [n + 100, n - 100] : [])]);
+  const slips = shuffle([n + 10, n - 10, swapped, ...(top > 200 ? [n + 100, n - 100] : []), ...(top > 2000 ? [n + 1000, n - 1000] : [])]);
   const out = [n];
   for (const x of [...slips, ...shuffle([n + 1, n - 1]), n + 2, n - 2]) {
     if (out.length >= 4) break;
