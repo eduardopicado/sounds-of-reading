@@ -4,7 +4,8 @@
  * Stage 1) to Year 2 (the end of Stage 1):
  *
  *   Off the Bench        part–whole: the pairs that make 5, 10 and 20, then
- *                        filling a stadium of 100 (Year 2)
+ *                        filling a stadium of 100 (Year 2), then one of 1000,
+ *                        ten stands of 100 (Years 3–4)
  *   Scoreboard Sums      combining and separating quantities within 20, then
  *                        within 100 by tens and ones (Year 2)
  *   Number Line Penalty  where numbers sit, from 0–10 up to 0–120, then on to
@@ -75,10 +76,13 @@ export function choices(answer: number, lo: number, hi: number, n = 4, unit = 1)
 /* ── Off the Bench: how many more to make the team? ──────────────────── */
 
 export interface BenchStep extends Step {
-  target: 5 | 10 | 20 | 100;
+  target: 5 | 10 | 20 | 100 | 1000;
   spots: boolean;
   /** the fans come in whole rows of ten (Year 2, the stadium) */
   tens?: boolean;
+  /** in the stadium of 1000, the fans come in whole stands of 100, whole
+      rows of 10, or one by one (Years 3–4) */
+  unit?: 1 | 10 | 100;
 }
 
 export const BENCH_STEPS: BenchStep[] = [
@@ -89,17 +93,55 @@ export const BENCH_STEPS: BenchStep[] = [
   /* Year 2: a stadium of 100 seats in rows of ten */
   { name: 'Fill 100 in tens', target: 100, spots: true, tens: true },
   { name: 'Fill 100', target: 100, spots: true },
+  /* Years 3–4: a stadium of 1000, ten stands of 100 seats */
+  { name: 'Fill 1000 in hundreds', target: 1000, spots: true, unit: 100 },
+  { name: 'Fill 1000 in tens', target: 1000, spots: true, unit: 10 },
+  { name: 'Fill 1000', target: 1000, spots: true, unit: 1 },
 ];
 
 export interface BenchQuestion { target: number; on: number; need: number }
 
 export function benchQuestion(step: BenchStep, last?: BenchQuestion): BenchQuestion {
+  if (step.target === 1000) {
+    /* whole stands, whole rows that leave a stand part full, or any number
+       that leaves a row part full: each step needs the one before it */
+    const unit = step.unit ?? 1;
+    for (;;) {
+      const on = unit * rand(1, 1000 / unit - 1);
+      if (unit === 10 && on % 100 === 0) continue;
+      if (unit === 1 && on % 10 === 0) continue;
+      if (last && last.on === on) continue;
+      return { target: 1000, on, need: 1000 - on };
+    }
+  }
   /* at least one on and one to come, and not the same as last time */
   const unit = step.tens ? 10 : 1;
   const slots = step.target / unit;
   let on = 1 + Math.floor(Math.random() * (slots - 1));
   if (last && last.target === step.target && last.on === on * unit) on = on === 1 ? 2 : on - 1;
   return { target: step.target, on: on * unit, need: step.target - on * unit };
+}
+
+/**
+ * How many more fill a stadium of 1000, counted the way it is done in your
+ * head: fill up the row of ten, then the stand of a hundred, then count the
+ * empty stands. 637 needs 3 to make 640, 60 to make 700, and 300: 363.
+ */
+export function toThousand(on: number): { ones: number; tens: number; hundreds: number; text: string } {
+  const ones = (10 - (on % 10)) % 10;
+  const tens = (100 - ((on + ones) % 100)) % 100;
+  const hundreds = 1000 - on - ones - tens;
+  const steps: string[] = [];
+  if (ones) steps.push(`Fill up the row: ${ones} more makes ${on + ones}.`);
+  if (tens) {
+    const rows = tens / 10;
+    steps.push(`Fill up the stand: ${rows} more ${rows === 1 ? 'row of 10 makes' : 'rows of 10 make'} ${on + ones + tens}.`);
+  }
+  const stands = hundreds / 100;
+  if (hundreds) steps.push(`${steps.length ? 'Then ' : ''}${stands} more ${stands === 1 ? 'stand of 100 makes' : 'stands of 100 make'} 1000.`);
+  const parts = [ones, tens, hundreds].filter(Boolean);
+  if (parts.length > 1) steps.push(`${parts.join(' and ')} make ${1000 - on}.`);
+  return { ones, tens, hundreds, text: steps.join(' ') };
 }
 
 /* ── Scoreboard Sums: goals added, and goals taken away ─────────────── */

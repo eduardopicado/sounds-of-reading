@@ -14,6 +14,7 @@ import {
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
+  toThousand,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -94,11 +95,41 @@ describe('Off the Bench', () => {
     }
   });
 
-  it('ends with Year 2: a stadium of 100, in tens and then any number', () => {
-    const top = BENCH_STEPS.slice(-2);
-    expect(top.map((s) => s.target)).toEqual([100, 100]);
-    expect(top[0].tens).toBe(true);
-    expect(top[1].tens).toBeFalsy();
+  it('Year 2 is a stadium of 100, in tens and then any number', () => {
+    const year2 = BENCH_STEPS.filter((s) => s.target === 100);
+    expect(year2).toHaveLength(2);
+    expect(year2[0].tens).toBe(true);
+    expect(year2[1].tens).toBeFalsy();
+  });
+
+  it('ends with Years 3–4: a stadium of 1000, in hundreds, then tens, then any number', () => {
+    const top = BENCH_STEPS.slice(-3);
+    expect(top.map((s) => [s.target, s.unit])).toEqual([[1000, 100], [1000, 10], [1000, 1]]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = benchQuestion(step);
+        expect(q.on % step.unit!).toBe(0);
+        /* each step needs the one before it: rows leave a stand part full, any number a row */
+        if (step.unit === 10) expect(q.on % 100).not.toBe(0);
+        if (step.unit === 1) expect(q.on % 10).not.toBe(0);
+      }
+    }
+  });
+
+  it('counts the empty seats to 1000 a row, a stand, then stands at a time', () => {
+    const seven = toThousand(637);
+    expect([seven.ones, seven.tens, seven.hundreds]).toEqual([3, 60, 300]);
+    expect(seven.text).toBe('Fill up the row: 3 more makes 640. Fill up the stand: 6 more rows of 10 make 700. Then 3 more stands of 100 make 1000. 3 and 60 and 300 make 363.');
+    expect(toThousand(700).text).toBe('3 more stands of 100 make 1000.');
+    expect(toThousand(900).text).toBe('1 more stand of 100 makes 1000.');
+    expect(toThousand(990).text).toBe('Fill up the stand: 1 more row of 10 makes 1000.');
+    for (let on = 1; on < 1000; on += 1) {
+      const t = toThousand(on);
+      expect(t.ones + t.tens + t.hundreds).toBe(1000 - on);
+      expect(t.ones).toBeLessThan(10);
+      expect(t.tens % 10).toBe(0);
+      expect(t.hundreds % 100).toBe(0);
+    }
   });
 
   it('does not ask the same question twice running', () => {
