@@ -2,7 +2,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
-import { moves, squareAt, squareName, type Kind } from '../../src/content/chess';
+import { allMoves, moves, rankOf, squareAt, squareName, type Board, type Kind } from '../../src/content/chess';
 
 async function startAt(page: Page, game: string, step: number): Promise<void> {
   await seed(page, { [`maths-step:${game}`]: step });
@@ -41,7 +41,7 @@ test.describe('Meet the Pieces', () => {
   test('the home screen has a chess section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: 'Chess' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(2);
+    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(4);
   });
 
   test('a whole round of moving the piece to the ball, to the sticker', async ({ page }) => {
@@ -143,5 +143,88 @@ test.describe('Collect the Balls', () => {
     await expect(stage).toHaveAttribute('data-at', from);
     await page.getByRole('button', { name: '👀 Where can it go?' }).click();
     await expect(page.locator('.ch-sq.dot')).toHaveCount(can.length);
+  });
+});
+
+test.describe('Capture!', () => {
+  test('a whole round of taking the one piece it can, to the sticker', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'chess-capture');
+    await openSetup(page);
+    await page.getByLabel('How many questions').selectOption('8');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    for (let i = 0; i < 8; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 8000 });
+      const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+      await square(page, answer).click();
+      await expect(page.locator('.mx-note.good')).toContainText('Yes!');
+    }
+    await expect(page.locator('.results .sticker')).toHaveText('⚔️', { timeout: 8000 });
+    noProblems(watch);
+  });
+
+  test('taking the guarded piece loses yours: the guard is shown', async ({ page }) => {
+    await startAt(page, 'chess-capture', 2);
+    const stage = page.locator('.mx-stage');
+    const answer = (await stage.getAttribute('data-answer'))!;
+    const trap = ((await stage.getAttribute('data-takes')) ?? '').split(' ').find((t) => t !== answer)!;
+    await square(page, trap).click();
+    await expect(page.locator('.mx-note')).toContainText('is guarded by the pawn');
+    await expect(page.locator('.ch-sq.picked')).toHaveCount(1);
+    await expect(square(page, trap)).toHaveClass(/miss/);
+    await expect(square(page, answer)).toHaveClass(/hit/);
+  });
+
+  test('of two free pieces, take the one worth more', async ({ page }) => {
+    await startAt(page, 'chess-capture', 3);
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await square(page, answer).click();
+    await expect(page.locator('.mx-note.good')).toContainText(/is worth \d, a \w+ \d: take the/);
+  });
+});
+
+/** the position on the board, read back from the page */
+const position = async (page: Page): Promise<Board> => {
+  const text = (await page.locator('.mx-stage').getAttribute('data-position')) ?? '';
+  return new Map(text.split(' ').filter(Boolean).map((t) => [squareAt(t.slice(1)), { kind: 'P' as Kind, colour: t[0] as 'w' | 'b' }]));
+};
+
+test.describe('Pawn Wars', () => {
+  test('a pawn shows where it can go; the computer answers each move', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 'chess-pawns', 0);
+    await expect(page.locator('.score')).toContainText('Game 1 of 3');
+    await square(page, 'd2').click();
+    await expect(page.locator('.ch-sq.dot')).toHaveCount(2);
+    /* a square it cannot go to does nothing */
+    await square(page, 'd5').click();
+    await expect(page.locator('.mx-stage')).toHaveAttribute('data-turn', 'w');
+    await square(page, 'd4').click();
+    await expect(page.locator('.mx-stage')).toHaveAttribute('data-turn', 'w', { timeout: 4000 });
+    const after = await position(page);
+    expect(after.get(squareAt('d4'))?.colour).toBe('w');
+    /* Black moved one of its pawns off the seventh row */
+    expect([...after].filter(([sq, m]) => m.colour === 'b' && rankOf(sq) === 6).length).toBe(2);
+    noProblems(watch);
+  });
+
+  test('a game is played to the end, and the next one starts', async ({ page }) => {
+    await startAt(page, 'chess-pawns', 0);
+    for (let turn = 0; turn < 60; turn += 1) {
+      if (await page.locator('.mx-note').textContent().then((t) => /You win|The computer/.test(t ?? ''))) break;
+      await expect(page.locator('.mx-stage')).toHaveAttribute('data-turn', 'w', { timeout: 4000 });
+      if (await page.locator('.mx-note').textContent().then((t) => /You win|The computer/.test(t ?? ''))) break;
+      const b = await position(page);
+      const options = allMoves(b, 'w');
+      if (!options.length) break;
+      /* a pawn that can get through, or take, or else the one furthest up */
+      const best = options.find((m) => rankOf(m.to) === 7) ?? options.find((m) => b.get(m.to)) ??
+        [...options].sort((x, y) => rankOf(y.to) - rankOf(x.to))[0];
+      await square(page, squareName(best.from)).click();
+      await square(page, squareName(best.to)).click();
+    }
+    await expect(page.locator('.mx-note')).toContainText(/You win|The computer/, { timeout: 4000 });
+    await expect(page.locator('.score')).toContainText('Game 2 of 3', { timeout: 8000 });
   });
 });

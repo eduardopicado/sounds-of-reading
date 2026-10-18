@@ -247,3 +247,214 @@ export function ballQuestion(step: BallStep, last?: BallQuestion, rand: Rand = M
     return { kind: step.kind, from, balls, best };
   }
 }
+
+/* ── what attacks what ─────────────────────────────────────────────────── */
+
+/**
+ * The squares a piece attacks: where it could take something. Unlike its
+ * moves, a pawn attacks only on the slant, whatever is there, and a piece
+ * attacks a square its own side stands on too — that is guarding it.
+ */
+export function attacks(from: number, board: Board): number[] {
+  const man = board.get(from);
+  if (!man) return [];
+  const [f, r] = [fileOf(from), rankOf(from)];
+  if (man.kind === 'P') {
+    const up = man.colour === 'w' ? 1 : -1;
+    return [-1, 1].filter((df) => onBoard(f + df, r + up)).map((df) => at(f + df, r + up));
+  }
+  /* the same lines as its moves, with every piece in the way counted as the other side's */
+  const flipped: Board = new Map([...board].map(([sq, m]) => [sq, sq === from ? m : { ...m, colour: man.colour === 'w' ? 'b' : 'w' }]));
+  return moves(from, flipped);
+}
+
+/** is anything of this colour guarding the square? */
+export const guarded = (sq: number, by: Colour, board: Board): boolean =>
+  [...board].some(([from, m]) => m.colour === by && from !== sq && attacks(from, board).includes(sq));
+
+/** what a piece is worth, as children are taught: a pawn 1, a knight or a bishop 3, a rook 5, a queen 9 */
+export const VALUE: Record<Kind, number> = { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 0 };
+
+/* ── Capture! ──────────────────────────────────────────────────────────── */
+
+export interface CaptureStep extends Step {
+  /**
+   * take: one of the black pieces can be taken, tap it;
+   * free: two can, but one is guarded — take the free one;
+   * best: two can, both free — take the one worth more.
+   */
+  task: 'take' | 'free' | 'best';
+  kinds: Kind[];
+}
+
+export const CAPTURE_STEPS: CaptureStep[] = [
+  { name: 'Take a piece', task: 'take', kinds: ['R', 'B', 'Q'] },
+  { name: 'Knights, kings and pawns take too', task: 'take', kinds: ['N', 'K', 'P'] },
+  { name: 'Take the free one', task: 'free', kinds: ['R', 'B', 'Q', 'N'] },
+  { name: 'Take the one worth more', task: 'best', kinds: ['R', 'B', 'Q', 'N'] },
+];
+
+export interface CaptureQuestion {
+  kind: Kind;
+  from: number;
+  board: Board;
+  /** the black pieces he could take */
+  takes: number[];
+  answer: number;
+  /** free: the piece he should not take, and what guards it */
+  trap?: number;
+  guard?: number;
+}
+
+const TARGETS: Kind[] = ['P', 'N', 'B', 'R', 'Q'];
+
+export function captureQuestion(step: CaptureStep, last?: CaptureQuestion, rand: Rand = Math.random): CaptureQuestion {
+  for (;;) {
+    const kind = pickOne(step.kinds, rand);
+    const from = kind === 'P' ? at(randInt(0, 7, rand), randInt(1, 5, rand)) : randInt(0, 63, rand);
+    const board: Board = new Map([[from, { kind, colour: 'w' as Colour }]]);
+    const reach = shuffled(moves(from, board), rand);
+    const black = (sq: number, k: Kind = pickOne(TARGETS, rand)): void => { board.set(sq, { kind: k, colour: 'b' }); };
+    let answer = -1;
+    let trap: number | undefined;
+    let guard: number | undefined;
+    if (step.task === 'take') {
+      /* a pawn takes on the slant, and only there */
+      const spots = kind === 'P' ? attacks(from, board) : reach;
+      if (!spots.length) continue;
+      answer = spots[0];
+      black(answer);
+      /* two more it cannot take: off its lines, or a pawn straight ahead */
+      const off = shuffled(Array.from({ length: 64 }, (_, i) => i).filter((sq) => !board.has(sq) && !moves(from, board).includes(sq)), rand);
+      for (const sq of off.slice(0, 2)) black(sq);
+    } else {
+      if (reach.length < 2) continue;
+      const [a, b] = reach;
+      if (step.task === 'best') {
+        const [ka, kb] = shuffled(TARGETS, rand);
+        if (VALUE[ka] === VALUE[kb]) continue;
+        black(a, ka);
+        black(b, kb);
+        answer = VALUE[ka] > VALUE[kb] ? a : b;
+      } else {
+        const [ka, kb] = [pickOne(TARGETS, rand), pickOne(TARGETS, rand)];
+        black(a, ka);
+        black(b, kb);
+        /* a black pawn guarding the first: diagonally in front of it, as Black sees it */
+        const spots = [-1, 1].map((df) => [fileOf(a) + df, rankOf(a) + 1]).filter(([f, r]) => onBoard(f, r)).map(([f, r]) => at(f, r))
+          .filter((sq) => !board.has(sq));
+        if (!spots.length) continue;
+        guard = pickOne(spots, rand);
+        board.set(guard, { kind: 'P', colour: 'b' });
+        trap = a;
+        answer = b;
+      }
+    }
+    const takes = moves(from, board).filter((sq) => board.get(sq)?.colour === 'b');
+    /* exactly the pieces meant can be taken; the answer is free, the trap guarded */
+    if (step.task === 'take' && (takes.length !== 1 || takes[0] !== answer)) continue;
+    if (step.task !== 'take' && takes.length !== 2) continue;
+    /* the guard may stand in the way: the two must still be the ones he can take */
+    if (!takes.includes(answer) || (trap !== undefined && !takes.includes(trap))) continue;
+    if (guarded(answer, 'b', board)) continue;
+    if (trap !== undefined && !guarded(trap, 'b', board)) continue;
+    if (step.task === 'best' && [...board.values()].filter((m) => m.colour === 'b').length !== 2) continue;
+    if (last && last.from === from) continue;
+    return { kind, from, board, takes, answer, trap, guard };
+  }
+}
+
+/* ── Pawn Wars ─────────────────────────────────────────────────────────── */
+
+/* Pawns only, his against the computer's: the first pawn to the far end
+ * wins, and so does taking every pawn the other side has, or leaving it
+ * with no move. No en passant: it is the first real game, not the rules
+ * exam. */
+
+export interface PawnStep extends Step {
+  /** the files the pawns start on */
+  files: number[];
+  /** how hard the computer tries: 0 takes what it sees, 1 also keeps its
+      pawns out of trouble, 2 also pushes the pawns nobody can stop */
+  smart: 0 | 1 | 2;
+}
+
+export const PAWN_STEPS: PawnStep[] = [
+  { name: 'Three pawns each', files: [2, 3, 4], smart: 0 },
+  { name: 'Five pawns each', files: [1, 2, 3, 4, 5], smart: 1 },
+  { name: 'All eight pawns', files: [0, 1, 2, 3, 4, 5, 6, 7], smart: 1 },
+  { name: 'A cleverer opponent', files: [0, 1, 2, 3, 4, 5, 6, 7], smart: 2 },
+];
+
+export interface Move { from: number; to: number }
+
+export function pawnStart(step: PawnStep): Board {
+  const board: Board = new Map();
+  for (const f of step.files) {
+    board.set(at(f, 1), { kind: 'P', colour: 'w' });
+    board.set(at(f, 6), { kind: 'P', colour: 'b' });
+  }
+  return board;
+}
+
+/** every move a side has */
+export const allMoves = (board: Board, colour: Colour): Move[] =>
+  [...board].filter(([, m]) => m.colour === colour).flatMap(([from]) => moves(from, board).map((to) => ({ from, to })));
+
+export function play(board: Board, move: Move): Board {
+  const next = new Map(board);
+  next.set(move.to, next.get(move.from)!);
+  next.delete(move.from);
+  return next;
+}
+
+/** who has won, with this side to move next; null while it goes on */
+export function winner(board: Board, toMove: Colour): Colour | null {
+  for (const [sq, m] of board) {
+    if (m.colour === 'w' && rankOf(sq) === 7) return 'w';
+    if (m.colour === 'b' && rankOf(sq) === 0) return 'b';
+  }
+  const has = (c: Colour): boolean => [...board.values()].some((m) => m.colour === c);
+  if (!has('w')) return 'b';
+  if (!has('b')) return 'w';
+  if (!allMoves(board, toMove).length) return toMove === 'w' ? 'b' : 'w';
+  return null;
+}
+
+/** a pawn no pawn of the other side can stop or take on its way */
+export function passed(sq: number, board: Board): boolean {
+  const m = board.get(sq);
+  if (!m) return false;
+  const up = m.colour === 'w' ? 1 : -1;
+  for (let r = rankOf(sq) + up; r >= 0 && r < 8; r += up) {
+    for (const df of [-1, 0, 1]) {
+      const other = board.get(at(fileOf(sq) + df, r));
+      if (onBoard(fileOf(sq) + df, r) && other && other.colour !== m.colour) return false;
+    }
+  }
+  return true;
+}
+
+/** the computer's move for Black */
+export function computerMove(board: Board, smart: PawnStep['smart'], rand: Rand = Math.random): Move | null {
+  const options = allMoves(board, 'b');
+  if (!options.length) return null;
+  const score = (mv: Move): number => {
+    const after = play(board, mv);
+    if (rankOf(mv.to) === 0) return 1000;
+    let s = rand() * 3;
+    const took = board.get(mv.to)?.colour === 'w';
+    if (took) s += 20;
+    /* stop a white pawn about to get through */
+    if (took && rankOf(mv.to) >= 5) s += 40;
+    if (smart >= 1) {
+      const danger = guarded(mv.to, 'w', after);
+      const cover = guarded(mv.to, 'b', after);
+      if (danger) s -= cover ? 6 : 15;
+      s += (6 - rankOf(mv.to)) * 1.5;
+    }
+    if (smart >= 2 && passed(mv.to, after)) s += 12;
+    return s;
+  };
+  return options.map((mv) => ({ mv, s: score(mv) })).sort((a, b) => b.s - a.s)[0].mv;
+}
