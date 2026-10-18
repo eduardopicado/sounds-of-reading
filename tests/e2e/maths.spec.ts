@@ -841,8 +841,8 @@ test.describe('maths games', () => {
       const board = page.locator('.cw-board');
       await expect(page.locator('.mx-choice, .cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
       const answer = await board.getAttribute('data-answer');
-      if (await page.locator('.cw-grid').count()) await page.locator(`.cw-cell[data-at="${answer}"]`).click();
-      else await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+      if (await page.locator('.mx-choice').count()) await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+      else await page.locator(`.cw-cell[data-at="${answer}"]`).click();
     });
     await expect(page.locator('.results')).toContainText('8 of 8');
     noProblems(watch);
@@ -866,6 +866,88 @@ test.describe('maths games', () => {
     const answer = await page.locator('.cw-board').getAttribute('data-answer');
     await page.locator(`.mx-choice[data-n="${answer}"]`).click();
     await expect(page.locator('.mx-note')).toContainText('leaves him facing');
+  });
+
+  test("Years 3–4: Coach's Whiteboard grid references, found and then named", async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:coach-whiteboard': 5 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-step')).toHaveText('Grid references');
+    /* first, find the square: a wrong one lights up the column and the row */
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-head')).toHaveText(['', 'A', 'B', 'C', 'D', 'E', '1', '2', '3', '4', '5']);
+    const at = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    const [x, y] = at.split(',').map(Number);
+    const ref = `${'ABCDE'[x]}${y + 1}`;
+    await expect(page.locator('.mx-ask')).toContainText(`Put the ball on ${ref}`);
+    await expect(page.locator(`.cw-cell[data-at="${at}"]`)).toHaveAttribute('aria-label', ref);
+    await page.locator(`.cw-cell:not([data-at="${at}"])`).first().click();
+    await expect(page.locator('.cw-cell.wrong')).toHaveCount(1);
+    await expect(page.locator('.cw-head.on')).toHaveText(['ABCDE'[x], String(y + 1)]);
+    await expect(page.locator(`.cw-cell.end[data-at="${at}"]`)).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toHaveText(
+      `${ref}: along the letters to ${'ABCDE'[x]}, then down the numbers to ${y + 1}. The ball goes where they meet.`);
+    /* then name the square the ball is on */
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText('Which square is the ball on?');
+    await expect(page.locator('.cw-cell:enabled')).toHaveCount(0);
+    const named = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    const [nx, ny] = [named.charCodeAt(0) - 65, Number(named.slice(1)) - 1];
+    await expect(page.locator(`.cw-cell[data-at="${nx},${ny}"] .cw-ball`)).toBeVisible();
+    await page.locator(`.mx-choice[data-n="${named}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`Yes! ${named}: along the letters`);
+    noProblems(watch);
+  });
+
+  test("Years 3–4: Coach's Whiteboard moves by the compass, north up the board", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 6 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-rose')).toBeVisible();
+    await expect(page.locator('.cw-rose-between')).toHaveCount(0);
+    await expect(page.locator('.mx-ask')).toHaveText(/^Run \d squares? (north|south|east|west), then \d squares? (north|south|east|west)\. Tap/);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.cw-cell:not([data-at="${answer}"])`).first().click();
+    await expect(page.locator(`.cw-cell.end[data-at="${answer}"]`)).toHaveCount(1);
+    /* the miss says which way on the board each point is */
+    await expect(page.locator('.mx-note')).toContainText(/(North is up|South is down|East is to the right|West is to the left)/i);
+  });
+
+  test("Years 3–4: Coach's Whiteboard north-east and the points between", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 9 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-rose-between')).toHaveCount(4);
+    await expect(page.locator('.mx-ask')).toHaveText(/^Run \d squares? (north|south)-(east|west)\. Tap/);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.cw-cell[data-at="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText('Yes!');
+    await expect(page.locator('.cw-cell.path').first()).toHaveText(/[↗↘↙↖]/);
+  });
+
+  test("Years 3–4: Coach's Whiteboard right angles, held against the corner of a page", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 7 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveText(['Smaller', 'Right angle', 'Bigger'], { timeout: 10000 });
+    await expect(page.locator('.cw-corner .cw-angle')).toBeVisible();
+    await expect(page.locator('.cw-right')).toHaveCount(0);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().click();
+    await expect(page.locator('.cw-right')).toBeVisible();
+    await expect(page.locator('.mx-note')).toContainText('corner of a page');
+  });
+
+  test("Years 3–4: Coach's Whiteboard three-quarter turns, in compass points", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 8 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveText(['North', 'East', 'South', 'West'], { timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText(/^He is facing (north|east|south|west)\. He makes a /);
+    await expect(page.locator('.cw-turn .cw-rose')).toBeVisible();
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`Yes! From `);
+    await expect(page.locator('.mx-note.good')).toContainText(answer.toLowerCase());
   });
 
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {

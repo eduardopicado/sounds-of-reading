@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BOARD_STEPS, GRID, boardQuestion, turned,
+  BOARD_STEPS, GRID, STEP_OF, boardQuestion, compassHelp, gridRef, refSquare, turnPath, turnWhy, turned,
   SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
@@ -649,6 +649,38 @@ describe("Coach's Whiteboard", () => {
     expect(turned('up', 'quarter-anticlockwise')).toBe('left');
     expect(turned('left', 'half')).toBe('right');
     expect(turned('left', 'quarter-clockwise')).toBe('up');
+    expect(turned('up', 'three-quarter-clockwise')).toBe('left');
+    expect(turned('up', 'three-quarter-anticlockwise')).toBe('right');
+    for (const d of ['up', 'right', 'down', 'left'] as const) {
+      for (const t of ['quarter-clockwise', 'quarter-anticlockwise', 'half', 'three-quarter-clockwise', 'three-quarter-anticlockwise'] as const) {
+        expect(turnPath(d, t).at(-1)).toBe(turned(d, t));
+      }
+    }
+  });
+
+  it('counts a turn out in quarters, in compass points', () => {
+    expect(turnWhy('up', 'three-quarter-clockwise')).toBe('From north, a three-quarter turn clockwise is 3 quarter turns: east, south, west. He faces west.');
+    expect(turnWhy('down', 'quarter-anticlockwise')).toBe('From south, a quarter turn anticlockwise goes to east.');
+    expect(turnWhy('left', 'half')).toBe('From west, a half turn is 2 quarter turns: north, east. He faces east.');
+  });
+
+  it('adds grid references and the compass and right angles after Year 2', () => {
+    expect(BOARD_STEPS.map((s) => s.name).slice(4)).toEqual([
+      'Flip, slide or turn?', 'Grid references', 'North, south, east and west', 'Right angles',
+      'Three-quarter turns', 'North-east and the points between',
+    ]);
+  });
+
+  it('names a square by its letter across and number down', () => {
+    expect(gridRef([0, 0])).toBe('A1');
+    expect(gridRef([2, 2])).toBe('C3');
+    expect(gridRef([4, 4])).toBe('E5');
+    for (let x = 0; x < GRID; x += 1) for (let y = 0; y < GRID; y += 1) expect(refSquare(gridRef([x, y]))).toEqual([x, y]);
+  });
+
+  it('says which way a compass point goes on the board', () => {
+    expect(compassHelp([{ dir: 'north', n: 2 }, { dir: 'west', n: 1 }])).toBe('North is up and west is to the left.');
+    expect(compassHelp([{ dir: 'south-east', n: 1 }])).toBe('South-east is between south and east: down and to the right.');
   });
 
   it('keeps every move on the grid, and lands where the moves say', () => {
@@ -656,21 +688,48 @@ describe("Coach's Whiteboard", () => {
       for (let i = 0; i < MANY; i += 1) {
         const q = boardQuestion(step);
         if (step.task === 'side') { expect(q.ball).not.toBe(q.keeper); expect(q.answer).toBe(q.ball < q.keeper ? 'left' : 'right'); }
-        if (step.task === 'move' || step.task === 'moves') {
-          expect(q.moves).toHaveLength(step.task === 'move' ? 1 : 2);
+        if (step.task === 'move' || step.task === 'moves' || step.task === 'compass') {
+          expect(q.moves).toHaveLength(step.task === 'move' || step.points === 8 ? 1 : 2);
           let [x, y] = q.start;
           for (const m of q.moves) {
             expect(m.n).toBeGreaterThanOrEqual(1);
             expect(m.n).toBeLessThanOrEqual(3);
-            x += m.dir === 'right' ? m.n : m.dir === 'left' ? -m.n : 0;
-            y += m.dir === 'down' ? m.n : m.dir === 'up' ? -m.n : 0;
+            x += STEP_OF[m.dir][0] * m.n;
+            y += STEP_OF[m.dir][1] * m.n;
             for (const v of [x, y]) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+            /* compass moves are said as compass points, and the points between come last */
+            if (step.task === 'compass') expect(m.dir.includes('-')).toBe(step.points === 8);
+            else expect(['up', 'down', 'left', 'right']).toContain(m.dir);
           }
           expect(q.answer).toBe(`${x},${y}`);
           /* two moves go along different lines: across, then up or down */
-          if (q.moves.length === 2) expect(['left', 'right'].includes(q.moves[0].dir)).not.toBe(['left', 'right'].includes(q.moves[1].dir));
+          const across = (d: string): boolean => STEP_OF[d as keyof typeof STEP_OF][1] === 0;
+          if (q.moves.length === 2) expect(across(q.moves[0].dir)).not.toBe(across(q.moves[1].dir));
         }
         if (step.task === 'turn') expect(q.answer).toBe(turned(q.facing, q.turn));
+        if (step.task === 'turn' && !step.compass) expect(q.turn).not.toContain('three-quarter');
+        if (step.task === 'gridref') {
+          for (const v of q.end) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+          if (q.way === 'tap') expect(q.answer).toBe(q.end.join());
+          else {
+            expect(q.answer).toBe(gridRef(q.end));
+            /* four different squares, the right one among them, each next to it */
+            expect(new Set(q.refs).size).toBe(4);
+            expect(q.refs).toContain(q.answer);
+            for (const r of q.refs) {
+              const [x, y] = refSquare(r);
+              expect(Math.max(Math.abs(x - q.end[0]), Math.abs(y - q.end[1]))).toBeLessThanOrEqual(1);
+            }
+            /* one has only the letter wrong, one only the number */
+            expect(q.refs.some((r) => r !== q.answer && r.slice(1) === q.answer.slice(1))).toBe(true);
+            expect(q.refs.some((r) => r !== q.answer && r[0] === q.answer[0])).toBe(true);
+          }
+        }
+        if (step.task === 'angle') {
+          expect(q.answer).toBe(q.angle < 90 ? 'smaller' : q.angle > 90 ? 'bigger' : 'right');
+          /* never so near a right angle that it needs a protractor */
+          expect(q.angle === 90 || Math.abs(q.angle - 90) >= 30).toBe(true);
+        }
       }
     }
   });

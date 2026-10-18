@@ -59,7 +59,7 @@ coach's picks for today at the top.
 | **Fan Survey** | Counts fans waving flags, reads tally marks and a picture graph; then (Year 2) reads a column graph and says how many more. |
 | **Fact Family Formation** | Three players are one family (3, 5, 8): turns a fact around and takes it back within 10 and 20; then (Year 2) finds a missing number, and does it with tens to 100. |
 | **Kit and Ball Shapes** | Names flat shapes, counts sides and corners, and names the solid objects of football (the ball is a sphere, the cone a cone); then (Year 2) pentagons and hexagons, and whether a kit is the same on both sides. |
-| **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. |
+| **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. Years 3–4: grid references like a street directory (finds C3, then names the square the ball is on), moves by the compass with north up the board, right angles held against the corner of a page, three-quarter turns in compass points, and north-east and the other points between. |
 | **Ice Cream Van** | Which Australian coin is worth more (the $2 is smaller than the 50c), which coin pays exactly; then (Year 2) a handful of mixed coins, paying the exact price from his purse, and change from a note. |
 
 ### Jiu-jitsu 🥋

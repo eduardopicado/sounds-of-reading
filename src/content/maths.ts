@@ -1072,7 +1072,20 @@ export function shapeQuestion(step: ShapeStep, last?: ShapeQuestion): ShapeQuest
 
 export type Dir = 'up' | 'right' | 'down' | 'left';
 export const DIRS: Dir[] = ['up', 'right', 'down', 'left'];
-const STEP: Record<Dir, [number, number]> = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };
+
+/** the points of the compass, clockwise from north; on the whiteboard, as on
+    a map, north is up */
+export type Compass = 'north' | 'north-east' | 'east' | 'south-east' | 'south' | 'south-west' | 'west' | 'north-west';
+export const COMPASS: Compass[] = ['north', 'north-east', 'east', 'south-east', 'south', 'south-west', 'west', 'north-west'];
+/** the four main points, by the way they face on the board */
+export const NORTH_OF: Record<Dir, Compass> = { up: 'north', right: 'east', down: 'south', left: 'west' };
+
+/** one square's move in each direction: [across, down] */
+export const STEP_OF: Record<Dir | Compass, [number, number]> = {
+  up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0],
+  north: [0, -1], 'north-east': [1, -1], east: [1, 0], 'south-east': [1, 1],
+  south: [0, 1], 'south-west': [-1, 1], west: [-1, 0], 'north-west': [-1, -1],
+};
 
 export interface BoardStep extends Step {
   /**
@@ -1080,8 +1093,16 @@ export interface BoardStep extends Step {
    * move / moves: follow one move (or two) on the grid and tap where he lands;
    * turn: a quarter or half turn, which way is he facing now;
    * transform: was the shape flipped, slid or turned?
+   * gridref: find C3 on a grid with letters across and numbers down, or say
+   *   which square the ball is on;
+   * compass: follow moves given as compass points;
+   * angle: is the corner a right angle, or smaller, or bigger?
    */
-  task: 'side' | 'move' | 'moves' | 'turn' | 'transform';
+  task: 'side' | 'move' | 'moves' | 'turn' | 'transform' | 'gridref' | 'compass' | 'angle';
+  /** compass: north, south, east and west, or the points in between */
+  points?: 4 | 8;
+  /** turn: faces north, east, south or west, and turns three quarters too */
+  compass?: boolean;
 }
 
 export const BOARD_STEPS: BoardStep[] = [
@@ -1091,31 +1112,105 @@ export const BOARD_STEPS: BoardStep[] = [
   /* Year 2: turns, and flips, slides and turns of a shape */
   { name: 'Quarter and half turns', task: 'turn' },
   { name: 'Flip, slide or turn?', task: 'transform' },
+  /* Years 3–4: grid references, the compass, right angles */
+  { name: 'Grid references', task: 'gridref' },
+  { name: 'North, south, east and west', task: 'compass', points: 4 },
+  { name: 'Right angles', task: 'angle' },
+  { name: 'Three-quarter turns', task: 'turn', compass: true },
+  { name: 'North-east and the points between', task: 'compass', points: 8 },
 ];
 
 /** the grid on the whiteboard: GRID by GRID squares */
 export const GRID = 5;
 
-export interface Move { dir: Dir; n: number }
+export interface Move { dir: Dir | Compass; n: number }
+
+export type Turn = 'quarter-clockwise' | 'quarter-anticlockwise' | 'half'
+  | 'three-quarter-clockwise' | 'three-quarter-anticlockwise';
+
+/** angles drawn for "is it a right angle?": never so close to one that it
+    takes a protractor to tell */
+export const ANGLES = { smaller: [30, 45, 60], bigger: [120, 135, 150] };
 
 export interface BoardQuestion {
   /** side: where the keeper and the ball are, along a row of GRID spots */
   keeper: number;
   ball: number;
-  /** move(s): where he starts, the moves, where he ends */
+  /** move(s), compass: where he starts, the moves, where he ends; gridref:
+      the square asked about is the end */
   start: [number, number];
   moves: Move[];
   end: [number, number];
   /** turn: which way he faces, the turn, and which way he faces after */
   facing: Dir;
-  turn: 'quarter-clockwise' | 'quarter-anticlockwise' | 'half';
+  turn: Turn;
   /** transform: what was done to the shape */
   done: 'flip' | 'slide' | 'turn';
+  /** gridref: tap the square named, or name the square the ball is on, in turn */
+  way: 'tap' | 'name';
+  /** gridref, name: the four squares offered */
+  refs: string[];
+  /** angle: how wide, in degrees, and how far round it is drawn */
+  angle: number;
+  tilt: number;
   answer: string;
 }
 
-export const turned = (d: Dir, turn: BoardQuestion['turn']): Dir =>
-  DIRS[(DIRS.indexOf(d) + (turn === 'half' ? 2 : turn === 'quarter-clockwise' ? 1 : 3)) % 4];
+/** quarter turns clockwise in each turn */
+const QUARTERS: Record<Turn, number> = {
+  'quarter-clockwise': 1, 'quarter-anticlockwise': 3, half: 2,
+  'three-quarter-clockwise': 3, 'three-quarter-anticlockwise': 1,
+};
+
+export const turned = (d: Dir, turn: Turn): Dir => DIRS[(DIRS.indexOf(d) + QUARTERS[turn]) % 4];
+
+/** the way he faces after each quarter of the turn, in order: a half turn
+    goes round clockwise */
+export function turnPath(d: Dir, turn: Turn): Dir[] {
+  const back = turn.endsWith('-anticlockwise');
+  const count = turn === 'half' ? 2 : turn.startsWith('three-quarter') ? 3 : 1;
+  return Array.from({ length: count }, (_, i) => DIRS[(DIRS.indexOf(d) + (back ? 3 : 1) * (i + 1)) % 4]);
+}
+
+export const TURN_NAME: Record<Turn, string> = {
+  'quarter-clockwise': 'a quarter turn clockwise', 'quarter-anticlockwise': 'a quarter turn anticlockwise',
+  half: 'a half turn', 'three-quarter-clockwise': 'a three-quarter turn clockwise',
+  'three-quarter-anticlockwise': 'a three-quarter turn anticlockwise',
+};
+
+/** a turn counted out in quarters, in compass points: "From north, a
+    three-quarter turn clockwise is 3 quarter turns: east, south, west. He
+    faces west." A quarter turn just "goes to east". */
+export function turnWhy(d: Dir, turn: Turn): string {
+  const path = turnPath(d, turn).map((x) => NORTH_OF[x]);
+  const from = `From ${NORTH_OF[d]}, ${TURN_NAME[turn]}`;
+  if (path.length === 1) return `${from} goes to ${path[0]}.`;
+  return `${from} is ${path.length} quarter turns: ${path.join(', ')}. He faces ${path[path.length - 1]}.`;
+}
+
+/** a square's grid reference: letters across, numbers down, A1 at the top left */
+export const gridRef = ([x, y]: [number, number]): string => `${'ABCDE'[x]}${y + 1}`;
+
+/** the square a grid reference names */
+export function refSquare(ref: string): [number, number] {
+  return ['ABCDE'.indexOf(ref[0]), Number(ref.slice(1)) - 1];
+}
+
+/** three wrong squares to offer beside the right one: the letter or the number
+    one out, and both */
+function nearRefs(at: [number, number]): string[] {
+  const near: [number, number][] = [];
+  for (const [dx, dy] of shuffle([[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [-1, -1], [1, -1], [-1, 1]] as [number, number][])) {
+    const x = at[0] + dx;
+    const y = at[1] + dy;
+    if (x >= 0 && x < GRID && y >= 0 && y < GRID) near.push([x, y]);
+  }
+  /* one with the letter wrong, one with the number wrong, and one more */
+  const letter = near.find(([, y]) => y === at[1])!;
+  const number = near.find(([x]) => x === at[0])!;
+  const more = near.find((p) => p !== letter && p !== number)!;
+  return shuffle([at, letter, number, more].map(gridRef));
+}
 
 export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuestion {
   for (;;) {
@@ -1125,33 +1220,69 @@ export function boardQuestion(step: BoardStep, last?: BoardQuestion): BoardQuest
     const start: [number, number] = [rand(0, GRID - 1), rand(0, GRID - 1)];
     const moves: Move[] = [];
     let end: [number, number] = [...start];
-    if (step.task === 'move' || step.task === 'moves') {
-      const axes = shuffle([['left', 'right'], ['up', 'down']] as Dir[][]).slice(0, step.task === 'move' ? 1 : 2);
+    if (step.task === 'move' || step.task === 'moves' || step.task === 'compass') {
+      const lines: (Dir | Compass)[][] = step.task === 'compass' && step.points === 8
+        ? [['north-east', 'south-east', 'south-west', 'north-west']]
+        : step.task === 'compass' ? [['west', 'east'], ['north', 'south']] : [['left', 'right'], ['up', 'down']];
+      const axes = shuffle(lines).slice(0, step.task === 'move' || step.points === 8 ? 1 : 2);
       for (const axis of axes) {
         const dir = pick(axis);
-        const room = dir === 'right' ? GRID - 1 - end[0] : dir === 'left' ? end[0] : dir === 'down' ? GRID - 1 - end[1] : end[1];
+        const [dx, dy] = STEP_OF[dir];
+        const roomX = dx > 0 ? GRID - 1 - end[0] : dx < 0 ? end[0] : GRID;
+        const roomY = dy > 0 ? GRID - 1 - end[1] : dy < 0 ? end[1] : GRID;
+        const room = Math.min(roomX, roomY);
         if (!room) continue;
         const n = rand(1, Math.min(3, room));
         moves.push({ dir, n });
-        end = [end[0] + STEP[dir][0] * n, end[1] + STEP[dir][1] * n];
+        end = [end[0] + dx * n, end[1] + dy * n];
       }
       if (moves.length !== axes.length) continue;
     }
+    if (step.task === 'gridref') end = [rand(0, GRID - 1), rand(0, GRID - 1)];
+    /* find a square, then name one, in turn */
+    const way: BoardQuestion['way'] = last?.way === 'tap' ? 'name' : 'tap';
+    const refs = step.task === 'gridref' && way === 'name' ? nearRefs(end) : [];
     const facing = pick(DIRS);
-    const turn = pick(['quarter-clockwise', 'quarter-anticlockwise', 'half'] as const);
+    const turn: Turn = pick(step.compass
+      ? ['quarter-clockwise', 'quarter-anticlockwise', 'half', 'three-quarter-clockwise', 'three-quarter-anticlockwise']
+      : ['quarter-clockwise', 'quarter-anticlockwise', 'half']);
     const done = pick(['flip', 'slide', 'turn'] as const);
+    /* a right angle a third of the time */
+    const angle = pick([90, 90, 90, ...ANGLES.smaller, ...ANGLES.bigger]);
+    const tilt = 15 * rand(0, 23);
     const answer = step.task === 'side' ? (ball < keeper ? 'left' : 'right')
       : step.task === 'turn' ? turned(facing, turn)
         : step.task === 'transform' ? done
-          : `${end[0]},${end[1]}`;
-    const q = { keeper, ball, start, moves, end, facing, turn, done, answer };
+          : step.task === 'angle' ? (angle < 90 ? 'smaller' : angle > 90 ? 'bigger' : 'right')
+            : step.task === 'gridref' && way === 'name' ? gridRef(end)
+              : `${end[0]},${end[1]}`;
+    const q = { keeper, ball, start, moves, end, facing, turn, done, way, refs, angle, tilt, answer };
     if (last && last.answer === answer && last.start.join() === start.join()) continue;
+    if (last && step.task === 'gridref' && last.end.join() === end.join()) continue;
     return q;
   }
 }
 
-/** a move as it is said: "2 squares up" */
+/** a move as it is said: "2 squares up", "1 square north-east" */
 export const moveWords = (m: Move): string => `${m.n} ${m.n === 1 ? 'square' : 'squares'} ${m.dir}`;
+
+const WAY_ON_BOARD: Record<Compass, string> = {
+  north: 'up', south: 'down', east: 'to the right', west: 'to the left',
+  'north-east': 'up and to the right', 'south-east': 'down and to the right',
+  'south-west': 'down and to the left', 'north-west': 'up and to the left',
+};
+
+/** which way each compass point in the moves goes on the board: "North is up
+    and west is to the left." or "North-east is between north and east: up
+    and to the right." */
+export function compassHelp(moves: Move[]): string {
+  const dirs = [...new Set(moves.map((m) => m.dir))] as Compass[];
+  const cap = (t: string): string => t[0].toUpperCase() + t.slice(1);
+  if (dirs.some((d) => d.includes('-'))) {
+    return dirs.map((d) => `${cap(d)} is between ${d.split('-').join(' and ')}: ${WAY_ON_BOARD[d]}.`).join(' ');
+  }
+  return `${cap(dirs.map((d) => `${d} is ${WAY_ON_BOARD[d]}`).join(' and '))}.`;
+}
 
 /* ── Ice Cream Van: Australian coins ─────────────────────────────────── */
 
