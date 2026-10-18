@@ -225,6 +225,34 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-spot.counted')).toHaveCount(need);
   });
 
+  test('Years 3–4: Off the Bench fills a stadium of 1000, in whole stands', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:off-the-bench': 6 });
+    await startGame(page, 'off-the-bench');
+    await expect(page.locator('.mx-step')).toHaveText('Fill 1000 in hundreds');
+    await expect(page.locator('.ob-stand')).toHaveCount(10);
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    for (const t of await page.locator('.mx-choice').allTextContents()) expect(Number(t) % 100).toBe(0);
+    const on = Number(await page.locator('.ob-1000').getAttribute('data-on'));
+    await tapNumber(page, 1000 - on);
+    await expect(page.locator('.mx-note')).toContainText(`${on} and ${1000 - on} make 1000`);
+    /* every seat is full */
+    await expect(page.locator('.ob-row.gap, .ob-seat.gap')).toHaveCount(0);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a miss on 1000 fills up the row, then the stand, then counts the stands', async ({ page }) => {
+    await seed(page, { 'maths-step:off-the-bench': 8 });
+    await startGame(page, 'off-the-bench');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const on = Number(await page.locator('.ob-1000').getAttribute('data-on'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== 1000 - on)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`Fill up the row: ${10 - (on % 10)} more makes`);
+    await expect(page.locator('.ob-seat.counted')).toHaveCount(10 - (on % 10));
+    await expect(page.locator('.ob-stand.counted')).toHaveCount(Math.floor((1000 - on) / 100));
+  });
+
   test('Year 2: Scoreboard Sums to 100 in racks of ten, and splits a miss into tens and ones', async ({ page }) => {
     await seed(page, { 'maths-step:scoreboard-sums': 7 });
     await startGame(page, 'scoreboard-sums');
