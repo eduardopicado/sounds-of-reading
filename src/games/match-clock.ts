@@ -8,14 +8,22 @@
  * order, and which season a month falls in — in Australia, where summer is
  * December to February.
  *
+ * Years 3 and 4 read the clock to five minutes and then to the minute
+ * (3:47), say whether a match-day time is am or pm, work out how long it is
+ * until kick-off by counting on, and read the 24-hour time on a ticket.
+ *
  * The wrong answers are the ones children give: half past 4 for half past
  * 3 (the hour hand has gone past the 3 but not reached the 4), reading the
- * minute hand as the hour, and the day before for the day after. */
+ * minute hand as the hour, the day before for the day after, and taking
+ * times away as if an hour had 100 minutes. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
-import { CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, type ClockQuestion, type ClockStep } from '../content/maths';
+import {
+  CLOCK_STEPS, DAYS, MATCH_DAY, MONTHS, clockQuestion, countOn, digital, seasonOf, time24, timeWords,
+  type ClockQuestion, type ClockStep,
+} from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
 
@@ -96,7 +104,10 @@ function build(kit: Kit) {
     const hint = q.m === 30 ? ` The hour hand is half way past the ${q.h}.`
       : q.m === 45 ? ` The hour hand is nearly at the ${(q.h % 12) + 1}.`
         : q.m === 15 ? ` The hour hand is just past the ${q.h}.`
-          : ` The long hand is on the 12.`;
+          : q.m === 0 ? ` The long hand is on the 12.`
+            /* five minutes: count the fives round to where the long hand points */
+            : q.m < 30 ? ` The long hand points at the ${q.m / 5}: count in fives, that's ${q.m} minutes past.`
+              : ` The long hand points at the ${q.m / 5}: ${q.m} minutes past is ${60 - q.m} to the next hour.`;
     return finish(picked === q.answer, `It's ${q.answer}.${picked === q.answer ? '' : hint}`);
   }
 
@@ -165,6 +176,68 @@ function build(kit: Kit) {
     return finish(picked === q.answer, `${MONTHS[q.index]} is in ${q.answer}. ${q.answer} is ${run.join(', ')}.`);
   }
 
+  /** to the minute: count the fives to the number before the long hand, then the ones */
+  async function minute(q: ClockQuestion): Promise<boolean> {
+    const c = clock();
+    c.set((q.h % 12) * 60 + q.m);
+    board.replaceChildren(c.node);
+    ask.textContent = 'What time does the clock say?';
+    say(ask.textContent);
+    const picked = await kit.choices.askWords(q.options);
+    kit.choices.revealWord(q.answer, picked);
+    const five = q.m - (q.m % 5);
+    const how = five
+      ? `The long hand is ${q.m % 5} past the ${five / 5}: ${five} and ${q.m % 5} make ${q.m} minutes past ${q.h}.`
+      : `The long hand is ${q.m} past the 12: ${q.m} minutes past ${q.h}.`;
+    return finish(picked === q.answer, `It's ${q.answer}. ${how}`);
+  }
+
+  /** am or pm: the morning, or the afternoon and the evening */
+  async function amOrPm(q: ClockQuestion): Promise<boolean> {
+    const when = MATCH_DAY.find((e) => e.what === q.event)!.when;
+    board.replaceChildren(el('div', { class: 'mc-event' },
+      el('span', { class: 'mc-event-pic', text: q.picture, 'aria-hidden': 'true' }),
+      el('span', { class: 'mc-digital', text: digital(q.h, q.m) })));
+    ask.textContent = `${q.event} is at ${digital(q.h, q.m)} ${when}. Is that am or pm?`;
+    say(ask.textContent);
+    const picked = await kit.choices.askWords(q.options);
+    kit.choices.revealWord(q.answer, picked);
+    const why = q.h === 12 ? 'Just after midday is pm.'
+      : q.h > 12 ? 'pm is from midday to midnight: the afternoon and the evening.'
+        : 'am is from midnight to midday: the morning.';
+    return finish(picked === q.answer, `It's ${q.answer}. ${why}`);
+  }
+
+  /** two clocks, now and kick-off: how long is it? */
+  async function howLong(q: ClockQuestion): Promise<boolean> {
+    const now = clock();
+    const ko = clock();
+    now.set(q.from % 720);
+    ko.set(q.to % 720);
+    board.replaceChildren(el('div', { class: 'mc-pair' },
+      el('figure', { class: 'mc-fig' }, now.node, el('figcaption', { text: `Now ${digital(Math.floor(q.from / 60), q.from % 60)}` })),
+      el('figure', { class: 'mc-fig' }, ko.node, el('figcaption', { text: `Kick-off ${digital(Math.floor(q.to / 60), q.to % 60)}` }))));
+    ask.textContent = 'How long until kick-off?';
+    say(ask.textContent);
+    const picked = await kit.choices.askWords(q.options);
+    kit.choices.revealWord(q.answer, picked);
+    return finish(picked === q.answer, countOn(q.from, q.to).text);
+  }
+
+  /** the 24-hour time on a ticket, in am and pm */
+  async function ticket(q: ClockQuestion): Promise<boolean> {
+    const t = time24(q.h, q.m);
+    board.replaceChildren(el('div', { class: 'mc-ticket' },
+      el('span', { class: 'mc-ticket-head', text: '🎟️ Match ticket' }),
+      el('span', { class: 'mc-ticket-time', text: `Kick-off ${t}` })));
+    ask.textContent = `The ticket says kick-off is at ${t}. What time is that?`;
+    say(`The ticket says kick-off is at ${q.h} ${q.m ? q.m : 'hundred'}. What time is that?`);
+    const picked = await kit.choices.askWords(q.options);
+    kit.choices.revealWord(q.answer, picked);
+    return finish(picked === q.answer,
+      `${t} is ${q.answer}. After midday, take 12 away from the hour: ${q.h} − 12 = ${q.h - 12}.`);
+  }
+
   return {
     node,
     ask: async (step: ClockStep): Promise<boolean> => {
@@ -176,6 +249,10 @@ function build(kit: Kit) {
       if (step.task === 'read') return read(q);
       if (step.task === 'set') return set(step, q);
       if (step.task === 'seasons') return season(q);
+      if (step.task === 'digital') return minute(q);
+      if (step.task === 'ampm') return amOrPm(q);
+      if (step.task === 'elapsed') return howLong(q);
+      if (step.task === 'twentyfour') return ticket(q);
       return order(step, q);
     },
   };
