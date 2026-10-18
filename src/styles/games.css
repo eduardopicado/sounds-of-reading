@@ -1043,6 +1043,8 @@
 
 /* Scoreboard Sums: racks of ten balls, and the loose ones stacked beside them */
 .mx-group { display: inline-flex; flex-wrap: nowrap; align-items: flex-end; gap: 4px; }
+/* up to nine crates of a hundred, as well as the racks: these wrap */
+.mx-group.big { flex-wrap: wrap; justify-content: center; max-width: 100%; padding: 6px; border-radius: 10px; background: rgba(255, 246, 231, .07); }
 .mx-ten {
   display: inline-grid; grid-template-rows: repeat(10, 7px); gap: 1px;
   width: 11px; padding: 2px; border-radius: 6px;
@@ -1051,6 +1053,14 @@
 .mx-ten i { display: block; width: 7px; height: 7px; border-radius: 50%; background: var(--paper); }
 .mx-ten.new { filter: drop-shadow(0 0 4px var(--mustard)); }
 .mx-ten.new i { background: var(--mustard); }
+.mx-hundred {
+  display: grid; place-items: center; width: 40px; height: 40px; border: 2px solid var(--paper); border-radius: 6px;
+  background: repeating-linear-gradient(0deg, rgba(255, 246, 231, .25) 0 1px, transparent 1px 4px), rgba(255, 246, 231, .12);
+  color: var(--paper); font: 800 13px var(--display);
+}
+.mx-hundred.new { border-color: var(--mustard); color: var(--mustard); }
+.mx-hundred.offside { opacity: .35; position: relative; }
+.mx-hundred.offside::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #FF6B4A; font-weight: 800; font-size: 24px; }
 .mx-ten.offside { opacity: .35; position: relative; }
 .mx-ten.offside::after { content: '✕'; position: absolute; inset: 0; display: grid; place-items: center; color: #FF6B4A; font-weight: 800; font-size: 18px; }
 .mx-ones { display: inline-grid; grid-template-rows: repeat(5, 11px); grid-auto-flow: column; gap: 3px; padding-bottom: 2px; }
