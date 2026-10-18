@@ -458,3 +458,91 @@ export function computerMove(board: Board, smart: PawnStep['smart'], rand: Rand 
   };
   return options.map((mv) => ({ mv, s: score(mv) })).sort((a, b) => b.s - a.s)[0].mv;
 }
+
+/* ── Board Squares ─────────────────────────────────────────────────────── */
+
+/* Every square has a name: its letter along the bottom, then its number up
+ * the side — e4, like a grid reference on Coach's Whiteboard. Chess books,
+ * coaches and clocks all use it, so it is worth knowing by heart. */
+
+export interface SquareStep extends Step {
+  /**
+   * find: tap the square named; name: which square is the ball on;
+   * blind: find it with no letters or numbers round the board;
+   * colour: is the square light or dark?
+   */
+  task: 'find' | 'name' | 'blind' | 'colour';
+}
+
+export const SQUARE_STEPS: SquareStep[] = [
+  { name: 'Find the square', task: 'find' },
+  { name: 'Name the square', task: 'name' },
+  { name: 'No letters or numbers', task: 'blind' },
+  { name: 'Light or dark?', task: 'colour' },
+];
+
+export interface SquareQuestion { sq: number; answer: string; options: string[] }
+
+export function squareQuestion(step: SquareStep, last?: SquareQuestion, rand: Rand = Math.random): SquareQuestion {
+  for (;;) {
+    const sq = randInt(0, 63, rand);
+    if (last && last.sq === sq) continue;
+    if (step.task === 'colour') return { sq, answer: isDark(sq) ? 'Dark' : 'Light', options: ['Light', 'Dark'] };
+    if (step.task !== 'name') return { sq, answer: squareName(sq), options: [] };
+    /* the slips: the letter one out, the number one out, and both */
+    const [f, r] = [fileOf(sq), rankOf(sq)];
+    const df = f < 7 ? 1 : -1;
+    const dr = r < 7 ? 1 : -1;
+    const options = shuffled([sq, at(f + df, r), at(f, r + dr), at(f + df, r + dr)].map(squareName), rand);
+    return { sq, answer: squareName(sq), options };
+  }
+}
+
+/* ── Set Up the Board ──────────────────────────────────────────────────── */
+
+const BACK: Kind[] = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+
+/** every piece on its starting square */
+export function startBoard(): Board {
+  const board: Board = new Map();
+  BACK.forEach((kind, f) => {
+    board.set(at(f, 0), { kind, colour: 'w' });
+    board.set(at(f, 1), { kind: 'P', colour: 'w' });
+    board.set(at(f, 6), { kind: 'P', colour: 'b' });
+    board.set(at(f, 7), { kind, colour: 'b' });
+  });
+  return board;
+}
+
+export interface SetupStep extends Step { kinds: Kind[]; colour: Colour }
+
+export const SETUP_STEPS: SetupStep[] = [
+  { name: 'Rooks, knights and bishops', kinds: ['R', 'N', 'B'], colour: 'w' },
+  { name: 'The queen and the king', kinds: ['Q', 'K'], colour: 'w' },
+  { name: 'The pawns', kinds: ['P'], colour: 'w' },
+  { name: "Black's pieces", kinds: ['R', 'N', 'B', 'Q', 'K', 'P'], colour: 'b' },
+];
+
+/** where each piece goes, as he is told it */
+export const HOME_RULE: Record<Kind, string> = {
+  R: 'The rooks go in the corners.',
+  N: 'The knights go next to the rooks.',
+  B: 'The bishops go next to the knights.',
+  Q: 'The queen goes on her own colour: the white queen on the light square, the black queen on the dark one.',
+  K: 'The king goes next to his queen, in the last square of the row left for him.',
+  P: 'The pawns stand in a row in front of the other pieces.',
+};
+
+export interface SetupQuestion { man: Man; board: Board; answer: number }
+
+export function setupQuestion(step: SetupStep, last?: SetupQuestion, rand: Rand = Math.random): SetupQuestion {
+  for (;;) {
+    const kind = pickOne(step.kinds, rand);
+    const start = startBoard();
+    const homes = [...start].filter(([, m]) => m.kind === kind && m.colour === step.colour).map(([sq]) => sq);
+    const answer = pickOne(homes, rand);
+    if (last && last.answer === answer) continue;
+    start.delete(answer);
+    return { man: { kind, colour: step.colour }, board: start, answer };
+  }
+}

@@ -41,7 +41,7 @@ test.describe('Meet the Pieces', () => {
   test('the home screen has a chess section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: 'Chess' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(4);
+    await expect(page.locator('.tiles[data-section="chess"] .tile-link')).toHaveCount(6);
   });
 
   test('a whole round of moving the piece to the ball, to the sticker', async ({ page }) => {
@@ -226,5 +226,96 @@ test.describe('Pawn Wars', () => {
     }
     await expect(page.locator('.mx-note')).toContainText(/You win|The computer/, { timeout: 4000 });
     await expect(page.locator('.score')).toContainText('Game 2 of 3', { timeout: 8000 });
+  });
+});
+
+test.describe('Board Squares', () => {
+  test('a whole round of finding squares, to the sticker', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'chess-squares');
+    await openSetup(page);
+    await page.getByLabel('How many questions').selectOption('8');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    for (let i = 0; i < 8; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 8000 });
+      const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+      if (await page.locator('.mx-choice').count()) await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+      else {
+        await expect(page.locator('.mx-ask')).toHaveText(`Tap ${answer}.`);
+        await square(page, answer).click();
+      }
+      await expect(page.locator('.mx-note.good')).toContainText(`${answer}: along the letters to ${answer[0]}, then up the numbers to ${answer[1]}.`);
+    }
+    await expect(page.locator('.results .sticker')).toHaveText('🔡', { timeout: 8000 });
+    noProblems(watch);
+  });
+
+  test('a wrong square lights up the way to the right one', async ({ page }) => {
+    await startAt(page, 'chess-squares', 0);
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    const wrong = answer === 'a1' ? 'b2' : 'a1';
+    await square(page, wrong).click();
+    await expect(page.locator('.mx-note')).toContainText(`That's ${wrong}.`);
+    await expect(square(page, answer)).toHaveClass(/hit/);
+    expect(await page.locator('.ch-sq.picked').count()).toBeGreaterThanOrEqual(1);
+  });
+
+  test('names the square the ball is on', async ({ page }) => {
+    await startAt(page, 'chess-squares', 1);
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 8000 });
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await expect(square(page, answer)).toHaveAttribute('data-ball', '');
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toBeVisible();
+  });
+
+  test('finds a square with no letters or numbers, which come back after', async ({ page }) => {
+    await startAt(page, 'chess-squares', 2);
+    await expect(page.locator('.ch-files')).toBeHidden();
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await square(page, answer).click();
+    await expect(page.locator('.ch-files')).toBeVisible();
+    await expect(page.locator('.mx-note.good')).toBeVisible();
+  });
+
+  test('says whether a square is light or dark', async ({ page }) => {
+    await startAt(page, 'chess-squares', 3);
+    await expect(page.locator('.mx-choice')).toHaveText(['Light', 'Dark'], { timeout: 8000 });
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice:not([data-n="${answer}"])`).click();
+    await expect(page.locator('.mx-note')).toContainText('a1, in the corner on your left, is always dark');
+  });
+});
+
+test.describe('Set Up the Board', () => {
+  test('a whole round of putting pieces on their squares, to the sticker', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'chess-setup');
+    await openSetup(page);
+    await page.getByLabel('How many questions').selectOption('8');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    for (let i = 0; i < 8; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i + 1}`, { timeout: 8000 });
+      await expect(page.locator('.ch-holding .ch-piece')).toBeVisible();
+      await expect(page.locator('.ch-sq[data-piece]:not([data-piece=""])')).toHaveCount(31);
+      const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+      await square(page, answer).click();
+      await expect(page.locator('.mx-note.good')).toContainText(`goes on ${answer}.`);
+    }
+    await expect(page.locator('.results .sticker')).toHaveText('🏰', { timeout: 8000 });
+    noProblems(watch);
+  });
+
+  test('the queen on her own colour; a wrong square is shown and the rule said', async ({ page }) => {
+    await startAt(page, 'chess-setup', 1);
+    const answer = (await page.locator('.mx-stage').getAttribute('data-answer'))!;
+    expect(['d1', 'e1']).toContain(answer);
+    /* an empty square in the middle of the board */
+    await square(page, 'e4').click();
+    await expect(page.locator('.mx-note')).toContainText(`goes on ${answer}.`);
+    await expect(square(page, 'e4')).toHaveClass(/miss/);
+    await expect(square(page, answer)).toHaveClass(/hit/);
   });
 });
