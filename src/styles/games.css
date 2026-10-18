@@ -1194,6 +1194,7 @@
 .jl-line { display: block; width: 100%; height: auto; }
 .jl-label { fill: var(--paper); font: 800 46px var(--display); text-anchor: middle; }
 .jl-label.tight { font-size: 40px; letter-spacing: -1px; }
+.jl-label.end { text-anchor: end; }
 .jl-small { stroke: rgba(255, 246, 231, .55); stroke-width: 3; }
 .jl-arc { fill: none; stroke-width: 6; stroke-linecap: round; }
 .jl-arc.his { stroke: var(--mustard); }
