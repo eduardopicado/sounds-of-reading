@@ -1906,3 +1906,10 @@
 .ch-holding { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 14px; background: #769656; }
 .ch-holding:empty { visibility: hidden; }
 .ch-holding .ch-piece { width: 90%; height: 90%; }
+
+/* Half-Time Oranges, Years 3–4: the shares counted, and two shapes to compare */
+.ht-share.counted { outline: 4px solid var(--mint); outline-offset: 2px; border-radius: 12px; }
+.ht-pair { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; }
+.ht-fig { display: grid; justify-items: center; gap: 6px; margin: 0; }
+.ht-fig .ht-shape { width: min(40vw, 220px); height: auto; aspect-ratio: 220 / 160; }
+.ht-fig figcaption { color: var(--paper); font: 700 20px var(--display); }
