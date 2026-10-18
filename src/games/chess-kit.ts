@@ -53,6 +53,8 @@ export interface BoardView {
   mark: (cls: string, squares: number[]) => void;
   /** what to do when a square is tapped */
   onTap: (f: (sq: number) => void) => void;
+  /** show or hide the letters and numbers round the board */
+  labels: (show: boolean) => void;
 }
 
 export function boardView(): BoardView {
@@ -93,5 +95,6 @@ export function boardView(): BoardView {
     dots: (list) => squares.forEach((b, sq) => b.classList.toggle('dot', list.includes(sq))),
     mark: (cls, list) => squares.forEach((b, sq) => b.classList.toggle(cls, list.includes(sq))),
     onTap: (f) => { tap = f; },
+    labels: (show) => { node.classList.toggle('blind', !show); },
   };
 }
