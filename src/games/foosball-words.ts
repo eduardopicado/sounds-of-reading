@@ -121,7 +121,7 @@ function build(kit: Kit) {
     ball.classList.remove('in', 'post');
     void ball.offsetWidth;
     ball.classList.add(inNet ? 'in' : 'post');
-    sfx.kick();
+    sfx.clack();
     await kit.wait(700);
   }
 

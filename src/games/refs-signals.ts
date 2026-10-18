@@ -12,7 +12,7 @@
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import {
-  CALL_NAME, COMMANDS, MOVES, SIGNAL_MEANING, SIGNAL_STEPS, pointsWords, signalQuestion,
+  CALL_NAME, COMMANDS, MOVES, SIGNAL_HOW, SIGNAL_MEANING, SIGNAL_SAYS, SIGNAL_STEPS, signalQuestion,
   type Both, type Call, type Command, type Signal, type SignalQuestion, type SignalStep,
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
@@ -33,17 +33,6 @@ export function mount(root: HTMLElement): () => void {
 
 const cap = (s: string): string => s[0].toUpperCase() + s.slice(1);
 const moveName = (id: string, lang: 'en' | 'pt'): string => cap(MOVES.find((m) => m.id === id)!.name[lang]);
-
-/** how each signal is made, said after a miss so he learns it */
-const HOW: Record<Signal, Both> = {
-  'points-2': { en: 'Two fingers up is 2 points.', pt: 'Dois dedos para cima são dois pontos.' },
-  'points-3': { en: 'Three fingers up is 3 points.', pt: 'Três dedos para cima são três pontos.' },
-  'points-4': { en: 'Four fingers up is 4 points.', pt: 'Quatro dedos para cima são quatro pontos.' },
-  advantage: { en: 'An open hand out flat is an advantage.', pt: 'A mão aberta, esticada e reta, é vantagem.' },
-  penalty: { en: 'A fist at the shoulder is a penalty.', pt: 'O punho fechado no ombro é punição.' },
-  parou: { en: 'Both arms out means stop: Parou!', pt: 'Os dois braços abertos: Parou!' },
-  dq: { en: 'Arms crossed over the head means disqualified.', pt: 'Braços cruzados sobre a cabeça: desclassificado.' },
-};
 
 function build(kit: Kit) {
   const langs = langSwitch();
@@ -67,18 +56,18 @@ function build(kit: Kit) {
 
   async function fingers(q: SignalQuestion): Promise<boolean> {
     card.replaceChildren(refPicture(q.signal!));
-    const question: Both = { en: 'How many points is the referee giving?', pt: 'Quantos pontos o árbitro está dando?' };
+    const question = SIGNAL_SAYS.fingers;
     retext = () => { ask.textContent = question[lang()]; };
     retext();
     speak(question, lang());
     const picked = await kit.choices.ask(q.options as number[]);
     kit.choices.reveal(Number(q.answer), picked);
-    return finish(picked === q.answer, HOW[q.signal!]);
+    return finish(picked === q.answer, SIGNAL_HOW[q.signal!]);
   }
 
   async function kind(q: SignalQuestion): Promise<boolean> {
     card.replaceChildren(refPicture(q.signal!));
-    const question: Both = { en: 'What is the referee giving?', pt: 'O que o árbitro está dando?' };
+    const question = SIGNAL_SAYS.kind;
     const label = (c: string): string => CALL_NAME[c as Call][lang()];
     retext = () => { ask.textContent = question[lang()]; kit.choices.relabel(label); };
     speak(question, lang());
@@ -86,13 +75,12 @@ function build(kit: Kit) {
     retext();
     const picked = await asked;
     kit.choices.revealWord(String(q.answer), picked);
-    return finish(picked === q.answer, HOW[q.signal!]);
+    return finish(picked === q.answer, SIGNAL_HOW[q.signal!]);
   }
 
   async function move(q: SignalQuestion): Promise<boolean> {
     card.replaceChildren(refPicture(q.signal!));
-    const n = Number(q.signal!.slice(7));
-    const question: Both = { en: 'Which move did Blue score?', pt: 'Qual golpe o Azul fez?' };
+    const question = SIGNAL_SAYS.move;
     const label = (id: string): string => moveName(id, lang());
     retext = () => { ask.textContent = question[lang()]; kit.choices.relabel(label); };
     speak(question, lang());
@@ -101,22 +89,19 @@ function build(kit: Kit) {
     const picked = await asked;
     kit.choices.revealWord(String(q.answer), picked);
     const right = MOVES.find((m) => m.id === q.answer)!;
-    return finish(picked === q.answer, {
-      en: `${n} fingers is ${pointsWords(n, 'en')}: ${right.name.en}.`,
-      pt: `${n} dedos são ${pointsWords(n, 'pt')}: ${right.name.pt}.`,
-    });
+    return finish(picked === q.answer, SIGNAL_SAYS.scored(right));
   }
 
   function referee(q: SignalQuestion): Promise<boolean> {
     const moment = q.moment!;
     card.replaceChildren(el('p', { class: 'bj-moment' }));
-    const question: Both = { en: 'You are the referee. Which signal?', pt: 'Você é o árbitro. Qual é o sinal?' };
+    const question = SIGNAL_SAYS.referee;
     retext = () => {
       card.querySelector('.bj-moment')!.textContent = moment.text[lang()];
       ask.textContent = question[lang()];
     };
     retext();
-    speak({ en: `${moment.text.en} ${question.en}`, pt: `${moment.text.pt} ${question.pt}` }, lang());
+    speak(SIGNAL_SAYS.moment(moment), lang());
     return new Promise((resolve) => {
       const row = el('div', { class: 'bj-signals' }, ...(q.options as Signal[]).map((s) => {
         const b = el('button', { class: 'bj-signal', type: 'button', dataset: { signal: s }, 'aria-label': SIGNAL_MEANING[s].en }, refPicture(s));
@@ -126,7 +111,7 @@ function build(kit: Kit) {
           const ok = s === q.answer;
           row.querySelector(`[data-signal="${q.answer}"]`)!.classList.add('right');
           if (!ok) b.classList.add('wrong');
-          resolve(await finish(ok, { en: `${moment.why.en} ${HOW[q.answer as Signal].en}`, pt: `${moment.why.pt} ${HOW[q.answer as Signal].pt}` }));
+          resolve(await finish(ok, SIGNAL_SAYS.answer(moment)));
         });
         return b;
       }));
@@ -141,15 +126,15 @@ function build(kit: Kit) {
       const question: Both = { en: `The referee shouts “${c.said}” What does it mean?`, pt: `O árbitro grita “${c.said}” O que quer dizer?` };
       const label = (k: string): string => COMMANDS[k as Command].means[lang()];
       retext = () => { ask.textContent = question[lang()]; kit.choices.relabel(label); };
-      speak({ en: `${c.said} What does it mean?`, pt: `${c.said} O que quer dizer?` }, lang());
+      speak(SIGNAL_SAYS.call(q.command), lang());
       const asked = kit.choices.askWords(q.options as string[], label);
       retext();
       const picked = await asked;
       kit.choices.revealWord(String(q.answer), picked);
-      return finish(picked === q.answer, { en: `${c.said} means: ${c.means.en}.`, pt: `${c.said} quer dizer: ${c.means.pt}.` });
+      return finish(picked === q.answer, SIGNAL_SAYS.means(q.command));
     }
     card.replaceChildren(refPicture(q.signal!));
-    const question: Both = { en: 'What does this signal mean?', pt: 'O que este sinal quer dizer?' };
+    const question = SIGNAL_SAYS.meaning;
     const label = (s: string): string => SIGNAL_MEANING[s as Signal][lang()];
     retext = () => { ask.textContent = question[lang()]; kit.choices.relabel(label); };
     speak(question, lang());
@@ -157,7 +142,7 @@ function build(kit: Kit) {
     retext();
     const picked = await asked;
     kit.choices.revealWord(String(q.answer), picked);
-    return finish(picked === q.answer, HOW[q.signal!]);
+    return finish(picked === q.answer, SIGNAL_HOW[q.signal!]);
   }
 
   return {

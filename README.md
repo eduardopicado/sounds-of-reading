@@ -254,10 +254,10 @@ downloaded. So a download can add another accent but never a clearer voice;
 English and Portuguese, with each voice's tier and the one the app uses. The Portuguese commentator picks its own voice the same way, and
 can sound much better than the English one.
 
-The app can also play recordings of the words instead, made ahead of time by
-`npm run make:audio` (see `public/audio/README.md`). None ship yet: the
-generator has no text-to-speech service wired up, so every word is spoken by
-the device.
+The app can also play recordings of the words instead, made ahead of time
+with ElevenLabs by `npm run make:audio`, and recorded sound effects made by
+`npm run make:sfx` (see `public/audio/README.md`). None ship yet, so every
+word is spoken by the device and every sound is made from tones.
 
 ## Design rules
 

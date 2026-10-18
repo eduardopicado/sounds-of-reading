@@ -62,7 +62,7 @@ function build(kit: Kit) {
           after.set(sq, after.get(q.from)!);
           after.delete(q.from);
           board.draw(after);
-          sfx.kick();
+          sfx.take();
         }
         board.mark('hit', [q.answer]);
         if (!ok) board.mark('miss', [sq]);

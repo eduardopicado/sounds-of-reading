@@ -48,6 +48,14 @@ CI runs all of these on every pull request and push, the browser tests as
 one job per device, side by side. GitHub Pages deploys
 only after CI has passed on a push to `main` (`.github/workflows/deploy.yml`).
 
+The recordings are made by hand, never in CI, with the ElevenLabs key in the
+environment (`public/audio/README.md`):
+
+```
+npm run make:audio       # the words
+npm run make:sfx         # the sound effects
+```
+
 ## Layout
 
 ```
@@ -81,11 +89,13 @@ src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (onl
                        everywhere), the three-touch rule, and set pieces that
                        come with a way to score, checked to work a little off
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
-                       games ask (Weigh-In's things and weight classes too),
-                       every word in English and Portuguese
-src/lib/               speech.ts (voices, and saying things), sfx.ts (synthesised
-                       sound effects), audio.ts and clip-id.ts (recorded words;
-                       none ship yet, see public/audio/README.md), storage.ts,
+                       games ask and say (Weigh-In's things and weight classes
+                       too), every word in English and Portuguese
+src/content/commentary.ts what the football commentator shouts, both languages
+src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
+                       effects, made from tones or recorded), audio.ts and
+                       clip-id.ts (recorded words; none ship yet, see
+                       public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
                        going), stickers.ts, colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),
@@ -115,7 +125,8 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere
-tools/                 content maintenance scripts (not shipped)
+tools/                 content maintenance scripts (not shipped); make-audio.ts and
+                       make-sfx.ts make the recordings in public/audio/
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes
 tests/e2e/             Playwright (review.spec.ts: regressions from the 2026-09 review)

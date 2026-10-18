@@ -86,17 +86,18 @@ function build(kit: Kit) {
           return;
         }
         if (picked === null || !moves(picked, pos).includes(sq)) return;
+        const took = pos.has(sq);
         pos = play(pos, { from: picked, to: sq });
         picked = null;
         mine = false;
-        sfx.kick();
+        if (took) sfx.take(); else sfx.move();
         show();
         const first = winner(pos, 'b');
         if (first) { void over(first === 'w'); return; }
         await kit.wait(700);
         const reply = computerMove(pos, step.smart);
+        if (reply && pos.has(reply.to)) sfx.take(); else sfx.move();
         if (reply) pos = play(pos, reply);
-        sfx.tap();
         mine = true;
         show();
         if (reply) board.mark('hit', [reply.to]);

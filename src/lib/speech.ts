@@ -275,9 +275,10 @@ export interface SayOptions {
   voiceURI?: string;
   /**
    * Another language, for the football narration ("Goooool do Brasil!"),
-   * which is shouted in Portuguese the way it is at home. Spoken by the best
-   * installed voice for it, never by a recording and never by the English
-   * voice, which would mangle it — check canSpeak() first.
+   * which is shouted in Portuguese the way it is at home. A recording of the
+   * line where one was made, and otherwise the best installed voice for the
+   * language, never the English voice, which would mangle it: check
+   * hasClip() or canSpeak() first.
    */
   lang?: string;
   /**
@@ -325,10 +326,10 @@ export const canSpeak = (lang: string): boolean => voicesFor(lang).length > 0;
 
 export function say(text: string, options: SayOptions = {}): void {
   if (!enabled || !text) { options.onEnd?.(); return; }
-  if (options.lang) { speakAloud(text, options); return; }
-  /* a recording where we shipped one, the device voice everywhere else. The
-     diagnostics screen asks for a named voice, so it always gets the real
-     thing rather than a clip that would sound the same in every row. */
+  /* a recording where we shipped one (in either language), the device voice
+     everywhere else. The diagnostics screen asks for a named voice, so it
+     always gets the real thing rather than a clip that would sound the same
+     in every row. */
   if (!options.deviceVoiceOnly && !options.voiceURI && hasClip(text)) {
     cancelSpeech();
     void playClip(text, { slow: options.slow, onEnd: options.onEnd })
@@ -343,6 +344,10 @@ function speakAloud(text: string, options: SayOptions): void {
   stopClips();
   const synth = engine();
   if (!synth) { options.onEnd?.(); return; }
+  /* a line in another language, with no voice for it, would come out of the
+     English voice mangled. That only happens when its recording would not
+     play, and saying nothing is better */
+  if (options.lang && !options.voiceURI && !canSpeak(options.lang)) { options.onEnd?.(); return; }
   try {
     /* drop the one being said before the engine reports it stopped */
     speaking = null;
