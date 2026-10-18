@@ -644,18 +644,26 @@ export function drillChoices(step: DrillStep, q: DrillQuestion): number[] {
 
 /* ── Half-Time Oranges: halves, then quarters and eighths ────────────── */
 
-export type Fraction = 2 | 4 | 8;
+export type Fraction = 2 | 3 | 4 | 5 | 8;
 
-export const FRACTION_NAME: Record<Fraction, string> = { 2: 'half', 4: 'quarter', 8: 'eighth' };
-export const FRACTION_PLURAL: Record<Fraction, string> = { 2: 'halves', 4: 'quarters', 8: 'eighths' };
+export const FRACTION_NAME: Record<Fraction, string> = { 2: 'half', 3: 'third', 4: 'quarter', 5: 'fifth', 8: 'eighth' };
+export const FRACTION_PLURAL: Record<Fraction, string> = { 2: 'halves', 3: 'thirds', 4: 'quarters', 5: 'fifths', 8: 'eighths' };
+
+/** "1 half", "2 quarters", "3 fifths" */
+export const fractionWords = (k: number, parts: Fraction): string => `${k} ${k === 1 ? FRACTION_NAME[parts] : FRACTION_PLURAL[parts]}`;
+
+/** "a half", "an eighth" */
+export const aFraction = (parts: Fraction): string => `${parts === 8 ? 'an' : 'a'} ${FRACTION_NAME[parts]}`;
 
 export interface FractionStep extends Step {
   /**
    * fair: is this cut into halves (or quarters)? yes or no;
    * part-of: half (or a quarter, an eighth) of a group of bibs;
    * name: a piece of a cut orange, what is it called?
+   * many: two thirds, three quarters of a squad;
+   * equal: is the same amount shaded — 2 quarters and 1 half?
    */
-  task: 'fair' | 'part-of' | 'name';
+  task: 'fair' | 'part-of' | 'name' | 'many' | 'equal';
   parts: Fraction[];
 }
 
@@ -667,6 +675,23 @@ export const FRACTION_STEPS: FractionStep[] = [
   { name: 'Quarters or not?', task: 'fair', parts: [4] },
   { name: 'A quarter of the bibs', task: 'part-of', parts: [4] },
   { name: 'Quarters and eighths of the bibs', task: 'part-of', parts: [4, 8] },
+  /* Years 3–4: thirds and fifths, more than one piece, and the same amount */
+  { name: 'Thirds and fifths', task: 'name', parts: [3, 5] },
+  { name: 'A third or a fifth of the squad', task: 'part-of', parts: [3, 5] },
+  { name: 'Two thirds, three quarters', task: 'many', parts: [3, 4, 5] },
+  { name: 'The same amount', task: 'equal', parts: [2, 4, 8] },
+];
+
+/** the pieces a "what is it called" step offers */
+export const NAMES_OFFERED = (step: FractionStep): Fraction[] =>
+  step.parts.some((p) => p === 3 || p === 5) ? [2, 3, 4, 5, 8] : [2, 4, 8];
+
+/** pairs of fractions to compare for "the same amount": [k, parts] each */
+const SAME: [[number, Fraction], [number, Fraction]][] = [
+  [[1, 2], [2, 4]], [[1, 2], [4, 8]], [[1, 4], [2, 8]], [[3, 4], [6, 8]],
+];
+const NOT_SAME: [[number, Fraction], [number, Fraction]][] = [
+  [[1, 2], [3, 4]], [[1, 2], [3, 8]], [[1, 4], [3, 8]], [[1, 4], [1, 8]], [[3, 4], [5, 8]], [[1, 2], [1, 4]],
 ];
 
 export interface FractionQuestion {
@@ -675,22 +700,49 @@ export interface FractionQuestion {
   parts: Fraction;
   /** for fair: are the pieces the same size? */
   fair: boolean;
-  /** for part-of: how many bibs, and the answer */
+  /** for part-of and many: how many bibs, and the answer */
   total: number;
   answer: number;
+  /** many: how many of the pieces; equal: the first shape's shaded pieces */
+  k: number;
+  /** equal: the second shape, and whether the same amount is shaded */
+  other?: { k: number; parts: Fraction };
+  same?: boolean;
+  /** many: the answers a child gives by mistake, one share and the rest */
+  options?: number[];
 }
 
 export function fractionQuestion(step: FractionStep, last?: FractionQuestion): FractionQuestion {
   for (;;) {
-    const parts = pick(step.parts);
+    let parts = pick(step.parts);
     const shape = pick(['orange', 'pitch'] as const);
     const fair = Math.random() < 0.5;
-    /* bibs: an even number to 20 for halves, to 40 for quarters and eighths */
+    /* bibs: an even number to 20 for halves, to 40 for quarters and eighths,
+       a squad of up to 15 or 25 in thirds and fifths */
     const most = parts === 2 ? 10 : 5;
-    const total = parts * rand(1, most);
-    const answer = step.task === 'part-of' ? total / parts : parts;
-    const q = { shape, parts, fair, total, answer };
-    if (last && last.total === q.total && last.parts === q.parts && last.fair === q.fair && last.shape === q.shape) continue;
+    let total = parts * rand(step.task === 'many' ? 2 : 1, most);
+    let answer = step.task === 'part-of' ? total / parts : parts;
+    let k = 1;
+    let other: FractionQuestion['other'];
+    let same: boolean | undefined;
+    let options: number[] | undefined;
+    if (step.task === 'many') {
+      k = rand(2, parts - 1);
+      answer = (total / parts) * k;
+      options = [...new Set([answer, total / parts, total - answer, answer + total / parts, answer - 1, answer + 1])]
+        .filter((x) => x > 0 && x <= total).slice(0, 4);
+    }
+    if (step.task === 'equal') {
+      same = Math.random() < 0.5;
+      const [[k1, p1], [k2, p2]] = pick(same ? SAME : NOT_SAME);
+      [k, parts] = [k1, p1];
+      other = { k: k2, parts: p2 };
+      total = 0;
+      answer = 0;
+    }
+    const q: FractionQuestion = { shape, parts, fair, total, answer, k, other, same, options };
+    if (last && last.total === q.total && last.parts === q.parts && last.fair === q.fair && last.shape === q.shape && last.k === q.k
+      && last.other?.k === q.other?.k) continue;
     return q;
   }
 }
