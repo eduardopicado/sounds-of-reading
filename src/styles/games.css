@@ -965,7 +965,10 @@
 .mx-axis { stroke: var(--paper); stroke-width: 6; stroke-linecap: round; }
 .mx-tick { stroke: var(--paper); stroke-width: 5; }
 .mx-label { fill: var(--paper); font: 800 46px var(--display); text-anchor: middle; }
+.mx-label.end { text-anchor: end; }
 .mx-mark { font-size: 56px; text-anchor: middle; }
+/* rounding (Years 3–4): halfway along the ten, dashed */
+.mx-half { stroke: var(--mustard); stroke-width: 4; stroke-dasharray: 8 7; }
 
 /* Flash Count */
 .mx-flash {

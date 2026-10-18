@@ -47,7 +47,7 @@ coach's picks for today at the top.
 | **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many; then (Year 2) rows and columns; then (Years 3–4) arrays that are times-table facts, up to 12 rows of 12, drawn in blocks of five so 7 rows reads as 5 and 2. A miss splits the array into those two easier parts. |
 | **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? Then (Years 3–4) a stadium of 1000, ten stands of 100: whole stands, then whole rows, then any number, counted by filling up the row, then the stand, then the empty stands. |
 | **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20. |
-| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000. |
+| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000; then (Years 3–4) to 10 000. Rounding is a kick too: the line is one ten (or hundred), 40 to 50, with the number marked and halfway dashed, and he kicks to the end it is nearer. Then lines from 0 to 1 and 0 to 2 in tenths. |
 | **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. |
 | **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. |
 | **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |

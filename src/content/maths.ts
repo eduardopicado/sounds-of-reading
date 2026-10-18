@@ -9,7 +9,8 @@
  *   Scoreboard Sums      combining and separating quantities within 20, then
  *                        within 100 by tens and ones (Year 2)
  *   Number Line Penalty  where numbers sit, from 0–10 up to 0–120, then on to
- *                        0–1000 (Year 2)
+ *                        0–1000 (Year 2), then 0–10 000, rounding to the
+ *                        nearest ten and hundred, and tenths (Years 3–4)
  *   Flash Count          seeing how many at a glance (subitising), then rows
  *                        and columns, the start of multiplying (Year 2), then
  *                        arrays that are times-table facts to 12 × 12 (Years 3–4)
@@ -233,9 +234,15 @@ export interface LineStep extends Step {
   /** the numbers written under the line */
   labels: number[];
   /** the numbers that can be asked */
-  ask: 'any' | 'tens' | 'hundreds';
+  ask: 'any' | 'tens' | 'hundreds' | 'thousands';
   /** how far off still counts, for lines too long to have a tick for each number */
   near: number;
+  /** tenths: the line counts in tenths, so its numbers are written over this
+      (lo 0 and hi 10 with per 10 is the line from 0 to 1) */
+  per?: number;
+  /** rounding: the line is one ten (or hundred) long, the number is marked
+      on it, and he kicks to the end it is nearer */
+  round?: 10 | 100;
 }
 
 const every = (lo: number, hi: number, by: number): number[] => {
@@ -255,10 +262,24 @@ export const LINE_STEPS: LineStep[] = [
   { name: '0 to 200', lo: 0, hi: 200, tick: 10, labels: [0, 100, 200], ask: 'any', near: 8 },
   { name: '0 to 1000 in hundreds', lo: 0, hi: 1000, tick: 100, labels: [0, 500, 1000], ask: 'hundreds', near: 0 },
   { name: '0 to 1000', lo: 0, hi: 1000, tick: 100, labels: [0, 500, 1000], ask: 'tens', near: 40 },
+  /* Years 3–4: to 10 000, rounding, and tenths */
+  { name: '0 to 10 000 in thousands', lo: 0, hi: 10000, tick: 1000, labels: [0, 5000, 10000], ask: 'thousands', near: 0 },
+  { name: '0 to 10 000', lo: 0, hi: 10000, tick: 1000, labels: [0, 5000, 10000], ask: 'hundreds', near: 400 },
+  { name: 'Nearest ten', lo: 0, hi: 100, tick: 1, labels: [0, 100], ask: 'any', near: 0, round: 10 },
+  { name: 'Nearest hundred', lo: 0, hi: 1000, tick: 10, labels: [0, 1000], ask: 'any', near: 0, round: 100 },
+  { name: '0 to 1 in tenths', lo: 0, hi: 10, tick: 1, labels: [0, 5, 10], ask: 'any', near: 0, per: 10 },
+  { name: '0 to 2 in tenths', lo: 0, hi: 20, tick: 1, labels: [0, 10, 20], ask: 'any', near: 0, per: 10 },
 ];
 
+/** a number as it is written on the line: 7 tenths is 0.7, and 10 000 has a space */
+export function lineText(v: number, per = 1): string {
+  if (per !== 1) return String(Math.round((v / per) * 1000) / 1000);
+  return v >= 10000 ? `${Math.floor(v / 1000)} ${String(v % 1000).padStart(3, '0')}` : String(v);
+}
+
 export function lineQuestion(step: LineStep, last?: number): number {
-  const pool = every(step.lo, step.hi, step.ask === 'hundreds' ? 100 : step.ask === 'tens' ? 10 : 1)
+  const by = step.ask === 'thousands' ? 1000 : step.ask === 'hundreds' ? 100 : step.ask === 'tens' ? 10 : 1;
+  const pool = every(step.lo, step.hi, by)
     /* a number written under the line is no question at all */
     .filter((n) => !step.labels.includes(n) && n !== last);
   return pick(pool.length ? pool : every(step.lo, step.hi, step.tick));
@@ -272,6 +293,37 @@ export function valueAt(step: LineStep, fraction: number): number {
 
 export const onTarget = (step: LineStep, asked: number, tapped: number): boolean =>
   Math.abs(asked - tapped) <= step.near;
+
+/** a rounding question: the stretch of line it is on, the number, and the end it rounds to */
+export interface RoundQuestion { lo: number; hi: number; tick: number; n: number; answer: number }
+
+/**
+ * A number to round, never one exactly halfway (45 is a rule to learn, not
+ * a distance to see) and never one that is already a ten or a hundred.
+ */
+export function roundQuestion(step: LineStep, last?: number): RoundQuestion {
+  const r = step.round ?? 10;
+  for (;;) {
+    /* 11 to 99 for tens, 101 to 999 for hundreds */
+    const n = rand(r + 1, r * 10 - 1);
+    if (n % r === 0 || n % r === r / 2 || n === last) continue;
+    /* the hundreds want a ones digit too, so it is never a whole ten */
+    if (r === 100 && n % 10 === 0) continue;
+    const lo = Math.floor(n / r) * r;
+    return { lo, hi: lo + r, tick: r / 10, n, answer: n - lo < r / 2 ? lo : lo + r };
+  }
+}
+
+/** a kick on a rounding question scores on the half of the line nearer the answer */
+export const roundOnTarget = (q: RoundQuestion, tapped: number): boolean =>
+  Math.abs(tapped - q.answer) < Math.abs(tapped - (q.answer === q.lo ? q.hi : q.lo));
+
+/** why: how far it is from each end */
+export function roundWhy(q: RoundQuestion): string {
+  /* the nearer end first: that is the one he is looking for */
+  const other = q.answer === q.lo ? q.hi : q.lo;
+  return `${q.n} is ${Math.abs(q.n - q.answer)} from ${q.answer} and ${Math.abs(q.n - other)} from ${other}, so it is nearer ${q.answer}.`;
+}
 
 /* ── Flash Count: how many did you see? ──────────────────────────────── */
 
