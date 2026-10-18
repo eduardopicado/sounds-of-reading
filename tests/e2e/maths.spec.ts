@@ -1,7 +1,7 @@
 /* The maths games, played through by reading the screen the way he does. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {
@@ -274,6 +274,56 @@ test.describe('maths games', () => {
     const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
     await tapNumber(page, wrong);
     await expect(page.locator('.mx-note')).toHaveText(`${a} and ${b - (b % 10)} is ${a + b - (b % 10)}, and ${b % 10} more is ${answer}.`);
+  });
+
+  test('Years 3–4: Scoreboard Sums counts the crowd, in crates of a hundred', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:scoreboard-sums': 12 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add to 1000');
+    await expect(page.locator('.mx-ask')).toContainText('come through the gates');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, , b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ').map(Number);
+    await expect(page.locator('.mx-hundred')).toHaveCount(Math.floor(a / 100) + Math.floor(b / 100));
+    await expect(page.locator('.mx-hundred.new')).toHaveCount(Math.floor(b / 100));
+    await expectTapTargets(page, '.mx-choice');
+    await tapNumber(page, a + b);
+    await expect(page.locator('.mx-note')).toHaveText(`Yes! ${a} and ${b} make ${a + b}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a miss past a hundred is split into hundreds, tens and ones, and the carry slip is offered', async ({ page }) => {
+    await seed(page, { 'maths-step:scoreboard-sums': 14 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add past a ten or a hundred');
+    await expect(page.locator('.mx-hundred')).toHaveCount(0);
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, , b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ').map(Number);
+    const answer = a + b;
+    /* each column added on its own, forgetting to carry */
+    const column = [1, 10, 100].reduce((sum, p) => sum + ((Math.floor(a / p) % 10 + Math.floor(b / p) % 10) % 10) * p, 0);
+    const offered = (await page.locator('.mx-choice').allTextContents()).map(Number);
+    expect(offered).toContain(column);
+    await tapNumber(page, column);
+    const [h, t, o] = [b - (b % 100), b % 100 - (b % 10), b % 10];
+    await expect(page.locator('.mx-note')).toHaveText(`${a} and ${h} is ${a + h}, and ${t} more is ${a + h + t}, and ${o} more is ${answer}.`);
+    /* and the crates come out to see it */
+    await expect(page.locator('.mx-hundred')).toHaveCount(Math.floor(a / 100) + Math.floor(b / 100));
+  });
+
+  test('Years 3–4: Scoreboard Sums goes on to 10 000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:scoreboard-sums': 17 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add and take away to 10 000');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, op, b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ');
+    expect(a).toHaveLength(4);
+    expect(b).toHaveLength(4);
+    const answer = op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText('Yes!');
+    noProblems(watch);
   });
 
   test('Year 2: the number line goes to 1000', async ({ page }) => {
