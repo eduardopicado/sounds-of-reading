@@ -624,6 +624,12 @@ test.describe('Sound Rocket', () => {
     test(`the whole sky fits on screen${height ? ` at ${height}px tall` : ''}`, async ({ page }) => {
       if (height) await page.setViewportSize({ width: page.viewportSize()?.width ?? 375, height });
       await openGame(page, 'sound-rocket');
+      /* the game fits the sky again once the fonts are in, since they make
+         the header taller; measured before that, it is 30 or 40px out */
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        await new Promise((done) => requestAnimationFrame(() => done(null)));
+      });
       const fits = await page.evaluate(() => {
         const r = document.querySelector('.rk-sky')?.getBoundingClientRect();
         return r ? { bottom: Math.round(r.bottom), screen: window.innerHeight, tall: Math.round(r.height) } : null;
