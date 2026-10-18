@@ -546,3 +546,157 @@ export function setupQuestion(step: SetupStep, last?: SetupQuestion, rand: Rand 
     return { man: { kind, colour: step.colour }, board: start, answer };
   }
 }
+
+/* ── Check and checkmate ───────────────────────────────────────────────── */
+
+/* A king may never be left where it can be taken. "Check" is when it is
+ * attacked; the side in check must get out of it — move the king, block the
+ * line, or take the piece giving check. Checkmate is check with no way out,
+ * and wins the game. Still no castling or en passant: these puzzles never
+ * need them. */
+
+export const kingOf = (colour: Colour, board: Board): number | undefined =>
+  [...board].find(([, m]) => m.kind === 'K' && m.colour === colour)?.[0];
+
+/** the pieces giving check to this side's king */
+export function checkers(colour: Colour, board: Board): number[] {
+  const king = kingOf(colour, board);
+  if (king === undefined) return [];
+  return [...board].filter(([sq, m]) => m.colour !== colour && attacks(sq, board).includes(king)).map(([sq]) => sq);
+}
+
+export const inCheck = (colour: Colour, board: Board): boolean => checkers(colour, board).length > 0;
+
+/** a piece's moves that do not leave its own king in check, and never take a king */
+export function legalMoves(from: number, board: Board): number[] {
+  const man = board.get(from);
+  if (!man) return [];
+  return moves(from, board).filter((to) => board.get(to)?.kind !== 'K' && !inCheck(man.colour, play(board, { from, to })));
+}
+
+export const legalAll = (colour: Colour, board: Board): Move[] =>
+  [...board].filter(([, m]) => m.colour === colour).flatMap(([from]) => legalMoves(from, board).map((to) => ({ from, to })));
+
+export const checkmate = (colour: Colour, board: Board): boolean => inCheck(colour, board) && legalAll(colour, board).length === 0;
+
+/** White's moves that checkmate Black at once */
+export const matesInOne = (board: Board): Move[] =>
+  legalAll('w', board).filter((mv) => checkmate('b', play(board, mv)));
+
+export interface CheckStep extends Step {
+  /**
+   * is: is the white king in check?
+   * which: tap the black piece giving check;
+   * escape: move the king out of check;
+   * mate: White to move and checkmate in one.
+   */
+  task: 'is' | 'which' | 'escape' | 'mate';
+  /** mate: which pattern the puzzles are built on */
+  pattern?: 'back' | 'queen' | 'any';
+}
+
+export const CHECK_STEPS: CheckStep[] = [
+  { name: 'Is it check?', task: 'is' },
+  { name: 'Who gives check?', task: 'which' },
+  { name: 'Get the king out of check', task: 'escape' },
+];
+
+export const MATE_STEPS: CheckStep[] = [
+  { name: 'The back row', task: 'mate', pattern: 'back' },
+  { name: 'The queen and the king', task: 'mate', pattern: 'queen' },
+  { name: 'Any mate in one', task: 'mate', pattern: 'any' },
+];
+
+export interface CheckQuestion {
+  board: Board;
+  check: boolean;
+  /** which: the checking piece; escape: the king's safe squares; mate: the mating moves */
+  answer: number[];
+  mates: Move[];
+}
+
+const ATTACKERS: Kind[] = ['Q', 'R', 'B', 'N', 'P'];
+
+/** a white king and a few black pieces, with no black king in the way of the lesson */
+function scatter(n: number, rand: Rand): Board {
+  const board: Board = new Map();
+  board.set(randInt(0, 63, rand), { kind: 'K', colour: 'w' });
+  while (board.size < n + 1) {
+    const sq = randInt(0, 63, rand);
+    if (board.has(sq)) continue;
+    const kind = pickOne(ATTACKERS, rand);
+    /* a pawn never stands on the first or last row */
+    if (kind === 'P' && (rankOf(sq) === 0 || rankOf(sq) === 7)) continue;
+    board.set(sq, { kind, colour: 'b' });
+  }
+  return board;
+}
+
+/** the pieces of a mate-in-one, one pattern each */
+function matePosition(kind: CheckStep['pattern'], rand: Rand): Board {
+  const b: Board = new Map();
+  const put = (sq: number, kind: Kind, colour: Colour): void => { b.set(sq, { kind, colour }); };
+  const pattern = kind === 'any' || !kind ? pickOne(['back', 'queen', 'rooks'] as const, rand) : kind;
+  if (pattern === 'back') {
+    /* the black king behind its own pawns on the back row; a white rook or
+       queen that can reach the row */
+    const kf = randInt(1, 6, rand);
+    put(at(kf, 7), 'K', 'b');
+    for (const df of [-1, 0, 1]) put(at(kf + df, 6), 'P', 'b');
+    const file = pickOne([0, 1, 2, 3, 4, 5, 6, 7].filter((f) => Math.abs(f - kf) > 1), rand);
+    put(at(file, randInt(0, 4, rand)), pickOne(['R', 'Q'] as const, rand), 'w');
+    put(at(randInt(0, 7, rand), 0), 'K', 'w');
+  } else if (pattern === 'queen') {
+    /* the black king on its edge, the white king two squares in front, the
+       white queen able to come next to the black king, guarded by her king */
+    const kf = randInt(1, 6, rand);
+    put(at(kf, 7), 'K', 'b');
+    put(at(kf, 5), 'K', 'w');
+    put(at(randInt(0, 7, rand), randInt(0, 3, rand)), 'Q', 'w');
+  } else {
+    /* two rooks: one holds the seventh row, the other comes to the eighth */
+    const kf = randInt(0, 7, rand);
+    put(at(kf, 7), 'K', 'b');
+    put(at(pickOne([0, 7].filter((f) => Math.abs(f - kf) > 1), rand), 6), 'R', 'w');
+    put(at(pickOne([0, 1, 2, 3, 4, 5, 6, 7].filter((f) => Math.abs(f - kf) > 1), rand), randInt(0, 3, rand)), 'R', 'w');
+    put(at(randInt(0, 7, rand), 0), 'K', 'w');
+  }
+  return b;
+}
+
+export function checkQuestion(step: CheckStep, last?: CheckQuestion, rand: Rand = Math.random): CheckQuestion {
+  const same = (board: Board): boolean => !!last && kingOf('w', board) === kingOf('w', last.board) && kingOf('b', board) === kingOf('b', last.board);
+  for (let tries = 0; tries < 5000; tries += 1) {
+    if (step.task === 'mate') {
+      const board = matePosition(step.pattern, rand);
+      if (same(board)) continue;
+      if (b2(board)) continue;
+      const mates = matesInOne(board);
+      /* a real puzzle: a mate there, Black not already in check, and not every move mates */
+      if (!mates.length || inCheck('b', board) || inCheck('w', board) || mates.length > 3) continue;
+      return { board, check: false, answer: mates.map((m) => m.to), mates };
+    }
+    const board = scatter(step.task === 'is' ? 2 : 3, rand);
+    if (same(board)) continue;
+    const giving = checkers('w', board);
+    if (step.task === 'is') {
+      /* check about half the time */
+      if ((giving.length > 0) !== (rand() < 0.5) || giving.length > 1) continue;
+      return { board, check: giving.length > 0, answer: giving, mates: [] };
+    }
+    if (giving.length !== 1) continue;
+    if (step.task === 'which') return { board, check: true, answer: giving, mates: [] };
+    const king = kingOf('w', board)!;
+    const safe = legalMoves(king, board);
+    /* some squares to go to, and some that are still in check */
+    if (safe.length < 1 || moves(king, board).length - safe.length < 1) continue;
+    return { board, check: true, answer: safe, mates: [] };
+  }
+  throw new Error(`no question for ${step.name}`);
+  /* two kings side by side cannot happen in a game */
+  function b2(board: Board): boolean {
+    const [w, b] = [kingOf('w', board), kingOf('b', board)];
+    if (w === undefined || b === undefined) return true;
+    return Math.max(Math.abs(fileOf(w) - fileOf(b)), Math.abs(rankOf(w) - rankOf(b))) <= 1;
+  }
+}

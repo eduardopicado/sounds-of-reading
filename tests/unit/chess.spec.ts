@@ -2,7 +2,8 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BALL_STEPS, CAPTURE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS, VALUE, setupQuestion, squareQuestion, startBoard, allMoves, attacks, ballQuestion, captureQuestion, computerMove,
+  BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS, VALUE,
+  checkQuestion, checkers, checkmate, inCheck, kingOf, legalAll, legalMoves, matesInOne, setupQuestion, squareQuestion, startBoard, allMoves, attacks, ballQuestion, captureQuestion, computerMove,
   fewestMoves, fewestToCollect, guarded, isDark, moves, passed, pawnStart, pieceQuestion, play, rankOf,
   squareAt, squareName, winner, type Board, type Colour, type Kind,
 } from '../../src/content/chess';
@@ -276,6 +277,70 @@ describe('Set Up the Board', () => {
         expect(startBoard().get(q.answer)).toEqual(q.man);
         expect(step.kinds).toContain(q.man.kind);
         expect(q.man.colour).toBe(step.colour);
+      }
+    }
+  });
+});
+
+/** a position written the short way: "wKe1 bRe8" */
+const pos = (text: string): Board => new Map(text.split(' ').map((t) => [squareAt(t.slice(2)), { kind: t[1] as Kind, colour: t[0] as Colour }]));
+
+describe('check and checkmate', () => {
+  it('sees a check, and a line that is blocked', () => {
+    expect(inCheck('w', pos('wKe1 bRe8'))).toBe(true);
+    expect(inCheck('w', pos('wKe1 bRe8 bPe4'))).toBe(false);
+    expect(names(checkers('w', pos('wKe1 bNd3 bBa5')))).toEqual(['a5', 'd3']);
+    /* a pawn gives check on the slant only */
+    expect(inCheck('w', pos('wKe4 bPd5'))).toBe(true);
+    expect(inCheck('w', pos('wKe4 bPe5'))).toBe(false);
+  });
+
+  it('never lets a king walk into check, or a piece leave its king in check', () => {
+    /* the king cannot stay on the rook's line, even the square behind it */
+    expect(names(legalMoves(squareAt('e1'), pos('wKe1 bRe8')))).toEqual(['d1', 'd2', 'f1', 'f2']);
+    /* the bishop is pinned to its king by the rook */
+    expect(legalMoves(squareAt('e2'), pos('wKe1 wBe2 bRe8'))).toEqual([]);
+    /* the king may take a piece nothing guards */
+    expect(names(legalMoves(squareAt('e1'), pos('wKe1 bQe2 bKa8')))).toEqual(['e2']);
+  });
+
+  it('knows checkmate, and finds the mate in one', () => {
+    const back = pos('bKg8 bPf7 bPg7 bPh7 wRa1 wKg1');
+    expect(checkmate('b', back)).toBe(false);
+    expect(matesInOne(back).map((m) => `${squareName(m.from)}${squareName(m.to)}`)).toEqual(['a1a8']);
+    expect(checkmate('b', pos('bKg8 bPf7 bPg7 bPh7 wRa8 wKg1'))).toBe(true);
+    /* the queen next to the king, guarded by her own king */
+    expect(checkmate('b', pos('bKe8 wQe7 wKe6'))).toBe(true);
+    /* not mate when the queen is not guarded: the king takes her */
+    expect(checkmate('b', pos('bKe8 wQe7 wKa1'))).toBe(false);
+  });
+
+  it('asks check questions that are what they say', () => {
+    for (const step of CHECK_STEPS) {
+      for (let i = 0; i < 200; i += 1) {
+        const q = checkQuestion(step);
+        const king = kingOf('w', q.board)!;
+        expect(inCheck('w', q.board)).toBe(q.check);
+        if (step.task === 'which') expect(names(q.answer)).toEqual(names(checkers('w', q.board)));
+        if (step.task === 'escape') {
+          expect(q.answer.length).toBeGreaterThanOrEqual(1);
+          expect(names(q.answer)).toEqual(names(legalMoves(king, q.board)));
+          for (const sq of q.answer) expect(inCheck('w', play(q.board, { from: king, to: sq }))).toBe(false);
+        }
+      }
+    }
+  });
+
+  it('builds mate-in-one puzzles that are real puzzles', () => {
+    for (const step of MATE_STEPS) {
+      for (let i = 0; i < 80; i += 1) {
+        const q = checkQuestion(step);
+        expect(inCheck('b', q.board) || inCheck('w', q.board)).toBe(false);
+        expect(q.mates.length).toBeGreaterThanOrEqual(1);
+        expect(q.mates.length).toBeLessThanOrEqual(3);
+        for (const m of q.mates) expect(checkmate('b', play(q.board, m))).toBe(true);
+        /* and plenty of moves that do not mate */
+        expect(legalAll('w', q.board).length).toBeGreaterThan(q.mates.length + 3);
       }
     }
   });
