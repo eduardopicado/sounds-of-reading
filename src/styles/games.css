@@ -1085,7 +1085,15 @@
 }
 .tb-windows { display: grid; grid-template-columns: repeat(5, 14px); gap: 3px; padding: 4px; border-radius: 5px; background: #CFE7F2; }
 .tb-wheels { width: 100%; height: 8px; background: radial-gradient(circle at 20% 100%, #222 0 6px, transparent 7px), radial-gradient(circle at 80% 100%, #222 0 6px, transparent 7px); }
-.tb-bus.broken { filter: grayscale(.8); animation: shake .5s 2; }
+.tb-bus.broken, .tb-train.broken, .tb-plane.broken { filter: grayscale(.8); animation: shake .5s 2; }
+/* a train is just its engine, and a bus a little smaller, when there are a lot of them */
+.tb-row.trains.compact .tb-cars { display: none; }
+.tb-row.trains.compact { gap: 6px; }
+.tb-row.buses.compact { gap: 5px; }
+.tb-row.buses.compact .tb-bus { zoom: .62; }
+.tb-plane { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px 4px 6px; border-radius: 22px; background: #E8EEF6; box-shadow: 0 3px 0 #9AA9BC; }
+.tb-wing { font-size: 26px; line-height: 1; }
+.tb-load { color: var(--ink); font: 800 16px var(--display); }
 .tb-train { display: inline-flex; align-items: stretch; border-radius: 8px; overflow: hidden; background: #2F5F8A; box-shadow: 0 3px 0 #1E3E5C; }
 .tb-engine { display: grid; place-items: center; padding: 0 8px; background: #C9452E; color: var(--paper); font: 800 18px var(--display); }
 .tb-cars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; padding: 3px; }
@@ -1106,7 +1114,7 @@
   .tb-fan { width: 9px; height: 9px; }
   .tb-fan.walking { width: 14px; height: 14px; }
 }
-@media (prefers-reduced-motion: reduce) { .tb-bus.broken { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .tb-bus.broken, .tb-train.broken, .tb-plane.broken { animation: none; } }
 
 /* ── Keepy-Uppy Count ──────────────────────────────────────────────────── */
 
