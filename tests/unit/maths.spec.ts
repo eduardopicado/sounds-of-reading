@@ -15,6 +15,7 @@ import {
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
   toThousand,
+  lineText, roundOnTarget, roundQuestion, roundWhy,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -183,7 +184,7 @@ describe('Scoreboard Sums', () => {
 
 describe('Number Line Penalty', () => {
   it('asks numbers on the line that are not already written under it', () => {
-    for (const step of LINE_STEPS) {
+    for (const step of LINE_STEPS.filter((s) => !s.round)) {
       expect(step.labels[0]).toBe(step.lo);
       expect(step.labels.at(-1)).toBe(step.hi);
       for (let i = 0; i < MANY; i += 1) {
@@ -196,6 +197,7 @@ describe('Number Line Penalty', () => {
         if (!allWritten) expect(step.labels).not.toContain(n);
         if (step.ask === 'tens') expect(n % 10).toBe(0);
         if (step.ask === 'hundreds') expect(n % 100).toBe(0);
+        if (step.ask === 'thousands') expect(n % 1000).toBe(0);
       }
     }
   });
@@ -220,8 +222,48 @@ describe('Number Line Penalty', () => {
     expect(onTarget(hundreds, 600, 700)).toBe(false);
   });
 
-  it('goes on to 1000 in Year 2', () => {
-    expect(LINE_STEPS.at(-1)!.hi).toBe(1000);
+  it('goes on to 1000 in Year 2, then to 10 000, rounding and tenths', () => {
+    expect(LINE_STEPS.map((s) => s.name).slice(-7)).toEqual([
+      '0 to 1000', '0 to 10 000 in thousands', '0 to 10 000', 'Nearest ten', 'Nearest hundred', '0 to 1 in tenths', '0 to 2 in tenths',
+    ]);
+    /* a near miss on 0 to 10 000 forgives what one on 0 to 1000 does, ten times over */
+    const big = LINE_STEPS.find((s) => s.name === '0 to 10 000')!;
+    expect(onTarget(big, 6300, 6650)).toBe(true);
+    expect(onTarget(big, 6300, 6800)).toBe(false);
+  });
+
+  it('writes a number the way it goes on the line', () => {
+    expect(lineText(10000)).toBe('10 000');
+    expect(lineText(5000)).toBe('5000');
+    expect(lineText(7, 10)).toBe('0.7');
+    expect(lineText(13, 10)).toBe('1.3');
+    expect(lineText(10, 10)).toBe('1');
+    expect(lineText(0, 10)).toBe('0');
+  });
+
+  it('rounds: a number inside one ten (or hundred), never halfway, never already round', () => {
+    for (const step of LINE_STEPS.filter((s) => s.round)) {
+      const r = step.round!;
+      for (let i = 0; i < MANY; i += 1) {
+        const q = roundQuestion(step);
+        expect(q.hi - q.lo).toBe(r);
+        expect(q.n).toBeGreaterThan(q.lo);
+        expect(q.n).toBeLessThan(q.hi);
+        expect(q.n - q.lo).not.toBe(r / 2);
+        expect(q.answer).toBe(Math.round(q.n / r) * r);
+        if (r === 100) expect(q.n % 10).not.toBe(0);
+        expect(q.lo).toBeGreaterThanOrEqual(r);
+      }
+    }
+  });
+
+  it('a rounding kick scores on the half of the line nearer the answer', () => {
+    const q = { lo: 40, hi: 50, tick: 1, n: 47, answer: 50 };
+    expect(roundOnTarget(q, 49)).toBe(true);
+    expect(roundOnTarget(q, 46)).toBe(true);
+    expect(roundOnTarget(q, 44)).toBe(false);
+    expect(roundWhy(q)).toBe('47 is 3 from 50 and 7 from 40, so it is nearer 50.');
+    expect(roundWhy({ ...q, n: 42, answer: 40 })).toBe('42 is 2 from 40 and 8 from 50, so it is nearer 40.');
   });
 });
 

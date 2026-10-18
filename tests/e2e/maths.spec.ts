@@ -45,15 +45,24 @@ async function kickToNumber(page: Page, right: boolean): Promise<void> {
   const line = page.locator('.mx-line[data-ready="1"]');
   await expect(line).toBeVisible({ timeout: 8000 });
   const asked = Number(await line.getAttribute('data-asked'));
-  const labels = (await page.locator('.mx-label').allTextContents()).map(Number);
-  const lo = labels[0];
-  const hi = labels[labels.length - 1];
-  const target = right ? asked : (asked > (lo + hi) / 2 ? lo : hi);
+  /* the ends of the line on show, as written (0.7 on a line of tenths) */
+  const lo = Number(await line.getAttribute('data-lo'));
+  const hi = Number(await line.getAttribute('data-hi'));
+  /* rounding: the right answer is the nearer end, not the number itself */
+  const answer = await line.getAttribute('data-answer');
+  const target = right ? Number(answer ?? asked) : (asked > (lo + hi) / 2 ? lo : hi);
   const box = await line.boundingBox();
   if (!box) throw new Error('no line');
   /* the line runs from 40 to 960 of the svg's 1000 units */
   const x = box.x + box.width * (40 + ((target - lo) / (hi - lo)) * 920) / 1000;
   await page.mouse.click(x, box.y + box.height / 2);
+}
+
+/** the last number under the line is inside the goal, not cut off at its edge */
+async function lastLabelFits(page: Page): Promise<void> {
+  const goal = await page.locator('.mx-goal').boundingBox();
+  const label = await page.locator('.mx-label').last().boundingBox();
+  expect(label!.x + label!.width).toBeLessThanOrEqual(goal!.x + goal!.width);
 }
 
 async function playRound(page: Page, answer: () => Promise<void>): Promise<void> {
@@ -271,10 +280,71 @@ test.describe('maths games', () => {
     await seed(page, { 'maths-step:number-line-penalty': 7 });
     await startGame(page, 'number-line-penalty');
     await expect(page.locator('.mx-label').last()).toHaveText('1000');
+    await lastLabelFits(page);
     await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
     expect(Number(await page.locator('.mx-line').getAttribute('data-asked')) % 100).toBe(0);
     await kickToNumber(page, true);
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
+  });
+
+  test('Years 3–4: the number line goes to 10 000, in thousands', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 9 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('0 to 10 000 in thousands');
+    await expect(page.locator('.mx-label')).toHaveText(['0', '5000', '10 000']);
+    await lastLabelFits(page);
+    await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
+    expect(Number(await page.locator('.mx-line').getAttribute('data-asked')) % 1000).toBe(0);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText('GOAL!');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: rounding is a kick to the nearer end of one ten', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 11 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('Nearest ten');
+    const line = page.locator('.mx-line[data-ready="1"]');
+    await expect(line).toBeVisible();
+    const n = Number(await line.getAttribute('data-asked'));
+    const answer = Number(await line.getAttribute('data-answer'));
+    const lo = Math.floor(n / 10) * 10;
+    expect(n % 10).not.toBe(0);
+    expect(n % 10).not.toBe(5);
+    expect(answer).toBe(Math.round(n / 10) * 10);
+    /* the line is just that ten, with the number marked and halfway dashed */
+    await expect(page.locator('.mx-label')).toHaveText([String(lo), String(lo + 10)]);
+    await expect(page.locator('.mx-ask')).toContainText(`Kick it to the ten nearest ${n}`);
+    await expect(page.locator('.mx-asked')).toBeVisible();
+    await expect(page.locator('.mx-half')).toHaveCount(1);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText(`GOAL! ${n} is nearer ${answer}.`);
+    /* a kick to the far end is saved, and says how far each end is */
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    const m = Number(await line.getAttribute('data-asked'));
+    const near = Math.round(m / 10) * 10;
+    const far = near === Math.floor(m / 10) * 10 ? near + 10 : near - 10;
+    await kickToNumber(page, false);
+    await expect(page.locator('.mx-note')).toContainText(
+      `Saved! ${m} is ${Math.abs(near - m)} from ${near} and ${Math.abs(far - m)} from ${far}, so it is nearer ${near}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: the line from 0 to 1 counts in tenths', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 13 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('0 to 1 in tenths');
+    await expect(page.locator('.mx-label')).toHaveText(['0', '0.5', '1']);
+    await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
+    const asked = await page.locator('.mx-line').getAttribute('data-asked');
+    expect(asked).toMatch(/^0\.[1-9]$/);
+    await expect(page.locator('.mx-ask .mx-big')).toHaveText(asked!);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText(`GOAL! ${asked} is right there.`);
+    noProblems(watch);
   });
 
   test('Years 3–4: Flash Count flashes a times-table fact in blocks of five, and a miss splits it', async ({ page }) => {
