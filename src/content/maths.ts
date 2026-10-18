@@ -155,13 +155,21 @@ export interface SumStep extends Step {
   mix?: boolean;
   /** the balls on the scoreboard: all of them, only the ones being added
       (so he counts on from the first number), tens and ones (racks of ten
-      balls and loose ones, for numbers to 100), or none */
-  show: 'all' | 'second' | 'bundles' | 'none';
+      balls and loose ones, for numbers to 100), hundreds, tens and ones
+      (crates of a hundred too, to 1000), or none */
+  show: 'all' | 'second' | 'bundles' | 'blocks' | 'none';
   /**
    * Year 2, within 100: whole tens only (30 + 20), tens and ones that never
    * cross a ten (34 + 25, 58 − 23), or ones that always do (38 + 25, 52 − 27).
    */
   hundred?: 'tens' | 'no-carry' | 'past';
+  /**
+   * Years 3–4, the crowd at the ground, within 1000 and then 10 000: whole
+   * hundreds added to or taken from a number of tens (340 + 200), or to
+   * 10 000 two numbers of hundreds (3400 + 2500); numbers that never cross a
+   * ten or a hundred (345 + 232, 785 − 342); or ones that do (368 + 257).
+   */
+  big?: 'round' | 'no-carry' | 'carry';
 }
 
 export const SUM_STEPS: SumStep[] = [
@@ -177,6 +185,14 @@ export const SUM_STEPS: SumStep[] = [
   { name: 'Take away tens and ones', max: 100, op: '-', show: 'bundles', hundred: 'no-carry' },
   { name: 'Add past a ten, to 100', max: 100, op: '+', show: 'none', hundred: 'past' },
   { name: 'Add and take away to 100', max: 100, op: '-', mix: true, show: 'none', hundred: 'past' },
+  /* Years 3–4: the crowd at the ground, to 1000 and then 10 000, in his head */
+  { name: 'Add and take away hundreds', max: 1000, op: '-', mix: true, show: 'blocks', big: 'round' },
+  { name: 'Add to 1000', max: 1000, op: '+', show: 'blocks', big: 'no-carry' },
+  { name: 'Take away to 1000', max: 1000, op: '-', show: 'blocks', big: 'no-carry' },
+  { name: 'Add past a ten or a hundred', max: 1000, op: '+', show: 'none', big: 'carry' },
+  { name: 'Take away past a ten or a hundred', max: 1000, op: '-', show: 'none', big: 'carry' },
+  { name: 'Thousands and hundreds, to 10 000', max: 10000, op: '-', mix: true, show: 'none', big: 'round' },
+  { name: 'Add and take away to 10 000', max: 10000, op: '-', mix: true, show: 'none', big: 'carry' },
 ];
 
 export interface SumQuestion { a: number; b: number; op: '+' | '-'; answer: number }
@@ -201,12 +217,50 @@ function hundredSum(kind: NonNullable<SumStep['hundred']>, op: '+' | '-'): { a: 
   }
 }
 
+/** a number's digits, ones first, to this many places */
+const digitsOf = (n: number, places: number): number[] =>
+  Array.from({ length: places }, (_, i) => Math.floor(n / 10 ** i) % 10);
+
+/** does working it out cross a ten, a hundred or a thousand: a column of
+    digits that adds to more than 9, or takes a bigger digit from a smaller one */
+export function crosses(a: number, b: number, op: '+' | '-'): boolean {
+  const [da, db] = [digitsOf(a, 4), digitsOf(b, 4)];
+  return da.some((d, i) => (op === '+' ? d + db[i] > 9 : d < db[i]));
+}
+
+/** a sum to 1000 or 10 000, for the Years 3–4 steps */
+function bigSum(kind: NonNullable<SumStep['big']>, op: '+' | '-', max: number): { a: number; b: number } {
+  const places = max === 1000 ? 3 : 4;
+  const lo = 10 ** (places - 1);
+  for (;;) {
+    let a: number;
+    let b: number;
+    if (kind === 'round') {
+      /* to 1000: tens and whole hundreds (340 + 200); to 10 000: hundreds (3400 + 2500) */
+      const unit = places === 3 ? 10 : 100;
+      a = rand(lo / unit + 1, max / unit - 1) * unit;
+      b = places === 3 ? rand(1, 8) * 100 : rand(lo / 100 + 1, max / 100 - 10) * 100;
+    } else {
+      a = rand(lo + 1, max - 1);
+      b = rand(lo + 1, max - lo);
+      /* a digit of nothing in the second number leaves a step out */
+      if (digitsOf(b, places).includes(0)) continue;
+    }
+    if (op === '+' ? a + b >= max : b >= a) continue;
+    if (op === '-' && a - b < (kind === 'round' ? 10 : lo / 10)) continue;
+    if (kind !== 'round' && crosses(a, b, op) !== (kind === 'carry')) continue;
+    return { a, b };
+  }
+}
+
 export function sumQuestion(step: SumStep, last?: SumQuestion): SumQuestion {
   for (let tries = 0; tries < 20; tries += 1) {
     const op = step.mix ? pick(['+', '-'] as const) : step.op;
     let a: number;
     let b: number;
-    if (step.hundred) {
+    if (step.big) {
+      ({ a, b } = bigSum(step.big, op, step.max));
+    } else if (step.hundred) {
       ({ a, b } = hundredSum(step.hundred, op));
     } else if (op === '+') {
       const total = 2 + Math.floor(Math.random() * (step.max - 1));
@@ -222,6 +276,44 @@ export function sumQuestion(step: SumStep, last?: SumQuestion): SumQuestion {
     if (!last || last.a !== q.a || last.b !== q.b || last.op !== q.op) return q;
   }
   return { a: 1, b: 1, op: '+', answer: 2 };
+}
+
+/**
+ * The way to work it out in his head: the second number split into its
+ * thousands, hundreds, tens and ones, and taken one at a time. 368 and 200
+ * is 568, and 50 more is 618, and 7 more is 625.
+ */
+export function sumWhy(q: SumQuestion): string {
+  const n = (v: number): string => lineText(v);
+  const parts = digitsOf(q.b, 4).map((d, i) => d * 10 ** i).filter(Boolean).reverse();
+  if (parts.length < 2) return q.op === '+' ? `${n(q.a)} and ${n(q.b)} make ${n(q.answer)}.` : `${n(q.a)} take away ${n(q.b)} is ${n(q.answer)}.`;
+  let at = q.a;
+  return `${parts.map((p, i) => {
+    at = q.op === '+' ? at + p : at - p;
+    if (i === 0) return `${n(q.a)} ${q.op === '+' ? 'and' : 'take away'} ${n(p)} is ${n(at)}`;
+    return q.op === '+' ? `and ${n(p)} more is ${n(at)}` : `take away ${n(p)} more is ${n(at)}`;
+  }).join(', ')}.`;
+}
+
+/**
+ * The answer and three wrong ones, for the Years 3–4 sums: the slip of
+ * working each column on its own (forgetting to carry, or taking the smaller
+ * digit from the bigger), then a ten or a hundred out, then one.
+ */
+export function bigSumChoices(q: SumQuestion, max: number): number[] {
+  const [da, db] = [digitsOf(q.a, 4), digitsOf(q.b, 4)];
+  const columns = da.reduce((sum, d, i) => sum + (q.op === '+' ? (d + db[i]) % 10 : Math.abs(d - db[i])) * 10 ** i, 0);
+  /* whole hundreds have only hundred-sized slips */
+  const unit = q.a % 100 === 0 && q.b % 100 === 0 ? 100 : q.b % 100 === 0 && q.a % 10 === 0 ? 10 : 1;
+  const near = [100, -100, 10, -10, 1000, -1000, 1, -1, 200, -200].filter((d) => Math.abs(d) >= unit);
+  const out = [q.answer];
+  /* and further off, for an answer near the bottom or the top */
+  const far = [3, 4, 5, 6].flatMap((k) => [k, -k]).map((k) => k * Math.max(unit, 10) * (unit === 100 ? 1 : 10));
+  for (const x of [columns, ...shuffle(near.slice(0, 4)).map((d) => q.answer + d), ...[...near.slice(4), ...far].map((d) => q.answer + d)]) {
+    if (out.length >= 4) break;
+    if (x > 0 && x < max && !out.includes(x)) out.push(x);
+  }
+  return shuffle(out);
 }
 
 /* ── Number Line Penalty: where does the number go? ─────────────────── */
