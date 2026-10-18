@@ -27,6 +27,7 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS, buildWord,
 } from '../src/content/index';
 import { clipId, speakable } from '../src/lib/clip-id';
+import { THEMES } from '../src/content/word-search';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 
@@ -36,6 +37,7 @@ const UI_LINES = [
   'Perfect sorting!', 'Nice work!', 'Pick one word from every row first',
   'You win!', 'What a match!', 'Good game!', 'Every one a goal!', 'Good passing!', 'Every one right!', 'Good spelling!',
   'Beautiful writing!', 'Good writing!', 'Well spotted!', 'Find every b', 'Find every d', 'Find every p', 'Find every q',
+  'Every word found!', 'Every word, and no help!',
 ];
 
 /** every real thing the app speaks — no made-up words anywhere in here */
@@ -51,6 +53,9 @@ export function wanted(): string[] {
   /* tricky words are spoken too, and being irregular is exactly why a
      recording beats the device voice on them */
   for (const w of ALL_SIGHT_WORDS) add(w.text);
+  /* Word Search's themes: countries, planets and the rest, said when he taps
+     one he cannot read yet */
+  for (const t of THEMES) for (const w of t.words) add(w.shown);
   for (const line of UI_LINES) add(line);
 
   return [...out].sort();

@@ -42,8 +42,10 @@ test('Penalty Shootout mid-match has no accessibility violations', async ({ page
 
 /* A game that waits for Start shows only the Start tray when it opens, so
    the check above never saw a question. Each is checked again with its
-   first question up: the choices, the picture, the feedback line. */
-for (const game of GAMES.filter((g) => g.ladder && g.path !== 'clock-trainer')) {
+   first question up: the choices, the picture, the feedback line. Short
+   Hand, Long Hand and Word Search open straight onto their question, which
+   the check above already sees. */
+for (const game of GAMES.filter((g) => g.ladder && !['clock-trainer', 'word-search'].includes(g.path))) {
   test(`${game.name}, with a question up, has no accessibility violations`, async ({ page }) => {
     await openGame(page, game.path);
     await page.getByRole('button', { name: '▶ Start' }).click();

@@ -22,6 +22,8 @@ import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
 import { contrast, INK, PAPER } from '../src/lib/colour';
+import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
+import { NOT_BY_CHANCE } from '../src/content/words';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
 
@@ -890,6 +892,47 @@ describe('big words', () => {
             for (const p of q.word.parts) expect(q.tiles).toContain(p);
           }
           if (q.task === 'split') expect(plainSplit(q.word)).toBe(true);
+        }
+      }
+    }
+  });
+});
+
+describe('word search', () => {
+  const all = THEMES.flatMap((t) => t.words.map((w) => ({ ...w, list: t.name })));
+
+  it('hides only real words; a name keeps its capital and is not looked up', () => {
+    const fake = all.filter((w) => w.shown === w.text && !isRealWord(w.text));
+    expect(fake.map((w) => `${w.shown} (${w.list})`)).toEqual([]);
+  });
+
+  it('shows no blocked word', () => {
+    const bad = all.filter((w) => blocked(w.text) || NOT_BY_CHANCE.includes(w.text));
+    expect(bad.map((w) => `${w.shown} (${w.list})`)).toEqual([]);
+  });
+
+  it('has words of letters only, that fit the biggest grid and are long enough to hide', () => {
+    const misfit = all.filter((w) => !/^[A-Za-z]+$/.test(w.shown) || w.text.length < MIN_LENGTH || w.text.length > MAX_SIZE);
+    expect(misfit.map((w) => `${w.shown} (${w.list})`)).toEqual([]);
+  });
+
+  it('gives every word a picture or a flag', () => {
+    expect(all.filter((w) => !w.picture).map((w) => `${w.shown} (${w.list})`)).toEqual([]);
+  });
+
+  it('never lists a word twice in one list', () => {
+    for (const t of THEMES) {
+      const seen = new Set<string>();
+      const dupes = t.words.filter((w) => (seen.has(w.text) ? true : (seen.add(w.text), false)));
+      expect(dupes.map((w) => `${w.shown} (${t.name})`)).toEqual([]);
+    }
+  });
+
+  it('has enough words in every list to fill every grid', () => {
+    for (const t of THEMES) {
+      for (const step of SEARCH_STEPS) {
+        for (let i = 0; i < 40; i += 1) {
+          expect(pickWords(t.words.map((w) => w.text), step.count, step.size), `${t.name}: ${step.name}`).toHaveLength(step.count);
         }
       }
     }
