@@ -83,6 +83,72 @@ test.describe('Ice Cream Van', () => {
     await expect(page.locator('.mx-note')).toContainText('the change is');
   });
 
+  test('Years 3–4: dollars and cents, where the nought matters', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 6);
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 8000 });
+    await expect(page.locator('.iv-tag.blank')).toHaveText('?');
+    const want = Number(await answerOf(page));
+    await expect(page.locator('.mx-ask')).toContainText(/\d dollars? and \d+ cents\. Which price tag says that\?/);
+    for (const label of await page.locator('.mx-choice').allTextContents()) expect(label).toMatch(/^\$\d+(\.\d\d)?$/);
+    await page.locator(`.mx-choice:not([data-n="${want}"])`).first().click();
+    await expect(page.locator('.mx-note')).toContainText(`is ${money(want)}.`);
+    await expect(page.locator('.iv-tag')).toHaveText(money(want));
+    noProblems(watch);
+  });
+
+  test('Years 3–4: pay to the 5 cents from the purse', async ({ page }) => {
+    await startAt(page, 7);
+    await expect(page.locator('.iv-purse .iv-pick').first()).toBeVisible({ timeout: 8000 });
+    let price = Number(await answerOf(page));
+    expect(price % 5).toBe(0);
+    const coins = await page.locator('.iv-purse .iv-pick').evaluateAll((ns) => ns.map((n) => Number((n as HTMLElement).dataset.cents)));
+    for (const c of coins.sort((a, b) => b - a)) {
+      if (c > price) continue;
+      await page.locator(`.iv-purse .iv-pick[data-cents="${c}"]`).first().click();
+      price -= c;
+    }
+    expect(price).toBe(0);
+    await page.getByRole('button', { name: 'Pay' }).click();
+    await expect(page.locator('.mx-note')).toContainText('Enjoy it!');
+  });
+
+  test('Years 3–4: which treat is cheaper, dollars first', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 8);
+    await expect(page.locator('.iv-offer:enabled')).toHaveCount(2, { timeout: 8000 });
+    const want = await answerOf(page);
+    await expect(page.locator(`.iv-offer[data-cents="${want}"]`)).toHaveCount(1);
+    await page.locator(`.iv-offer:not([data-cents="${want}"])`).click();
+    await expect(page.locator(`.iv-offer.right[data-cents="${want}"]`)).toHaveCount(1);
+    await expect(page.locator('.iv-offer.wrong')).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toContainText(`so ${money(Number(want))} is cheaper. Get the `);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: two treats added up, dollars then cents', async ({ page }) => {
+    await startAt(page, 9);
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 8000 });
+    await expect(page.locator('.iv-counter .iv-tag')).toHaveCount(2);
+    const [a, b] = (await page.locator('.iv-counter .iv-tag').allTextContents()).map((t) => Math.round(Number(t.slice(1)) * 100));
+    const want = Number(await answerOf(page));
+    expect(want).toBe(a + b);
+    await page.locator(`.mx-choice:not([data-n="${want}"])`).first().click();
+    await expect(page.locator('.mx-note')).toContainText('Dollars: ');
+    await expect(page.locator('.mx-note')).toContainText(`Together: ${money(want)}.`);
+  });
+
+  test('Years 3–4: the change from a $5, $10 or $20 note, counted up', async ({ page }) => {
+    await startAt(page, 10);
+    await expect(page.locator('.iv-note')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('.iv-note')).toHaveAttribute('aria-label', /^\$(5|10|20) note$/);
+    await expect(page.locator('.mx-choice')).toHaveCount(4);
+    const want = Number(await answerOf(page));
+    await page.locator(`.mx-choice:not([data-n="${want}"])`).first().click();
+    await expect(page.locator('.mx-note')).toContainText('Count up from ');
+    await expect(page.locator('.mx-note')).toContainText(`= ${money(want)}.`);
+  });
+
   test('the coins are photographs of the real ones, at their real sizes', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 3);
