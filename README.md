@@ -78,8 +78,9 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 ### Chess ♟️
 
 The way chess is first taught to young children: one piece at a time on an
-almost empty board, with a football to reach. The pieces are drawn in the app,
-so they look the same on every device.
+almost empty board, with a football to reach, then taking pieces, the first
+real game (pawns only), the board itself, check, and checkmate. The pieces are
+drawn in the app, so they look the same on every device.
 
 | Game | What the child does |
 |---|---|
@@ -89,6 +90,8 @@ so they look the same on every device.
 | **Set Up the Board** | The board is set out but for one piece: tap the square it goes on. Rooks in the corners, knights next to them, then bishops; the queen on her own colour and the king beside her; the pawns in front; then Black's side. |
 | **Capture!** | Takes a black piece by landing on it: which one can his piece take (only one can)? Then the knight, king and pawn, which take differently (a pawn only on the slant). Then two he could take, one guarded by a pawn: take the free one, or the pawn takes his piece back. Then two free ones: take the one worth more (pawn 1, knight or bishop 3, rook 5, queen 9). |
 | **Pawn Wars** | The first real game: his pawns against the computer's, pawns only. First pawn to the far end wins, or take all of theirs. Tap a pawn to see where it can go. Three pawns each, then five, then all eight, then a computer that keeps its pawns safe and pushes the ones nothing can stop. |
+| **Check!** | Is the white king in check — can a black piece take him? Then taps the piece giving check, then moves the king to a square where nothing attacks him. Every dot shows what a piece attacks; the safe squares are ringed. |
+| **Mate in One** | White to move: find the checkmate. The back row (the king shut in by his own pawns), the queen beside the king with her own king guarding her, then two rooks up the board. A move that is not mate says why (no check, or the king can get out) and shows the mate. |
 
 The maths and jiu-jitsu games follow the NSW Mathematics K–10 syllabus from
 Kindergarten to Year 2, and each climbs its own levels: up after three right
