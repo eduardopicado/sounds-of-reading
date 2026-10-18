@@ -146,7 +146,10 @@ test.describe('Ice Cream Van', () => {
     const want = Number(await answerOf(page));
     await page.locator(`.mx-choice:not([data-n="${want}"])`).first().click();
     await expect(page.locator('.mx-note')).toContainText('Count up from ');
-    await expect(page.locator('.mx-note')).toContainText(`= ${money(want)}.`);
+    /* the jumps add up to it ("5c + 60c + $2 = $2.65"), or there was only
+       one ("20c makes $5. The change is 20c.") */
+    const said = money(want).replace(/[$.]/g, '\\$&');
+    await expect(page.locator('.mx-note')).toHaveText(new RegExp(`The change is (.+ = )?${said}\\.$`));
   });
 
   test('the coins are photographs of the real ones, at their real sizes', async ({ page }) => {
