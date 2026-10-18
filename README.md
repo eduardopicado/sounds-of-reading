@@ -32,6 +32,7 @@ coach's picks for today at the top.
 | **Build the Word** | Hears a word and builds it from sound or letter tiles. |
 | **Coach Says** | Reads the coach's written instruction — "Put the frog in the box, then tap the hen" — and does it. The pictures carry no words, so reading is the only way to know what to do. |
 | **Big Words** | Reads two-syllable words a part at a time (sun·set, rab·bit), then whole, then (Year 2) taps where a word splits. |
+| **Word Search** | Finds hidden words in a grid of letters by dragging across them or tapping both ends; each one is said aloud as it is found, and its tricky letters or its sound light up. His tricky words, this week's sounds, or a theme (countries, cities, space, animals, colours, football, jiu-jitsu) with a picture or a flag beside every word, and the word said when he taps it. The grids grow from 6 × 6 with every word across, to down as well, then (Years 3–4) slants and backwards. A grid found with no help moves him up. It prints as a sheet. |
 
 ### Handwriting
 
@@ -183,8 +184,15 @@ secretly is one, that every Word Builder build comes out the way it is labelled
 both ways round, that nothing is on the blocklist, that no word is both real
 and silly, that every grapheme really sits where the file says it does, that
 every pair of real words that sound the same with an Australian accent is
-listed (Penalty Shootout must never offer a word's twin), and that both tones
-of every sound colour clear WCAG AA.
+listed (Penalty Shootout must never offer a word's twin), that every Word
+Search word has a picture, fits the biggest grid and is a real word (names
+aside), and that both tones of every sound colour clear WCAG AA.
+
+Word Search grids are checked as they are made: every line is read both ways,
+and a blocked word may only appear inside a word he is meant to find, never
+spelt by the letters filling the gaps. `NOT_BY_CHANCE` in the content file
+lists words that are fine inside another (pea·cock) but not on their own in a
+grid.
 
 This is what holds the handover's section 8 fixed: *vain*, *zip*, *ding*,
 *zing*, *gone*, *zone*, *vice*, *mink*, *gale*, *vat*, *thatch*, *mace*,

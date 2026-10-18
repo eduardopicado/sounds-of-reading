@@ -65,6 +65,9 @@ src/content/big-words.ts two-syllable words from words.ts, each level worked out
                        from the spellings in its parts
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
+src/content/word-search.ts Word Search: the themed lists from words.ts, the grid
+                       steps, and the grids, checked so no blocked word is
+                       spelt by chance and every hidden word appears once
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
                        Year 2 steps sit at the top of each game's ladder; Times
                        Table Sprint goes on to 12 × 12, Years 3–4), and
