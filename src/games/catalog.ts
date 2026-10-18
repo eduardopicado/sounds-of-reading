@@ -20,7 +20,7 @@ import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
-import { BALL_STEPS, PIECE_STEPS } from '../content/chess';
+import { BALL_STEPS, CAPTURE_STEPS, PAWN_STEPS, PIECE_STEPS } from '../content/chess';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'bjj' | 'chess';
 
@@ -136,6 +136,10 @@ export const GAMES: Game[] = [
     load: () => import('./chess-pieces') },
   { path: 'chess-balls', name: 'Collect the Balls', emoji: '🐴', what: 'One piece, every ball, fewest moves', tone: '#5E7F45', section: 'chess', ladder: BALL_STEPS,
     load: () => import('./chess-balls') },
+  { path: 'chess-capture', name: 'Capture!', emoji: '⚔️', what: 'Take a piece, the free one, the best one', tone: '#8A6A3B', section: 'chess', ladder: CAPTURE_STEPS,
+    load: () => import('./chess-capture') },
+  { path: 'chess-pawns', name: 'Pawn Wars', emoji: '🏁', what: 'Pawns only: first to the other end', tone: '#4E6E8E', section: 'chess', ladder: PAWN_STEPS,
+    load: () => import('./chess-pawns') },
 ];
 
 export const gameByPath = (path: string | undefined): Game | undefined => GAMES.find((g) => g.path === path);
