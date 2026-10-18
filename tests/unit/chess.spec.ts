@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BALL_STEPS, CAPTURE_STEPS, PAWN_STEPS, PIECE_STEPS, VALUE, allMoves, attacks, ballQuestion, captureQuestion, computerMove,
+  BALL_STEPS, CAPTURE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS, VALUE, setupQuestion, squareQuestion, startBoard, allMoves, attacks, ballQuestion, captureQuestion, computerMove,
   fewestMoves, fewestToCollect, guarded, isDark, moves, passed, pawnStart, pieceQuestion, play, rankOf,
   squareAt, squareName, winner, type Board, type Colour, type Kind,
 } from '../../src/content/chess';
@@ -230,5 +230,53 @@ describe('Pawn Wars', () => {
       if (winner(b, side) === 'b') wins += 1;
     }
     expect(wins / 60).toBeGreaterThan(0.8);
+  });
+});
+
+describe('Board Squares', () => {
+  it('names a square, offers the letter or the number one out, and knows its colour', () => {
+    for (const step of SQUARE_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = squareQuestion(step);
+        if (step.task === 'colour') expect(q.answer).toBe(isDark(q.sq) ? 'Dark' : 'Light');
+        else expect(q.answer).toBe(squareName(q.sq));
+        if (step.task === 'name') {
+          expect(new Set(q.options).size).toBe(4);
+          expect(q.options).toContain(q.answer);
+          for (const o of q.options) {
+            const [df, dr] = [Math.abs(o.charCodeAt(0) - q.answer.charCodeAt(0)), Math.abs(Number(o[1]) - Number(q.answer[1]))];
+            expect(df <= 1 && dr <= 1).toBe(true);
+          }
+        }
+      }
+    }
+  });
+});
+
+describe('Set Up the Board', () => {
+  it('sets out the pieces the way a game starts', () => {
+    const b = startBoard();
+    expect(b.size).toBe(32);
+    expect(b.get(squareAt('d1'))).toEqual({ kind: 'Q', colour: 'w' });
+    expect(b.get(squareAt('e8'))).toEqual({ kind: 'K', colour: 'b' });
+    /* the queen on her own colour */
+    expect(isDark(squareAt('d1'))).toBe(false);
+    expect(isDark(squareAt('d8'))).toBe(true);
+    expect(b.get(squareAt('h1'))?.kind).toBe('R');
+    expect(b.get(squareAt('g8'))?.kind).toBe('N');
+    expect([...b].filter(([sq, m]) => m.kind === 'P' && rankOf(sq) === 1).length).toBe(8);
+  });
+
+  it('takes one piece off, and its square is the answer', () => {
+    for (const step of SETUP_STEPS) {
+      for (let i = 0; i < 100; i += 1) {
+        const q = setupQuestion(step);
+        expect(q.board.size).toBe(31);
+        expect(q.board.has(q.answer)).toBe(false);
+        expect(startBoard().get(q.answer)).toEqual(q.man);
+        expect(step.kinds).toContain(q.man.kind);
+        expect(q.man.colour).toBe(step.colour);
+      }
+    }
   });
 });
