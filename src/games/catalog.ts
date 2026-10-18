@@ -20,14 +20,16 @@ import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
+import { BALL_STEPS, PIECE_STEPS } from '../content/chess';
 
-export type Section = 'reading' | 'writing' | 'maths' | 'bjj';
+export type Section = 'reading' | 'writing' | 'maths' | 'bjj' | 'chess';
 
 export const SECTIONS: { id: Section; title: string }[] = [
   { id: 'reading', title: 'Reading and spelling' },
   { id: 'writing', title: 'Handwriting' },
   { id: 'maths', title: 'Maths' },
   { id: 'bjj', title: 'Jiu-jitsu 🥋' },
+  { id: 'chess', title: 'Chess ♟️' },
 ];
 
 export interface Game {
@@ -130,6 +132,10 @@ export const GAMES: Game[] = [
     load: () => import('./weigh-in') },
   { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj', ladder: SIGNAL_STEPS,
     load: () => import('./refs-signals') },
+  { path: 'chess-pieces', name: 'Meet the Pieces', emoji: '♟️', what: 'How each chess piece moves', tone: '#769656', section: 'chess', ladder: PIECE_STEPS,
+    load: () => import('./chess-pieces') },
+  { path: 'chess-balls', name: 'Collect the Balls', emoji: '🐴', what: 'One piece, every ball, fewest moves', tone: '#5E7F45', section: 'chess', ladder: BALL_STEPS,
+    load: () => import('./chess-balls') },
 ];
 
 export const gameByPath = (path: string | undefined): Game | undefined => GAMES.find((g) => g.path === path);

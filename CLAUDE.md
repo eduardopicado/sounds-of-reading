@@ -74,6 +74,8 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
                        Year 2 steps sit at the top of each game's ladder; Times
                        Table Sprint goes on to 12 × 12, Years 3–4), and
                        timeWords(), the one way the app says a time
+src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
+                       and the first chess games' questions
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask (Weigh-In's things and weight classes too),
                        every word in English and Portuguese
@@ -100,6 +102,8 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        asks one question. A new maths game that needs a team
                        picture uses a country with its flag; club kits are
                        fine where it is a shirt
+                       chess-kit.ts draws the board and the pieces the chess
+                       games share (src/content/chess.ts has the rules);
                        bjj-art.ts draws the moves and the referee's signals;
                        bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
                        belt the BJJ games share
