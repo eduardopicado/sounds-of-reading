@@ -56,13 +56,17 @@ for (const game of GAMES.filter((g) => g.ladder && g.path !== 'clock-trainer')) 
   });
 }
 
-/* the Years 3–4 boards: a grid with its letters and numbers, the compass, a corner */
-for (const step of [5, 6, 7, 8]) {
-  test(`Coach's Whiteboard step ${step + 1}, with a question up, has no accessibility violations`, async ({ page }) => {
-    await seed(page, { 'maths-step:coach-whiteboard': step });
-    await openGame(page, 'coach-whiteboard');
+/* the Years 3–4 boards: a grid with its letters and numbers, the compass, a
+   corner; two treats to compare and to add, and a $20 note */
+for (const [game, step] of [
+  ['coach-whiteboard', 5], ['coach-whiteboard', 6], ['coach-whiteboard', 7], ['coach-whiteboard', 8],
+  ['ice-cream-van', 6], ['ice-cream-van', 8], ['ice-cream-van', 9], ['ice-cream-van', 10],
+] as const) {
+  test(`${game} step ${step + 1}, with a question up, has no accessibility violations`, async ({ page }) => {
+    await seed(page, { [`maths-step:${game}`]: step });
+    await openGame(page, game);
     await page.getByRole('button', { name: '▶ Start' }).click();
-    await expect(page.locator('.mx-choice, .cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.mx-choice, .cw-cell:enabled, .iv-pick:enabled').first()).toBeVisible({ timeout: 10000 });
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();

@@ -1539,6 +1539,16 @@
   font-family: var(--display); font-weight: 800; font-size: 13px; color: var(--mustard);
 }
 .counted .iv-coins { padding-bottom: 24px; }
+/* Years 3–4: two treats side by side, to tap the cheaper or add them up */
+.iv-two { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; }
+.iv-pick.iv-offer { display: grid; justify-items: center; gap: 8px; padding: 12px 16px; border-radius: 18px; background: rgba(255, 246, 231, .08); }
+.iv-offer .iv-treat { font-size: 64px; }
+.iv-plus { font: 800 32px var(--display); color: var(--paper); }
+@media (max-width: 480px) {
+  .iv-counter:has(.iv-plus) { gap: 6px; }
+  .iv-counter:has(.iv-plus) .iv-treat { font-size: 36px; }
+  .iv-counter:has(.iv-plus) .iv-tag { font-size: 20px; padding: 4px 8px; }
+}
 
 /* ── Big Words ────────────────────────────────────────────────────────── */
 

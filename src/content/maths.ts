@@ -1292,6 +1292,11 @@ export function compassHelp(moves: Move[]): string {
  * counts mixed coins, picks coins that make a price exactly, and works out
  * the change.
  *
+ * Years 3 and 4 read and write dollars and cents ($3.05 is not $3.50), pay
+ * prices to the 5 cents, tell which of two prices is cheaper, add two
+ * prices, and count up the change from a $5, $10 or $20 note, the way a
+ * shopkeeper does.
+ *
  * Everything is in cents so there is no rounding; money() writes it the way
  * a price tag does: 50c, $2, $3.50. */
 
@@ -1345,9 +1350,15 @@ export interface KioskStep extends Step {
    * count: how much is a handful of the same coin;
    * mixed: how much is a handful of different coins;
    * pay: tap coins that make the price exactly;
-   * change: pay with a note, how much change
+   * change: pay with a note, how much change;
+   * read: which price tag says "3 dollars and 45 cents";
+   * cheaper: which of two treats costs less;
+   * total: how much for two treats together
    */
-  task: 'more' | 'one' | 'count' | 'mixed' | 'pay' | 'change';
+  task: 'more' | 'one' | 'count' | 'mixed' | 'pay' | 'change' | 'read' | 'cheaper' | 'total';
+  /** Years 3–4: prices to the 5 cents (but $3.45 against $3.54 to say which
+      is cheaper), and change from a $20 note too */
+  fives?: boolean;
 }
 
 export const KIOSK_STEPS: KioskStep[] = [
@@ -1358,6 +1369,12 @@ export const KIOSK_STEPS: KioskStep[] = [
   { name: 'Count mixed coins', task: 'mixed' },
   { name: 'Pay the exact price', task: 'pay' },
   { name: 'How much change?', task: 'change' },
+  /* Years 3–4 */
+  { name: 'Dollars and cents', task: 'read', fives: true },
+  { name: 'Pay to the 5 cents', task: 'pay', fives: true },
+  { name: 'Which is cheaper?', task: 'cheaper', fives: true },
+  { name: 'Two treats', task: 'total', fives: true },
+  { name: 'Change from $5, $10 and $20', task: 'change', fives: true },
 ];
 
 export interface KioskQuestion {
@@ -1369,6 +1386,9 @@ export interface KioskQuestion {
   coins: number[];
   /** for change: the note he pays with, in cents */
   paid?: number;
+  /** cheaper, total: a second treat and its price */
+  other?: Treat;
+  otherPrice?: number;
   /** cents; for more, the coin worth more */
   answer: number;
   options: number[];
@@ -1422,12 +1442,34 @@ export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuest
       const answer = coins.reduce((s, c) => s + c, 0);
       q = { task: 'mixed', treat, price: answer, coins, answer, options: moneyChoices(answer, pick([10, 50])) };
     } else if (step.task === 'pay') {
-      /* a price in tens of cents up to $5, and a purse that can make it */
-      const price = rand(5, 50) * 10;
-      const exact = makeUp(price, [200, 100, 50, 20, 10]);
+      /* a price in tens of cents up to $5 (to the 5 cents, Years 3–4), and a
+         purse that can make it */
+      const price = step.fives ? 10 * rand(20, 59) + pick([5, 5, 0]) : rand(5, 50) * 10;
+      const exact = makeUp(price, step.fives ? [200, 100, 50, 20, 10, 5] : [200, 100, 50, 20, 10]);
       const extra = shuffle([200, 100, 50, 20, 10, 5]).slice(0, 2);
       const coins = [...exact, ...extra].sort((a, b) => b - a);
       q = { task: 'pay', treat, price, coins, answer: price, options: [] };
+    } else if (step.task === 'read') {
+      const price = 100 * rand(1, 9) + pick([5, 5, 10 * rand(1, 9), 5 * rand(1, 19)]);
+      q = { task: 'read', treat, price, coins: [], answer: price, options: priceSlips(price) };
+    } else if (step.task === 'cheaper') {
+      const [a, b] = cheaperPair();
+      const other = pick(TREATS.filter((t) => t !== treat));
+      q = { task: 'cheaper', treat, price: a, other, otherPrice: b, coins: [], answer: Math.min(a, b), options: [] };
+    } else if (step.task === 'total') {
+      const a = 100 * rand(1, 4) + 5 * rand(1, 19);
+      const b = 100 * rand(1, 4) + 5 * rand(1, 19);
+      const other = pick(TREATS.filter((t) => t !== treat));
+      const answer = a + b;
+      /* the slip to catch: the cents make more than a dollar, and it is lost */
+      const lost = (a % 100) + (b % 100) >= 100 ? answer - 100 : answer + 100;
+      q = { task: 'total', treat, price: a, other, otherPrice: b, coins: [], answer, options: withSlip(answer, lost, 10) };
+    } else if (step.fives) {
+      const paid = pick([500, 1000, 2000]);
+      const price = paid / 2 + 5 * rand(1, paid / 10 - 1);
+      const answer = paid - price;
+      /* the slip: forgetting that the cents took a dollar */
+      q = { task: 'change', treat, price, coins: [], paid, answer, options: withSlip(answer, answer + 100, 10) };
     } else {
       const paid = pick([500, 1000]);
       const price = rand(paid === 500 ? 3 : 10, paid === 500 ? 9 : 19) * 50;
@@ -1435,8 +1477,95 @@ export function kioskQuestion(step: KioskStep, last?: KioskQuestion): KioskQuest
       q = { task: 'change', treat, price, coins: [], paid, answer, options: moneyChoices(answer, 50) };
     }
     if (last && last.answer === q.answer && last.task === q.task) continue;
+    /* a price like $5.05 has fewer slips than four tags need */
+    if (q.task === 'read' && q.options.length < 4) continue;
     return q;
   }
+}
+
+/** the right amount, the slip a child makes, and two more near it */
+function withSlip(answer: number, slip: number, step: number): number[] {
+  const out = new Set([answer, slip]);
+  for (const x of moneyChoices(answer, step)) if (out.size < 4) out.add(x);
+  return [...out].sort((a, b) => a - b);
+}
+
+/** price tags for "3 dollars and 45 cents": the right one, and the ones a
+    child writes by mistake — $3.54, $45.03, $345, and the lost or added nought
+    ($3.50 for 3 dollars and 5 cents, $3.04 for 3 dollars and 40 cents) */
+function priceSlips(price: number): number[] {
+  const d = Math.floor(price / 100);
+  const c = price % 100;
+  const nought = c < 10 ? d * 100 + c * 10 : c % 10 === 0 ? d * 100 + c / 10 : -1;
+  const swapped = c >= 10 && c % 10 ? d * 100 + (c % 10) * 10 + Math.floor(c / 10) : -1;
+  const slips = [nought, swapped, c * 100 + d, price * 100].filter((x) => x > 0 && x !== price);
+  return shuffle([price, ...[...new Set(slips)].slice(0, 3)]);
+}
+
+/** a price said with its "and": 3 dollars and 45 cents */
+export const priceWords = (cents: number): string =>
+  moneyWords(cents).replace(/(dollars?) (\d)/, '$1 and $2');
+
+/** how dollars and cents are written */
+export function priceWhy(price: number): string {
+  const c = price % 100;
+  const rule = c < 10
+    ? `${c} cents is written .0${c}, with a nought: there are always two digits after the point.`
+    : 'The dollars go before the point and the cents after it.';
+  return `${priceWords(price)} is ${money(price)}. ${rule}`;
+}
+
+/** two prices that need reading carefully to say which is less: the cents
+    swapped round, $3.05 against $3.50, or fewer dollars but more cents */
+function cheaperPair(): [number, number] {
+  const d = rand(1, 8);
+  const kind = pick(['swap', 'nought', 'dollar'] as const);
+  let pair: [number, number];
+  if (kind === 'swap') {
+    const [x, y] = shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+    pair = [d * 100 + x * 10 + y, d * 100 + y * 10 + x];
+  } else if (kind === 'nought') {
+    const x = rand(1, 9);
+    pair = [d * 100 + x, d * 100 + x * 10];
+  } else {
+    pair = [d * 100 + 5 * rand(12, 19), (d + 1) * 100 + 5 * rand(1, 8)];
+  }
+  return shuffle(pair) as [number, number];
+}
+
+/** why one price is less: dollars first, then cents */
+export function cheaperWhy(a: number, b: number): string {
+  const [lo, hi] = a < b ? [a, b] : [b, a];
+  const d = Math.floor(lo / 100);
+  if (d === Math.floor(hi / 100)) {
+    return `Both are ${d} ${d === 1 ? 'dollar' : 'dollars'}, and ${lo % 100} cents is less than ${hi % 100} cents, so ${money(lo)} is cheaper.`;
+  }
+  return `${money(lo)} is less than ${money((d + 1) * 100)}, and ${money(hi)} is more, so ${money(lo)} is cheaper.`;
+}
+
+/** adding two prices: dollars, then cents, then both together */
+export function totalWhy(a: number, b: number): string {
+  const dollars = Math.floor(a / 100) * 100 + Math.floor(b / 100) * 100;
+  const cents = (a % 100) + (b % 100);
+  return `Dollars: ${money(Math.floor(a / 100) * 100)} + ${money(Math.floor(b / 100) * 100)} = ${money(dollars)}. `
+    + `Cents: ${money(a % 100)} + ${money(b % 100)} = ${money(cents)}. Together: ${money(a + b)}.`;
+}
+
+/** the change, counted up from the price the way a shopkeeper does: to the
+    next ten cents, to the next dollar, then to the note */
+export function countUp(price: number, paid: number): { jumps: number[]; text: string } {
+  const jumps: number[] = [];
+  const said: string[] = [];
+  let at = price;
+  for (const to of [Math.ceil(at / 10) * 10, Math.ceil(at / 100) * 100, paid]) {
+    if (to <= at) continue;
+    jumps.push(to - at);
+    said.push(`${money(to - at)} makes ${money(to)}`);
+    at = to;
+  }
+  const list = said.length > 1 ? `${said.slice(0, -1).join(', ')}, and ${said[said.length - 1]}` : said[0];
+  const sum = jumps.length > 1 ? `${jumps.map(money).join(' + ')} = ${money(paid - price)}` : money(paid - price);
+  return { jumps, text: `Count up from ${money(price)}: ${list}. The change is ${sum}.` };
 }
 
 /** do these coins make the price exactly? */
