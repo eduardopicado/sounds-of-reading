@@ -178,7 +178,7 @@ test.describe('the grown-ups corner', () => {
     await expect(rows).toHaveCount(2);
     await expect(rows.first()).toHaveAttribute('data-game', 'team-buses');
     await expect(rows.first().locator('.mp-step')).toContainText('step 3 of');
-    await expect(page.locator('.maths-progress')).toContainText('Not tried yet: Coach Says, Big Words, Word Search, Flash Count');
+    await expect(page.locator('.maths-progress')).toContainText('Not tried yet: Coach Says, Big Words, Word Search, Foosball Words, Flash Count');
   });
 
   test('every maths and jiu-jitsu game has its ladder in the progress card', async ({ page }) => {
