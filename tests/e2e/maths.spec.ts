@@ -697,6 +697,62 @@ test.describe('maths games', () => {
     await expect(page.locator('.mc-clock')).toHaveAttribute('data-minutes', String(want));
   });
 
+  /** answer this Match Clock question wrong, to see how it explains */
+  async function missClock(page: Page): Promise<string> {
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = (await page.locator('.mc-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().click();
+    return answer;
+  }
+
+  test('Years 3–4: Match Clock to five minutes, then to the minute', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-clock': 8 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-step')).toHaveText('Five minutes');
+    const five = await missClock(page);
+    await expect(page.locator('.mc-clock')).toHaveAttribute('aria-label', `A clock showing ${five}`);
+    await expect(page.locator('.mx-note')).toContainText('The long hand points at the');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Match Clock to the minute, written 3:47', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 9 });
+    await startGame(page, 'match-clock');
+    const answer = await missClock(page);
+    expect(answer).toMatch(/^\d{1,2}:\d\d$/);
+    await expect(page.locator('.mx-note')).toContainText(`It's ${answer}. The long hand is`);
+  });
+
+  test('Years 3–4: Match Clock am or pm on match day', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 10 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-choice')).toHaveCount(2, { timeout: 10000 });
+    await expect(page.locator('.mx-choice').first()).toHaveText(/ am$/);
+    await expect(page.locator('.mc-digital')).toBeVisible();
+    const answer = (await page.locator('.mc-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`It's ${answer}.`);
+  });
+
+  test('Years 3–4: Match Clock counts on to kick-off', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 11 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mc-clock')).toHaveCount(2);
+    await expect(page.locator('.mc-fig figcaption')).toHaveText([/^Now \d{1,2}:\d\d$/, /^Kick-off \d{1,2}:\d\d$/]);
+    await missClock(page);
+    await expect(page.locator('.mx-note')).toContainText(/^From \d{1,2}:\d\d, /);
+  });
+
+  test('Years 3–4: Match Clock reads a 24-hour ticket', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 12 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mc-ticket-time')).toHaveText(/^Kick-off (1[3-9]|2[0-2]):\d\d$/);
+    const answer = await missClock(page);
+    expect(answer).toMatch(/ pm$/);
+    await expect(page.locator('.mx-note')).toContainText('After midday, take 12 away from the hour');
+  });
+
   test('Match Clock: the day after training', async ({ page }) => {
     await seed(page, { 'maths-step:match-clock': 3 });
     await startGame(page, 'match-clock');

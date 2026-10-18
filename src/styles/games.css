@@ -1232,6 +1232,22 @@
 .mc-cell.target { background: var(--mustard); color: var(--ink); font-size: 22px; }
 .mc-month { padding: 14px 26px; border-radius: 16px; background: var(--paper); color: var(--ink); font: 800 32px var(--display); }
 .mc-season { color: var(--paper); font: 700 18px var(--reading); text-align: center; }
+/* Years 3–4: a match-day time, two clocks side by side, a ticket */
+.mc-event { display: flex; align-items: center; gap: 16px; }
+.mc-event-pic { font-size: 56px; line-height: 1; }
+.mc-digital, .mc-ticket-time {
+  padding: 8px 18px; border-radius: 12px; background: #10241F; color: #8DF0B8;
+  font: 700 40px ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: 2px;
+}
+.mc-pair { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 24px; }
+.mc-fig { display: grid; justify-items: center; gap: 6px; margin: 0; }
+.mc-fig .mc-clock { width: min(40vw, 200px); }
+.mc-fig figcaption { color: var(--paper); font: 700 18px var(--display); }
+.mc-ticket {
+  display: grid; justify-items: center; gap: 8px; padding: 14px 26px; border-radius: 14px;
+  background: var(--paper); color: var(--ink); border: 3px dashed var(--mustard-dark);
+}
+.mc-ticket-head { font: 800 18px var(--display); text-transform: uppercase; letter-spacing: 1.5px; }
 
 /* ── Fan Survey ────────────────────────────────────────────────────────── */
 

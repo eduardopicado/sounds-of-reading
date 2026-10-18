@@ -6,7 +6,7 @@ import {
   SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
-  CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
+  CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
   JUMP_STEPS, jumpQuestion, jumpsFor,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
@@ -544,7 +544,8 @@ describe('Match Clock', () => {
         const q = clockQuestion(step);
         expect(q.options).toContain(q.answer);
         expect(new Set(q.options).size).toBe(q.options.length);
-        expect(q.options.length).toBeGreaterThanOrEqual(3);
+        /* am or pm is the one question with two answers */
+        expect(q.options.length).toBeGreaterThanOrEqual(step.task === 'ampm' ? 2 : 3);
         if (step.task === 'read' || step.task === 'set') {
           expect(step.minutes).toContain(q.m);
           expect(q.answer).toBe(timeWords(q.h, q.m));
@@ -558,6 +559,70 @@ describe('Match Clock', () => {
     for (let i = 0; i < 100; i += 1) {
       const q = clockQuestion(half);
       if (q.m === 30 && q.h < 12) expect(q.options.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('goes on, for Years 3–4, to the minute, am and pm, how long, and the 24-hour clock', () => {
+    expect(CLOCK_STEPS.slice(8).map((s) => s.name)).toEqual(['Five minutes', 'To the minute', 'am or pm', 'How long until kick-off?', '24-hour time']);
+    expect(digital(15, 7)).toBe('3:07');
+    expect(digital(0, 30)).toBe('12:30');
+    expect(time24(19, 30)).toBe('19:30');
+    expect(time24(9, 5)).toBe('09:05');
+    expect(duration(35)).toBe('35 minutes');
+    expect(duration(65)).toBe('1 hour 5 minutes');
+    expect(duration(120)).toBe('2 hours');
+    expect(ampm(7, 30)).toBe('7:30 am');
+    expect(ampm(12, 30)).toBe('12:30 pm');
+    expect(ampm(19, 45)).toBe('7:45 pm');
+  });
+
+  it('reads five minutes and single minutes with the slips children make', () => {
+    const fives = CLOCK_STEPS.find((s) => s.name === 'Five minutes')!;
+    const q = (() => { for (;;) { const x = clockQuestion(fives); if (x.m === 20 && x.h === 3) return x; } })();
+    expect(q.options.sort()).toEqual(['20 past 3', '20 past 4', '20 to 4', '4 past 3'].sort());
+    const toMinute = CLOCK_STEPS.find((s) => s.name === 'To the minute')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const m = clockQuestion(toMinute);
+      expect(m.m % 5).not.toBe(0);
+      expect(m.answer).toBe(digital(m.h, m.m));
+      /* the hour after is always there to be tempted by */
+      expect(m.options).toContain(digital(m.h + 1, m.m));
+    }
+  });
+
+  it('counts on to kick-off, and offers the 100-minute hour as the slip', () => {
+    expect(countOn(14 * 60 + 40, 15 * 60 + 15)).toEqual({
+      jumps: [20, 15],
+      text: "From 2:40, 20 minutes makes 3 o'clock, then 15 minutes makes 3:15. 20 minutes and 15 minutes make 35 minutes.",
+    });
+    expect(countOn(14 * 60 + 40, 16 * 60 + 30).jumps).toEqual([20, 60, 30]);
+    expect(countOn(15 * 60, 15 * 60 + 45).text).toBe("From 3:00, 45 minutes makes 3:45.");
+    const elapsed = CLOCK_STEPS.find((s) => s.task === 'elapsed')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(elapsed);
+      expect(q.to).toBeGreaterThan(q.from);
+      expect(q.to - q.from).toBeLessThanOrEqual(120);
+      expect(q.answer).toBe(duration(q.to - q.from));
+      expect(countOn(q.from, q.to).jumps.reduce((a, b) => a + b, 0)).toBe(q.to - q.from);
+      /* 2:40 to 3:15 as 315 − 240: 40 minutes too many for every hour crossed */
+      const hours = Math.floor(q.to / 60) - Math.floor(q.from / 60);
+      if (hours) expect(q.options).toContain(duration(q.to - q.from + 40 * hours));
+    }
+  });
+
+  it('turns a ticket time into am and pm, and an event into am or pm', () => {
+    const t = CLOCK_STEPS.find((s) => s.task === 'twentyfour')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(t);
+      expect(q.h).toBeGreaterThanOrEqual(13);
+      expect(q.answer).toBe(`${q.h - 12}:${String(q.m).padStart(2, '0')} pm`);
+      expect(q.options).toContain(`${q.h - 12}:${String(q.m).padStart(2, '0')} am`);
+    }
+    const a = CLOCK_STEPS.find((s) => s.task === 'ampm')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(a);
+      expect(q.options).toEqual([`${digital(q.h, q.m)} am`, `${digital(q.h, q.m)} pm`]);
+      expect(q.answer.endsWith(q.h >= 12 ? 'pm' : 'am')).toBe(true);
     }
   });
 
