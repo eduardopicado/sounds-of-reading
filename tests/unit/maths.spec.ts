@@ -13,6 +13,7 @@ import {
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
   BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
+  factChoices,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -200,6 +201,15 @@ describe('Flash Count', () => {
         const q = flashQuestion(step);
         expect(q.n).toBeLessThanOrEqual(step.max);
         expect(q.n).toBeGreaterThanOrEqual(flashLowest(step));
+        if (step.look === 'facts') {
+          /* a times-table fact: rows of one of the step's tables */
+          const [rows, cols] = q.parts;
+          expect(rows * cols).toBe(q.n);
+          expect(step.tables).toContain(cols);
+          expect(rows).toBeGreaterThanOrEqual(2);
+          expect(rows).toBeLessThanOrEqual(step.rowsTo!);
+          continue;
+        }
         if (step.look === 'array') {
           /* rows times columns, two to five of each */
           expect(q.parts[0] * q.parts[1]).toBe(q.n);
@@ -229,6 +239,37 @@ describe('Flash Count', () => {
     expect(flashMs(step, 0, 'normal', true)).toBe(Math.round(flashMs(step, 0) * 1.5));
     /* even quick, at full speed, leaves time to see a pattern */
     for (const s of FLASH_STEPS) expect(flashMs(s, 99, 'quick')).toBeGreaterThanOrEqual(900);
+  });
+
+  it('Years 3–4: climbs from rows of 2, 5 and 10 to any fact up to 12 × 12', () => {
+    const facts = FLASH_STEPS.filter((s) => s.look === 'facts');
+    expect(facts.map((s) => s.tables)).toEqual([[2, 5, 10], [3, 4], [6, 7, 8, 9], [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]]);
+    expect(FLASH_STEPS.at(-1)!.max).toBe(144);
+    /* they come after every Year 2 step */
+    expect(FLASH_STEPS.findIndex((s) => s.look === 'facts')).toBeGreaterThan(FLASH_STEPS.findLastIndex((s) => s.look === 'array'));
+  });
+
+  it('offers a fact with the slips made with it: a row or a column too many or too few', () => {
+    for (let rows = 2; rows <= 12; rows += 1) {
+      for (let cols = 2; cols <= 12; cols += 1) {
+        const c = factChoices(rows, cols);
+        expect(c).toContain(rows * cols);
+        expect(c).toHaveLength(4);
+        expect(new Set(c).size).toBe(4);
+        expect([...c].sort((a, b) => a - b)).toEqual(c);
+        for (const x of c) expect(x).toBeGreaterThan(0);
+        /* every wrong one is a whole row or column away */
+        for (const x of c.filter((y) => y !== rows * cols)) {
+          expect(x % cols === 0 || x % rows === 0).toBe(true);
+        }
+      }
+    }
+  });
+
+  it('a miss on an array is said in rows', () => {
+    const help = timesHelp({ a: 7, b: 6, op: '×', answer: 42, table: 6, lots: 7, fact: factKey(6, 7) }, 'rows');
+    expect(help.text).toBe('7 × 6 = 42. 7 rows of 6 is 5 rows and 2 more: 30 and 12 make 42.');
+    expect(timesHelp({ a: 1, b: 4, op: '×', answer: 4, table: 4, lots: 1, fact: factKey(1, 4) }, 'rows').text).toContain('1 row of 4');
   });
 
   it('puts the right number of spots on every die face', () => {

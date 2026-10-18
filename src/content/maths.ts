@@ -10,7 +10,8 @@
  *   Number Line Penalty  where numbers sit, from 0–10 up to 0–120, then on to
  *                        0–1000 (Year 2)
  *   Flash Count          seeing how many at a glance (subitising), then rows
- *                        and columns, the start of multiplying (Year 2)
+ *                        and columns, the start of multiplying (Year 2), then
+ *                        arrays that are times-table facts to 12 × 12 (Years 3–4)
  *   Ice Cream Van        Australian coins: worth more, paying, counting, then
  *                        mixed coins, the exact price and change (Year 2)
  *
@@ -234,11 +235,14 @@ export const onTarget = (step: LineStep, asked: number, tapped: number): boolean
 
 export interface FlashStep extends Step {
   max: number;
-  /** dice spots, a ten frame, two dice side by side, or rows and columns
-      (an array, Year 2) */
-  look: 'dice' | 'frame' | 'two-dice' | 'array';
+  /** dice spots, a ten frame, two dice side by side, rows and columns (an
+      array, Year 2), or an array that is a times-table fact (Years 3–4) */
+  look: 'dice' | 'frame' | 'two-dice' | 'array' | 'facts';
   /** how long it shows, in ms */
   ms: number;
+  /** for a times-table array: the dots in a row, and the most rows */
+  tables?: number[];
+  rowsTo?: number;
 }
 
 export const FLASH_STEPS: FlashStep[] = [
@@ -250,6 +254,12 @@ export const FLASH_STEPS: FlashStep[] = [
   /* Year 2: rows and columns, seen as "3 rows of 4" rather than counted */
   { name: 'Rows of dots', max: 15, look: 'array', ms: 3000 },
   { name: 'Bigger rows of dots', max: 25, look: 'array', ms: 3000 },
+  /* Years 3–4: arrays that are times-table facts, drawn in blocks of five so
+     7 rows reads as 5 and 2 more, the way a ten frame is read */
+  { name: 'Rows of 2, 5 and 10', max: 100, look: 'facts', ms: 4000, tables: [2, 5, 10], rowsTo: 10 },
+  { name: 'Rows of 3 and 4', max: 48, look: 'facts', ms: 4000, tables: [3, 4], rowsTo: 12 },
+  { name: 'Rows of 6, 7, 8 and 9', max: 108, look: 'facts', ms: 4500, tables: [6, 7, 8, 9], rowsTo: 12 },
+  { name: 'Any rows, to 12 × 12', max: 144, look: 'facts', ms: 5000, tables: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], rowsTo: 12 },
 ];
 
 /** the grown-up's choice of pace for Flash Count */
@@ -282,9 +292,18 @@ export interface FlashQuestion {
 
 /** the smallest number a step can show */
 export const flashLowest = (step: FlashStep): number =>
-  step.look === 'array' ? 4 : step.look === 'two-dice' ? 2 : 1;
+  step.look === 'array' || step.look === 'facts' ? 4 : step.look === 'two-dice' ? 2 : 1;
 
 export function flashQuestion(step: FlashStep, last?: number): FlashQuestion {
+  if (step.look === 'facts') {
+    /* a times-table fact: rows of one of the step's tables, two rows or more */
+    for (;;) {
+      const cols = pick(step.tables ?? [2]);
+      const rows = rand(2, step.rowsTo ?? 10);
+      const n = rows * cols;
+      if (n !== last) return { n, parts: [rows, cols] };
+    }
+  }
   if (step.look === 'array') {
     /* at least two rows and two columns, at most five of each */
     for (;;) {
@@ -301,6 +320,20 @@ export function flashQuestion(step: FlashStep, last?: number): FlashQuestion {
   /* two dice that add to n, each 1 to 6 */
   const first = Math.max(1, n - 6) + Math.floor(Math.random() * (Math.min(6, n - 1) - Math.max(1, n - 6) + 1));
   return { n, parts: [first, n - first] };
+}
+
+/**
+ * The numbers to choose from for a times-table array: the answer and the
+ * slips a child makes with one, a row too few or too many, or a column, so
+ * telling them apart means knowing the fact rather than guessing near it.
+ */
+export function factChoices(rows: number, cols: number): number[] {
+  const answer = rows * cols;
+  const near = [...shuffle([(rows - 1) * cols, (rows + 1) * cols]), ...shuffle([rows * (cols - 1), rows * (cols + 1)]),
+    (rows - 2) * cols, (rows + 2) * cols];
+  const out = [answer];
+  for (const x of near) if (out.length < 4 && x > 0 && !out.includes(x)) out.push(x);
+  return out.sort((a, b) => a - b);
 }
 
 /** where the spots go on a die, in a 3 × 3 grid read left to right, top down */
@@ -1416,23 +1449,24 @@ export function askAgain(q: TimesQuestion, random: () => number = Math.random): 
  * any lots of 10, he counts on in the table. `parts` are the two blocks of
  * rows drawn on the array (the second is 0 when there is no split).
  */
-export function timesHelp(q: TimesQuestion): { text: string; parts: [number, number] } {
+export function timesHelp(q: TimesQuestion, unit: 'lots' | 'rows' = 'lots'): { text: string; parts: [number, number] } {
   const { table: t, lots: k } = q;
+  const one = unit === 'rows' ? 'row' : 'lot';
   const fact = q.op === '÷'
     ? `${q.a} ÷ ${t} = ${k}, because ${k} × ${t} = ${q.a}.`
     : `${q.a} × ${q.b} = ${q.answer}.`;
   let how: string;
   let parts: [number, number] = [k, 0];
   if (t === 10) {
-    how = `${k} lots of 10 is ${k} tens: ${k * 10}.`;
+    how = `${k} ${k === 1 ? one : unit} of 10 is ${k} tens: ${k * 10}.`;
   } else if (k <= 5 || k === 10) {
     const counted = Array.from({ length: k }, (_, i) => (i + 1) * t);
-    how = k === 1 ? `1 lot of ${t} is just ${t}.` : `Count in ${t}s: ${counted.join(', ')}.`;
+    how = k === 1 ? `1 ${one} of ${t} is just ${t}.` : `Count in ${t}s: ${counted.join(', ')}.`;
   } else {
     const first = k < 10 ? 5 : 10;
     const rest = k - first;
     parts = [first, rest];
-    how = `${k} lots of ${t} is ${first} lots and ${rest} more: ${first * t} and ${rest * t} make ${k * t}.`;
+    how = `${k} ${unit} of ${t} is ${first} ${unit} and ${rest} more: ${first * t} and ${rest * t} make ${k * t}.`;
   }
   return { text: `${fact} ${how}`, parts };
 }

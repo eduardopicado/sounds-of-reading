@@ -249,6 +249,23 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
   });
 
+  test('Years 3–4: Flash Count flashes a times-table fact in blocks of five, and a miss splits it', async ({ page }) => {
+    const top = 10;
+    await seed(page, { 'maths-step:flash-count': top, 'flash-speed': 'slow' });
+    await startGame(page, 'flash-count');
+    await expect(page.locator('.mx-step')).toHaveText('Any rows, to 12 × 12');
+    await expect(page.locator('.mx-array.facts')).toBeVisible();
+    const dots = await page.locator('.mx-flash .mx-dot').count();
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 15000 });
+    const offered = (await page.locator('.mx-choice').allTextContents()).map(Number);
+    expect(offered).toContain(dots);
+    await tapNumber(page, offered.find((x) => x !== dots)!);
+    /* the fact, built in rows or counted along them, and the array again */
+    await expect(page.locator('.mx-note')).toContainText(`= ${dots}.`);
+    await expect(page.locator('.mx-note')).toContainText(/ rows of |Count in /);
+    await expect(page.locator('.mx-flash .mx-dot')).toHaveCount(dots);
+  });
+
   test('Year 2: Flash Count shows rows and columns', async ({ page }) => {
     await seed(page, { 'maths-step:flash-count': 5, 'flash-speed': 'slow' });
     await startGame(page, 'flash-count');
