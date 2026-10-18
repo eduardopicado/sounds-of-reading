@@ -20,6 +20,7 @@ import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
+import { BOTAO_STEPS } from '../content/botao';
 import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'bjj' | 'chess';
@@ -122,6 +123,8 @@ export const GAMES: Game[] = [
     load: () => import('./kit-shapes') },
   { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths', ladder: BOARD_STEPS,
     load: () => import('./coach-whiteboard') },
+  { path: 'futebol-de-botao', name: 'Futebol de Botão', emoji: '🔘', what: 'Flick the button, aim through the ball', tone: '#3B8D4A', section: 'maths', ladder: BOTAO_STEPS,
+    load: () => import('./futebol-de-botao') },
   { path: 'ice-cream-van', name: 'Ice Cream Van', emoji: '🍦', what: 'Pay with Aussie coins', tone: '#E58FB3', section: 'maths', ladder: KIOSK_STEPS,
     load: () => import('./ice-cream-van') },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj', ladder: REF_STEPS,
