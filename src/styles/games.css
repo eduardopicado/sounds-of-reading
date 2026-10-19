@@ -1913,3 +1913,34 @@
 .ht-fig { display: grid; justify-items: center; gap: 6px; margin: 0; }
 .ht-fig .ht-shape { width: min(40vw, 220px); height: auto; aspect-ratio: 220 / 160; }
 .ht-fig figcaption { color: var(--paper); font: 700 20px var(--display); }
+
+/* Futebol de Botão: the table is an SVG in table units, sized to fit the screen's height */
+.bt-stage { gap: 8px; }
+.bt-tell { margin: 0; }
+.bt-touches { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--paper); font: 700 18px var(--display); }
+.bt-pips { display: inline-flex; gap: 6px; }
+.bt-pip { width: 18px; height: 18px; border: 3px solid var(--paper); border-radius: 50%; }
+.bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
+/* svh where there is one, so an iPhone's toolbar is counted */
+.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .7)); width: min(100%, 600px, calc((100svh - 230px) * .7)); }
+.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 100; touch-action: none; user-select: none; -webkit-user-select: none; }
+.bt-wood { fill: #8A5A2B; }
+.bt-felt { fill: #2E8B4F; }
+.bt-line { fill: none; stroke: rgba(255, 255, 255, .75); stroke-width: .4; }
+.bt-spot { fill: rgba(255, 255, 255, .8); }
+.bt-net rect { fill: rgba(255, 255, 255, .12); stroke: #fff; stroke-width: .5; }
+.bt-net line { stroke: rgba(255, 255, 255, .45); stroke-width: .2; }
+.bt-post { fill: #fff; stroke: #333; stroke-width: .2; }
+.bt-keeper { stroke: #111; stroke-width: .4; }
+.bt-keeper.moving { transition: transform .4s ease; }
+.bt-btn .bt-rim { stroke: rgba(0, 0, 0, .55); stroke-width: .5; }
+.bt-btn.us { cursor: grab; }
+.bt-btn.tired { opacity: .4; }
+.bt-flag { pointer-events: none; }
+.bt-ball circle { fill: #fff; stroke: #222; stroke-width: .35; }
+.bt-path { fill: none; stroke: #fff; stroke-width: .7; stroke-dasharray: 1.6 1.2; stroke-linecap: round; }
+.bt-trail { fill: none; stroke: rgba(255, 255, 255, .4); stroke-width: .5; stroke-dasharray: .6 1; }
+.bt-band { stroke: rgba(255, 255, 255, .55); stroke-width: .5; stroke-dasharray: 1 1; }
+.bt-arrow { fill: var(--mustard); stroke: var(--deep); stroke-width: .35; stroke-linejoin: round; }
+.bt-ghost { fill: rgba(255, 255, 255, .18); stroke: #fff; stroke-width: .5; stroke-dasharray: 1.2 .8; }
+.bt-ghost[hidden], .bt-keeper[hidden] { display: none; }

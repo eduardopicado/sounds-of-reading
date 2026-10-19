@@ -76,6 +76,10 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
                        timeWords(), the one way the app says a time
 src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
                        and the first chess games' questions
+src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (only
+                       + − × ÷ and square roots, so a flick does the same thing
+                       everywhere), the three-touch rule, and set pieces that
+                       come with a way to score, checked to work a little off
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask (Weigh-In's things and weight classes too),
                        every word in English and Portuguese
