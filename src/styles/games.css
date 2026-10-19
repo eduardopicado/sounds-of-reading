@@ -2044,3 +2044,48 @@
 /* a country found, or tapped by mistake */
 .wm-land path.right { fill: #FFD84D; stroke: #14312F; stroke-width: 1.4; }
 .wm-land path.wrong { fill: #B4BAC0; }
+
+/* ── Capital Cities ────────────────────────────────────────────────────── */
+
+.cc-stage { gap: 8px; }
+.au-wrap {
+  position: relative;
+  width: min(100%, 760px, calc((100vh - 300px) * 1.1));
+  width: min(100%, 760px, calc((100svh - 300px) * 1.1));
+}
+.au-map {
+  display: block; width: 100%; height: auto; aspect-ratio: 1000 / 909;
+  user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; cursor: pointer;
+}
+.au-sea { fill: #A9D6F2; }
+.au-state { stroke: #fff; stroke-width: 2; stroke-linejoin: round; fill-rule: evenodd; }
+.au-state[data-state="NSW"] { fill: #79BE6F; }
+.au-state[data-state="VIC"] { fill: #A78AD8; }
+.au-state[data-state="QLD"] { fill: #E9785F; }
+.au-state[data-state="SA"] { fill: #EE86A7; }
+.au-state[data-state="WA"] { fill: #F2BC48; }
+.au-state[data-state="TAS"] { fill: #45AE9F; }
+.au-state[data-state="NT"] { fill: #E7A15A; }
+.au-state[data-state="ACT"] { fill: #3D97D6; }
+.au-state.right, .au-state.glow { stroke: #14312F; stroke-width: 5; }
+.au-state.wrong { fill: #B4BAC0; }
+.au-map:has(.glow) .au-state:not(.glow) { fill: #DADFE3; }
+.au-state.glow { animation: wm-glow 1.4s ease-in-out infinite; }
+.au-city { fill: #14312F; stroke: #fff; stroke-width: 4; display: none; }
+.au-wrap.cities .au-city, .au-city.shown { display: inline; }
+.au-city.right { fill: #FFD84D; stroke: #14312F; }
+.au-city.wrong { fill: #B4BAC0; stroke: #14312F; }
+.au-labels { position: absolute; inset: 0; pointer-events: none; }
+.au-label {
+  position: absolute; transform: translate(-50%, -50%); display: none;
+  width: min-content; text-align: center; white-space: normal;
+  font: 700 clamp(10px, 1.8vw, 17px) / 1.05 var(--reading); color: var(--ink);
+  background: rgba(255, 246, 231, .9); padding: 2px 5px; border-radius: 6px;
+}
+/* a city's name under its dot */
+.au-label.city { transform: translate(-50%, 45%); white-space: nowrap; width: auto; }
+.au-wrap.names .au-label.state, .au-label.shown { display: block; }
+.au-label.shown { box-shadow: 0 0 0 2px var(--ink); }
+@media (prefers-reduced-motion: reduce) {
+  .au-state.glow { animation: none; }
+}
