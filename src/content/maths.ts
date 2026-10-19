@@ -844,11 +844,21 @@ export function fractionQuestion(step: FractionStep, last?: FractionQuestion): F
 export interface JumpStep extends Step {
   op: '+' | '-';
   /** the line runs from 0 to this */
-  top: 10 | 20 | 100;
+  top: 10 | 20 | 100 | 1000 | 10000;
   /** tens jumps as well as ones (Year 2) */
   tens: boolean;
-  /** how the second number is made: a few ones, whole tens, or tens and ones */
-  b: 'ones' | 'tens' | 'tens-ones';
+  /** the jumps he has, biggest first, when they are not ten and one: a
+      hundred and ten on the line to 1000, a thousand and a hundred to 10 000 */
+  sizes?: number[];
+  /**
+   * how the second number is made: a few ones, whole tens, or tens and ones;
+   * to 1000, whole hundreds or hundreds and tens; to 10 000, thousands and
+   * hundreds
+   */
+  b: 'ones' | 'tens' | 'tens-ones' | 'hundreds' | 'hundreds-tens' | 'thousands';
+  /** jump to the next ten (or hundred) first, then the rest: 38 + 25 is
+      38 → 40 → 63 (Years 3–4) */
+  bridge?: 10 | 100;
 }
 
 export const JUMP_STEPS: JumpStep[] = [
@@ -860,7 +870,18 @@ export const JUMP_STEPS: JumpStep[] = [
   { name: 'Jump on in tens', op: '+', top: 100, tens: true, b: 'tens' },
   { name: 'Tens and ones to 100', op: '+', top: 100, tens: true, b: 'tens-ones' },
   { name: 'Jump back in tens and ones', op: '-', top: 100, tens: true, b: 'tens-ones' },
+  /* Years 3–4: to 1000 in hundreds, to the next ten or hundred first, then to 10 000 */
+  { name: 'Jump on in hundreds', op: '+', top: 1000, tens: true, sizes: [100, 10], b: 'hundreds' },
+  { name: 'Hundreds and tens to 1000', op: '+', top: 1000, tens: true, sizes: [100, 10], b: 'hundreds-tens' },
+  { name: 'Jump back in hundreds and tens', op: '-', top: 1000, tens: true, sizes: [100, 10], b: 'hundreds-tens' },
+  { name: 'To the next ten first', op: '+', top: 100, tens: true, b: 'tens-ones', bridge: 10 },
+  { name: 'Back to the ten first', op: '-', top: 100, tens: true, b: 'tens-ones', bridge: 10 },
+  { name: 'To the next hundred first', op: '+', top: 1000, tens: true, sizes: [100, 10], b: 'hundreds-tens', bridge: 100 },
+  { name: 'Jump on in thousands to 10 000', op: '+', top: 10000, tens: true, sizes: [1000, 100], b: 'thousands' },
 ];
+
+/** the jumps a step gives him, biggest first */
+export const sizesOf = (step: JumpStep): number[] => step.sizes ?? (step.tens ? [10, 1] : [1]);
 
 export interface JumpQuestion { a: number; b: number; op: '+' | '-'; answer: number }
 
@@ -876,26 +897,68 @@ export function jumpQuestion(step: JumpStep, last?: JumpQuestion): JumpQuestion 
       b = 10 * rand(1, 4);
       a = rand(1, 99 - b);
       if (a % 10 === 0) continue;
-    } else {
+    } else if (step.b === 'tens-ones') {
       b = rand(11, 39);
       if (b % 10 === 0) continue;
       a = step.op === '+' ? rand(11, 99 - b) : rand(b + 1, 99);
       if (a % 10 === 0) continue;
+    } else if (step.b === 'hundreds') {
+      b = 100 * rand(1, 5);
+      a = 10 * rand(1, 99);
+      if (a % 100 === 0) continue;
+    } else if (step.b === 'hundreds-tens') {
+      /* no more than four of each jump */
+      b = 100 * rand(1, 4) + 10 * rand(1, 4);
+      a = step.op === '+' ? rand(11, 999) : rand(b + 10, 999);
+      if (step.bridge) a -= a % 10;
+      if (a % 100 === 0) continue;
+    } else {
+      b = 1000 * rand(1, 4) + 100 * rand(1, 4);
+      a = 100 * rand(1, 99);
+      if (a % 1000 === 0) continue;
     }
     const answer = step.op === '+' ? a + b : a - b;
     if (answer < 0 || answer > step.top) continue;
+    if (step.bridge) {
+      const to = step.op === '+' ? step.bridge - (a % step.bridge) : a % step.bridge;
+      /* the second number goes past the ten (or hundred), with something of
+         its own place left after it: that is what makes the jump worth making */
+      if (b % step.bridge <= to) continue;
+      /* and the first jump is a short one, shorter than the other part of the
+         ten, which is the slip offered beside it: 38 → 40 (not 8), 63 → 60
+         (not 7). A jump of 5 (or 50) would be its own slip. */
+      if (to >= step.bridge / 2) continue;
+    }
     if (last && last.a === a && last.b === b) continue;
     return { a, b, op: step.op, answer };
   }
 }
 
-/** the jumps that get there the Year 2 way: the tens of b, then its ones */
-export function jumpsFor(q: JumpQuestion, tens: boolean): number[] {
+/** how far the first jump goes, to the next ten or hundred (or back to it) */
+export const bridgeOf = (q: JumpQuestion, bridge: number): number =>
+  q.op === '+' ? bridge - (q.a % bridge) : q.a % bridge;
+
+/**
+ * The jumps that get there: the biggest jumps of the second number first,
+ * then the smaller ones (38 + 25 is two tens and five ones). With a bridge,
+ * the first jump is to the next ten or hundred, and the rest after it
+ * (38 → 40, then 23 more).
+ */
+export function jumpsFor(q: JumpQuestion, sizes: boolean | readonly number[], bridge?: number): number[] {
   const sign = q.op === '+' ? 1 : -1;
-  const big = tens ? Math.floor(q.b / 10) : 0;
-  const small = tens ? q.b % 10 : q.b;
-  return [...Array.from({ length: big }, () => sign * 10), ...Array.from({ length: small }, () => sign)];
+  const list = typeof sizes === 'boolean' ? (sizes ? [10, 1] : [1]) : sizes;
+  const out: number[] = [];
+  let left = q.b;
+  if (bridge) { const first = bridgeOf(q, bridge); out.push(sign * first); left -= first; }
+  for (const size of list) {
+    while (left >= size) { out.push(sign * size); left -= size; }
+  }
+  return out;
 }
+
+/** a jump's size as it is said: a jump of ten, of a hundred */
+export const jumpWord = (size: number): string =>
+  size === 1000 ? 'a thousand' : size === 100 ? 'a hundred' : size === 10 ? 'ten' : 'one';
 
 /* ── Match Clock: telling the time, days, months and seasons ─────────── */
 

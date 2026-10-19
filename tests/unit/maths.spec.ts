@@ -7,7 +7,7 @@ import {
   FACT_STEPS, factQuestion, factText, family,
   SURVEY_STEPS, surveyQuestion,
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
-  JUMP_STEPS, jumpQuestion, jumpsFor,
+  JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
@@ -587,12 +587,50 @@ describe('Jump Line', () => {
     expect(jumpsFor({ a: 9, b: 3, op: '-', answer: 6 }, false)).toEqual([-1, -1, -1]);
     for (const step of JUMP_STEPS) {
       const q = jumpQuestion(step);
-      expect(q.a + jumpsFor(q, step.tens).reduce((s, j) => s + j, 0)).toBe(q.answer);
+      expect(q.a + jumpsFor(q, sizesOf(step), step.bridge).reduce((s, j) => s + j, 0)).toBe(q.answer);
     }
   });
 
   it('stays within 20 until Year 2', () => {
     expect(JUMP_STEPS.filter((s) => !s.tens).every((s) => s.top <= 20)).toBe(true);
+  });
+
+  it('goes on, for Years 3–4, to 1000 and 10 000, and to the next ten or hundred first', () => {
+    const top = JUMP_STEPS.slice(7);
+    expect(top.map((s) => s.top)).toEqual([1000, 1000, 1000, 100, 100, 1000, 10000]);
+    for (const step of top) {
+      const sizes = sizesOf(step);
+      for (let i = 0; i < MANY; i += 1) {
+        const q = jumpQuestion(step);
+        const what = `${q.a} ${q.op} ${q.b}`;
+        for (const n of [q.a, q.answer]) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.top); }
+        const jumps = jumpsFor(q, sizes, step.bridge);
+        expect(q.a + jumps.reduce((s, j) => s + j, 0), what).toBe(q.answer);
+        /* every jump after the first is one of his buttons, and there are never too many */
+        for (const j of jumps.slice(step.bridge ? 1 : 0)) expect(sizes).toContain(Math.abs(j));
+        expect(jumps.length).toBeLessThanOrEqual(13);
+        if (step.b === 'hundreds') expect(q.b % 100).toBe(0);
+        if (step.b === 'thousands') { expect(q.b % 100).toBe(0); expect(q.b).toBeGreaterThan(1000); }
+        if (step.bridge) {
+          const first = bridgeOf(q, step.bridge);
+          const to = q.a + (q.op === '+' ? first : -first);
+          /* the first jump lands on a ten (or a hundred), is shorter than the
+             other part (so that part can be the slip), and the sum goes past it */
+          expect(to % step.bridge, what).toBe(0);
+          expect(first, what).toBeLessThan(step.bridge - first);
+          expect(q.b % step.bridge, what).toBeGreaterThan(first);
+        }
+      }
+    }
+  });
+
+  it('jumps to the next ten first: 38 + 25 is 2 to 40, then 23 more', () => {
+    const q = { a: 38, b: 25, op: '+' as const, answer: 63 };
+    expect(bridgeOf(q, 10)).toBe(2);
+    expect(jumpsFor(q, [10, 1], 10)).toEqual([2, 10, 10, 1, 1, 1]);
+    const back = { a: 63, b: 25, op: '-' as const, answer: 38 };
+    expect(jumpsFor(back, [10, 1], 10)).toEqual([-3, -10, -10, -1, -1]);
+    expect(jumpsFor({ a: 470, b: 260, op: '+', answer: 730 }, [100, 10], 100)).toEqual([30, 100, 100, 10, 10, 10]);
   });
 });
 
