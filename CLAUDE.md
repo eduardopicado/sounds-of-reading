@@ -54,12 +54,14 @@ environment (`public/audio/README.md`):
 ```
 npm run make:audio       # the words
 npm run make:sfx         # the sound effects
+npm run make:sounds      # the sounds on their own ("sss", "sh"), one per phoneme
 ```
 
 ## Layout
 
 ```
-src/content/words.ts   the content file — sounds, words, families, phrases
+src/content/words.ts   the content file — sounds, words, families, phrases, and
+                       PHONEMES: the sound each spelling makes, one recording each
 src/content/index.ts   loads it into typed data with explicit positions
 src/content/spans.ts   works out which letters carry a sound; refuses to guess
 src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Shoot)

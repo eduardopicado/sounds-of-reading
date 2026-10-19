@@ -23,7 +23,7 @@ import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
-import { NOT_BY_CHANCE } from '../src/content/words';
+import { NOT_BY_CHANCE, PHONEMES } from '../src/content/words';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
 
@@ -60,6 +60,29 @@ describe('sounds', () => {
       return out;
     });
     expect(failures).toEqual([]);
+  });
+});
+
+describe('the sounds themselves', () => {
+  it('every sound a game offers names its phoneme, and every phoneme is one of them', () => {
+    expect(PRACTICE_SOUNDS.filter((s) => !s.phoneme || !(s.phoneme in PHONEMES)).map((s) => s.id)).toEqual([]);
+    const used = new Set(PRACTICE_SOUNDS.map((s) => s.phoneme));
+    expect(Object.keys(PHONEMES).filter((p) => !used.has(p))).toEqual([]);
+  });
+
+  it('keys every phoneme so it can be a file name, and gives each its own IPA', () => {
+    expect(Object.keys(PHONEMES).filter((p) => !/^[a-z]+(-[a-z]+)?$/.test(p))).toEqual([]);
+    const ipa = Object.values(PHONEMES).map((p) => p.ipa);
+    expect(ipa.filter((x, i) => ipa.indexOf(x) !== i)).toEqual([]);
+  });
+
+  it('hears the phoneme in the example word of every sound (CMU, American)', () => {
+    const wrong = PRACTICE_SOUNDS.filter((s) => {
+      const said = (CMU as Record<string, string>)[s.asIn.toLowerCase()]?.replace(/\d/g, '');
+      if (!said) return true;
+      return !PHONEMES[s.phoneme!].arpabet.some((a) => ` ${said} `.includes(` ${a} `));
+    });
+    expect(wrong.map((s) => `${s.id} (${s.asIn}: ${(CMU as Record<string, string>)[s.asIn.toLowerCase()]})`)).toEqual([]);
   });
 });
 

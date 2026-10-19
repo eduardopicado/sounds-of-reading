@@ -44,5 +44,14 @@ the best is kept with `--keep`.
 4. `npm run make:audio` records everything missing. For the sound effects,
    `npm run make:sfx -- --takes 3`, then `--keep <sound> <take>` for each.
 
+The sounds on their own ("sss", "sh", the ai in rain) are one clip per
+phoneme (`PHONEMES` in `src/content/words.ts`), in `sounds/` with their own
+`sounds.json`, never shared with a word. `npm run make:sounds -- --takes 2`
+tries each three ways (IPA in v4, a spelt-out sound, an SSML phoneme tag in
+Flash v2) into `audition/sounds/`, and `--keep <sound> <way>-<take>` keeps
+the one that sounds right. The app plays them with `saySound()`, never the
+device voice, which would read a letter's name; a sound with no clip is
+simply not said, and a game that needs it checks `hasSound()`.
+
 The offline worker caches `clips.json`, `sfx.json` and every `.mp3` beside
 them, so once made they play with no signal like everything else.

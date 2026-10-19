@@ -260,3 +260,43 @@ describe('the first tap', () => {
     expect(engine.said).toHaveLength(1);
   });
 });
+
+describe('a sound on its own', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build with recordings of these sounds, and no recorded words */
+  async function withSounds(ids: string[]): Promise<string[]> {
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async (url: string) => ({ ok: true, json: async () => (url.includes('sounds.json') ? ids : []) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    await audio.loadSounds('./audio/sounds/sounds.json');
+    return played;
+  }
+
+  it('plays its own recording, from the sounds folder, never the word spelt the same', async () => {
+    const speech = await load();
+    const played = await withSounds(['a', 'sh']);
+    expect(speech.hasSound('a')).toBe(true);
+    speech.saySound('a');
+    await settle();
+    expect(played).toEqual(['./audio/sounds/a.mp3']);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says nothing with no recording, rather than let the device voice read a letter name', async () => {
+    const speech = await load();
+    await withSounds([]);
+    const onEnd = vi.fn();
+    expect(speech.hasSound('sh')).toBe(false);
+    speech.saySound('sh', { onEnd });
+    await settle();
+    expect(engine.said).toEqual([]);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+});

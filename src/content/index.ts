@@ -6,14 +6,14 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY,
-  type SoundSpec, type FamilySpec, type Level, type Slot,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, PHONEMES,
+  type SoundSpec, type PhonemeSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
 import { ContentError, resolveSpans, unmark, type Span } from './spans';
 
-export type { Level, Slot, SoundSpec, FamilySpec };
-export { LEVELS, BLOCKLIST, SOUNDS_ALIKE };
+export type { Level, Slot, SoundSpec, FamilySpec, PhonemeSpec };
+export { LEVELS, BLOCKLIST, SOUNDS_ALIKE, PHONEMES };
 export { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export interface Sound extends SoundSpec {

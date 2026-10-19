@@ -12,7 +12,8 @@
     "test": "vitest run tests/content.spec.ts tests/unit && playwright test",
     "test:e2e": "playwright test",
     "make:audio": "npx tsx tools/make-audio.ts",
-    "make:sfx": "npx tsx tools/make-sfx.ts"
+    "make:sfx": "npx tsx tools/make-sfx.ts",
+    "make:sounds": "npx tsx tools/make-sounds.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

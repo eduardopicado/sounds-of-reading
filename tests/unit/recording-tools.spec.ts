@@ -8,6 +8,8 @@
 import { describe, expect, it } from 'vitest';
 import { LANGUAGE_CODE_MODELS, voiceSettings, brazilianProblem, clips, fetchRetrying, ptAudition, ttsRequest, wanted } from '../../tools/make-audio';
 import { EFFECTS, sfxRequest } from '../../tools/make-sfx';
+import { WAYS, soundRequest, textFor } from '../../tools/make-sounds';
+import { PHONEMES } from '../../src/content/words';
 import { ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS } from '../../src/content/index';
 import { refereeLines, weighLines } from '../../src/content/bjj';
 import { PT_SAVES, ptGoals } from '../../src/content/commentary';
@@ -177,5 +179,29 @@ describe('the list of clips', () => {
 
   it('lists each clip once', () => {
     expect(new Set(wanted()).size).toBe(wanted().length);
+  });
+});
+
+describe('asking for a sound on its own', () => {
+  it('reads the IPA between slashes in v4, in English', () => {
+    const { url, init } = soundRequest(PHONEMES.sh, 'ipa', ENV);
+    expect(url).toContain('/text-to-speech/aussie?');
+    expect(body(init)).toMatchObject({ text: '/ʃ/', model_id: 'eleven_v4', language_code: 'en' });
+  });
+
+  it('puts the phoneme tag only to Flash v2, the model that reads it', () => {
+    expect(body(soundRequest(PHONEMES.sh, 'tag', ENV).init)).toMatchObject({
+      text: '<phoneme alphabet="ipa" ph="ʃ">shhh</phoneme>', model_id: 'eleven_flash_v2',
+    });
+    expect(body(soundRequest(PHONEMES.sh, 'tag', ENV).init).language_code).toBeUndefined();
+  });
+
+  it('has no spelt-out way for a stop, which cannot be held', () => {
+    expect(textFor(PHONEMES.b, 'say')).toBeNull();
+    for (const p of Object.values(PHONEMES)) if (p.stop) expect(p.say, p.ipa).toBeUndefined();
+  });
+
+  it('records every sound for the app under its own name, apart from the words', () => {
+    for (const id of Object.keys(PHONEMES)) expect(WAYS.some((w) => textFor(PHONEMES[id], w))).toBe(true);
   });
 });

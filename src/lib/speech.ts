@@ -18,7 +18,9 @@
  * even reaching for the object is inside a try. On iOS nothing is spoken until
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
-import { hasClip, playClip, stopClips } from './audio';
+import { hasClip, hasSound, playClip, playSound, stopClips } from './audio';
+
+export { hasSound };
 
 let cached: SpeechSynthesisVoice | null = null;
 /**
@@ -343,6 +345,19 @@ export function say(text: string, options: SayOptions = {}): void {
     return;
   }
   speakAloud(text, options);
+}
+
+/**
+ * Says a sound on its own ("sss", "sh", the ai in rain), a key of PHONEMES
+ * in src/content/words.ts. Only ever its recording: the device voice reads
+ * "sh" or "a" as letter names, which in a phonics game is worse than
+ * nothing, so with no recording nothing is said, and a game that needs bare
+ * sounds checks hasSound() before it offers itself.
+ */
+export function saySound(phoneme: string, options: { onEnd?: () => void } = {}): void {
+  if (!enabled || !hasSound(phoneme)) { options.onEnd?.(); return; }
+  cancelSpeech();
+  void playSound(phoneme, { onEnd: options.onEnd }).then((played) => { if (!played) options.onEnd?.(); });
 }
 
 function speakAloud(text: string, options: SayOptions): void {
