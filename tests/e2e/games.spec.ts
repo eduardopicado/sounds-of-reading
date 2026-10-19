@@ -3,7 +3,7 @@
  * way the child does, by looking at the screen and tapping. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, openSetup, watchPage } from './helpers';
 
 test.describe('Memory Match', () => {
   test('plays a full round through to the win screen', async ({ page }) => {
@@ -398,6 +398,7 @@ test.describe('Same Sound, Two Ways', () => {
   });
 
   test('says the word, since hearing it is the only clue', async ({ page }) => {
+    await noRecordings(page);
     await page.addInitScript(() => {
       const spoken: string[] = [];
       (window as unknown as { __said: unknown }).__said = spoken;
@@ -513,6 +514,7 @@ test.describe('Tricky Words', () => {
   });
 
   test('says nothing until the word has been found', async ({ page }) => {
+    await noRecordings(page);
     await page.addInitScript(() => {
       const spoken: string[] = [];
       (window as unknown as { __said: unknown }).__said = spoken;
@@ -720,8 +722,10 @@ test.describe('Sound Rocket', () => {
 /* ── Penalty Shootout ─────────────────────────────────────────────────── */
 
 /** a speech engine that writes down what it is asked to say and finishes at
- *  once, so a test can hear the word the way the child does */
+ *  once, so a test can hear the word the way the child does; nothing is
+ *  recorded, so every word goes to it */
 async function recordSpeech(page: Page): Promise<void> {
+  await noRecordings(page);
   await page.addInitScript(() => {
     const spoken: string[] = [];
     (window as unknown as { __said: string[] }).__said = spoken;

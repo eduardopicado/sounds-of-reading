@@ -51,8 +51,11 @@ export async function expectTapTargets(page: Page, selector: string): Promise<vo
   expect(small, 'tap targets under 40px').toEqual([]);
 }
 
-/** a speech engine that writes down what it says, so a test can hear it too */
+/** a speech engine that writes down what it says, so a test can hear it
+    too; and nothing recorded, so everything goes to it (recordPlays below
+    is how a test hears a recording) */
 export async function recordSpeech(page: Page): Promise<void> {
+  await noRecordings(page);
   await page.addInitScript(() => {
     const spoken: string[] = [];
     (window as unknown as { __said: string[] }).__said = spoken;
@@ -85,6 +88,14 @@ export async function recordSpeech(page: Page): Promise<void> {
     voice: with no clips listed, everything is spoken */
 export async function noRecordings(page: Page): Promise<void> {
   await page.context().route('**/audio/clips.json', (route) => route.fulfill({ json: [] }));
+}
+
+/** the app with only the recordings `keep` says yes to */
+export async function onlyRecordings(page: Page, keep: (id: string) => boolean): Promise<void> {
+  await page.context().route('**/audio/clips.json', async (route) => {
+    const ids = (await (await route.fetch()).json()) as string[];
+    await route.fulfill({ json: ids.filter(keep) });
+  });
 }
 
 /** a player that writes down each recording it plays, and ends it at once */

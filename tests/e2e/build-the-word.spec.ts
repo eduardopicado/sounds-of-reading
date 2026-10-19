@@ -1,7 +1,7 @@
 /* Build the Word: hear it, then spell it from the tiles. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, recordSpeech, watchPage } from './helpers';
+import { noProblems, openGame, openSetup, plays, recordPlays, recordSpeech, watchPage } from './helpers';
 
 const lastSaid = (page: Page): Promise<string> =>
   page.evaluate(() => { const s = (window as unknown as { __said: string[] }).__said; return s[s.length - 1] ?? ''; });
@@ -93,5 +93,16 @@ test.describe('Build the Word', () => {
     await page.getByLabel('Which tiles').selectOption('letters');
     const word = await lastSaid(page);
     await expect(page.locator('.bw-slot')).toHaveCount(word.length);
+  });
+
+  test("plays the word's recording, Stuart's voice, not the device's", async ({ page }) => {
+    const watch = watchPage(page);
+    await recordPlays(page);
+    await openGame(page, 'build-the-word');
+    await expect(page.locator('.score')).toContainText('Word 1');
+    /* the empty plays are the silent unlock iOS needs; the word is a recording */
+    await expect.poll(async () => (await plays(page)).filter((src) => /\/audio\/[0-9a-f]{8}\.mp3$/.test(src)).length, { timeout: 10_000 })
+      .toBeGreaterThan(0);
+    noProblems(watch);
   });
 });

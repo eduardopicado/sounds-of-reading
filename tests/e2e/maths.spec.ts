@@ -869,8 +869,13 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-ask')).toContainText('how far is it back to the ten?', { timeout: 10000 });
     const line = page.locator('.jl-line');
     const [a, b, first] = await Promise.all(['data-a', 'data-b', 'data-bridge'].map(async (k) => Number(await line.getAttribute(k))));
-    /* 63: 3 back to 60, and the 7 that makes the ten is offered too */
-    await tapNumber(page, 10 - first);
+    /* 63: 3 back to 60, and the 7 that makes the ten is offered too; from
+       a number ending in 5 the two parts are the same, so any wrong one */
+    if (10 - first !== first) await tapNumber(page, 10 - first);
+    else {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 6000 });
+      await page.locator(`.mx-choice:not([data-n="${first}"])`).first().click();
+    }
     await expect(page.locator('.mx-note')).toHaveText(`${a} is ${first} from ${a - first}.`);
     await expect(line).toHaveAttribute('data-at', String(a - first), { timeout: 4000 });
     const rest = b - first;

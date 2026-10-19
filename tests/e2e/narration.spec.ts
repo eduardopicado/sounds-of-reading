@@ -1,7 +1,13 @@
 /* The football commentator: "Goooool do Brasil!", "Defendeu o goleiro!" */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, noRecordings, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, onlyRecordings, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
+import { clips } from '../../tools/make-audio';
+import { clipId } from '../../src/lib/clip-id';
+
+/** the recordings in English, which the commentator's recording test leaves
+    out so the word he is asked for is still spoken where a test can hear it */
+const ENGLISH = new Set(clips().filter((c) => c.voice === 'en').map((c) => clipId(c.text)));
 
 type Said = { text: string; lang: string };
 
@@ -80,6 +86,7 @@ test.describe('the commentator', () => {
   test('plays the commentator\'s recording of the goal where one was made', async ({ page }) => {
     const watch = watchPage(page);
     await voices(page, true, 0, true);
+    await onlyRecordings(page, (id) => !ENGLISH.has(id));
     await recordPlays(page);
     await seed(page, { 'shootout-team': 'brazil', 'shootout-rival': 'argentina' });
     await kickOff(page);
