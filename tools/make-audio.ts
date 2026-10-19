@@ -37,6 +37,7 @@
  *                                             Brazilian voices only
  *   npm run make:audio -- --audition-commentator ID,ID  the same with the commentator's goals and saves
  *   npm run make:audio -- --only rain         one clip, to hear it before the rest
+ *   npm run make:audio -- --voice pt,pt-commentator  only what these voices say (en, pt, pt-commentator)
  *   npm run make:audio                        everything missing
  *
  * Existing files are left alone, so a run costs only what is new.
@@ -344,6 +345,13 @@ async function main(): Promise<void> {
   }
   const only = flag('--only');
   if (only) list = list.filter((c) => speakable(c.text) === speakable(only));
+  const voices = flag('--voice');
+  if (voices) {
+    const asked = voices.split(',').filter(Boolean);
+    const unknown = asked.filter((v) => !(v in VOICE_ENV));
+    if (unknown.length) throw new Error(`no voice called ${unknown.join(', ')}: the voices are ${Object.keys(VOICE_ENV).join(', ')}`);
+    list = list.filter((c) => asked.includes(c.voice));
+  }
 
   mkdirSync(OUT, { recursive: true });
   const already = new Set(readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4)));
