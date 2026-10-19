@@ -924,8 +924,10 @@ export function jumpQuestion(step: JumpStep, last?: JumpQuestion): JumpQuestion 
       /* the second number goes past the ten (or hundred), with something of
          its own place left after it: that is what makes the jump worth making */
       if (b % step.bridge <= to) continue;
-      /* and the first jump is a short one: 38 → 40, 63 → 60 */
-      if (to > step.bridge / 2) continue;
+      /* and the first jump is a short one, shorter than the other part of the
+         ten, which is the slip offered beside it: 38 → 40 (not 8), 63 → 60
+         (not 7). A jump of 5 (or 50) would be its own slip. */
+      if (to >= step.bridge / 2) continue;
     }
     if (last && last.a === a && last.b === b) continue;
     return { a, b, op: step.op, answer };
