@@ -78,6 +78,39 @@ describe('recorded clips', () => {
     }
   });
 
+  it('plays every clip through one element, which the first tap unlocks', async () => {
+    /* Safari lets an element play outside a tap only once it has played
+       inside one, and most words are said a moment after a tap */
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    audio.unlockClips();
+    expect(FakeAudio.made).toHaveLength(1);
+    expect(FakeAudio.made[0].paused).toBe(true);
+    await audio.playClip('cat');
+    await audio.playClip('dog');
+    expect(FakeAudio.made).toHaveLength(1);
+    expect(FakeAudio.made[0].src).toBe(`./audio/${clipId('dog')}.mp3`);
+  });
+
+  it('does not say a word again in the device voice when the next word cuts it short', async () => {
+    /* an element still starting a word, the way a real one is for a moment:
+       stopping it (or giving it the next word) rejects the play it was on */
+    class Starting extends FakeAudio {
+      stopped: ((e: Error) => void) | null = null;
+      play(): Promise<void> { this.paused = false; return new Promise((_, fail) => { this.stopped = fail; }); }
+      pause(): void { this.paused = true; this.stopped?.(new Error('AbortError')); this.stopped = null; }
+    }
+    vi.stubGlobal('Audio', Starting);
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    const cat = audio.playClip('cat');
+    const dog = audio.playClip('dog');
+    /* true: nothing for the caller to fall back to, the next word took over */
+    expect(await cat).toBe(true);
+    audio.stopClips();
+    expect(await dog).toBe(true);
+  });
+
   it('has no clip for a word that was not recorded', async () => {
     const audio = await import('../../src/lib/audio');
     await audio.loadClips('./audio/clips.json');

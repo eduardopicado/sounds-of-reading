@@ -6,5 +6,5 @@ playwright-report/
 *.local
 .DS_Store
 
-# generated recordings — reproducible from words.ts, too big to commit
-public/audio/*.m4a
+# a voice audition (tools/make-audio.ts --audition), listened to and thrown away
+audition/

@@ -21,7 +21,6 @@ import { clipId, speakable } from './clip-id';
 let have: Set<string> | null = null;
 let loading: Promise<void> | null = null;
 let base = '';
-const cache = new Map<string, HTMLAudioElement>();
 
 /** where the clips live, relative to the page, so any deploy path works */
 export function setClipBase(url: string): void {
@@ -56,12 +55,55 @@ export function hasClip(text: string): boolean {
   return have.has(clipId(text));
 }
 
+/* One element plays every recording.
+ *
+ * Safari on the iPad lets a page start a sound only inside a tap, and it
+ * keeps that permission per element. Most words are said a moment after a
+ * tap, once the ball has flown or the next card is dealt, so an element made
+ * for each word would be refused almost every time and the word would go to
+ * the device voice. An element that has played inside a tap may play again
+ * whenever it likes, so the first tap unlocks this one (unlockClips, from
+ * src/main.ts) and every recording goes through it. One element is also
+ * "one voice at a time" for free. */
+let player: HTMLAudioElement | null = null;
+/** the clip the element holds, so the same word again is not fetched again */
+let holding = '';
+/** counts every play and every stop, so a play cut short knows it was */
+let turn = 0;
+/** a recording has played, so the element is allowed to and needs no more unlocking */
+let unlocked = false;
+
+const element = (): HTMLAudioElement => {
+  player ??= new Audio();
+  return player;
+};
+
 /**
- * Plays the recording, resolving true if it actually played.
+ * Unlocks the player inside a tap, called on every tap until a recording has
+ * played. It is stopped again before a sound comes out (and usually holds
+ * nothing yet, so the play is refused for want of a source), but by then
+ * Safari has marked the element as started by a tap.
+ */
+export function unlockClips(): void {
+  if (unlocked || !have?.size) return;
+  try {
+    const audio = element();
+    /* saying a word already, so already allowed */
+    if (!audio.paused) return;
+    void audio.play()?.catch(() => undefined);
+    audio.pause();
+  } catch {
+    /* the first word said inside a tap unlocks it instead */
+  }
+}
+
+/**
+ * Plays the recording, resolving true if it played, or if it was cut short
+ * by the next word or by stopClips(): either way there is nothing left for
+ * the caller to say.
  *
  * False means the caller should fall back to speech: no clip, or the browser
- * refused to play it — which iOS does until a user gesture has happened, the
- * same gate speechSynthesis sits behind.
+ * refused to play it.
  */
 export async function playClip(
   text: string,
@@ -69,46 +111,47 @@ export async function playClip(
 ): Promise<boolean> {
   if (!hasClip(text)) return false;
   const id = clipId(speakable(text));
+  const mine = (turn += 1);
   try {
-    let audio = cache.get(id);
-    if (!audio) {
-      audio = new Audio(`${base}/${id}.m4a`);
-      audio.preload = 'auto';
-      cache.set(id, audio);
+    const audio = element();
+    /* The handlers must be set every time, including to nothing. Left over,
+       the last caller's onEnd would fire again the next time anyone played a
+       word, even from another game. And once: an error followed by the
+       fallback to speech must not report the end twice. */
+    audio.onended = null;
+    audio.pause();
+    if (holding !== id) {
+      audio.src = `${base}/${id}.mp3`;
+      holding = id;
     }
     audio.currentTime = 0;
     /* "sound it out for me" slows the recording rather than dropping to the
-       device voice, which would change who is speaking mid-game */
-    audio.playbackRate = options.slow ? 0.6 : 1;
-    /* one voice at a time, the way cancel() works for speech */
-    for (const [otherId, other] of cache) if (otherId !== id) other.pause();
-    /* The element is cached and reused, so its handlers must be set every
-       time — including to nothing. Left over, the last caller's onEnd would
-       fire again the next time anyone played this word, even from another
-       game. And once: an error followed by the fallback to speech must not
-       report the end twice. */
+       device voice, which would change who is speaking mid-game. Loading a
+       new clip resets the rate to the default, so both are set */
+    audio.defaultPlaybackRate = audio.playbackRate = options.slow ? 0.6 : 1;
     let ended = false;
-    const end = options.onEnd ? () => { if (!ended) { ended = true; options.onEnd?.(); } } : null;
-    audio.onended = end;
-    audio.onerror = null;
+    audio.onended = options.onEnd ? () => { if (!ended) { ended = true; options.onEnd?.(); } } : null;
     await audio.play();
+    unlocked = true;
     return true;
   } catch {
+    /* cut short: the next word, or leaving the game, has taken over */
+    if (mine !== turn) return true;
     /* blocked or missing: the caller speaks it instead, and reports the end */
-    const audio = cache.get(id);
-    if (audio) { audio.onended = null; audio.onerror = null; }
+    if (player) player.onended = null;
+    holding = '';
     return false;
   }
 }
 
 /** stop any recording that is playing, for leaving a game or the device voice taking over */
 export function stopClips(): void {
-  for (const audio of cache.values()) {
-    try {
-      audio.onended = null;
-      audio.pause();
-    } catch {
-      /* already stopped */
-    }
+  turn += 1;
+  if (!player) return;
+  try {
+    player.onended = null;
+    player.pause();
+  } catch {
+    /* already stopped */
   }
 }

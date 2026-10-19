@@ -168,6 +168,45 @@ describe('choosing a voice', () => {
   });
 });
 
+describe('a line in Portuguese', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build with a recording of each of these lines */
+  async function recorded(lines: string[]): Promise<string[]> {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => lines.map((l) => clipId(l)) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    return played;
+  }
+
+  it('plays its recording where there is one, with no Portuguese voice needed', async () => {
+    const speech = await load([voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen')]);
+    const played = await recorded(['Goooool do Brasil!']);
+    speech.say('Goooool do Brasil!', { lang: 'pt-BR' });
+    await settle();
+    expect(played).toHaveLength(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says nothing, rather than mangle it in the English voice, with neither', async () => {
+    const speech = await load([voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen')]);
+    await recorded([]);
+    const onEnd = vi.fn();
+    speech.say('Goooool do Brasil!', { lang: 'pt-BR', onEnd });
+    await settle();
+    expect(engine.said).toEqual([]);
+    /* and a game waiting for the end of it is not left waiting */
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('the first tap', () => {
   afterEach(() => { vi.unstubAllGlobals(); });
 

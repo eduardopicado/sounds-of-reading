@@ -466,3 +466,82 @@ export function signalQuestion(step: SignalStep, last?: SignalQuestion): SignalQ
     return q;
   }
 }
+
+/* ── what the referee games say ──────────────────────────────────────────
+ *
+ * Every line Ref's Call and Ref's Signals say aloud, each way. Built here
+ * rather than in the games so that tools/make-audio.ts can record each one
+ * exactly as it is said: a line that differs by a word from its recording
+ * plays in the device voice. */
+
+const cap = (s: string): string => s[0].toUpperCase() + s.slice(1);
+
+/** how each signal is made, said after a miss so he learns it */
+export const SIGNAL_HOW: Record<Signal, Both> = {
+  'points-2': { en: 'Two fingers up is 2 points.', pt: 'Dois dedos para cima são dois pontos.' },
+  'points-3': { en: 'Three fingers up is 3 points.', pt: 'Três dedos para cima são três pontos.' },
+  'points-4': { en: 'Four fingers up is 4 points.', pt: 'Quatro dedos para cima são quatro pontos.' },
+  advantage: { en: 'An open hand out flat is an advantage.', pt: 'A mão aberta, esticada e reta, é vantagem.' },
+  penalty: { en: 'A fist at the shoulder is a penalty.', pt: 'O punho fechado no ombro é punição.' },
+  parou: { en: 'Both arms out means stop: Parou!', pt: 'Os dois braços abertos: Parou!' },
+  dq: { en: 'Arms crossed over the head means disqualified.', pt: 'Braços cruzados sobre a cabeça: desclassificado.' },
+};
+
+/** Ref's Call */
+export const REF_SAYS = {
+  /** "Mount. How many points?" */
+  points: (m: Move): Both => ({ en: `${cap(m.name.en)}. How many points?`, pt: `${cap(m.name.pt)}. Quantos pontos?` }),
+  /** "Which move is worth 4 points?" */
+  which: (n: number): Both => ({ en: `Which move is worth ${pointsWords(n, 'en')}?`, pt: `Qual vale ${pointsWords(n, 'pt')}?` }),
+  /** what happened on the mat, then the question */
+  moment: (m: Moment): Both => ({ en: `${m.text.en} What does the referee give?`, pt: `${m.text.pt} O que o árbitro dá?` }),
+  /** "A mount is 4 points." */
+  worth: (m: Move): Both => ({ en: `A ${m.name.en} is ${pointsWords(m.points, 'en')}.`, pt: `${cap(m.name.pt)} vale ${pointsWords(m.points, 'pt')}.` }),
+  /** the referee's call where a move scored ("Mount! 4 points!"), then why */
+  answer: (how: Both, move?: Move): Both =>
+    (move ? { en: `${refCall(move, 'en')} ${how.en}`, pt: `${refCall(move, 'pt')} ${how.pt}` } : how),
+};
+
+/** Ref's Signals */
+export const SIGNAL_SAYS = {
+  fingers: { en: 'How many points is the referee giving?', pt: 'Quantos pontos o árbitro está dando?' } as Both,
+  kind: { en: 'What is the referee giving?', pt: 'O que o árbitro está dando?' } as Both,
+  move: { en: 'Which move did Blue score?', pt: 'Qual golpe o Azul fez?' } as Both,
+  referee: { en: 'You are the referee. Which signal?', pt: 'Você é o árbitro. Qual é o sinal?' } as Both,
+  meaning: { en: 'What does this signal mean?', pt: 'O que este sinal quer dizer?' } as Both,
+  /** "3 fingers is 3 points: guard pass." */
+  scored: (m: Move): Both => ({
+    en: `${m.points} fingers is ${pointsWords(m.points, 'en')}: ${m.name.en}.`,
+    pt: `${m.points} dedos são ${pointsWords(m.points, 'pt')}: ${m.name.pt}.`,
+  }),
+  /** what happened on the mat, then "You are the referee. Which signal?" */
+  moment: (m: Moment): Both => ({ en: `${m.text.en} ${SIGNAL_SAYS.referee.en}`, pt: `${m.text.pt} ${SIGNAL_SAYS.referee.pt}` }),
+  /** why that call, then how its signal is made */
+  answer: (m: Moment): Both => {
+    const how = SIGNAL_HOW[signalFor(m)];
+    return { en: `${m.why.en} ${how.en}`, pt: `${m.why.pt} ${how.pt}` };
+  },
+  /** "Parou! What does it mean?" */
+  call: (c: Command): Both => ({ en: `${COMMANDS[c].said} What does it mean?`, pt: `${COMMANDS[c].said} O que quer dizer?` }),
+  /** "Parou! means: Stop." */
+  means: (c: Command): Both => ({
+    en: `${COMMANDS[c].said} means: ${COMMANDS[c].means.en}.`,
+    pt: `${COMMANDS[c].said} quer dizer: ${COMMANDS[c].means.pt}.`,
+  }),
+};
+
+/** every line the two referee games can say, for the recordings */
+export function refereeLines(): Both[] {
+  const commands = Object.keys(COMMANDS) as Command[];
+  return [
+    ...MOVES.flatMap((m) => [REF_SAYS.points(m), REF_SAYS.answer(REF_SAYS.worth(m), m), SIGNAL_SAYS.scored(m)]),
+    ...[2, 3, 4].map((n) => REF_SAYS.which(n)),
+    ...MOMENTS.flatMap((m) => [
+      REF_SAYS.moment(m), REF_SAYS.answer(m.why, m.move ? moveById(m.move) : undefined),
+      SIGNAL_SAYS.moment(m), SIGNAL_SAYS.answer(m),
+    ]),
+    SIGNAL_SAYS.fingers, SIGNAL_SAYS.kind, SIGNAL_SAYS.move, SIGNAL_SAYS.meaning,
+    ...Object.values(SIGNAL_HOW),
+    ...commands.flatMap((c) => [SIGNAL_SAYS.call(c), SIGNAL_SAYS.means(c)]),
+  ];
+}

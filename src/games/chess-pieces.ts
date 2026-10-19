@@ -61,7 +61,7 @@ function build(kit: Kit) {
         after.set(sq, after.get(q.from)!);
         after.delete(q.from);
         board.draw(after, ok ? [] : q.balls);
-        sfx.tap();
+        sfx.move();
       }
       if (!ok) {
         board.dots(can);

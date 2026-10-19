@@ -85,7 +85,7 @@ function build(kit: Kit) {
         used += 1;
         const got = left.includes(sq);
         left = left.filter((b) => b !== sq);
-        sfx.tap();
+        sfx.move();
         if (got) sfx.right();
         show();
         if (left.length) return;

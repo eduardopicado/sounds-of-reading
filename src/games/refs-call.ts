@@ -17,7 +17,7 @@
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import {
-  CALL_NAME, MOVES, REF_STEPS, pointsWords, refCall, refQuestion,
+  CALL_NAME, MOVES, REF_SAYS, REF_STEPS, refQuestion,
   type Both, type Call, type Move, type RefQuestion, type RefStep,
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
@@ -35,8 +35,6 @@ export function mount(root: HTMLElement): () => void {
     build,
   }, root);
 }
-
-const cap = (s: string): string => s[0].toUpperCase() + s.slice(1);
 
 function build(kit: Kit) {
   const langs = langSwitch();
@@ -60,9 +58,7 @@ function build(kit: Kit) {
   }
 
   async function finish(ok: boolean, how: Both, call?: Move): Promise<boolean> {
-    const said: Both = call
-      ? { en: `${refCall(call, 'en')} ${how.en}`, pt: `${refCall(call, 'pt')} ${how.pt}` }
-      : how;
+    const said = REF_SAYS.answer(how, call);
     if (ok) sfx.cheer(); else sfx.wrong();
     const show = (): void => kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${said[lang()]}`, ok);
     show();
@@ -80,35 +76,29 @@ function build(kit: Kit) {
       card.querySelector('.bj-name')!.textContent = q.move.name[lang()];
     };
     retext();
-    speak({ en: `${cap(q.move.name.en)}. How many points?`, pt: `${cap(q.move.name.pt)}. Quantos pontos?` }, lang());
+    speak(REF_SAYS.points(q.move), lang());
     const picked = await kit.choices.ask([2, 3, 4]);
     kit.choices.reveal(q.move.points, picked);
-    return finish(picked === q.move.points, {
-      en: `A ${q.move.name.en} is ${pointsWords(q.move.points, 'en')}.`,
-      pt: `${cap(q.move.name.pt)} vale ${pointsWords(q.move.points, 'pt')}.`,
-    }, q.move);
+    return finish(picked === q.move.points, REF_SAYS.worth(q.move), q.move);
   }
 
   async function which(q: RefQuestion): Promise<boolean> {
     card.replaceChildren(el('div', { class: 'bj-row' }, ...q.options.map((m) => moveCard(m, true, true))));
     const n = q.move.points;
     retext = () => {
-      ask.textContent = lang() === 'pt' ? `Qual vale ${pointsWords(n, 'pt')}?` : `Which move is worth ${pointsWords(n, 'en')}?`;
+      ask.textContent = REF_SAYS.which(n)[lang()];
       card.querySelectorAll<HTMLElement>('.bj-move').forEach((c) => {
         c.querySelector('.bj-name')!.textContent = MOVES.find((m) => m.id === c.dataset.move)!.name[lang()];
       });
       kit.choices.relabel((id) => MOVES.find((m) => m.id === id)!.name[lang()]);
     };
     ask.textContent = '';
-    speak({ en: `Which move is worth ${pointsWords(n, 'en')}?`, pt: `Qual vale ${pointsWords(n, 'pt')}?` }, lang());
+    speak(REF_SAYS.which(n), lang());
     const asked = kit.choices.askWords(q.options.map((m) => m.id), (id) => MOVES.find((m) => m.id === id)!.name[lang()]);
     retext();
     const picked = await asked;
     kit.choices.revealWord(q.move.id, picked);
-    return finish(picked === q.move.id, {
-      en: `A ${q.move.name.en} is ${pointsWords(n, 'en')}.`,
-      pt: `${cap(q.move.name.pt)} vale ${pointsWords(n, 'pt')}.`,
-    }, q.move);
+    return finish(picked === q.move.id, REF_SAYS.worth(q.move), q.move);
   }
 
   async function call(q: RefQuestion): Promise<boolean> {
@@ -119,7 +109,7 @@ function build(kit: Kit) {
       card.querySelector('.bj-moment')!.textContent = moment.text[lang()];
       kit.choices.relabel((c) => CALL_NAME[c as Call][lang()]);
     };
-    speak({ en: `${moment.text.en} What does the referee give?`, pt: `${moment.text.pt} O que o árbitro dá?` }, lang());
+    speak(REF_SAYS.moment(moment), lang());
     const options: Call[] = ['points', 'advantage', 'penalty'];
     const asked = kit.choices.askWords(options, (c) => CALL_NAME[c as Call][lang()]);
     retext();

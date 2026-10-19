@@ -145,8 +145,8 @@ function build(kit: Kit) {
         frame(t, shot.frames[i]);
         for (; heard < shot.bumps.length && shot.bumps[heard].frame <= i; heard += 1) {
           const what = shot.bumps[heard].what;
-          if (what === 'touch') sfx.kick();
-          else if (what === 'post') sfx.crack();
+          if (what === 'touch') sfx.clack();
+          else if (what === 'post') sfx.post();
           else sfx.tap();
         }
         if (i >= shot.frames.length - 1) { done(); return; }
