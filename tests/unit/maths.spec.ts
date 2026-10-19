@@ -646,9 +646,10 @@ describe('Jump Line', () => {
         if (step.bridge) {
           const first = bridgeOf(q, step.bridge);
           const to = q.a + (q.op === '+' ? first : -first);
-          /* the first jump lands on a ten (or a hundred), is a short one, and the sum goes past it */
+          /* the first jump lands on a ten (or a hundred), is shorter than the
+             other part (so that part can be the slip), and the sum goes past it */
           expect(to % step.bridge, what).toBe(0);
-          expect(first).toBeLessThanOrEqual(step.bridge / 2);
+          expect(first, what).toBeLessThan(step.bridge - first);
           expect(q.b % step.bridge, what).toBeGreaterThan(first);
         }
       }

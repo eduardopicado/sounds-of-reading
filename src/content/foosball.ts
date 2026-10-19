@@ -7,11 +7,14 @@
  * whole lesson, and a wrong word he builds is one the game can name.
  *
  * A rod never offers a second spelling of the sound it needs (c beside k,
- * ai beside ay): he hears the word, so he could not tell which was meant. And
- * no setting of the rods may spell a word that sounds like the one asked for
- * (pair, pear). */
+ * ai beside ay): he hears the word, so he could not tell which was meant. No
+ * setting of the rods may spell a word that sounds like the one asked for
+ * (pair, pear). And none may spell a word on the blocklist, or have one
+ * inside it, unless it is a real word from the lists (shell, with hell in
+ * it): the lane's letters are on the screen, whatever they spell. */
 
-import { REAL_WORDS, SOUND_BY_ID, soundsAlike, uniqueWords, type Word } from './index';
+import { BLOCKLIST, REAL_WORDS, SOUND_BY_ID, soundsAlike, uniqueWords, type Word } from './index';
+import { NOT_BY_CHANCE } from './words';
 import { pieces } from './graphemes';
 import type { Step } from './maths';
 
@@ -58,11 +61,40 @@ export const sameSound = (a: string, b: string): boolean => a === b || SAME.some
 const isVowel = (part: string, at: number): boolean =>
   (/[aeiou]/.test(part) && part !== 'qu') || (part === 'y' && at > 0);
 
+const BY_TEXT = new Map(CUTS.map((c) => [c.word.text, c]));
+
 /** the real word these parts spell, if there is one */
-export const wordOf = (parts: readonly string[]): Cut | undefined => {
+export const wordOf = (parts: readonly string[]): Cut | undefined => BY_TEXT.get(parts.join(''));
+
+const NEVER = new Set([...BLOCKLIST, ...NOT_BY_CHANCE]);
+/* The blocked words that are only a problem on their own: the toilet words,
+   the drinks and the fighting. Inside other letters (weet, gunt) they are
+   nothing. The rest, the swearing and the slurs, are rude wherever they sit
+   (shits), unless the whole row is a real word (shell). */
+const ALONE = new Set(['wee', 'pee', 'poo', 'bum', 'butt', 'fart', 'ass', 'willy', 'gut', 'hell', 'damn', 'hate',
+  'die', 'dead', 'death', 'kill', 'gun', 'stab', 'blood', 'gin', 'rum', 'beer', 'wine', 'drug']);
+const RUDE = [...NEVER].filter((w) => !ALONE.has(w));
+
+/**
+ * A row of players not fit to show: a blocked word, or a rude one inside
+ * letters that are not a real word. With the word being built, rude letters
+ * that are all its own players in its own places (the "tit" in st·i·tch,
+ * with another first sound) are not a new word, so they do not count.
+ */
+export function unfit(parts: readonly string[], own?: readonly string[]): boolean {
   const text = parts.join('');
-  return CUTS.find((c) => c.word.text === text);
-};
+  if (NEVER.has(text)) return true;
+  if (BY_TEXT.has(text)) return false;
+  const ends = parts.reduce<number[]>((acc, p) => [...acc, (acc.at(-1) ?? 0) + p.length], []);
+  for (const bad of RUDE) {
+    for (let at = text.indexOf(bad); at >= 0; at = text.indexOf(bad, at + 1)) {
+      /* the rods those letters are on */
+      const from = parts.map((_, k) => k).filter((k) => ends[k] - parts[k].length < at + bad.length && ends[k] > at);
+      if (!own || from.some((k) => parts[k] !== own[k])) return true;
+    }
+  }
+  return false;
+}
 
 export interface FoosQuestion {
   target: Cut;
@@ -91,9 +123,13 @@ function settings(rods: string[][]): string[][] {
  * The rods for a word: on each, its own sound and the others it can be
  * swapped for. Words that differ from it by one sound come first; then any
  * sound of the same kind (a vowel for a vowel) in that place in the words of
- * that length, then anywhere in them.
+ * that length, then anywhere in them. `avoid` holds, for each rod, players
+ * taken off because the rods could spell something unfit with them.
  */
-export function foosQuestion(target: Cut, step: FoosStep, rand: Rand = Math.random, tries = 0): FoosQuestion {
+export function foosQuestion(
+  target: Cut, step: FoosStep, rand: Rand = Math.random, tries = 0,
+  avoid: string[][] = target.parts.map(() => []),
+): FoosQuestion {
   const n = target.parts.length;
   /* only sounds taught by the word's own level, so every player is one he knows */
   const same = CUTS.filter((c) => c.parts.length === n && c.word.level <= target.word.level);
@@ -108,7 +144,7 @@ export function foosQuestion(target: Cut, step: FoosStep, rand: Rand = Math.rand
     const out = [part];
     for (const p of [...shuffled([...new Set(near)], rand), ...shuffled([...new Set(here)], rand), ...shuffled([...new Set(anywhere)], rand)]) {
       if (out.length >= step.players) break;
-      if (out.some((o) => sameSound(o, p))) continue;
+      if (avoid[i].includes(p) || out.some((o) => sameSound(o, p))) continue;
       /* a swap that sounds like the word asked for is no wrong answer */
       const swapped = target.parts.map((q, j) => (j === i ? p : q)).join('');
       if (soundsAlike(swapped, target.word.text)) continue;
@@ -116,18 +152,30 @@ export function foosQuestion(target: Cut, step: FoosStep, rand: Rand = Math.rand
     }
     return shuffled(out, rand);
   });
-  /* nor may two swaps together spell one */
+  /* nothing unfit, in any setting of the rods: take off a player that
+     makes it (never the word's own) and build the rods again. The word
+     itself is fit, so each time one player goes, and it ends */
+  for (const parts of settings(rods)) {
+    if (!unfit(parts, target.parts)) continue;
+    /* from the rod with the most players, so none is left with only its own */
+    const j = parts.map((_, k) => k).filter((k) => parts[k] !== target.parts[k])
+      .reduce((best, k) => (rods[k].length >= rods[best].length ? k : best));
+    return foosQuestion(target, step, rand, tries, avoid.map((a, k) => (k === j ? [...a, parts[j]] : a)));
+  }
+  /* nor may two swaps together spell one that sounds like it */
   for (const parts of settings(rods)) {
     const text = parts.join('');
     if (text !== target.word.text && soundsAlike(text, target.word.text) && tries < 20) {
-      return foosQuestion(target, step, rand, tries + 1);
+      return foosQuestion(target, step, rand, tries + 1, avoid);
     }
   }
   /* start away from the answer: most rods on a wrong player */
   let start: number[];
+  /* (a rod left with only its own player can only start on it) */
+  const alone = rods.filter((rod) => rod.length === 1).length;
   do {
     start = rods.map((rod) => Math.floor(rand() * rod.length));
-  } while (start.filter((s, i) => rods[i][s] === target.parts[i]).length > (n > 3 ? 1 : 0));
+  } while (start.filter((s, i) => rods[i][s] === target.parts[i]).length > alone + (n > 3 ? 1 : 0));
   return { target, rods, start };
 }
 
