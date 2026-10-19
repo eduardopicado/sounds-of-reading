@@ -19,6 +19,7 @@
  * well as Europe is west of Asia, from Arabia. */
 
 import type { Step } from './maths';
+import { The, of, pt, the, thatIs, thisIs, whereIs, isHere, type Both, type Lang, type PtName } from './pt';
 
 export type ContinentId = 'africa' | 'antarctica' | 'asia' | 'australia' | 'europe' | 'north-america' | 'south-america';
 export type OceanId = 'pacific' | 'atlantic' | 'indian' | 'southern' | 'arctic';
@@ -34,33 +35,48 @@ export interface Place {
   labels: [number, number][];
   /** one true thing about it, said when he finds it */
   fact: string;
+  /** its name in Portuguese, and the fact */
+  pt: PtName;
+  factPt: string;
 }
 
 export const PLACES: Place[] = [
   { id: 'africa', kind: 'continent', name: 'Africa', labels: [[20, 4]],
-    fact: 'Africa has more countries than any other continent.' },
+    fact: 'Africa has more countries than any other continent.',
+    pt: pt('África', 'f'), factPt: 'A África tem mais países do que qualquer outro continente.' },
   { id: 'antarctica', kind: 'continent', name: 'Antarctica', labels: [[20, -75]],
-    fact: 'Antarctica is the coldest place on Earth, and nearly all of it is covered in ice.' },
+    fact: 'Antarctica is the coldest place on Earth, and nearly all of it is covered in ice.',
+    pt: pt('Antártida', 'f'), factPt: 'A Antártida é o lugar mais frio da Terra, e quase toda ela é coberta de gelo.' },
   { id: 'asia', kind: 'continent', name: 'Asia', labels: [[95, 48]],
-    fact: 'Asia is the biggest continent, and more people live there than anywhere else.' },
+    fact: 'Asia is the biggest continent, and more people live there than anywhere else.',
+    pt: pt('Ásia', 'f'), factPt: 'A Ásia é o maior continente, e é onde mora mais gente.' },
   { id: 'australia', kind: 'continent', name: 'Australia', labels: [[134, -25]],
-    fact: 'Australia is the smallest continent. With New Zealand and the Pacific islands, some maps call it Oceania.' },
+    fact: 'Australia is the smallest continent. With New Zealand and the Pacific islands, some maps call it Oceania.',
+    pt: pt('Austrália', 'f'), factPt: 'A Austrália é o menor continente. Com a Nova Zelândia e as ilhas do Pacífico, alguns mapas a chamam de Oceania.' },
   { id: 'europe', kind: 'continent', name: 'Europe', labels: [[16, 51]],
-    fact: 'Europe is the second smallest continent, and it has lots of countries close together.' },
+    fact: 'Europe is the second smallest continent, and it has lots of countries close together.',
+    pt: pt('Europa', 'f'), factPt: 'A Europa é o segundo menor continente, e tem muitos países pertinho uns dos outros.' },
   { id: 'north-america', kind: 'continent', name: 'North America', labels: [[-102, 47]],
-    fact: 'North America has Canada, the United States and Mexico in it.' },
+    fact: 'North America has Canada, the United States and Mexico in it.',
+    pt: pt('América do Norte', 'f'), factPt: 'Na América do Norte ficam o Canadá, os Estados Unidos e o México.' },
   { id: 'south-america', kind: 'continent', name: 'South America', labels: [[-60, -12]],
-    fact: 'Brazil is the biggest country in South America.' },
+    fact: 'Brazil is the biggest country in South America.',
+    pt: pt('América do Sul', 'f'), factPt: 'O Brasil é o maior país da América do Sul.' },
   { id: 'pacific', kind: 'ocean', name: 'Pacific Ocean', labels: [[-138, -2], [160, 18]],
-    fact: 'The Pacific is the biggest and the deepest ocean.' },
+    fact: 'The Pacific is the biggest and the deepest ocean.',
+    pt: pt('Oceano Pacífico', 'm'), factPt: 'O Pacífico é o maior e o mais fundo de todos os oceanos.' },
   { id: 'atlantic', kind: 'ocean', name: 'Atlantic Ocean', labels: [[-37, 24]],
-    fact: 'The Atlantic Ocean is between the Americas, and Europe and Africa.' },
+    fact: 'The Atlantic Ocean is between the Americas, and Europe and Africa.',
+    pt: pt('Oceano Atlântico', 'm'), factPt: 'O Oceano Atlântico fica entre as Américas, e a Europa e a África.' },
   { id: 'indian', kind: 'ocean', name: 'Indian Ocean', labels: [[75, -20]],
-    fact: 'The Indian Ocean is the warmest ocean.' },
+    fact: 'The Indian Ocean is the warmest ocean.',
+    pt: pt('Oceano Índico', 'm'), factPt: 'O Oceano Índico é o oceano mais quente.' },
   { id: 'southern', kind: 'ocean', name: 'Southern Ocean', labels: [[130, -48]],
-    fact: 'The Southern Ocean goes all the way around Antarctica.' },
+    fact: 'The Southern Ocean goes all the way around Antarctica.',
+    pt: pt('Oceano Austral', 'm'), factPt: 'O Oceano Austral dá a volta inteira na Antártida.' },
   { id: 'arctic', kind: 'ocean', name: 'Arctic Ocean', labels: [[170, 76]],
-    fact: 'The Arctic is the smallest ocean, and a lot of it is frozen.' },
+    fact: 'The Arctic is the smallest ocean, and a lot of it is frozen.',
+    pt: pt('Oceano Ártico', 'm'), factPt: 'O Ártico é o menor oceano, e boa parte dele é congelada.' },
 ];
 
 export const place = (id: PlaceId): Place => PLACES.find((p) => p.id === id)!;
@@ -69,6 +85,8 @@ export const place = (id: PlaceId): Place => PLACES.find((p) => p.id === id)!;
 export const called = (p: Place): string => (p.kind === 'ocean' ? `the ${p.name}` : p.name);
 /** the same at the start of a sentence */
 export const Called = (p: Place): string => (p.kind === 'ocean' ? `The ${p.name}` : p.name);
+/** its name on the map and on a button, in either language */
+export const nameIn = (p: Place, lang: Lang): string => (lang === 'pt' ? p.pt.name : p.name);
 
 /* ── the questions ───────────────────────────────────────────────────── */
 
@@ -114,39 +132,68 @@ export const BETWEEN: Between[] = [
   { a: 'atlantic', b: 'indian', answer: 'africa' },
 ];
 
-const kindWord = (id: PlaceId): string => place(id).kind;
+const kindWord = (id: PlaceId, lang: Lang = 'en'): string =>
+  (lang === 'pt' ? { continent: 'continente', ocean: 'oceano' } : { continent: 'continent', ocean: 'ocean' })[place(id).kind];
+
+const DIR_PT: Record<Compass, string> = { north: 'ao norte', south: 'ao sul', east: 'a leste', west: 'a oeste' };
 
 /** the question and the answer, as said */
-export const directionSays = (d: Direction): { ask: string; answer: string } => ({
-  ask: `Which ${kindWord(d.answer)} is ${d.dir} of ${called(place(d.of))}?`,
-  answer: `${Called(place(d.answer))} is ${d.dir} of ${called(place(d.of))}.`,
-});
+export const directionSays = (d: Direction, lang: Lang = 'en'): { ask: string; answer: string } => {
+  const [of_, answer] = [place(d.of), place(d.answer)];
+  if (lang === 'pt') {
+    return {
+      ask: `Qual ${kindWord(d.answer, 'pt')} fica ${DIR_PT[d.dir]} ${of(of_.pt)}?`,
+      answer: `${The(answer.pt)} fica ${DIR_PT[d.dir]} ${of(of_.pt)}.`,
+    };
+  }
+  return {
+    ask: `Which ${kindWord(d.answer)} is ${d.dir} of ${called(of_)}?`,
+    answer: `${Called(answer)} is ${d.dir} of ${called(of_)}.`,
+  };
+};
 
-export const betweenSays = (b: Between): { ask: string; answer: string } => ({
-  ask: `Which ${kindWord(b.answer)} is between ${called(place(b.a))} and ${called(place(b.b))}?`,
-  answer: `${Called(place(b.answer))} is between ${called(place(b.a))} and ${called(place(b.b))}.`,
-});
+export const betweenSays = (b: Between, lang: Lang = 'en'): { ask: string; answer: string } => {
+  const [a, c, answer] = [place(b.a), place(b.b), place(b.answer)];
+  if (lang === 'pt') {
+    return {
+      ask: `Qual ${kindWord(b.answer, 'pt')} fica entre ${the(a.pt)} e ${the(c.pt)}?`,
+      answer: `${The(answer.pt)} fica entre ${the(a.pt)} e ${the(c.pt)}.`,
+    };
+  }
+  return {
+    ask: `Which ${kindWord(b.answer)} is between ${called(a)} and ${called(c)}?`,
+    answer: `${Called(answer)} is between ${called(a)} and ${called(c)}.`,
+  };
+};
 
 /** finding one place, what is said when he taps another, and naming it */
-export const findSays = (p: Place): { ask: string; here: string; that: string; this: string } => ({
-  ask: `Where is ${called(p)}?`,
-  here: `${Called(p)} is here.`,
-  that: `That is ${called(p)}.`,
-  this: `This is ${called(p)}.`,
-});
+export const findSays = (p: Place, lang: Lang = 'en'): { ask: string; here: string; that: string; this: string } => (lang === 'pt'
+  ? { ask: whereIs(p.pt), here: isHere(p.pt), that: thatIs(p.pt), this: thisIs(p.pt) }
+  : {
+    ask: `Where is ${called(p)}?`,
+    here: `${Called(p)} is here.`,
+    that: `That is ${called(p)}.`,
+    this: `This is ${called(p)}.`,
+  });
+
+/** the fact about a place, in either language */
+export const factIn = (p: Place, lang: Lang): string => (lang === 'pt' ? p.factPt : p.fact);
 
 /* The three seas the map draws that are no ocean's: a tap on one is a
    miss, and he is told which sea it was. */
 export const SEAS = [
-  { id: 'mediterranean', name: 'Mediterranean Sea' },
-  { id: 'black', name: 'Black Sea' },
-  { id: 'caspian', name: 'Caspian Sea' },
+  { id: 'mediterranean', name: 'Mediterranean Sea', pt: pt('Mar Mediterrâneo', 'm') },
+  { id: 'black', name: 'Black Sea', pt: pt('Mar Negro', 'm') },
+  { id: 'caspian', name: 'Caspian Sea', pt: pt('Mar Cáspio', 'm') },
 ] as const;
 export type SeaId = (typeof SEAS)[number]['id'];
 
-export const seaSays = (id: SeaId): { that: string } => ({ that: `That is the ${SEAS.find((x) => x.id === id)!.name}.` });
+export const seaSays = (id: SeaId, lang: Lang = 'en'): { that: string } => {
+  const sea = SEAS.find((x) => x.id === id)!;
+  return { that: lang === 'pt' ? thatIs(sea.pt) : `That is the ${sea.name}.` };
+};
 
-export const NAME_IT = 'What is it called?';
+export const NAME_IT: Both = { en: 'What is it called?', pt: 'Como se chama?' };
 
 /* ── the steps ───────────────────────────────────────────────────────── */
 
@@ -182,6 +229,8 @@ export interface MapQuestion {
   ask: string;
   /** what is said once it is answered: the fact, or the answer in a sentence */
   why: string;
+  /** the same two in Portuguese */
+  pt: { ask: string; why: string };
   /** for "What is it called?": the names to choose from */
   options?: PlaceId[];
   /** the places the question names, which have their names on the map */
@@ -203,12 +252,14 @@ export function mapQuestion(step: MapStep, recent: PlaceId[] = []): MapQuestion 
   if (step.task === 'around' || step.task === 'direction') {
     const d = pickOf(step.task === 'around' ? AROUND_AUSTRALIA : DIRECTIONS, (x) => seen(x.answer));
     const says = directionSays(d);
-    return { task: step.task, answer: d.answer, ask: says.ask, why: says.answer, given: [d.of] };
+    const pts = directionSays(d, 'pt');
+    return { task: step.task, answer: d.answer, ask: says.ask, why: says.answer, pt: { ask: pts.ask, why: pts.answer }, given: [d.of] };
   }
   if (step.task === 'between') {
     const b = pickOf(BETWEEN, (x) => seen(x.answer));
     const says = betweenSays(b);
-    return { task: 'between', answer: b.answer, ask: says.ask, why: says.answer, given: [b.a, b.b] };
+    const pts = betweenSays(b, 'pt');
+    return { task: 'between', answer: b.answer, ask: says.ask, why: says.answer, pt: { ask: pts.ask, why: pts.answer }, given: [b.a, b.b] };
   }
   const pool = PLACES.filter((p) => step.of === 'both' || p.kind === step.of);
   const p = pickOf(pool, (x) => seen(x.id));
@@ -216,18 +267,18 @@ export function mapQuestion(step: MapStep, recent: PlaceId[] = []): MapQuestion 
     /* two other names of the same kind, so "ocean" in the name is no clue */
     const others = PLACES.filter((x) => x.kind === p.kind && x.id !== p.id).sort(() => Math.random() - 0.5).slice(0, 2);
     const options = [p, ...others].map((x) => x.id).sort(() => Math.random() - 0.5);
-    return { task: 'name', answer: p.id, ask: NAME_IT, why: p.fact, options };
+    return { task: 'name', answer: p.id, ask: NAME_IT.en, why: p.fact, pt: { ask: NAME_IT.pt, why: p.factPt }, options };
   }
-  return { task: 'find', answer: p.id, ask: findSays(p).ask, why: p.fact };
+  return { task: 'find', answer: p.id, ask: findSays(p).ask, why: p.fact, pt: { ask: findSays(p, 'pt').ask, why: p.factPt } };
 }
 
-/** every line the game can say, for the recordings (tools/make-audio.ts) */
-export function mapLines(): string[] {
+/** every line the game can say in one language, for the recordings (tools/make-audio.ts) */
+export function mapLines(lang: Lang = 'en'): string[] {
   return [
-    NAME_IT,
-    ...PLACES.flatMap((p) => [p.fact, ...Object.values(findSays(p))]),
-    ...SEAS.map((x) => seaSays(x.id).that),
-    ...[...AROUND_AUSTRALIA, ...DIRECTIONS].flatMap((d) => Object.values(directionSays(d))),
-    ...BETWEEN.flatMap((b) => Object.values(betweenSays(b))),
+    NAME_IT[lang],
+    ...PLACES.flatMap((p) => [factIn(p, lang), ...Object.values(findSays(p, lang))]),
+    ...SEAS.map((x) => seaSays(x.id, lang).that),
+    ...[...AROUND_AUSTRALIA, ...DIRECTIONS].flatMap((d) => Object.values(directionSays(d, lang))),
+    ...BETWEEN.flatMap((b) => Object.values(betweenSays(b, lang))),
   ];
 }

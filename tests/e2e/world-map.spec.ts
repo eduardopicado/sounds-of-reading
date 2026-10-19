@@ -164,4 +164,22 @@ test.describe('World Map', () => {
     await expect(page.locator('.mx-note')).toContainText(' is between ');
     await expect(page.locator('.mx-note')).toContainText('Yes! ');
   });
+
+  test('the flags switch to Portuguese mid-question: the question, the names on the map, the fact', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 0);
+    const want = await wanted(page, 1);
+    await expect(page.locator('.mx-ask')).toHaveText(`Where is ${place(want).name}?`);
+    await page.getByRole('button', { name: 'Português' }).click();
+    await expect(page.locator('.mx-ask')).toHaveText(`Onde fica a ${place(want).pt.name}?`); // the continents all take "a"
+    await expect(page.locator('.wm-label[data-place="south-america"]')).toHaveText('América do Sul');
+    await tap(page, want);
+    await expect(page.locator('.mx-note')).toHaveText(`Isso! ${place(want).factPt}`);
+    /* remembered next time */
+    await page.reload();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.getByRole('button', { name: 'Português' })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.mx-ask')).toContainText('Onde fica');
+    noProblems(watch);
+  });
 });

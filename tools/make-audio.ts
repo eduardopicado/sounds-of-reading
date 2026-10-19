@@ -141,6 +141,8 @@ export function clips(): Clip[] {
   for (const line of flagLines()) add(line);
   /* Capital Cities: the states, their capitals, and the world's */
   for (const line of capitalLines((code) => country(code).name)) add(line);
+  /* and the three in Portuguese, said by the teacher */
+  for (const line of [...mapLines('pt'), ...flagLines('pt'), ...capitalLines((code) => country(code).name, (code) => country(code).pt)]) add(line, 'pt');
   for (const line of Object.values(HOW)) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */

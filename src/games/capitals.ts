@@ -6,20 +6,24 @@
  * the capitals as dots on the map. After that come the capitals of the
  * countries in Flags of the World, with the flag beside the question, and
  * the ones where the capital is not the biggest city: Canberra, Brasília,
- * Washington, D.C. (src/content/capitals.ts). */
+ * Washington, D.C. (src/content/capitals.ts).
+ *
+ * In English or Portuguese, switched with the flags at the top, like the
+ * other geography games: Camberra and Pequim in Portuguese. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import { AUS_H, AUS_W, projectAus } from '../content/australia-projection';
 import { STATE_SHAPES } from '../content/australia-shapes';
 import {
-  CAPITALS, CAPITAL_STEPS, STATES, capitalQuestion, capitalSays, state, stateSays,
-  type CapitalQuestion, type CapitalStep, type StateId,
+  CAPITALS, CAPITAL_STEPS, STATES, capitalQuestion, capitalSays, capitalSaysPt, cityIn, state, stateSays,
+  type CapitalQuestion, type CapitalStep, type State, type StateId,
 } from '../content/capitals';
 import { country } from '../content/flags';
+import { of, type Both, type Lang } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
+import { GEO_LANG, langSwitch, speak } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<CapitalStep>({
@@ -35,6 +39,9 @@ export function mount(root: HTMLElement): () => void {
 }
 
 const nameOf = (code: string): string => country(code).name;
+const ptOf = (code: string) => country(code).pt;
+/** a state's name on the map: the ACT by its letters, in both languages */
+const stateLabel = (s: State, lang: Lang): string => (s.id === 'ACT' ? 'ACT' : lang === 'pt' ? s.pt.name : s.name);
 const isState = (id: string): id is StateId => STATES.some((s) => s.id === id);
 const pct = (x: number, of: number): string => `${(100 * x) / of}%`;
 
@@ -53,7 +60,7 @@ function australiaMap() {
   const labels = el('div', { class: 'au-labels', 'aria-hidden': 'true' });
   for (const s of STATES) {
     const [x, y] = projectAus(...s.label);
-    labels.append(el('span', { class: 'au-label state', text: s.id === 'ACT' ? 'ACT' : s.name, dataset: { state: s.id }, style: `left: ${pct(x, AUS_W)}; top: ${pct(y, AUS_H)}` }));
+    labels.append(el('span', { class: 'au-label state', text: stateLabel(s, 'en'), dataset: { state: s.id }, style: `left: ${pct(x, AUS_W)}; top: ${pct(y, AUS_H)}` }));
     const [cx, cy] = projectAus(...s.at);
     labels.append(el('span', { class: 'au-label city', text: s.capital, dataset: { city: s.capital }, style: `left: ${pct(cx, AUS_W)}; top: ${pct(cy, AUS_H)}` }));
   }
@@ -103,6 +110,13 @@ function australiaMap() {
 
   return {
     node,
+    /** the names on the map in English or Portuguese */
+    language: (lang: Lang) => {
+      for (const s of STATES) {
+        for (const n of labels.querySelectorAll(`[data-state="${s.id}"]`)) n.textContent = stateLabel(s, lang);
+        for (const n of labels.querySelectorAll(`[data-city="${CSS.escape(s.capital)}"]`)) n.textContent = cityIn(s.capital, lang);
+      }
+    },
     /** the states' names on the map, and the capital cities as dots */
     show: (names: boolean, cities: boolean) => {
       node.classList.toggle('names', names);
@@ -128,12 +142,21 @@ function australiaMap() {
   };
 }
 
+/** a state's line, both ways */
+const stateBoth = (s: State, what: keyof ReturnType<typeof stateSays>): Both => ({ en: stateSays(s)[what], pt: stateSays(s, 'pt')[what] });
+
 function build(kit: Kit) {
+  const langs = langSwitch(GEO_LANG);
+  const lang = () => langs.lang();
   const map = australiaMap();
   const ask = el('p', { class: 'mx-ask' });
   const flag = el('div', { class: 'fl-flag cc-flag', role: 'img' });
-  const node = el('div', { class: 'mx-stage cc-stage' }, ask, flag, map.node);
+  const node = el('div', { class: 'mx-stage cc-stage' }, langs.node, ask, flag, map.node);
   let recent: string[] = [];
+  /** redraws the words on screen in the chosen language */
+  let retext: () => void = () => undefined;
+  langs.onChange(() => { map.language(lang()); retext(); });
+  map.language(lang());
 
   /** the state a capital belongs to */
   const stateOf = (city: string) => STATES.find((s) => s.capital === city);
@@ -144,35 +167,40 @@ function build(kit: Kit) {
       map.mark(q.about, 'right');
       map.mark(q.answer, 'right');
     }
+    const why: Both = { en: q.why, pt: q.pt.why };
     if (ok) {
       sfx.cheer();
-      kit.note(`Yes! ${q.why}`, true);
-      say(q.why);
+      retext = () => kit.note(`${lang() === 'pt' ? 'Isso!' : 'Yes!'} ${why[lang()]}`, true);
+      retext();
+      speak(why, lang());
       await kit.wait(2600);
       return true;
     }
     sfx.wrong();
-    let first = '';
-    let then = q.why;
+    let first: Both | null = null;
+    let then = why;
     if (q.task === 'state') {
       map.mark(picked, 'wrong');
-      first = stateSays(state(picked as StateId)).that;
-      then = stateSays(state(q.answer as StateId)).here;
+      first = stateBoth(state(picked as StateId), 'that');
+      then = stateBoth(state(q.answer as StateId), 'here');
     } else if (q.task === 'capital' || q.task === 'city') {
       /* what he picked is another state's capital: say whose */
       const other = stateOf(picked);
       if (other) {
         map.mark(picked, 'wrong');
-        first = stateSays(other).is;
+        first = stateBoth(other, 'is');
       }
     } else {
       /* another country's capital: say whose; a bigger city needs no more than the answer */
       const other = CAPITALS.find((c) => c.capital === picked);
-      if (other) first = capitalSays(other, nameOf(other.country)).is;
+      if (other) first = { en: capitalSays(other, nameOf(other.country)).is, pt: capitalSaysPt(other, ptOf(other.country)).is };
     }
-    kit.note(first ? `${first} ${then}` : then);
-    if (first) say(first, { onEnd: () => say(then) });
-    else say(then);
+    const said = first;
+    retext = () => kit.note(said ? `${said[lang()]} ${then[lang()]}` : then[lang()]);
+    retext();
+    const now = lang();
+    if (said) speak(said, now, () => speak(then, now));
+    else speak(then, now);
     await kit.wait(5200);
     return false;
   }
@@ -180,7 +208,7 @@ function build(kit: Kit) {
   return {
     node,
     ask: async (step: CapitalStep): Promise<boolean> => {
-      const q = capitalQuestion(step, nameOf, recent);
+      const q = capitalQuestion(step, nameOf, recent, ptOf);
       recent = [q.about, ...recent].slice(0, 3);
       node.dataset.answer = q.answer;
       map.reset();
@@ -188,18 +216,25 @@ function build(kit: Kit) {
       map.node.hidden = !onMap;
       map.show(!!step.names, q.task === 'city');
       flag.hidden = onMap;
-      if (!onMap) {
-        flag.textContent = country(q.about).flag;
-        flag.setAttribute('aria-label', `The flag of ${nameOf(q.about)}`);
-      }
-      ask.textContent = q.ask;
-      say(q.ask);
+      if (!onMap) flag.textContent = country(q.about).flag;
+      const question: Both = { en: q.ask, pt: q.pt.ask };
+      const label = (city: string): string => cityIn(city, lang());
+      const words = (): void => {
+        ask.textContent = question[lang()];
+        if (!onMap) flag.setAttribute('aria-label', lang() === 'pt' ? `A bandeira ${of(ptOf(q.about))}` : `The flag of ${nameOf(q.about)}`);
+      };
+      retext = () => {
+        words();
+        if (q.task !== 'state' && q.task !== 'city') kit.choices.relabel(label);
+      };
+      words();
+      speak(question, lang());
       if (q.task === 'state' || q.task === 'city') {
         const picked = await map.tap(q.answer, q.task);
         return finish(picked === q.answer, q, picked);
       }
       if (q.task === 'capital') map.mark(q.about, 'glow');
-      const picked = await kit.choices.askWords(q.options);
+      const picked = await kit.choices.askWords(q.options, label);
       kit.choices.revealWord(q.answer, picked);
       return finish(picked === q.answer, q, picked);
     },

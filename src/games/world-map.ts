@@ -7,14 +7,18 @@
  * where things are: what is north, south, east and west of Australia, and
  * which ocean is between two continents. Whatever he finds, he is told one
  * true thing about it (src/content/world.ts). The map is the one the
- * geography games share (world-kit.ts). */
+ * geography games share (world-kit.ts).
+ *
+ * In English or Portuguese, switched with the flags on the game, mid-question
+ * too: the question, the names on the map and the buttons all change. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
-import { MAP_STEPS, findSays, mapQuestion, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
+import { MAP_STEPS, findSays, mapQuestion, nameIn, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
+import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
+import { GEO_LANG, langSwitch, speak } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<MapStep>({
@@ -30,30 +34,43 @@ export function mount(root: HTMLElement): () => void {
 }
 
 function build(kit: Kit) {
+  const langs = langSwitch(GEO_LANG);
+  const lang = () => langs.lang();
   const map = worldMap();
   const ask = el('p', { class: 'mx-ask' });
-  const node = el('div', { class: 'mx-stage wm-stage' }, ask, map.node);
+  const node = el('div', { class: 'mx-stage wm-stage' }, langs.node, ask, map.node);
   let recent: PlaceId[] = [];
+  /** redraws the words on screen in the chosen language */
+  let retext: () => void = () => undefined;
+  langs.onChange(() => { map.language(lang()); retext(); });
+  map.language(lang());
 
   /** what he tapped, said and written: "That is Asia." */
-  const that = (id: string): string => (isSea(id) ? seaSays(id).that : findSays(place(id as PlaceId)).that);
+  const that = (id: string): Both => (isSea(id)
+    ? { en: seaSays(id).that, pt: seaSays(id, 'pt').that }
+    : { en: findSays(place(id as PlaceId)).that, pt: findSays(place(id as PlaceId), 'pt').that });
 
   async function finish(ok: boolean, q: MapQuestion, picked: string): Promise<boolean> {
     map.mark(q.answer, 'right');
+    const why: Both = { en: q.why, pt: q.pt.why };
     if (ok) {
       sfx.cheer();
-      kit.note(`Yes! ${q.why}`, true);
-      say(q.why);
+      retext = () => kit.note(`${lang() === 'pt' ? 'Isso!' : 'Yes!'} ${why[lang()]}`, true);
+      retext();
+      speak(why, lang());
       await kit.wait(2600);
       return true;
     }
     sfx.wrong();
     /* where it was, then what he tapped and the right answer in words */
-    const right = q.task === 'find' ? findSays(place(q.answer)).here : q.why;
-    const first = q.task === 'name' ? findSays(place(q.answer)).this : that(picked);
+    const answer = place(q.answer);
+    const right: Both = q.task === 'find' ? { en: findSays(answer).here, pt: findSays(answer, 'pt').here } : why;
+    const first: Both = q.task === 'name' ? { en: findSays(answer).this, pt: findSays(answer, 'pt').this } : that(picked);
     if (q.task !== 'name') map.mark(picked, 'wrong');
-    kit.note(`${first} ${right}`);
-    say(first, { onEnd: () => say(right) });
+    retext = () => kit.note(`${first[lang()]} ${right[lang()]}`);
+    retext();
+    const now = lang();
+    speak(first, now, () => speak(right, now));
     await kit.wait(4600);
     return false;
   }
@@ -68,11 +85,17 @@ function build(kit: Kit) {
       for (const id of q.given ?? []) map.give(id);
       /* what the tests look for, the way the other games' cards say it */
       node.dataset.answer = q.answer;
-      ask.textContent = q.ask;
-      say(q.ask);
+      const question: Both = { en: q.ask, pt: q.pt.ask };
+      const label = (id: string): string => nameIn(place(id as PlaceId), lang());
+      retext = () => {
+        ask.textContent = question[lang()];
+        if (q.task === 'name') kit.choices.relabel(label);
+      };
+      ask.textContent = question[lang()];
+      speak(question, lang());
       if (q.task === 'name') {
         map.mark(q.answer, 'glow');
-        const picked = await kit.choices.askWords(q.options!, (id) => place(id as PlaceId).name);
+        const picked = await kit.choices.askWords(q.options!, label);
         kit.choices.revealWord(q.answer, picked);
         return finish(picked === q.answer, q, picked);
       }
