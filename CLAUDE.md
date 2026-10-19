@@ -90,6 +90,8 @@ src/content/world.ts   World Map: the continents and oceans, a fact for each,
                        tools/make-world.ts from Natural Earth, never edited),
                        projection.ts puts a longitude and latitude on it, and
                        seas.ts says which ocean a point of water is in
+src/content/flags.ts   Flags: the countries, their flags, what is on each one,
+                       the look-alikes, and the questions
 src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (only
                        + − × ÷ and square roots, so a flick does the same thing
                        everywhere), the three-touch rule, and set pieces that
@@ -127,6 +129,8 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        bjj-art.ts draws the moves and the referee's signals;
                        bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
                        belt the BJJ games share
+                       world-kit.ts is the world map the geography games
+                       share, with its taps (a little off a coast counts)
                        teams.ts: the football teams, their flags and kits;
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked

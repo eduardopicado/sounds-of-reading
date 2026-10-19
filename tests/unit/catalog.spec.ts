@@ -29,7 +29,7 @@ describe('the games', () => {
 
   it('every game file is in the list, so none is left out of the home screen', () => {
     /* the files in src/games that are not a game */
-    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'chess-kit', 'narration', 'teams']);
+    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'chess-kit', 'narration', 'teams', 'world-kit']);
     const files = readdirSync(new URL('../../src/games', import.meta.url))
       .map((f) => f.replace(/\.ts$/, ''))
       .filter((f) => !parts.has(f));
