@@ -13,7 +13,7 @@
  * inside it, unless it is a real word from the lists (shell, with hell in
  * it): the lane's letters are on the screen, whatever they spell. */
 
-import { BLOCKLIST, REAL_WORDS, SOUND_BY_ID, soundsAlike, uniqueWords, type Word } from './index';
+import { BLOCKLIST, REAL_WORDS, SILLY_WORDS, SOUND_BY_ID, soundsAlike, uniqueWords, type Word } from './index';
 import { NOT_BY_CHANCE } from './words';
 import { pieces } from './graphemes';
 import type { Step } from './maths';
@@ -177,6 +177,38 @@ export function foosQuestion(
     start = rods.map((rod) => Math.floor(rand() * rod.length));
   } while (start.filter((s, i) => rods[i][s] === target.parts[i]).length > alone + (n > 3 ? 1 : 0));
   return { target, rods, start };
+}
+
+/* ── Make any word: the second way to play ───────────────────────────── */
+
+const SILLY_BY_TEXT = new Map(SILLY_WORDS.map((w) => [w.text, w]));
+
+/** a made-up word from the lists, the kind Real or Silly calls silly */
+export const sillyOf = (parts: readonly string[]): Word | undefined => SILLY_BY_TEXT.get(parts.join(''));
+
+/** every real word a table's rods can spell, the one they were built for among them */
+export function wordsOn(rods: string[][]): Cut[] {
+  const found = new Map<string, Cut>();
+  for (const parts of settings(rods)) {
+    const c = wordOf(parts);
+    if (c) found.set(c.word.text, c);
+  }
+  return [...found.values()];
+}
+
+/**
+ * A table for making any word he can. The rods are built for one word as
+ * usual, so the swaps that make other real words come first; of a few
+ * tries, the table with the most words on it is kept.
+ */
+export function makeTable(pool: readonly Cut[], step: FoosStep, rand: Rand = Math.random, tries = 12): { q: FoosQuestion; words: Cut[] } {
+  let best: { q: FoosQuestion; words: Cut[] } | null = null;
+  for (let i = 0; i < tries; i += 1) {
+    const q = foosQuestion(pool[Math.floor(rand() * pool.length)], step, rand);
+    const words = wordsOn(q.rods);
+    if (!best || words.length > best.words.length) best = { q, words };
+  }
+  return best!;
 }
 
 /** words he can play at these levels: with a picture, cut into this many sounds */

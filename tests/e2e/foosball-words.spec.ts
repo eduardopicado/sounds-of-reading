@@ -2,10 +2,10 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
-import { FOOS_STEPS } from '../../src/content/foosball';
+import { FOOS_STEPS, wordOf } from '../../src/content/foosball';
 
-async function startAt(page: Page, step: number): Promise<void> {
-  await seed(page, { 'maths-step:foosball-words': step });
+async function startAt(page: Page, step: number, extra: Record<string, unknown> = {}): Promise<void> {
+  await seed(page, { 'maths-step:foosball-words': step, ...extra });
   await openGame(page, 'foosball-words');
   await page.getByRole('button', { name: '▶ Start' }).click();
   await expect(page.locator('.fb-col').first()).toBeVisible();
@@ -92,5 +92,67 @@ test.describe('Foosball Words', () => {
     await setRods(page, parts);
     await page.getByRole('button', { name: '⚽ Shoot!' }).click();
     await expect(page.locator('.mx-note.good')).toContainText('GOAL!');
+  });
+
+  test('make any word: each new word scores and joins the list, once', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 0, { 'foosball-mode': 'make' });
+    await expect(page.locator('.mx-ask')).toHaveText('Make any word you can, then shoot!');
+    await expect(page.locator('.fb-picture')).toHaveCount(0);
+    const total = Number((await page.locator('.fb-count').textContent())!.match(/^0 of (\d+) words found$/)![1]);
+    expect(total).toBeGreaterThanOrEqual(3);
+    /* a word he has not found yet */
+    const first = await answerOf(page);
+    await setRods(page, first);
+    await page.getByRole('button', { name: '⚽ Shoot!' }).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`GOAL! ${first.join(' · ')}: ${first.join('')}.`);
+    await expect(page.locator('.fb-count')).toHaveText(`1 of ${total} words found`);
+    await expect(page.locator('.fb-word')).toHaveText([first.join('')]);
+    /* the same again is not a goal, nor a miss */
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    await expect(page.getByRole('button', { name: '⚽ Shoot!' })).toBeEnabled();
+    await expect(page.locator('.fb-reads')).toHaveText(first.join(''));
+    await page.getByRole('button', { name: '⚽ Shoot!' }).click();
+    await expect(page.locator('.mx-note')).toHaveText(`You made ${first.join('')} already. Make a new word!`);
+    /* and a new one */
+    const second = await answerOf(page);
+    expect(second.join('')).not.toBe(first.join(''));
+    await setRods(page, second);
+    await page.getByRole('button', { name: '⚽ Shoot!' }).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`GOAL! ${second.join(' · ')}`);
+    await expect(page.locator('.fb-count')).toHaveText(`2 of ${total} words found`);
+    await expect(page.locator('.score')).toContainText('Right first time 2');
+    noProblems(watch);
+  });
+
+  test('make any word: two shots that are not words, and the rods slide to one he has not found', async ({ page }) => {
+    await startAt(page, 0, { 'foosball-mode': 'make' });
+    /* the players on each rod, and a setting of them that is no word on the list */
+    const rods = await page.locator('.fb-col').evaluateAll((cols) =>
+      cols.map((c) => [...c.querySelectorAll<HTMLElement>('.fb-man')].map((m) => m.dataset.part!)));
+    const settings = rods.reduce<string[][]>((acc, rod) => acc.flatMap((a) => rod.map((p) => [...a, p])), [[]]);
+    const nonsense = settings.find((parts) => !wordOf(parts))!;
+    await setRods(page, nonsense);
+    await page.getByRole('button', { name: '⚽ Shoot!' }).click();
+    await expect(page.locator('.mx-note')).toHaveText(/^(That is a made-up word! Make a real one\.|That one is not on our word list\. Try another!)$/);
+    await expect(page.getByRole('button', { name: '⚽ Shoot!' })).toBeEnabled();
+    const one = await answerOf(page);
+    await page.getByRole('button', { name: '⚽ Shoot!' }).click();
+    await expect(page.locator('.mx-note')).toHaveText(`Here is one you can make: ${one.join(' · ')}, ${one.join('')}.`);
+    await expect(page.locator('.fb-reads')).toHaveText(one.join(''));
+    await expect(page.locator('.fb-word.shown')).toHaveText([one.join('')]);
+    await expect(page.locator('.score')).toContainText('Right first time 0');
+  });
+
+  test('the way to play is chosen in setup, and kept', async ({ page }) => {
+    await openGame(page, 'foosball-words');
+    await openSetup(page);
+    await page.getByLabel('Way to play').selectOption('make');
+    await page.getByRole('button', { name: 'Set up this game' }).click();
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.mx-ask')).toHaveText('Make any word you can, then shoot!');
+    await page.reload();
+    await openSetup(page);
+    await expect(page.getByLabel('Way to play')).toHaveValue('make');
   });
 });
