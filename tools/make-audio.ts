@@ -30,7 +30,8 @@
  *   npm run make:audio -- --dry               how many clips are missing, and the cost
  *   npm run make:audio -- --list clips.txt    every clip, one a line, to read through
  *   npm run make:audio -- --voices            the voices the key can use, Australian first
- *   npm run make:audio -- --audition ID,ID    ten test words in each voice, into audition/
+ *   npm run make:audio -- --audition ID,ID    ten test words in each voice, into audition/<voice>-<model>/
+ *                                             (set ELEVENLABS_MODEL to hear the same voice on another model)
  *   npm run make:audio -- --audition-pt ID,ID the same in Portuguese, Brazilian voices only
  *   npm run make:audio -- --only rain         one clip, to hear it before the rest
  *   npm run make:audio                        everything missing
@@ -180,6 +181,9 @@ export function ttsRequest(clip: Clip, env: Env, voiceId?: string): { url: strin
 
 export const DEFAULT_MODEL = 'eleven_v4';
 
+/** where a voice's audition goes: by model too, so two models can be compared */
+const auditionDir = (voiceId: string): string => `${voiceId}-${process.env.ELEVENLABS_MODEL ?? DEFAULT_MODEL}`;
+
 /** the models that take a language_code. Multilingual v2 does not (it works
     the language out from the text), so it is sent only where it is understood */
 export const LANGUAGE_CODE_MODELS = new Set(['eleven_v4', 'eleven_v4_turbo', 'eleven_v3', 'eleven_flash_v2_5', 'eleven_turbo_v2_5']);
@@ -291,12 +295,12 @@ async function main(): Promise<void> {
     for (const voiceId of auditionPt.split(',').filter(Boolean)) {
       const problem = brazilianProblem(await voiceInfo(voiceId));
       if (problem) { console.log(`  ${voiceId}: skipped, ${problem}`); continue; }
-      const dir = join(process.cwd(), 'audition', voiceId);
+      const dir = join(process.cwd(), 'audition', auditionDir(voiceId));
       mkdirSync(dir, { recursive: true });
       for (const [i, text] of lines.entries()) {
         writeFileSync(join(dir, `pt-${i + 1}.mp3`), await speak({ text, voice: 'pt' }, voiceId));
       }
-      console.log(`  ${voiceId}: ${lines.length} lines in audition/${voiceId}: ${lines.join(' | ')}`);
+      console.log(`  ${voiceId}: ${lines.length} lines in audition/${auditionDir(voiceId)}: ${lines.join(' | ')}`);
     }
     return;
   }
@@ -304,10 +308,10 @@ async function main(): Promise<void> {
   const audition = flag('--audition');
   if (audition !== null) {
     for (const voiceId of audition.split(',').filter(Boolean)) {
-      const dir = join(process.cwd(), 'audition', voiceId);
+      const dir = join(process.cwd(), 'audition', auditionDir(voiceId));
       mkdirSync(dir, { recursive: true });
       for (const text of AUDITION) writeFileSync(join(dir, `${text.replace(/[^\w ]/g, '').trim()}.mp3`), await speak({ text, voice: 'en' }, voiceId));
-      console.log(`  ${voiceId}: ${AUDITION.length} words in audition/${voiceId}`);
+      console.log(`  ${voiceId}: ${AUDITION.length} words in audition/${auditionDir(voiceId)}`);
     }
     return;
   }
