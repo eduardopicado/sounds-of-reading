@@ -54,7 +54,7 @@ coach's picks for today at the top.
 | **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. |
 | **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |
 | **Times Table Sprint** | The times tables to 12 × 12, by heart (Years 3–4): types the answer on a number pad before the bar runs out. A table at a time (×2 and ×10, ×5, ×3, ×4, ×6, ×8, ×7, ×9, ×11, ×12), the earlier ones coming back as review, then all of them mixed, then the same facts as division. Every fact is remembered on its own: the slow and missed ones come back most, and he moves up a table only when he knows every fact in it. A miss shows the fact built from easier ones (7 lots of 6 is 5 lots and 2 more) on rows of dots. |
-| **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group. |
+| **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group; then (Years 3–4) thirds and fifths, two thirds or three quarters of the squad, and whether two fractions cover the same amount. |
 | **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. |
 | **Match Clock** | Reads and sets o'clock and half past, and the days of the week in order; then (Year 2) quarter past and quarter to, the months, and the Australian seasons. Years 3–4: five minutes (20 past 3, 25 to 4), then to the minute (3:47); am or pm on match day; how long until kick-off, counted on from now (2:40, 20 minutes makes 3 o'clock, 15 more makes 3:15); and the 24-hour time on a ticket (19:30 is 7:30 pm). |
 | **Short Hand, Long Hand** | Drags the hands of a clock whose two scales are kept apart — red hours with a shaded "hour zone", blue minutes on their own ring — then sets the clock to a time and reads one, from o'clock up to any minute. |
@@ -78,8 +78,9 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 ### Chess ♟️
 
 The way chess is first taught to young children: one piece at a time on an
-almost empty board, with a football to reach. The pieces are drawn in the app,
-so they look the same on every device.
+almost empty board, with a football to reach, then taking pieces, the first
+real game (pawns only), the board itself, check, and checkmate. The pieces are
+drawn in the app, so they look the same on every device.
 
 | Game | What the child does |
 |---|---|
@@ -89,6 +90,8 @@ so they look the same on every device.
 | **Set Up the Board** | The board is set out but for one piece: tap the square it goes on. Rooks in the corners, knights next to them, then bishops; the queen on her own colour and the king beside her; the pawns in front; then Black's side. |
 | **Capture!** | Takes a black piece by landing on it: which one can his piece take (only one can)? Then the knight, king and pawn, which take differently (a pawn only on the slant). Then two he could take, one guarded by a pawn: take the free one, or the pawn takes his piece back. Then two free ones: take the one worth more (pawn 1, knight or bishop 3, rook 5, queen 9). |
 | **Pawn Wars** | The first real game: his pawns against the computer's, pawns only. First pawn to the far end wins, or take all of theirs. Tap a pawn to see where it can go. Three pawns each, then five, then all eight, then a computer that keeps its pawns safe and pushes the ones nothing can stop. |
+| **Check!** | Is the white king in check — can a black piece take him? Then taps the piece giving check, then moves the king to a square where nothing attacks him. Every dot shows what a piece attacks; the safe squares are ringed. |
+| **Mate in One** | White to move: find the checkmate. The back row (the king shut in by his own pawns), the queen beside the king with her own king guarding her, then two rooks up the board. A move that is not mate says why (no check, or the king can get out) and shows the mate. |
 
 The maths and jiu-jitsu games follow the NSW Mathematics K–10 syllabus from
 Kindergarten to Year 2, and each climbs its own levels: up after three right

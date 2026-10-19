@@ -581,6 +581,40 @@ test.describe('maths games', () => {
     expect((await page.locator('.ht-flag').first().textContent())?.length).toBeGreaterThan(0);
   });
 
+  test('Years 3–4: Half-Time Oranges names thirds and fifths', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 6 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice')).toHaveText(['a half', 'a third', 'a quarter', 'a fifth', 'an eighth'], { timeout: 10000 });
+    const answer = (await page.locator('.ht-board').getAttribute('data-answer'))!;
+    expect(['a third', 'a fifth']).toContain(answer);
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`each one is ${answer}`);
+  });
+
+  test('Years 3–4: Half-Time Oranges, two thirds of the bibs, the shares counted', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:half-time-oranges': 8 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText(/^\d+ bibs shared between \d teams\. How many is \d (thirds|quarters|fifths) of them\?$/);
+    const answer = Number(await page.locator('.ht-board').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`= ${answer}.`);
+    expect(await page.locator('.ht-share.counted').count()).toBeGreaterThanOrEqual(2);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Half-Time Oranges, is it the same amount?', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 9 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.ht-fig')).toHaveCount(2, { timeout: 10000 });
+    await expect(page.locator('.mx-choice')).toHaveText(['Yes', 'No']);
+    const answer = (await page.locator('.ht-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(answer === 'Yes' ? 'covers just the same as' : 'than');
+  });
+
   test('Year 2: Half-Time Oranges names halves, quarters and eighths', async ({ page }) => {
     await seed(page, { 'maths-step:half-time-oranges': 2 });
     await startGame(page, 'half-time-oranges');
