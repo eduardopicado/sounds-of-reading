@@ -1,8 +1,9 @@
 /* Foosball Words: the rods for every word the game can ask. */
 
 import { describe, expect, it } from 'vitest';
-import { CUTS, FOOS_STEPS, foosQuestion, foosWords, sameSound, wordOf } from '../../src/content/foosball';
-import { soundsAlike } from '../../src/content/index';
+import { CUTS, FOOS_STEPS, foosQuestion, foosWords, sameSound, unfit, wordOf } from '../../src/content/foosball';
+import { BLOCKLIST, soundsAlike } from '../../src/content/index';
+import { NOT_BY_CHANCE } from '../../src/content/words';
 
 /** the same "random" rods every run */
 function seeded(seed: number): () => number {
@@ -76,6 +77,36 @@ describe('Foosball Words', () => {
     }
     /* almost every rod has its full team of players */
     expect(full / all).toBeGreaterThan(0.9);
+  });
+
+  it('never lets the rods spell a blocked word, or one inside letters that are not a word', () => {
+    expect(unfit(['sh', 'i', 't'])).toBe(true);
+    expect(unfit(['sh', 'i', 't', 's'])).toBe(true);
+    /* a real word with one inside it is a real word */
+    expect(unfit(['sh', 'e', 'll'])).toBe(false);
+    expect(unfit(['sh', 'i', 'p'])).toBe(false);
+    /* the word's own letters in their own places are no new word: b·t·i·tch on a table for stitch */
+    expect(unfit(['b', 't', 'i', 'tch'], ['s', 't', 'i', 'tch'])).toBe(false);
+    expect(unfit(['b', 't', 'i', 'tch'])).toBe(true);
+    /* the mild words only on their own */
+    expect(unfit(['w', 'ee', 't'])).toBe(false);
+    expect(unfit(['p', 'oo'])).toBe(true);
+    const never = [...BLOCKLIST, ...NOT_BY_CHANCE];
+    const settingsOf = (rods: string[][]): string[][] =>
+      rods.reduce<string[][]>((acc, rod) => acc.flatMap((a) => rod.map((p) => [...a, p])), [[]]);
+    /* every word the game asks, at every step */
+    const rand = seeded(100);
+    for (const step of FOOS_STEPS) {
+      for (const target of foosWords([], step.rods)) {
+        const q = foosQuestion(target, step, rand);
+        const bad = settingsOf(q.rods).filter((parts) => never.includes(parts.join('')) || unfit(parts, target.parts));
+        expect(bad.map((parts) => parts.join('')), target.word.text).toEqual([]);
+        q.rods.forEach((rod, i) => {
+          expect(rod).toContain(target.parts[i]);
+          expect(rod.length, `${target.word.text}: rod ${i + 1}`).toBeGreaterThanOrEqual(2);
+        });
+      }
+    }
   });
 
   it('offers the sounds that make another real word first', () => {
