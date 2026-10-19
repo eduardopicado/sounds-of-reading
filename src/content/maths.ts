@@ -759,11 +759,15 @@ export interface ClockStep extends Step {
   /**
    * read: what time does the clock say; set: put the hands on a time;
    * days / months: the day (or month) before or after; seasons: which
-   * season a month is in, in Australia.
+   * season a month is in, in Australia;
+   * digital: read the clock to the minute, written 3:47;
+   * ampm: is a match-day time am or pm;
+   * elapsed: how long from now until kick-off;
+   * twentyfour: what a 24-hour time on a ticket is in am and pm.
    */
-  task: 'read' | 'set' | 'days' | 'months' | 'seasons';
+  task: 'read' | 'set' | 'days' | 'months' | 'seasons' | 'digital' | 'ampm' | 'elapsed' | 'twentyfour';
   /** the minutes a time can have */
-  minutes: (0 | 15 | 30 | 45)[];
+  minutes: number[];
 }
 
 export const CLOCK_STEPS: ClockStep[] = [
@@ -776,6 +780,13 @@ export const CLOCK_STEPS: ClockStep[] = [
   { name: 'Set quarter times', task: 'set', minutes: [0, 15, 30, 45] },
   { name: 'Months of the year', task: 'months', minutes: [] },
   { name: 'Seasons', task: 'seasons', minutes: [] },
+  /* Years 3–4: to five minutes, then the minute; am and pm; how long; the
+     24-hour clock */
+  { name: 'Five minutes', task: 'read', minutes: [5, 10, 20, 25, 35, 40, 50, 55] },
+  { name: 'To the minute', task: 'digital', minutes: [] },
+  { name: 'am or pm', task: 'ampm', minutes: [] },
+  { name: 'How long until kick-off?', task: 'elapsed', minutes: [] },
+  { name: '24-hour time', task: 'twentyfour', minutes: [] },
 ];
 
 export const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
@@ -803,9 +814,66 @@ export function timeWords(h: number, m: number): string {
   return `${60 - m} to ${next}`;
 }
 
+/** a time as a digital clock writes it: 3:07 */
+export const digital = (h: number, m: number): string => `${clockHour(h)}:${String(m).padStart(2, '0')}`;
+
+/** a time on the 24-hour clock: 19:30, 09:05 */
+export const time24 = (h: number, m: number): string => `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+/** a length of time: "35 minutes", "1 hour 5 minutes", "2 hours" */
+export function duration(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const hours = h ? `${h} ${h === 1 ? 'hour' : 'hours'}` : '';
+  const mins = m ? `${m} ${m === 1 ? 'minute' : 'minutes'}` : '';
+  return [hours, mins].filter(Boolean).join(' ') || '0 minutes';
+}
+
+/** match-day times, to say whether each is am or pm */
+export const MATCH_DAY: { what: string; picture: string; h: number; m: number; when: string }[] = [
+  { what: 'Morning training', picture: '🏃', h: 6, m: 30, when: 'in the morning' },
+  { what: 'Breakfast before the match', picture: '🥣', h: 7, m: 30, when: 'in the morning' },
+  { what: 'The bus to the away game', picture: '🚌', h: 9, m: 15, when: 'in the morning' },
+  { what: 'The junior game', picture: '⚽', h: 10, m: 0, when: 'in the morning' },
+  { what: 'Lunch with the team', picture: '🥪', h: 12, m: 30, when: 'just after midday' },
+  { what: 'Kick-off', picture: '⚽', h: 15, m: 0, when: 'in the afternoon' },
+  { what: 'The night match', picture: '🌙', h: 19, m: 45, when: 'in the evening' },
+  { what: 'Bedtime after the match', picture: '🛏️', h: 20, m: 0, when: 'at night' },
+];
+
+/** am or pm, written after the time: 7:30 am, 12:30 pm */
+export const ampm = (h: number, m: number): string => `${digital(h, m)} ${h >= 12 ? 'pm' : 'am'}`;
+
+/**
+ * How long from one time to another, counted up the way it is done in his
+ * head: to the next hour, then whole hours, then the minutes left. "From
+ * 2:40, 20 minutes makes 3 o'clock, then 15 minutes makes 3:15. 20 and 15
+ * make 35 minutes."
+ */
+export function countOn(from: number, to: number): { jumps: number[]; text: string } {
+  const jumps: number[] = [];
+  const said: string[] = [];
+  let at = from;
+  const say = (t: number): string => (t % 60 ? digital(Math.floor(t / 60), t % 60) : timeWords(Math.floor(t / 60), 0));
+  for (const next of [Math.ceil(at / 60) * 60, Math.floor(to / 60) * 60, to]) {
+    if (next <= at || next > to) continue;
+    jumps.push(next - at);
+    said.push(`${duration(next - at)} makes ${say(next)}`);
+    at = next;
+  }
+  const sum = jumps.length > 1 ? ` ${jumps.map(duration).join(' and ')} make ${duration(to - from)}.` : '';
+  return { jumps, text: `From ${digital(Math.floor(from / 60), from % 60)}, ${said.join(', then ')}.${sum}` };
+}
+
 export interface ClockQuestion {
   h: number;
-  m: 0 | 15 | 30 | 45;
+  m: number;
+  /** elapsed: kick-off, in minutes after midnight, and now */
+  from: number;
+  to: number;
+  /** ampm: what happens then */
+  event: string;
+  picture: string;
   /** for days and months: which one, and before or after */
   index: number;
   after: boolean;
@@ -816,13 +884,24 @@ export interface ClockQuestion {
 
 export function clockQuestion(step: ClockStep, last?: ClockQuestion): ClockQuestion {
   for (;;) {
-    const h = rand(1, 12);
-    const m = step.minutes.length ? pick(step.minutes) : 0;
+    let h = rand(1, 12);
+    let m = step.minutes.length ? pick(step.minutes) : 0;
     const after = Math.random() < 0.5;
     let index = 0;
+    let from = 0;
+    let to = 0;
+    let event = '';
+    let picture = '';
     let answer: string;
     let options: string[];
-    if (step.task === 'read' || step.task === 'set') {
+    if (step.task === 'read' && step.minutes.some((x) => x % 15)) {
+      /* five minutes: the hour on the wrong side of it, past for to, and the
+         number the long hand points at read as the minutes */
+      answer = timeWords(h, m);
+      const pointsAt = m / 5;
+      options = [answer, m < 30 ? timeWords(h + 1, m) : `${60 - m} to ${clockHour(h)}`, timeWords(h, 60 - m),
+        m < 30 ? `${pointsAt} past ${h}` : `${pointsAt} to ${clockHour(h + 1)}`];
+    } else if (step.task === 'read' || step.task === 'set') {
       answer = timeWords(h, m);
       /* the slips: the hour on the wrong side (half past 4 for half past 3),
          and the other way of saying the minutes */
@@ -840,15 +919,47 @@ export function clockQuestion(step: ClockStep, last?: ClockQuestion): ClockQuest
       index = rand(0, 11);
       answer = MONTHS[(index + (after ? 1 : 11)) % 12];
       options = [answer, MONTHS[(index + (after ? 11 : 1)) % 12], MONTHS[index], MONTHS[(index + (after ? 2 : 10)) % 12]];
+    } else if (step.task === 'digital') {
+      /* to the minute, never on a five: the slips are the hour after (the
+         short hand is nearly there), counting back from the five instead of
+         on, and the hands read the wrong way round */
+      do m = rand(1, 59); while (m % 5 === 0);
+      answer = digital(h, m);
+      const five = m - (m % 5);
+      options = [answer, digital(h + 1, m), digital(h, five - (m % 5) + (five ? 0 : 60)), digital(Math.round(m / 5) || 12, (h % 12) * 5)];
+    } else if (step.task === 'ampm') {
+      const e = pick(MATCH_DAY);
+      [h, m, event, picture] = [e.h, e.m, e.what, e.picture];
+      answer = ampm(h, m);
+      options = [`${digital(h, m)} am`, `${digital(h, m)} pm`];
+    } else if (step.task === 'elapsed') {
+      /* now, on a five, and kick-off up to two hours later on a quarter */
+      to = 60 * rand(10, 19) + pick([0, 15, 30, 45]);
+      from = to - 5 * rand(2, 24);
+      [h, m] = [Math.floor(from / 60), from % 60];
+      const length = to - from;
+      answer = duration(length);
+      /* the slip: taking the times away as if an hour were 100 minutes */
+      const hundred = (Math.floor(to / 60) * 100 + (to % 60)) - (Math.floor(from / 60) * 100 + (from % 60));
+      options = [answer, duration(hundred), duration(length + 10), duration(Math.max(5, length - 10)), duration(length + 60)];
+      options = [answer, ...[...new Set(options.slice(1))].filter((o) => o !== answer).slice(0, 3)];
+    } else if (step.task === 'twentyfour') {
+      /* an afternoon or evening kick-off on the ticket */
+      h = rand(13, 22);
+      m = pick([0, 15, 30, 45]);
+      answer = ampm(h, m);
+      /* the slips: the same digits in the morning, and taking away 10 */
+      options = [answer, `${digital(h, m)} am`, `${h - 10}:${String(m).padStart(2, '0')} pm`];
     } else {
       index = rand(0, 11);
       answer = seasonOf(index);
       options = [...SEASONS];
     }
-    const q: ClockQuestion = { h, m, index, after, answer, options: [...new Set(options)] };
+    const q: ClockQuestion = { h, m, from, to, event, picture, index, after, answer, options: [...new Set(options)] };
     if (last && last.answer === q.answer && last.index === q.index) continue;
-    /* the seasons keep their order round the year; everything else shuffles */
-    return step.task === 'seasons' ? q : { ...q, options: shuffle(q.options) };
+    /* the seasons keep their order round the year, am comes before pm;
+       everything else shuffles */
+    return step.task === 'seasons' || step.task === 'ampm' ? q : { ...q, options: shuffle(q.options) };
   }
 }
 
