@@ -70,6 +70,7 @@ coach's picks for today at the top.
 | Game | What the child does |
 |---|---|
 | **World Map** | A map of the whole world, each continent its own colour and the oceans in blues. Finds the seven continents with their names on the map, then the five oceans, then both with no names; then reads which name belongs to the place that glows. Year 2: what is north, south, east and west of Australia (Asia, Antarctica and the Southern Ocean, the Indian, the Pacific), which ocean is between two continents, and north, south, east and west across the world. Each place he finds comes with one true thing about it. A tap just off a coast counts for that continent. |
+| **Flags of the World** | Picks Brazil's flag from three, then names a flag he is shown, then Australia's neighbours (New Zealand, Papua New Guinea, Indonesia, Fiji). Finds the country on the world map with its flag beside the question, the big countries first. Year 2: flags that are easy to mix up (Australia's six white stars and New Zealand's four red ones; Indonesia red on top, Poland white on top), which flag has a maple leaf or the Southern Cross, and the neighbours and smaller countries on the map. A miss says what the right flag looks like, in words he can check against the picture. |
 
 The map is drawn from Natural Earth's countries (public domain), in the
 Natural Earth projection, inside the app. The Southern Ocean is south of

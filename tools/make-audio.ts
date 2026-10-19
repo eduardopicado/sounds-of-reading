@@ -47,6 +47,7 @@ import { THEMES } from '../src/content/word-search';
 import { BOTAO_STEPS, HOW } from '../src/content/botao';
 import { refereeLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
+import { flagLines } from '../src/content/flags';
 import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../src/content/commentary';
 import { TEAMS } from '../src/games/teams';
 
@@ -115,6 +116,8 @@ export function clips(): Clip[] {
   for (const step of BOTAO_STEPS) add(step.tell);
   /* World Map: where each place is, what it is called, and the directions */
   for (const line of mapLines()) add(line);
+  /* Flags: what each flag looks like, and the questions */
+  for (const line of flagLines()) add(line);
   for (const line of Object.values(HOW)) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */

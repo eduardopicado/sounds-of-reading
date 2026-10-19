@@ -2034,3 +2034,13 @@
 @media (prefers-reduced-motion: reduce) {
   .wm-ocean.glow, .wm-land.glow path { animation: none; }
 }
+
+/* ── Flags ─────────────────────────────────────────────────────────────── */
+
+.fl-stage { gap: 8px; }
+.fl-flag { font-size: clamp(72px, 18vw, 120px); line-height: 1.1; text-align: center; }
+.fl-stage.on-map .fl-flag { font-size: clamp(40px, 8vw, 60px); }
+.mx-choices.fl-flags .mx-choice { font-size: clamp(44px, 11vw, 72px); line-height: 1.1; padding: 6px 16px; min-width: 96px; }
+/* a country found, or tapped by mistake */
+.wm-land path.right { fill: #FFD84D; stroke: #14312F; stroke-width: 1.4; }
+.wm-land path.wrong { fill: #B4BAC0; }
