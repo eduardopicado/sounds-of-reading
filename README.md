@@ -84,7 +84,7 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 | Game | What the child does |
 |---|---|
 | **Ref's Call** | Sees a move (takedown, sweep, mount…) and calls its IBJJF points, reads the move's name alone, finds the move worth 3; then (Year 2) says whether the referee gives points, an advantage or a penalty. |
-| **Match Maths** | Adds up a match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. |
+| **Match Maths** | Adds up a match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. Years 3–4: a long match added up by putting the same points together (3 × 2 = 6), how far behind Blue is, and the least he needs to win with 30 seconds to go: an advantage, a takedown, a guard pass or a mount, since drawing level wins only when the advantages or penalties are his. |
 | **Weigh-In** | Which side of the balance is heavier, measuring in blocks; then (Year 2) reads the kilograms off the scale, finds his weight class, and adds or takes off the gi. Years 3–4: weighs small things in grams on a kitchen scale, works out how many more grams make a kilogram, reads scales whose marks are not all numbered (each space worth 2, 20, 25, 50 or 100), and says which of two bags is heavier and by how much (3 kg 200 g against 2 kg 800 g). |
 | **Ref's Signals** | Reads the referee's hands — fingers for points, an open hand for an advantage, a fist for a penalty; then (Year 2) plays referee, and learns the calls shouted at every competition: Combate! Parou! Lute! |
 
