@@ -141,7 +141,7 @@ export const GAMES: Game[] = [
     load: () => import('./refs-call') },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj', ladder: MATCH_STEPS,
     load: () => import('./match-maths') },
-  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj', ladder: WEIGH_STEPS,
+  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms, grams', tone: '#4A7FA8', section: 'bjj', ladder: WEIGH_STEPS,
     load: () => import('./weigh-in') },
   { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj', ladder: SIGNAL_STEPS,
     load: () => import('./refs-signals') },

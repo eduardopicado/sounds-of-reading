@@ -231,13 +231,18 @@ export function missingOptions(answer: Move): Move[] {
   return shuffle([answer, ...others]);
 }
 
-/* ── Weigh-In: heavier and lighter, then kilograms ────────────────────── */
+/* ── Weigh-In: heavier and lighter, then kilograms and grams ─────────── */
 
 /* Before a competition every fighter is weighed, and fights others in the
  * same weight class. Kindergarten and Year 1 compare on a balance: the side
  * that goes down is heavier. Then they measure with blocks, the informal unit
  * the syllabus starts with. Year 2 reads kilograms off the scale, finds his
  * weight class, and adds or takes away the gi, since he is weighed in it.
+ *
+ * Years 3 and 4 weigh small things in grams on a kitchen scale, use
+ * 1 kilogram = 1000 grams, read scales whose marks are not all numbered (a
+ * space can be worth 2, 20, 25, 50 or 100), and compare two bags written in
+ * kilograms and grams: which is heavier, and by how much.
  *
  * The classes have their Portuguese names in English too, as on the mat at a
  * competition: Galo (rooster) for the lightest, up through Pluma, Pena, Leve
@@ -249,7 +254,9 @@ export interface WeighThing {
   id: string;
   picture: string;
   name: Both;
-  /** heavier things have bigger numbers; only the order matters */
+  /** heavier things have bigger numbers. Only the order matters, and it is
+      the real one: the gi (2 kg here) is heavier than the trophy and the
+      ball, as the kitchen scale's grams say */
   heft: number;
 }
 
@@ -258,13 +265,40 @@ export const WEIGH_THINGS: WeighThing[] = [
   { id: 'medal', picture: '🥇', name: { en: 'medal', pt: 'medalha' }, heft: 2 },
   { id: 'banana', picture: '🍌', name: { en: 'banana', pt: 'banana' }, heft: 3 },
   { id: 'shoe', picture: '👟', name: { en: 'shoe', pt: 'tênis' }, heft: 4 },
-  { id: 'gi', picture: '🥋', name: { en: 'gi', pt: 'quimono' }, heft: 5 },
-  { id: 'ball', picture: '⚽', name: { en: 'ball', pt: 'bola' }, heft: 6 },
-  { id: 'trophy', picture: '🏆', name: { en: 'trophy', pt: 'troféu' }, heft: 7 },
+  { id: 'ball', picture: '⚽', name: { en: 'ball', pt: 'bola' }, heft: 5 },
+  { id: 'trophy', picture: '🏆', name: { en: 'trophy', pt: 'troféu' }, heft: 6 },
+  { id: 'gi', picture: '🥋', name: { en: 'gi', pt: 'quimono' }, heft: 7 },
   { id: 'backpack', picture: '🎒', name: { en: 'backpack', pt: 'mochila' }, heft: 8 },
   { id: 'watermelon', picture: '🍉', name: { en: 'watermelon', pt: 'melancia' }, heft: 9 },
   { id: 'rock', picture: '🪨', name: { en: 'rock', pt: 'pedra' }, heft: 10 },
 ];
+
+/** a small thing for the kitchen scale, with about what it really weighs:
+    the lightest and the heaviest it is shown at, in grams. Those on the
+    balance as well come in the balance's order. */
+export interface GramThing {
+  id: string;
+  picture: string;
+  name: Both;
+  grams: [number, number];
+}
+
+export const GRAM_THINGS: GramThing[] = [
+  { id: 'medal', picture: '🥇', name: { en: 'medal', pt: 'medalha' }, grams: [50, 100] },
+  { id: 'apple', picture: '🍎', name: { en: 'apple', pt: 'maçã' }, grams: [100, 200] },
+  { id: 'banana', picture: '🍌', name: { en: 'banana', pt: 'banana' }, grams: [150, 200] },
+  { id: 'juice', picture: '🧃', name: { en: 'juice box', pt: 'caixinha de suco' }, grams: [200, 300] },
+  { id: 'shoe', picture: '👟', name: { en: 'shoe', pt: 'tênis' }, grams: [250, 300] },
+  { id: 'ball', picture: '⚽', name: { en: 'ball', pt: 'bola' }, grams: [350, 450] },
+  { id: 'trophy', picture: '🏆', name: { en: 'trophy', pt: 'troféu' }, grams: [500, 900] },
+  { id: 'pineapple', picture: '🍍', name: { en: 'pineapple', pt: 'abacaxi' }, grams: [900, 1000] },
+];
+
+/** "the ball", "a bola": Portuguese needs the article, so each word's gender */
+const PT_FEMININE = new Set(['pena', 'medalha', 'banana', 'bola', 'mochila', 'melancia', 'pedra', 'maçã', 'caixinha de suco']);
+export const feminine = (t: { name: Both }): boolean => PT_FEMININE.has(t.name.pt);
+export const theThing = (t: { name: Both }, lang: Lang): string =>
+  lang === 'en' ? `the ${t.name.en}` : `${feminine(t) ? 'a' : 'o'} ${t.name.pt}`;
 
 export interface WeightClass { name: string; upTo: number }
 
@@ -283,6 +317,52 @@ export const classFor = (kg: number): WeightClass | undefined => WEIGHT_CLASSES.
 /** what the gi weighs, in kilograms, at every weigh-in here */
 export const GI_KG = 2;
 
+/** a scale, drawn as a straight strip from lo to hi */
+export interface Dial {
+  lo: number;
+  hi: number;
+  /** a mark every this many */
+  mark: number;
+  /** and a number written every this many */
+  number: number;
+  unit: 'g' | 'kg';
+}
+
+/** the fighters' scale in Year 2: a mark for every kilogram, a number every 5 */
+export const FIGHTER_DIAL: Dial = { lo: 15, hi: 35, mark: 1, number: 5, unit: 'kg' };
+/** the kitchen scale: a number every 100 grams and a mark halfway between,
+    up to 1000 grams, which is 1 kilogram */
+export const KITCHEN_DIAL: Dial = { lo: 0, hi: 1000, mark: 50, number: 100, unit: 'g' };
+/** Year 4: scales whose marks are not all numbered, a space worth 50, 100,
+    20 or 25 grams, or 2 kilograms. Never more than 25 spaces, so the marks
+    stay far enough apart to count on a phone. */
+export const MARK_DIALS: Dial[] = [
+  { lo: 0, hi: 1000, mark: 50, number: 200, unit: 'g' },
+  { lo: 0, hi: 1000, mark: 100, number: 500, unit: 'g' },
+  { lo: 0, hi: 500, mark: 20, number: 100, unit: 'g' },
+  { lo: 0, hi: 500, mark: 25, number: 100, unit: 'g' },
+  { lo: 0, hi: 40, mark: 2, number: 10, unit: 'kg' },
+];
+
+/** what Blue weighs on the Year 4 scale: on a mark of its own, never a number */
+const BLUE_KG = [18, 22, 24, 26, 28, 32, 34];
+
+/** grams written the way a bag's tag writes them: "900 g", "3 kg", "3 kg 200 g" */
+export function kgAndG(grams: number): string {
+  const kg = Math.floor(grams / 1000);
+  const g = grams % 1000;
+  if (!kg) return `${g} g`;
+  return g ? `${kg} kg ${g} g` : `${kg} kg`;
+}
+
+/** the units in words, to be said: "3 kg 200 g" is said "3 kilograms 200 grams" */
+export function unitsSaid(text: string, lang: Lang): string {
+  return text.replace(/(\d+) (kg|g)\b/g, (_, n: string, unit: string) => {
+    const word = unit === 'kg' ? (lang === 'pt' ? 'quilo' : 'kilogram') : (lang === 'pt' ? 'grama' : 'gram');
+    return `${n} ${word}${n === '1' ? '' : 's'}`;
+  });
+}
+
 export interface WeighStep extends Step {
   /**
    * heavier / lighter: which side of the balance;
@@ -290,9 +370,13 @@ export interface WeighStep extends Step {
    * blocks: how many blocks balance it;
    * scale: read the kilograms off the scale;
    * class: which weight class;
-   * gi: on the scale with the gi, or without it
+   * gi: on the scale with the gi, or without it;
+   * grams: read the grams off the kitchen scale (Years 3–4);
+   * kilo: how many more grams make 1 kilogram;
+   * marks: read a scale whose marks are not all numbered;
+   * bags: which bag is heavier, and by how much
    */
-  task: 'heavier' | 'mixed' | 'blocks' | 'scale' | 'class' | 'gi';
+  task: 'heavier' | 'mixed' | 'blocks' | 'scale' | 'class' | 'gi' | 'grams' | 'kilo' | 'marks' | 'bags';
 }
 
 export const WEIGH_STEPS: WeighStep[] = [
@@ -303,6 +387,11 @@ export const WEIGH_STEPS: WeighStep[] = [
   { name: 'Read the scale', task: 'scale' },
   { name: 'Which weight class?', task: 'class' },
   { name: 'With the gi on', task: 'gi' },
+  /* Years 3–4: grams, and scales with marks that have no number */
+  { name: 'Grams', task: 'grams' },
+  { name: '1 kilogram is 1000 grams', task: 'kilo' },
+  { name: 'Between the numbers', task: 'marks' },
+  { name: 'Which bag, and by how much?', task: 'bags' },
 ];
 
 export interface WeighQuestion {
@@ -318,9 +407,79 @@ export interface WeighQuestion {
   kg?: number;
   /** for gi: does the scale show it with the gi on, and he works out without, or the other way */
   giOn?: boolean;
-  /** a thing's id, a number, or a class name */
+  /** for grams, kilo and marks: what is on the scale (none when it is Blue),
+      the scale, and the number its pointer is on */
+  small?: GramThing;
+  dial?: Dial;
+  shows?: number;
+  /** for bags: what each weighs in grams, how much heavier the heavier one
+      is, and the amounts offered for that */
+  bags?: Record<Side, number>;
+  by?: number;
+  byOptions?: number[];
+  /** a thing's id, a number, a class name, or for bags the heavier side */
   answer: string | number;
   options: (string | number)[];
+}
+
+/** every number from lo to hi, a step apart */
+const every = (lo: number, hi: number, by: number): number[] =>
+  Array.from({ length: Math.floor((hi - lo) / by) + 1 }, (_, i) => lo + i * by);
+
+/** on one of the scale's marks, but not one with a number */
+export const unnumbered = (v: number, d: Dial): boolean =>
+  v > d.lo && v < d.hi && (v - d.lo) % d.mark === 0 && (v - d.lo) % d.number !== 0;
+
+/** the number written on the scale just before the pointer */
+const numberBefore = (v: number, d: Dial): number => d.lo + Math.floor((v - d.lo) / d.number) * d.number;
+
+/**
+ * The answer and three wrong ones, for a scale whose marks are not all
+ * numbered: the slip of counting each space as 10 (or as 1, when a space is
+ * worth 2), then a mark either side.
+ */
+export function markChoices(shows: number, d: Dial): number[] {
+  const before = numberBefore(shows, d);
+  const spaces = (shows - before) / d.mark;
+  const slip = before + spaces * (d.mark > 10 ? 10 : 1);
+  const out = [shows];
+  for (const x of [slip, shows - d.mark, shows + d.mark, shows + 2 * d.mark, shows - 2 * d.mark]) {
+    if (out.length >= 4) break;
+    if (x > d.lo && x <= d.hi && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+/** two bags, one heavier by less than a kilogram; half the time it has the
+    smaller number of grams on its tag, a kilogram more beside it */
+function bagsQuestion(): WeighQuestion {
+  let heavy: number;
+  let light: number;
+  if (pick([true, false])) {
+    const kg = rand(2, 4);
+    const [a, b] = shuffle(every(100, 900, 100)).slice(0, 2);
+    heavy = kg * 1000 + Math.max(a, b);
+    light = kg * 1000 + Math.min(a, b);
+  } else {
+    /* 3 kg 200 g is heavier than 2 kg 800 g */
+    const kg = rand(2, 3);
+    const lightG = rand(2, 9) * 100;
+    light = kg * 1000 + lightG;
+    heavy = (kg + 1) * 1000 + rand(0, lightG / 100 - 1) * 100;
+  }
+  const side = pick(['Blue', 'White'] as Side[]);
+  const by = heavy - light;
+  /* the slip: the grams taken from the grams, and the kilograms left out */
+  const slip = Math.abs((heavy % 1000) - (light % 1000));
+  const byOptions = [by];
+  for (const x of [slip, by - 100, by + 100, by + 200, by - 200, by + 300]) {
+    if (byOptions.length >= 4) break;
+    if (x >= 100 && x <= 900 && !byOptions.includes(x)) byOptions.push(x);
+  }
+  return {
+    task: 'bags', bags: side === 'Blue' ? { Blue: heavy, White: light } : { Blue: light, White: heavy },
+    by, byOptions: byOptions.sort((x, y) => x - y), answer: side, options: ['Blue', 'White'],
+  };
 }
 
 export function weighQuestion(step: WeighStep, last?: WeighQuestion): WeighQuestion {
@@ -342,16 +501,155 @@ export function weighQuestion(step: WeighStep, last?: WeighQuestion): WeighQuest
     } else if (step.task === 'class') {
       const kg = rand(17, 32);
       q = { task: 'class', kg, answer: classFor(kg)!.name, options: WEIGHT_CLASSES.map((c) => c.name) };
-    } else {
+    } else if (step.task === 'gi') {
       const kg = rand(17, 30);
       const giOn = pick([true, false]);
       /* with the gi on the scale shows more; he works out the other one */
       const answer = giOn ? kg : kg + GI_KG;
       q = { task: 'gi', kg, giOn, answer, options: choices(answer, 15, 35) };
+    } else if (step.task === 'grams') {
+      const small = pick(GRAM_THINGS);
+      const shows = pick(every(small.grams[0], small.grams[1], KITCHEN_DIAL.mark));
+      q = { task: 'grams', small, dial: KITCHEN_DIAL, shows, answer: shows, options: choices(shows, 50, 1000, 4, 50) };
+    } else if (step.task === 'kilo') {
+      /* bananas for the team, short of a kilogram */
+      const shows = rand(2, 18) * 50;
+      q = { task: 'kilo', small: GRAM_THINGS.find((t) => t.id === 'banana'), dial: KITCHEN_DIAL, shows,
+        answer: 1000 - shows, options: choices(1000 - shows, 50, 950, 4, 50) };
+    } else if (step.task === 'marks') {
+      const dial = pick(MARK_DIALS);
+      /* a thing that can be on a mark without a number: Blue on the
+         kilogram scale, or something light enough on the gram ones */
+      const fits: [GramThing | undefined, number][] = dial.unit === 'kg'
+        ? BLUE_KG.filter((v) => unnumbered(v, dial)).map((v) => [undefined, v])
+        : GRAM_THINGS.flatMap((t) => every(t.grams[0], t.grams[1], 5).filter((v) => unnumbered(v, dial)).map((v): [GramThing, number] => [t, v]));
+      const [small, shows] = pick(fits);
+      q = { task: 'marks', small, dial, shows, answer: shows, options: markChoices(shows, dial) };
+    } else {
+      q = bagsQuestion();
     }
-    if (last && last.answer === q.answer && last.left === q.left) continue;
+    /* not the same again straight away: for the bags, the same side and amount */
+    const same = q.task === 'bags' ? last?.answer === q.answer && last?.by === q.by : last?.answer === q.answer;
+    if (last && same && last.left === q.left) continue;
     return q;
   }
+}
+
+/* What Weigh-In says, both ways. The questions without a number or a
+   weight in them are on the list to record (weighLines); the explanations
+   have the numbers of each question, so they stay with the device voice. */
+
+export const WEIGH_SAYS = {
+  heavier: { en: 'Which is heavier?', pt: 'Qual é mais pesado?' },
+  lighter: { en: 'Which is lighter?', pt: 'Qual é mais leve?' },
+  blocks: (t: WeighThing): Both => ({
+    en: `The balance is level. How many blocks does ${theThing(t, 'en')} weigh?`,
+    pt: `A balança está equilibrada. Quantos blocos pesa ${theThing(t, 'pt')}?`,
+  }),
+  scale: { en: 'Blue is on the scale. How many kilograms?', pt: 'O Azul está na balança. Quantos quilos?' },
+  class: { en: 'Which weight class does Blue fight in?', pt: 'Em qual categoria o Azul luta?' },
+  grams: (t: GramThing): Both => ({
+    en: `How many grams does ${theThing(t, 'en')} weigh?`,
+    pt: `Quantos gramas pesa ${theThing(t, 'pt')}?`,
+  }),
+  kilo: {
+    en: 'The coach wants 1 kilogram of bananas for the team. How many more grams make 1 kilogram?',
+    pt: 'O professor quer 1 quilo de bananas para a equipe. Quantos gramas faltam para 1 quilo?',
+  },
+  bags: { en: 'Which bag is heavier?', pt: 'Qual mochila é mais pesada?' },
+  bag: (side: Side): Both => ({ en: `${side}'s bag`, pt: `Mochila do ${SIDE_NAME[side].pt}` }),
+  by: (side: Side): Both => ({
+    en: `How much heavier is ${side}'s bag?`,
+    pt: `Quanto a mochila do ${SIDE_NAME[side].pt} pesa a mais?`,
+  }),
+};
+
+/** the kitchen scale read: on a number, or halfway to the next */
+export function gramsWhy(t: GramThing, g: number): Both {
+  const before = Math.floor(g / 100) * 100;
+  const kilo = g === 1000;
+  return g % 100 === 0
+    ? {
+      en: `The pointer is on ${g}: ${theThing(t, 'en')} weighs ${g} grams.${kilo ? ' 1000 grams is 1 kilogram.' : ''}`,
+      pt: `O ponteiro está no ${g}: ${theThing(t, 'pt')} pesa ${g} gramas.${kilo ? ' 1000 gramas são 1 quilo.' : ''}`,
+    }
+    : {
+      en: `The pointer is halfway between ${before} and ${before + 100}: ${theThing(t, 'en')} weighs ${g} grams.`,
+      pt: `O ponteiro está no meio, entre ${before} e ${before + 100}: ${theThing(t, 'pt')} pesa ${g} gramas.`,
+    };
+}
+
+/** how many more grams make a kilogram: to the next hundred first, then on to 1000 */
+export function kiloWhy(g: number): Both {
+  const more = 1000 - g;
+  const next = Math.ceil(g / 100) * 100;
+  const simple = g % 100 === 0 || next === 1000;
+  return {
+    en: `The scale shows ${g} grams. 1 kilogram is 1000 grams: ${simple
+      ? `${g} and ${more} make 1000`
+      : `${g} and ${next - g} make ${next}, and ${1000 - next} more make 1000`}. ${more} grams more.`,
+    pt: `A balança mostra ${g} gramas. 1 quilo é 1000 gramas: ${simple
+      ? `${g} e ${more} fazem 1000`
+      : `${g} e ${next - g} fazem ${next}, e mais ${1000 - next} fazem 1000`}. Faltam ${more} gramas.`,
+  };
+}
+
+/** a scale read between its numbers: what each space is worth, then counting on */
+export function marksWhy(d: Dial, shows: number, who: Both): Both {
+  const before = numberBefore(shows, d);
+  const counted = every(before + d.mark, shows, d.mark).join(', ');
+  const unit = d.unit === 'g' ? { en: 'grams', pt: 'gramas' } : { en: 'kilograms', pt: 'quilos' };
+  return {
+    en: `There are ${d.number / d.mark} spaces from ${before} to ${before + d.number}, so each space is ${d.mark} ${unit.en}. `
+      + `Count on from ${before}: ${counted}. ${cap(who.en)} weighs ${shows} ${unit.en}.`,
+    pt: `São ${d.number / d.mark} espaços do ${before} ao ${before + d.number}, então cada espaço vale ${d.mark} ${unit.pt}. `
+      + `Conte a partir do ${before}: ${counted}. ${cap(who.pt)} pesa ${shows} ${unit.pt}.`,
+  };
+}
+
+/**
+ * Which bag is heavier, and by how much: with the same kilograms, the grams
+ * taken away; with a kilogram between them, counting up from the lighter to
+ * the kilogram and on, the way Jump Line goes to the next ten first. With
+ * `side` the heavier side was missed too, so it says first why it is heavier.
+ */
+export function bagsWhy(bags: Record<Side, number>, side = false): Both {
+  const heavier: Side = bags.Blue > bags.White ? 'Blue' : 'White';
+  const h = bags[heavier];
+  const l = bags[heavier === 'Blue' ? 'White' : 'Blue'];
+  const [hk, lk] = [Math.floor(h / 1000), Math.floor(l / 1000)];
+  const by = h - l;
+  const pt = SIDE_NAME[heavier].pt;
+  let how: Both;
+  if (hk === lk) {
+    how = {
+      en: `Both bags have ${hk} kg, and ${h % 1000} g take away ${l % 1000} g is ${by} g`,
+      pt: `As duas mochilas têm ${hk} kg, e ${h % 1000} g menos ${l % 1000} g é ${by} g`,
+    };
+  } else {
+    const up = hk * 1000 - l;
+    how = {
+      en: `${kgAndG(l)} and ${up} g make ${hk} kg${h % 1000 ? `, and ${h % 1000} g more is ${kgAndG(h)}` : ''}`,
+      pt: `${kgAndG(l)} e ${up} g fazem ${hk} kg${h % 1000 ? `, e mais ${h % 1000} g dá ${kgAndG(h)}` : ''}`,
+    };
+  }
+  const first: Both = side && hk !== lk
+    ? { en: `${hk} kg is more than ${lk} kg, so ${heavier}'s bag is heavier. `, pt: `${hk} kg é mais que ${lk} kg, então a mochila do ${pt} é mais pesada. ` }
+    : { en: '', pt: '' };
+  return {
+    en: `${first.en}${how.en}: ${heavier}'s bag is ${by} g heavier.`,
+    pt: `${first.pt}${how.pt}: a mochila do ${pt} é ${by} g mais pesada.`,
+  };
+}
+
+/** every line Weigh-In says with no number or weight in it, for the recordings */
+export function weighLines(): Both[] {
+  return [
+    WEIGH_SAYS.heavier, WEIGH_SAYS.lighter, WEIGH_SAYS.scale, WEIGH_SAYS.class, WEIGH_SAYS.kilo, WEIGH_SAYS.bags,
+    ...WEIGH_THINGS.filter((t) => t.heft >= 2).map(WEIGH_SAYS.blocks),
+    ...GRAM_THINGS.map(WEIGH_SAYS.grams),
+    ...(['Blue', 'White'] as Side[]).map(WEIGH_SAYS.by),
+  ];
 }
 
 /* ── Ref's Signals: what the referee's hands say ─────────────────────── */
