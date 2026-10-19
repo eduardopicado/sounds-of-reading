@@ -9,7 +9,7 @@ once opened, and nothing ever leaves the device.
 
 ## The games
 
-The home screen groups the tiles into four sections, with three of the
+The home screen groups the tiles into five sections, with three of the
 coach's picks for today at the top.
 
 ### Reading and spelling
@@ -74,6 +74,17 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 | **Match Maths** | Adds up a match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. |
 | **Weigh-In** | Which side of the balance is heavier, measuring in blocks; then (Year 2) reads the kilograms off the scale, finds his weight class, and adds or takes off the gi. |
 | **Ref's Signals** | Reads the referee's hands — fingers for points, an open hand for an advantage, a fist for a penalty; then (Year 2) plays referee, and learns the calls shouted at every competition: Combate! Parou! Lute! |
+
+### Chess ♟️
+
+The way chess is first taught to young children: one piece at a time on an
+almost empty board, with a football to reach. The pieces are drawn in the app,
+so they look the same on every device.
+
+| Game | What the child does |
+|---|---|
+| **Meet the Pieces** | Moves one piece to the ball: the rook and the bishop first, then the queen, the king, the pawn (two squares on its first move), and the knight's L-jump. Then taps every ball a piece can reach in one move, and then with his own pawns in the way. A miss puts a dot on every square the piece can reach and says how it moves. |
+| **Collect the Balls** | One piece, several balls: collect them all in the fewest moves there are (the bishop only ever reaches its own colour; a ball next to the knight takes it three jumps). A wrong square shows where the piece can go; 👀 shows it on demand; ↺ starts again. |
 
 The maths and jiu-jitsu games follow the NSW Mathematics K–10 syllabus from
 Kindergarten to Year 2, and each climbs its own levels: up after three right
