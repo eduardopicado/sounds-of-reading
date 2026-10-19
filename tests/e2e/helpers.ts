@@ -81,6 +81,29 @@ export async function recordSpeech(page: Page): Promise<void> {
   });
 }
 
+/** the app as if nothing were recorded, for a test about the device's own
+    voice: with no clips listed, everything is spoken */
+export async function noRecordings(page: Page): Promise<void> {
+  await page.context().route('**/audio/clips.json', (route) => route.fulfill({ json: [] }));
+}
+
+/** a player that writes down each recording it plays, and ends it at once */
+export async function recordPlays(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const plays: string[] = [];
+    (window as unknown as { __plays: string[] }).__plays = plays;
+    HTMLMediaElement.prototype.play = function play(this: HTMLMediaElement) {
+      plays.push(this.currentSrc || this.src);
+      window.setTimeout(() => this.dispatchEvent(new Event('ended')), 20);
+      return Promise.resolve();
+    };
+  });
+}
+
+/** the recordings played so far */
+export const plays = (page: Page): Promise<string[]> =>
+  page.evaluate(() => [...(window as unknown as { __plays: string[] }).__plays]);
+
 /** everything said so far */
 export const said = (page: Page): Promise<string[]> =>
   page.evaluate(() => [...(window as unknown as { __said: string[] }).__said]);
