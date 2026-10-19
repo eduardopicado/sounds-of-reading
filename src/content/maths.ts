@@ -1214,13 +1214,20 @@ export interface SurveyStep extends Step {
    * tally: tally marks for each team, how many for one;
    * most: a picture graph, which team got the most;
    * column: a column graph, how many for one team;
-   * more: a column graph, how many more for one team than another.
+   * more: a column graph, how many more for one team than another;
+   * key: a picture graph where each picture is several fans (Years 3–4);
+   * scale: a column graph whose scale is numbered every 10 with a line
+   * every 5, so a column can stop on a line with no number;
+   * table: tallies in a table, the number for one team to fill in;
+   * total: a table of numbers, how many altogether.
    */
-  task: 'count' | 'tally' | 'most' | 'column' | 'more';
+  task: 'count' | 'tally' | 'most' | 'column' | 'more' | 'key' | 'scale' | 'table' | 'total';
   /** how many teams were voted for */
   teams: number;
   /** the most votes a team can get */
   max: number;
+  /** key: how many fans one picture stands for; scale: the gap between its lines */
+  key?: number;
 }
 
 export const SURVEY_STEPS: SurveyStep[] = [
@@ -1230,6 +1237,13 @@ export const SURVEY_STEPS: SurveyStep[] = [
   /* Year 2: column graphs, and comparing */
   { name: 'Column graph', task: 'column', teams: 4, max: 10 },
   { name: 'How many more?', task: 'more', teams: 4, max: 10 },
+  /* Years 3–4: one picture for many fans, a scale to read, and tables */
+  { name: 'Each picture is 2 fans', task: 'key', teams: 4, max: 20, key: 2 },
+  { name: 'Each picture is 5 fans', task: 'key', teams: 4, max: 40, key: 5 },
+  { name: 'Each picture is 10 fans', task: 'key', teams: 4, max: 90, key: 10 },
+  { name: 'Read the scale', task: 'scale', teams: 4, max: 50, key: 5 },
+  { name: 'Tallies into a table', task: 'table', teams: 4, max: 30 },
+  { name: 'How many altogether?', task: 'total', teams: 4, max: 30 },
 ];
 
 export interface SurveyQuestion {
@@ -1244,12 +1258,21 @@ export interface SurveyQuestion {
 
 export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQuestion {
   for (;;) {
-    const votes = shuffle(Array.from({ length: step.max }, (_, i) => i + 1)).slice(0, step.teams);
+    /* with a key, every team's votes are whole pictures; tables have bigger, busier numbers */
+    const by = step.key ?? 1;
+    const least = step.task === 'table' ? 3 : step.task === 'total' ? 2 : 1;
+    const pool = Array.from({ length: step.max / by }, (_, i) => (i + 1) * by).filter((v) => v >= least);
+    const votes = shuffle(pool).slice(0, step.teams);
     const team = rand(0, step.teams - 1);
     const most = votes.indexOf(Math.max(...votes));
     let other = team;
     let answer: number;
+    /* reading the scale is about the lines with no number: 35, between 30 and 40 */
+    if (step.task === 'scale' && votes[team] % 10 === 0) continue;
+    /* a table of tallies needs a gate of five to count in the one asked */
+    if (step.task === 'table' && votes[team] < 6) continue;
     if (step.task === 'most') answer = most;
+    else if (step.task === 'total') answer = votes.reduce((a, b) => a + b, 0);
     else if (step.task === 'more') {
       const fewer = votes.map((_, i) => i).filter((i) => votes[i] < votes[team]);
       if (!fewer.length) continue;
@@ -1260,6 +1283,37 @@ export function surveyQuestion(step: SurveyStep, last?: SurveyQuestion): SurveyQ
     return { votes, team, other, answer };
   }
 }
+
+/**
+ * The wrong choices for the Years 3–4 survey steps, the slips made reading
+ * them: counting the pictures and not the fans (4 for 20, when each is 5);
+ * reading a line with no number as the next number up or down, or counting
+ * the lines (7 for 35); counting a gate of five as one mark, or forgetting
+ * its crossing stroke; leaving a row out of the total.
+ */
+export function surveyChoices(step: SurveyStep, q: SurveyQuestion): number[] {
+  const a = q.answer;
+  const key = step.key ?? 1;
+  const slips: number[] = [];
+  if (step.task === 'key') slips.push(a / key, a + key, a - key, a + 2 * key);
+  if (step.task === 'scale') slips.push(a - 5, a + 5, a / 5, a + 10);
+  if (step.task === 'table') {
+    const gates = Math.floor(a / 5);
+    slips.push(gates + (a % 5), gates * 4 + (a % 5), a + 1, a - 1, a + 5);
+  }
+  if (step.task === 'total') slips.push(a - Math.min(...q.votes), a + 10, a - 10, a + 1, a - 1);
+  const out = [a];
+  for (const x of slips) {
+    if (out.length >= 4) break;
+    if (x >= 1 && Number.isInteger(x) && !out.includes(x)) out.push(x);
+  }
+  for (let d = 1; out.length < 4; d += 1) if (!out.includes(a + d)) out.push(a + d);
+  return out.sort((x, y) => x - y);
+}
+
+/** counting in a step: "5, 10, 15, 20" */
+export const countIn = (by: number, times: number): string =>
+  Array.from({ length: times }, (_, i) => String((i + 1) * by)).join(', ');
 
 /* ── Fact Family Formation: adding and taking away undo each other ──── */
 

@@ -1038,6 +1038,59 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText(`That's ${answer} more.`);
   });
 
+  test('Years 3–4: Fan Survey, each picture is 5 fans, and counting the pictures is the slip', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:fan-survey': 6 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-key')).toHaveText('Each ● is 5 fans', { timeout: 10000 });
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer / 5);
+    const fives = Array.from({ length: answer / 5 }, (_, i) => (i + 1) * 5).join(', ');
+    await expect(page.locator('.mx-note')).toContainText(`each ● is 5 fans: ${fives}. That's ${answer} fans.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Fan Survey reads a line with no number on the scale', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 8 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-bar')).toHaveCount(4, { timeout: 10000 });
+    /* numbered every 10, a line every 5 */
+    await expect(page.locator('.fs-scale')).toHaveText(['0', '10', '20', '30', '40', '50']);
+    await expect(page.locator('.fs-grid')).toHaveCount(10);
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    expect(answer % 10).toBe(5);
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`halfway between ${answer - 5} and ${answer + 5}: that's ${answer}.`);
+  });
+
+  test('Years 3–4: Fan Survey turns tallies into a table, then adds it up', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:fan-survey': 9 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-sheet .fs-tally')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.fs-gap')).toHaveText('?');
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.fs-gap')).toHaveText(String(answer));
+    await expect(page.locator('.mx-note')).toContainText('Count the gates of five, then the rest');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Fan Survey adds up a table, and leaving a row out is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 10 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-total')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText('How many fans voted altogether?');
+    const numbers = (await page.locator('.fs-sheet .fs-n').allTextContents()).map(Number);
+    const answer = numbers.reduce((a, b) => a + b, 0);
+    expect(Number(await page.locator('.fs-board').getAttribute('data-answer'))).toBe(answer);
+    const offered = (await page.locator('.mx-choice').allTextContents()).map(Number);
+    expect(offered).toContain(answer - Math.min(...numbers));
+    await tapNumber(page, answer - Math.min(...numbers));
+    await expect(page.locator('.mx-note')).toHaveText(`${numbers.join(' + ')} = ${answer}.`);
+  });
+
   test('Fact Family Formation: a whole round', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'fact-family');
