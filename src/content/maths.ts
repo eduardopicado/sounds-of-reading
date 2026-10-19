@@ -659,6 +659,9 @@ export interface SkipStep extends Step {
   dir: 1 | -1;
   /** the biggest number said */
   max: number;
+  /** a times table (Years 3–4): never past 12 of the step, and the gap
+      comes with its fact, 28 is 4 × 7 */
+  facts?: boolean;
 }
 
 export const SKIP_STEPS: SkipStep[] = [
@@ -672,6 +675,11 @@ export const SKIP_STEPS: SkipStep[] = [
   { name: 'Odd numbers', by: [2], from: 'odd', dir: 1, max: 41 },
   { name: 'Count by 3s', by: [3], from: 'zero', dir: 1, max: 36 },
   { name: 'Back in 10s and 5s', by: [10, 5], from: 'any', dir: -1, max: 120 },
+  /* Years 3–4: the counting side of the times tables, up and then back */
+  { name: 'Count by 4s', by: [4], from: 'zero', dir: 1, max: 48, facts: true },
+  { name: 'Count by 6s and 8s', by: [6, 8], from: 'zero', dir: 1, max: 96, facts: true },
+  { name: 'Count by 7s and 9s', by: [7, 9], from: 'zero', dir: 1, max: 108, facts: true },
+  { name: 'Back down a times table', by: [3, 4, 6, 7, 8, 9], from: 'zero', dir: -1, max: 108, facts: true },
 ];
 
 /** how many numbers each keepy-uppy shows */
@@ -684,8 +692,11 @@ export function skipQuestion(step: SkipStep, last?: SkipQuestion): SkipQuestion 
     const by = pick(step.by);
     const span = by * (BOUNCES - 1);
     let first: number;
-    if (step.from === 'zero') first = by * rand(0, Math.floor((step.max - span) / by));
-    else if (step.from === 'odd') first = 2 * rand(0, Math.floor((step.max - span - 1) / 2)) + 1;
+    if (step.from === 'zero') {
+      /* along the multiples of the step: up from one, or back down to one */
+      const top = Math.floor((step.facts ? Math.min(step.max, 12 * by) : step.max) / by);
+      first = by * (step.dir === 1 ? rand(0, top - (BOUNCES - 1)) : rand(BOUNCES - 1, top));
+    } else if (step.from === 'odd') first = 2 * rand(0, Math.floor((step.max - span - 1) / 2)) + 1;
     else {
       first = rand(step.dir === 1 ? 1 : span + 1, step.dir === 1 ? step.max - span : step.max);
       /* "from any number" in tens means not from a ten, or it is just counting by 10s */
@@ -694,9 +705,17 @@ export function skipQuestion(step: SkipStep, last?: SkipQuestion): SkipQuestion 
     const seq = Array.from({ length: BOUNCES }, (_, i) => first + step.dir * by * i);
     /* never the first two: he needs to hear the pattern before the gap */
     const gap = rand(2, BOUNCES - 1);
+    /* a times table's gap is never 0: "0 × 7" is no fact to learn here */
+    if (step.facts && seq[gap] === 0) continue;
     if (last && last.seq[0] === seq[0] && last.by === by) continue;
     return { seq, gap, by };
   }
+}
+
+/** the times-table fact for the gap: 28 is 4 × 7 */
+export function skipFact(q: SkipQuestion): string {
+  const n = q.seq[q.gap];
+  return `${n / q.by} × ${q.by} = ${n}`;
 }
 
 /** the gap's number and the slips: one off, and a step too far either way */

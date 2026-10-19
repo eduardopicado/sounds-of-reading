@@ -11,7 +11,7 @@ import {
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
-  BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
+  BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
   BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
@@ -513,6 +513,29 @@ describe('Keepy-Uppy Count', () => {
     const y1 = SKIP_STEPS.slice(0, 5).flatMap((s) => s.by);
     expect(new Set(y1)).toEqual(new Set([1, 2, 5, 10]));
     expect(SKIP_STEPS.slice(5).some((s) => s.by.includes(3))).toBe(true);
+  });
+
+  it('Years 3–4: counts along a times table, up and back, never past 12 of the step', () => {
+    const tables = SKIP_STEPS.filter((s) => s.facts);
+    /* above every Year 2 step, and every table from 3 to 9 but 5 */
+    expect(SKIP_STEPS.indexOf(tables[0])).toBe(SKIP_STEPS.findIndex((s) => s.name === 'Back in 10s and 5s') + 1);
+    expect(new Set(tables.flatMap((s) => s.by))).toEqual(new Set([3, 4, 6, 7, 8, 9]));
+    expect(tables.some((s) => s.dir === -1)).toBe(true);
+    for (const step of tables) {
+      const seen = new Set<number>();
+      for (let i = 0; i < MANY; i += 1) {
+        const q = skipQuestion(step);
+        for (const n of q.seq) {
+          expect(n % q.by).toBe(0);
+          expect(n).toBeLessThanOrEqual(12 * q.by);
+        }
+        const gap = q.seq[q.gap];
+        expect(gap).toBeGreaterThan(0);
+        expect(skipFact(q)).toBe(`${gap / q.by} × ${q.by} = ${gap}`);
+        seen.add(q.by);
+      }
+      expect(seen).toEqual(new Set(step.by));
+    }
   });
 });
 

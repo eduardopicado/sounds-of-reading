@@ -600,6 +600,38 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('Keepy-uppy!');
   });
 
+  test('Years 3–4: Keepy-Uppy counts by 7s and 9s, and says the fact', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:keepy-uppy': 11 });
+    await startGame(page, 'keepy-uppy');
+    for (let i = 1; i <= 3; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i}`, { timeout: 10000 });
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      const shown = (await page.locator('.ku-ball:not(.gap)').allTextContents()).map(Number);
+      const by = shown[1] - shown[0];
+      expect([7, 9]).toContain(by);
+      const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+      await tapNumber(page, answer);
+      await expect(page.locator('.mx-note')).toHaveText(`Keepy-uppy! ${answer}! ${answer / by} × ${by} = ${answer}.`);
+    }
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Keepy-Uppy back down a times table, a miss naming the table', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 12 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const shown = (await page.locator('.ku-ball:not(.gap)').allTextContents()).map(Number);
+    const by = shown[0] - shown[1];
+    expect(by).toBeGreaterThan(2);
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.ku-hop').first()).toHaveText(`−${by}`);
+    await expect(page.locator('.mx-note')).toContainText(`Back in ${by}s: `);
+    await expect(page.locator('.mx-note')).toContainText(`The ${by} times table: ${answer / by} × ${by} = ${answer}.`);
+  });
+
   test('Training Drills: a whole round of groups and sharing', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'training-drills');
