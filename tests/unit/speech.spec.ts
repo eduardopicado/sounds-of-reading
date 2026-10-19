@@ -157,6 +157,32 @@ describe('choosing a voice', () => {
     expect(speech.canSpeak('fr-FR')).toBe(false);
   });
 
+  it('never says Portuguese in a European voice, so with no Brazilian one it cannot speak it', async () => {
+    const speech = await load([
+      voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),
+      voice('Joana', 'pt-PT', 'com.apple.voice.premium.pt-PT.Joana'),
+      voice('Catarina', 'pt_PT', 'com.apple.voice.enhanced.pt-PT.Catarina'),
+    ]);
+    expect(speech.voicesFor('pt-BR')).toEqual([]);
+    expect(speech.voicesFor('pt')).toEqual([]);
+    expect(speech.canSpeak('pt-BR')).toBe(false);
+    speech.say('Que defesa!', { lang: 'pt-BR' });
+    expect(engine.said).toEqual([]);
+  });
+
+  it('finds a Brazilian voice however the engine writes it', async () => {
+    const speech = await load([voice('Luciana', 'pt_BR', 'com.apple.voice.compact.pt-BR.Luciana')]);
+    expect(speech.voicesFor('pt-BR').map((v) => v.voiceURI)).toEqual(['com.apple.voice.compact.pt-BR.Luciana']);
+  });
+
+  it('keeps English cousins: en-AU first, then en-GB', async () => {
+    const speech = await load([
+      voice('Daniel', 'en-GB', 'com.apple.voice.compact.en-GB.Daniel'),
+      voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),
+    ]);
+    expect(speech.voicesFor('en-AU').map((v) => v.lang)).toEqual(['en-AU', 'en-GB']);
+  });
+
   it('says there is nothing better installed only when no voice is enhanced or premium', async () => {
     const plain = await load([
       voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),

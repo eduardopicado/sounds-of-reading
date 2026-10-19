@@ -311,9 +311,15 @@ export function voicesFor(lang: string): SpeechSynthesisVoice[] {
   const norm = (l: string) => l.replace('_', '-').toLowerCase();
   const want = norm(lang);
   const base = want.split('-')[0];
+  /* Portuguese is Brazilian or nothing: a pt-PT voice reading the
+     commentator or the referee is a different accent from the one he hears
+     at the academy. English keeps its cousins (en-AU, then en-GB) */
+  const fits = base === 'pt'
+    ? (v: SpeechSynthesisVoice) => norm(v.lang) === 'pt-br'
+    : (v: SpeechSynthesisVoice) => norm(v.lang).split('-')[0] === base;
   try {
     return synth.getVoices()
-      .filter((v) => norm(v.lang).split('-')[0] === base)
+      .filter(fits)
       .sort((a, b) => Number(norm(b.lang) === want) - Number(norm(a.lang) === want)
         || QUALITY_RANK[qualityOf(a)] - QUALITY_RANK[qualityOf(b)]);
   } catch {

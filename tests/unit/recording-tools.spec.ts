@@ -6,10 +6,11 @@
  *   npm run test:unit */
 
 import { describe, expect, it } from 'vitest';
-import { clips, fetchRetrying, ttsRequest, wanted } from '../../tools/make-audio';
+import { LANGUAGE_CODE_MODELS, brazilianProblem, clips, fetchRetrying, ptAudition, ttsRequest, wanted } from '../../tools/make-audio';
 import { EFFECTS, sfxRequest } from '../../tools/make-sfx';
 import { ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS } from '../../src/content/index';
 import { refereeLines, weighLines } from '../../src/content/bjj';
+import { PT_SAVES, ptGoals } from '../../src/content/commentary';
 import { speakable } from '../../src/lib/clip-id';
 import { callFor } from '../../src/games/narration';
 import { TEAMS } from '../../src/games/teams';
@@ -38,6 +39,46 @@ describe('asking for a word', () => {
   it('stops before asking with no key, or no voice chosen', () => {
     expect(() => ttsRequest({ text: 'rain', voice: 'en' }, {})).toThrow(/ELEVENLABS_API_KEY/);
     expect(() => ttsRequest({ text: 'Que defesa!', voice: 'pt' }, { ELEVENLABS_API_KEY: 'k' })).toThrow(/ELEVENLABS_VOICE_PT/);
+  });
+});
+
+describe('Portuguese is always Brazilian', () => {
+  it('gives every Portuguese line the Portuguese voice, none taken by an English twin', () => {
+    const voiceOf = new Map(clips().map((c) => [speakable(c.text), c.voice]));
+    const pt = [
+      ...PT_SAVES, ...ptGoals(),
+      ...TEAMS.flatMap((t) => (t.pt ? ptGoals(t.pt) : [])),
+      ...refereeLines().map((l) => l.pt),
+      ...weighLines().map((l) => l.pt),
+    ];
+    expect(pt.length).toBeGreaterThan(100);
+    for (const line of pt) expect(voiceOf.get(speakable(line)), line).toBe('pt');
+  });
+
+  it('auditions the Portuguese voices with lines the games say', () => {
+    const voiceOf = new Map(clips().map((c) => [speakable(c.text), c.voice]));
+    for (const line of ptAudition()) expect(voiceOf.get(speakable(line)), line).toBe('pt');
+  });
+
+  it('takes a voice whose verified language is pt-BR, or that is labelled Brazilian', () => {
+    expect(brazilianProblem({ name: 'A', verified_languages: [{ language: 'pt', locale: 'pt-BR', accent: 'brazilian' }] })).toBeNull();
+    expect(brazilianProblem({ name: 'B', labels: { accent: 'brazilian', language: 'pt' } })).toBeNull();
+  });
+
+  it('refuses a European Portuguese voice, or one that says nothing, and says what it found', () => {
+    expect(brazilianProblem({ name: 'Joana', verified_languages: [{ language: 'pt', locale: 'pt-PT', accent: 'european' }] }))
+      .toMatch(/Joana.*pt european pt-PT/);
+    expect(brazilianProblem({ name: 'Matilda', labels: { accent: 'australian' } })).toMatch(/accent: australian/);
+    expect(brazilianProblem({ name: 'Blank' })).toMatch(/nothing about its language/);
+  });
+
+  it('sends the language code for Portuguese only to a model that takes one', () => {
+    const pt = { text: 'Que defesa!', voice: 'pt' as const };
+    expect(body(ttsRequest(pt, ENV).init).language_code).toBeUndefined();
+    for (const model of LANGUAGE_CODE_MODELS) {
+      expect(body(ttsRequest(pt, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('pt');
+      expect(body(ttsRequest({ text: 'rain', voice: 'en' }, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBeUndefined();
+    }
   });
 });
 
