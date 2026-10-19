@@ -37,10 +37,12 @@ the best is kept with `--keep`.
 3. `npm run make:audio -- --voices` lists the voices, and `--audition ID,ID`
    makes ten test words in each into `audition/` to choose from;
    `--audition-pt ID,ID` does the same for the Portuguese voices, with
-   lines the games say in Portuguese. The chosen ones go in
-   `ELEVENLABS_VOICE_EN` and `ELEVENLABS_VOICE_PT`. Portuguese is always
-   Brazilian: the tool looks the Portuguese voice up first and will not
-   record with one ElevenLabs does not mark as Brazilian.
+   the referee's and teacher's lines, and `--audition-commentator ID,ID`
+   with the football commentator's. The chosen ones go in
+   `ELEVENLABS_VOICE_EN`, `ELEVENLABS_VOICE_PT` (the referee and the
+   teacher) and `ELEVENLABS_VOICE_PT_COMMENTATOR` (who shouts the goals).
+   Portuguese is always Brazilian: the tool looks each Portuguese voice up
+   first and will not record with one ElevenLabs does not mark as Brazilian.
 4. `npm run make:audio` records everything missing. For the sound effects,
    `npm run make:sfx -- --takes 3`, then `--keep <sound> <take>` for each.
 

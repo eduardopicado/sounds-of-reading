@@ -23,7 +23,8 @@
  * The environment it needs:
  *   ELEVENLABS_API_KEY   the key, as an environment secret
  *   ELEVENLABS_VOICE_EN  the Australian English voice's id
- *   ELEVENLABS_VOICE_PT  the Brazilian Portuguese voice's id, for the commentator
+ *   ELEVENLABS_VOICE_PT  the Brazilian Portuguese voice's id, for the referee and the teacher
+ *   ELEVENLABS_VOICE_PT_COMMENTATOR  the Brazilian football commentator's id
  *   ELEVENLABS_MODEL     the model; eleven_v4 unless set
  *   ELEVENLABS_FORMAT    the file format; mp3_44100_64 unless set
  *
@@ -32,13 +33,15 @@
  *   npm run make:audio -- --voices            the voices the key can use, Australian first
  *   npm run make:audio -- --audition ID,ID    ten test words in each voice, into audition/<voice>-<model>/
  *                                             (set ELEVENLABS_MODEL to hear the same voice on another model)
- *   npm run make:audio -- --audition-pt ID,ID the same in Portuguese, Brazilian voices only
+ *   npm run make:audio -- --audition-pt ID,ID the same in Portuguese, the referee's and teacher's lines,
+ *                                             Brazilian voices only
+ *   npm run make:audio -- --audition-commentator ID,ID  the same with the commentator's goals and saves
  *   npm run make:audio -- --only rain         one clip, to hear it before the rest
  *   npm run make:audio                        everything missing
  *
  * Existing files are left alone, so a run costs only what is new.
  *
- * Portuguese is always Brazilian. Before a Portuguese line is recorded the
+ * Portuguese is always Brazilian. Before a Portuguese line is recorded its
  * voice is looked up, and the run stops unless ElevenLabs says it speaks
  * Portuguese with a Brazilian accent (brazilianProblem below). */
 
@@ -94,7 +97,17 @@ const GAME_LINES = [
   'White to move. Find the checkmate!', 'White to move. Find the move that checkmates the black king.',
 ];
 
-export type Voice = 'en' | 'pt';
+/** who says it: the Australian voice, the Brazilian referee and teacher, or
+    the Brazilian football commentator, who shouts */
+export type Voice = 'en' | 'pt' | 'pt-commentator';
+
+/** where each voice's id comes from */
+export const VOICE_ENV: Record<Voice, string> = {
+  en: 'ELEVENLABS_VOICE_EN', pt: 'ELEVENLABS_VOICE_PT', 'pt-commentator': 'ELEVENLABS_VOICE_PT_COMMENTATOR',
+};
+
+/** the language a voice speaks */
+const languageOf = (voice: Voice): 'en' | 'pt' => (voice === 'en' ? 'en' : 'pt');
 
 /** one clip: the words as written, and who says them */
 export interface Clip { text: string; voice: Voice }
@@ -133,8 +146,8 @@ export function clips(): Clip[] {
   for (const line of EN_SAVES) add(line);
   add(enGoal());
   for (const t of TEAMS) if (t.kind !== 'you') add(enGoal(t.name));
-  for (const line of [...PT_SAVES, ...ptGoals()]) add(line, 'pt');
-  for (const t of TEAMS) if (t.pt) for (const line of ptGoals(t.pt)) add(line, 'pt');
+  for (const line of [...PT_SAVES, ...ptGoals()]) add(line, 'pt-commentator');
+  for (const t of TEAMS) if (t.pt) for (const line of ptGoals(t.pt)) add(line, 'pt-commentator');
 
   /* jiu-jitsu: everything the two referee games say, both ways */
   for (const line of refereeLines()) { add(line.en); add(line.pt, 'pt'); }
@@ -158,8 +171,8 @@ type Env = Record<string, string | undefined>;
 export function ttsRequest(clip: Clip, env: Env, voiceId?: string): { url: string; init: RequestInit } {
   const key = env.ELEVENLABS_API_KEY;
   if (!key) throw new Error('ELEVENLABS_API_KEY is not set: see public/audio/README.md');
-  const voice = voiceId ?? (clip.voice === 'pt' ? env.ELEVENLABS_VOICE_PT : env.ELEVENLABS_VOICE_EN);
-  if (!voice) throw new Error(`ELEVENLABS_VOICE_${clip.voice.toUpperCase()} is not set: pick one with --voices`);
+  const voice = voiceId ?? env[VOICE_ENV[clip.voice]];
+  if (!voice) throw new Error(`${VOICE_ENV[clip.voice]} is not set: pick one with --voices`);
   const format = env.ELEVENLABS_FORMAT ?? 'mp3_44100_64';
   const text = /[.!?…]$/.test(clip.text) ? clip.text : `${clip.text}.`;
   const model = env.ELEVENLABS_MODEL ?? DEFAULT_MODEL;
@@ -172,7 +185,7 @@ export function ttsRequest(clip: Clip, env: Env, voiceId?: string): { url: strin
         text,
         model_id: model,
         /* a one-word clip gives the model little to tell the language by */
-        ...(LANGUAGE_CODE_MODELS.has(model) ? { language_code: clip.voice } : {}),
+        ...(LANGUAGE_CODE_MODELS.has(model) ? { language_code: languageOf(clip.voice) } : {}),
         voice_settings: voiceSettings(model),
       }),
     },
@@ -270,14 +283,18 @@ async function listVoices(): Promise<void> {
 /** a few words that show a voice off: short and long vowels, a tricky word, a name, a sentence */
 const AUDITION = ['rain', 'ship', 'thumb', 'the', 'said', 'kangaroo', 'Brazil', 'a big bug', 'Well done!', 'Goooal for Australia!'];
 
-/** and in Portuguese, from the lines the games say: the commentator, the
-    referee and Weigh-In */
+/** and in Portuguese, from the lines the games say: the referee and
+    Weigh-In's teacher */
 export function ptAudition(): string[] {
   return [
-    ptGoals('do Brasil')[0], PT_SAVES[1], ptGoals()[1],
     ...refereeLines().slice(0, 3).map((l) => l.pt),
     ...weighLines().map((l) => l.pt).filter((l) => /1 quilo\?$/.test(l)).slice(0, 1),
   ];
+}
+
+/** and the commentator's */
+export function commentatorAudition(): string[] {
+  return [ptGoals('do Brasil')[0], PT_SAVES[1], ptGoals()[1]];
 }
 
 async function main(): Promise<void> {
@@ -289,16 +306,18 @@ async function main(): Promise<void> {
 
   if (args.includes('--voices')) { await listVoices(); return; }
 
-  const auditionPt = flag('--audition-pt');
-  if (auditionPt !== null) {
-    const lines = ptAudition();
-    for (const voiceId of auditionPt.split(',').filter(Boolean)) {
+  for (const [option, voice, lines] of [
+    ['--audition-pt', 'pt', ptAudition()], ['--audition-commentator', 'pt-commentator', commentatorAudition()],
+  ] as const) {
+    const ids = flag(option);
+    if (ids === null) continue;
+    for (const voiceId of ids.split(',').filter(Boolean)) {
       const problem = brazilianProblem(await voiceInfo(voiceId));
       if (problem) { console.log(`  ${voiceId}: skipped, ${problem}`); continue; }
       const dir = join(process.cwd(), 'audition', auditionDir(voiceId));
       mkdirSync(dir, { recursive: true });
       for (const [i, text] of lines.entries()) {
-        writeFileSync(join(dir, `pt-${i + 1}.mp3`), await speak({ text, voice: 'pt' }, voiceId));
+        writeFileSync(join(dir, `${voice}-${i + 1}.mp3`), await speak({ text, voice }, voiceId));
       }
       console.log(`  ${voiceId}: ${lines.length} lines in audition/${auditionDir(voiceId)}: ${lines.join(' | ')}`);
     }
@@ -352,10 +371,11 @@ async function main(): Promise<void> {
     return;
   }
 
-  if (todo.some((c) => c.voice === 'pt')) {
-    const pt = process.env.ELEVENLABS_VOICE_PT;
-    if (!pt) throw new Error('ELEVENLABS_VOICE_PT is not set: pick one with --voices');
-    await mustBeBrazilian(pt);
+  for (const voice of ['pt', 'pt-commentator'] as const) {
+    if (!todo.some((c) => c.voice === voice)) continue;
+    const id = process.env[VOICE_ENV[voice]];
+    if (!id) throw new Error(`${VOICE_ENV[voice]} is not set: pick one with --voices`);
+    await mustBeBrazilian(id);
   }
 
   let made = 0;
