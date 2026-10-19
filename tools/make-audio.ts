@@ -47,7 +47,8 @@ import { THEMES } from '../src/content/word-search';
 import { BOTAO_STEPS, HOW } from '../src/content/botao';
 import { refereeLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
-import { flagLines } from '../src/content/flags';
+import { country, flagLines } from '../src/content/flags';
+import { capitalLines } from '../src/content/capitals';
 import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../src/content/commentary';
 import { TEAMS } from '../src/games/teams';
 
@@ -118,6 +119,8 @@ export function clips(): Clip[] {
   for (const line of mapLines()) add(line);
   /* Flags: what each flag looks like, and the questions */
   for (const line of flagLines()) add(line);
+  /* Capital Cities: the states, their capitals, and the world's */
+  for (const line of capitalLines((code) => country(code).name)) add(line);
   for (const line of Object.values(HOW)) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */

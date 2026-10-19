@@ -92,6 +92,10 @@ src/content/world.ts   World Map: the continents and oceans, a fact for each,
                        seas.ts says which ocean a point of water is in
 src/content/flags.ts   Flags: the countries, their flags, what is on each one,
                        the look-alikes, and the questions
+src/content/capitals.ts Capital Cities: Australia's states and their capitals,
+                       and the world's; australia-shapes.ts is the map of the
+                       states (tools/make-australia.ts), australia-projection.ts
+                       puts a city on it
 src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (only
                        + − × ÷ and square roots, so a flick does the same thing
                        everywhere), the three-touch rule, and set pieces that
@@ -136,7 +140,9 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere
 tools/                 content maintenance scripts (not shipped); make-audio.ts and
-                       make-sfx.ts make the recordings in public/audio/
+                       make-sfx.ts make the recordings in public/audio/;
+                       make-world.ts and make-australia.ts the maps, sharing
+                       shapes.ts
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes
 tests/e2e/             Playwright (review.spec.ts: regressions from the 2026-09 review)
