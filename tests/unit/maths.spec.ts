@@ -12,7 +12,7 @@ import {
   DRILL_STEPS, drillChoices, drillQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
-  BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
+  BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
   toThousand,
@@ -443,6 +443,38 @@ describe('Team Buses', () => {
     expect(BUS_STEPS[0].hi).toBeLessThan(20);
     const firstTrain = BUS_STEPS.findIndex((s) => s.trains);
     expect(BUS_STEPS.slice(0, firstTrain).every((s) => s.hi <= 120)).toBe(true);
+  });
+
+  it('goes on, for Years 3–4, to planes of 1000, and numbers made in more than one way', () => {
+    const top = BUS_STEPS.slice(7);
+    expect(top.map((s) => s.task)).toEqual(['read', 'build', 'regroup', 'regroup']);
+    expect(places(3245, true, true)).toEqual({ thousands: 3, hundreds: 2, tens: 4, ones: 5 });
+    for (let n = 1; n < 10000; n += 1) expect(valueOf(places(n, true, true))).toBe(n);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const n = busQuestion(step);
+        if (step.task === 'regroup') {
+          /* whole buses, some in each place, so one digit alone is wrong */
+          expect(n % 10).toBe(0);
+          expect(Math.floor(n / 10) % 10).not.toBe(0);
+          expect(Math.floor(n / 100) % 10).not.toBe(0);
+          const c = regroupChoices(n, step.unit!);
+          expect(c).toContain(Math.floor(n / step.unit!));
+          expect(c).toContain(Math.floor(n / step.unit!) % 10);
+          expect(new Set(c).size).toBe(4);
+        } else {
+          const c = placeChoices(n, 9999);
+          expect(c).toContain(n);
+          expect(new Set(c).size).toBe(4);
+          for (const x of c) { expect(x).toBeGreaterThanOrEqual(1); expect(x).toBeLessThanOrEqual(9999); }
+        }
+      }
+    }
+  });
+
+  it('carries 350 in 35 buses, and 1250 in 12 trains: the slip is the digit on its own', () => {
+    expect(regroupChoices(350, 10)).toEqual(expect.arrayContaining([35, 5]));
+    expect(regroupChoices(1250, 100)).toEqual(expect.arrayContaining([12, 2]));
   });
 });
 
