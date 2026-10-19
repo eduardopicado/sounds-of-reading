@@ -24,7 +24,7 @@
  *   ELEVENLABS_API_KEY   the key, as an environment secret
  *   ELEVENLABS_VOICE_EN  the Australian English voice's id
  *   ELEVENLABS_VOICE_PT  the Brazilian Portuguese voice's id, for the commentator
- *   ELEVENLABS_MODEL     the model; eleven_multilingual_v2 unless set
+ *   ELEVENLABS_MODEL     the model; eleven_v4 unless set
  *   ELEVENLABS_FORMAT    the file format; mp3_44100_64 unless set
  *
  *   npm run make:audio -- --dry               how many clips are missing, and the cost
@@ -161,7 +161,7 @@ export function ttsRequest(clip: Clip, env: Env, voiceId?: string): { url: strin
   if (!voice) throw new Error(`ELEVENLABS_VOICE_${clip.voice.toUpperCase()} is not set: pick one with --voices`);
   const format = env.ELEVENLABS_FORMAT ?? 'mp3_44100_64';
   const text = /[.!?…]$/.test(clip.text) ? clip.text : `${clip.text}.`;
-  const model = env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2';
+  const model = env.ELEVENLABS_MODEL ?? DEFAULT_MODEL;
   return {
     url: `${API}/text-to-speech/${encodeURIComponent(voice)}?output_format=${encodeURIComponent(format)}`,
     init: {
@@ -170,18 +170,27 @@ export function ttsRequest(clip: Clip, env: Env, voiceId?: string): { url: strin
       body: JSON.stringify({
         text,
         model_id: model,
-        ...(clip.voice === 'pt' && LANGUAGE_CODE_MODELS.has(model) ? { language_code: 'pt' } : {}),
-        /* steady and clear rather than expressive, and a touch slow for a beginner reader */
-        voice_settings: { stability: 0.6, similarity_boost: 0.8, style: 0, use_speaker_boost: true, speed: 0.9 },
+        /* a one-word clip gives the model little to tell the language by */
+        ...(LANGUAGE_CODE_MODELS.has(model) ? { language_code: clip.voice } : {}),
+        voice_settings: voiceSettings(model),
       }),
     },
   };
 }
 
+export const DEFAULT_MODEL = 'eleven_v4';
+
 /** the models that take a language_code. Multilingual v2 does not (it works
-    the language out from the text, which for these lines is plainly
-    Portuguese), so it is sent only where it is understood */
-export const LANGUAGE_CODE_MODELS = new Set(['eleven_turbo_v2_5', 'eleven_flash_v2_5', 'eleven_v3']);
+    the language out from the text), so it is sent only where it is understood */
+export const LANGUAGE_CODE_MODELS = new Set(['eleven_v4', 'eleven_v4_turbo', 'eleven_v3', 'eleven_flash_v2_5', 'eleven_turbo_v2_5']);
+
+/** steady and clear rather than expressive. The v2 models also take a touch
+    of slowness for a beginner reader; v3 and v4 take only stability and
+    similarity, so nothing else is sent to them */
+export function voiceSettings(model: string): Record<string, number | boolean> {
+  if (/^eleven_v[34]/.test(model)) return { stability: 0.6, similarity_boost: 0.8 };
+  return { stability: 0.6, similarity_boost: 0.8, style: 0, use_speaker_boost: true, speed: 0.9 };
+}
 
 /** what ElevenLabs says about a voice (GET /v1/voices/{id}), the parts that matter here */
 export interface VoiceInfo {
@@ -321,7 +330,7 @@ async function main(): Promise<void> {
   const chars = todo.reduce((n, c) => n + c.text.length + 1, 0);
   console.log(`${list.length} clips wanted, ${already.size} already recorded, ${todo.length} to do`);
   console.log(`about ${Math.round(seconds)}s of audio, roughly ${(seconds * 8 / 1024).toFixed(1)} MB at 64 kbps`);
-  console.log(`about ${chars} characters to record, which is about ${chars} credits on Multilingual v2\n`);
+  console.log(`about ${chars} characters to record, on ${process.env.ELEVENLABS_MODEL ?? DEFAULT_MODEL} (credits per character depend on the model and the plan)\n`);
 
   /* a collision would mean one word playing another word's recording, which
      is the sort of thing nobody reports and everybody notices */

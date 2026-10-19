@@ -6,7 +6,7 @@
  *   npm run test:unit */
 
 import { describe, expect, it } from 'vitest';
-import { LANGUAGE_CODE_MODELS, brazilianProblem, clips, fetchRetrying, ptAudition, ttsRequest, wanted } from '../../tools/make-audio';
+import { LANGUAGE_CODE_MODELS, voiceSettings, brazilianProblem, clips, fetchRetrying, ptAudition, ttsRequest, wanted } from '../../tools/make-audio';
 import { EFFECTS, sfxRequest } from '../../tools/make-sfx';
 import { ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS } from '../../src/content/index';
 import { refereeLines, weighLines } from '../../src/content/bjj';
@@ -24,7 +24,7 @@ describe('asking for a word', () => {
     expect(url).toBe('https://api.elevenlabs.io/v1/text-to-speech/aussie?output_format=mp3_44100_64');
     expect(init.method).toBe('POST');
     expect((init.headers as Record<string, string>)['xi-api-key']).toBe('test-key');
-    expect(body(init).model_id).toBe('eleven_multilingual_v2');
+    expect(body(init).model_id).toBe('eleven_v4');
   });
 
   it('says a single word as a statement, and leaves a sentence alone', () => {
@@ -72,13 +72,20 @@ describe('Portuguese is always Brazilian', () => {
     expect(brazilianProblem({ name: 'Blank' })).toMatch(/nothing about its language/);
   });
 
-  it('sends the language code for Portuguese only to a model that takes one', () => {
+  it('sends the language code to a model that takes one, and only there', () => {
     const pt = { text: 'Que defesa!', voice: 'pt' as const };
-    expect(body(ttsRequest(pt, ENV).init).language_code).toBeUndefined();
+    const v2 = { ...ENV, ELEVENLABS_MODEL: 'eleven_multilingual_v2' };
+    expect(body(ttsRequest(pt, v2).init).language_code).toBeUndefined();
     for (const model of LANGUAGE_CODE_MODELS) {
       expect(body(ttsRequest(pt, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('pt');
-      expect(body(ttsRequest({ text: 'rain', voice: 'en' }, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBeUndefined();
+      expect(body(ttsRequest({ text: 'rain', voice: 'en' }, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('en');
     }
+  });
+
+  it('sends v4 only the two settings it takes, and v2 its slower pace', () => {
+    expect(Object.keys(body(ttsRequest({ text: 'rain', voice: 'en' }, ENV).init).voice_settings as object).sort())
+      .toEqual(['similarity_boost', 'stability']);
+    expect(voiceSettings('eleven_multilingual_v2').speed).toBe(0.9);
   });
 });
 
