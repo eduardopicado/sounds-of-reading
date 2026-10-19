@@ -111,8 +111,8 @@ src/content/pt.ts      Portuguese names in sentences: each name's article, joine
                        Unidos"); the geography games speak Portuguese through it
 src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
                        effects, made from tones or recorded), audio.ts and
-                       clip-id.ts (recorded words; none ship yet, see
-                       public/audio/README.md), storage.ts,
+                       clip-id.ts (recorded words, and which voice says
+                       them: public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
                        going), stickers.ts, colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),

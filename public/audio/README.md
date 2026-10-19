@@ -4,8 +4,9 @@ Made by `npm run make:audio` and `npm run make:sfx` with ElevenLabs, never
 edited by hand. The files are committed, so a deploy needs neither the key
 nor the credits to make them again.
 
-None ship yet: both lists below are empty until the key is in place and the
-tools have been run, and until then the app sounds exactly as it always has.
+The words ship: everything in English, and the Portuguese the football
+commentator, the jiu-jitsu referee and the geography games say. Anything
+not listed is spoken by the device voice, as before.
 
 ## Words: `*.mp3` and `clips.json`
 
@@ -25,6 +26,19 @@ plays. Every other sound, and every sound until its file has loaded, is made
 from tones in `src/lib/sfx.ts`, as before. `tools/make-sfx.ts` has the
 prompt for each one; takes are made into `audition/sfx/` to listen to, and
 the best is kept with `--keep`.
+
+## The voices
+
+All on Eleven v4, chosen by ear in October 2026:
+
+| Who | Voice | `ELEVENLABS_VOICE_…` |
+|---|---|---|
+| Everything in English | Stuart – Energetic and enthusiastic (Australian) | `EN=HDA9tsk27wYi3uq0fPcK` |
+| The referee and the teacher | Roberto Valença – Calm Narrator (Brazilian) | `PT=bZztR6P62TDbe6sgaZgz` |
+| The football commentator | Nassif – Sports Commentary & Hype (Brazilian) | `PT_COMMENTATOR=Fjiik8aKXNDjmxd1Q2jF` |
+
+A clip added later should be made with the same voice and model, or it
+will sound like someone else said it.
 
 ## Making them
 
