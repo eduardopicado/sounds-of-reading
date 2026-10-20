@@ -1429,6 +1429,11 @@
 .bj-step-name { font: 700 clamp(13px, 3.4vw, 16px) var(--reading); text-align: center; line-height: 1.15; min-height: 2.3em; }
 .bj-step-points { font: 800 22px var(--display); color: #C9452E; }
 .bj-step-mystery { display: grid; place-items: center; width: 100%; aspect-ratio: 3 / 2; font: 800 48px var(--display); color: #8C9096; }
+/* a long match: more, smaller cards, so the scoreboard and the answers stay in sight */
+.bj-strip.long { width: min(100%, 960px); gap: 6px; }
+.bj-strip.long .bj-step { width: clamp(76px, 20vw, 116px); padding: 4px 4px 6px; border-width: 3px; }
+.bj-strip.long .bj-step-name { font-size: clamp(11px, 2.8vw, 14px); }
+.bj-strip.long .bj-step-points { font-size: 18px; }
 .bj-scoreboard { display: grid; gap: 4px; width: min(100%, 420px); padding: 8px; border-radius: 12px; background: #111; }
 .bj-score-row { display: grid; grid-template-columns: 1fr 70px; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; font: 800 22px var(--display); }
 .bj-scoreboard:has(.head) .bj-score-row { grid-template-columns: 1fr 70px 56px 56px; }

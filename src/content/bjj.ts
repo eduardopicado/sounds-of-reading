@@ -145,14 +145,19 @@ export interface MatchStep extends Step {
    * ahead: who is ahead, by how many;
    * missing: Blue had so many, now has so many, which move was it;
    * tiebreak: the points are level, who wins on advantages and penalties?
+   * behind: Blue is behind after a whole match, by how many (Years 3–4);
+   * need: near the end, the least Blue needs to win: an advantage, or a
+   *   move worth 2, 3 or 4
    */
-  task: 'total' | 'ahead' | 'missing' | 'tiebreak';
+  task: 'total' | 'ahead' | 'missing' | 'tiebreak' | 'behind' | 'need';
   /** how many moves Blue makes (least, most) */
   moves: [number, number];
   /** write the points on the moves, or he remembers them */
   shown: boolean;
   /** White scores too, and the question can be about either */
   both?: boolean;
+  /** how many moves White makes, when not one or two */
+  white?: [number, number];
 }
 
 export const MATCH_STEPS: MatchStep[] = [
@@ -164,7 +169,17 @@ export const MATCH_STEPS: MatchStep[] = [
   /* Year 2: a whole match, and the tie-breakers */
   { name: 'A whole match', task: 'total', moves: [3, 4], shown: false, both: true },
   { name: 'Advantages and penalties', task: 'tiebreak', moves: [1, 2], shown: false },
+  /* Years 3–4: longer matches, how far behind, and what it takes to win */
+  { name: 'A long match', task: 'total', moves: [5, 6], shown: false, both: true, white: [2, 3] },
+  { name: 'How far behind?', task: 'behind', moves: [4, 5], shown: false, white: [5, 7] },
+  { name: 'What does Blue need?', task: 'need', moves: [1, 3], shown: false },
 ];
+
+/** what can still be scored near the end: an advantage, or a move worth 2, 3 or 4 */
+export type Score = 'advantage' | 2 | 3 | 4;
+export const SCORES: Score[] = ['advantage', 2, 3, 4];
+/** the move each score stands for when it is offered */
+export const SCORE_MOVE: Record<2 | 3 | 4, Move['id']> = { 2: 'takedown', 3: 'guard-pass', 4: 'mount' };
 
 export type Side = 'Blue' | 'White';
 
@@ -175,13 +190,137 @@ export interface MatchQuestion {
   side: Side;
   advantages: { Blue: number; White: number };
   penalties: { Blue: number; White: number };
-  /** a number, or for tiebreak the winner */
-  answer: number | Side;
+  /** a number, for tiebreak the winner, and for need the least that wins */
+  answer: number | Side | Score;
   options: (number | string)[];
 }
 
 export const pointsOf = (moves: Move[]): number => moves.reduce((s, m) => s + m.points, 0);
 const moves = (n: number): Move[] => Array.from({ length: n }, () => pick(MOVES));
+
+/** who wins as it stands, the IBJJF way: the points, then the advantages,
+    then fewer penalties; nobody when all three are level (the referee decides) */
+export function winnerOf(points: Record<Side, number>, advantages: Record<Side, number>, penalties: Record<Side, number>): Side | null {
+  if (points.Blue !== points.White) return points.Blue > points.White ? 'Blue' : 'White';
+  if (advantages.Blue !== advantages.White) return advantages.Blue > advantages.White ? 'Blue' : 'White';
+  if (penalties.Blue !== penalties.White) return penalties.Blue < penalties.White ? 'Blue' : 'White';
+  return null;
+}
+
+/** the least Blue can score to win: an advantage first, then 2, 3 and 4 points */
+export function leastToWin(q: Pick<MatchQuestion, 'blue' | 'white' | 'advantages' | 'penalties'>): Score | null {
+  for (const s of SCORES) {
+    const points = { Blue: pointsOf(q.blue) + (s === 'advantage' ? 0 : s), White: pointsOf(q.white) };
+    const advantages = { ...q.advantages, Blue: q.advantages.Blue + (s === 'advantage' ? 1 : 0) };
+    if (winnerOf(points, advantages, q.penalties) === 'Blue') return s;
+  }
+  return null;
+}
+
+/** a long match added up by putting the same points together, the times
+    tables at work: "3 × 2 = 6, 2 × 4 = 8, and a 3. 6 + 8 + 3 = 17". Null
+    when no two moves score the same, so there is nothing to group. */
+export function groupedSum(moves: Move[]): Both | null {
+  const counts = ([2, 3, 4] as const).map((p) => ({ p, n: moves.filter((m) => m.points === p).length })).filter((c) => c.n);
+  const groups = counts.filter((c) => c.n > 1);
+  const singles = counts.filter((c) => c.n === 1);
+  if (!groups.length) return null;
+  const totals = [...groups.map((c) => c.n * c.p), ...singles.map((c) => c.p)];
+  /* one group on its own is already the total */
+  const sum = totals.length > 1 ? ` ${totals.join(' + ')} = ${pointsOf(moves)}.` : '';
+  const facts = groups.map((c) => `${c.n} × ${c.p} = ${c.n * c.p}`).join(', ');
+  return {
+    en: `Group the same points: ${facts}${singles.length ? `, and ${singles.map((c) => `a ${c.p}`).join(' and ')}` : ''}.${sum}`,
+    pt: `Junte os pontos iguais: ${facts}${singles.length ? `, e ${singles.map((c) => `um ${c.p}`).join(' e ')}` : ''}.${sum}`,
+  };
+}
+
+/** how far behind, counting up from Blue's points through the next ten */
+export function behindWhy(blue: number, white: number): Both {
+  const d = white - blue;
+  const ten = Math.ceil(blue / 10) * 10;
+  if (ten === blue || ten >= white) {
+    return {
+      en: `${white} take away ${blue} is ${d}: Blue is ${d} points behind.`,
+      pt: `${white} menos ${blue} são ${d}: o Azul está ${d} pontos atrás.`,
+    };
+  }
+  return {
+    en: `From ${blue}, ${ten - blue} more is ${ten}, and ${white - ten} more is ${white}: Blue is ${d} points behind.`,
+    pt: `Do ${blue}, mais ${ten - blue} dá ${ten}, e mais ${white - ten} dá ${white}: o Azul está ${d} pontos atrás.`,
+  };
+}
+
+/** a score as it is offered: "An advantage", "Takedown: 2" */
+export function scoreLabel(s: Score, lang: Lang): string {
+  if (s === 'advantage') return lang === 'pt' ? 'Uma vantagem' : 'An advantage';
+  const name = moveById(SCORE_MOVE[s]).name[lang];
+  return `${name[0].toUpperCase()}${name.slice(1)}: ${s}`;
+}
+
+/** why that is the least Blue needs, and why anything less is not enough */
+export function needWhy(q: Pick<MatchQuestion, 'blue' | 'white' | 'advantages' | 'penalties' | 'answer'>): Both {
+  const [b, w] = [pointsOf(q.blue), pointsOf(q.white)];
+  const d = w - b;
+  const a = q.advantages;
+  const p = q.penalties;
+  const least = q.answer as Score;
+  const move = (s: 2 | 3 | 4) => moveById(SCORE_MOVE[s]);
+  /* "a takedown", "uma queda" */
+  const aMove = (s: 2 | 3 | 4, lang: Lang): string => (lang === 'en' ? `a ${move(s).name.en}` : `${move(s).um} ${move(s).name.pt}`);
+  const cap = (t: string): string => t[0].toUpperCase() + t.slice(1);
+  if (least === 'advantage') {
+    return a.Blue + 1 > a.White
+      ? {
+        en: `The points are level, ${b} each. An advantage makes it ${a.Blue + 1} advantages to ${a.White}: Blue wins on advantages.`,
+        pt: `Os pontos estão iguais, ${b} a ${b}. Uma vantagem deixa ${a.Blue + 1} vantagens a ${a.White}: o Azul ganha nas vantagens.`,
+      }
+      : {
+        en: `The points are level, ${b} each. An advantage makes the advantages level too, ${a.White} each, and Blue has fewer penalties, ${p.Blue} to ${p.White}: Blue wins.`,
+        pt: `Os pontos estão iguais, ${b} a ${b}. Uma vantagem empata as vantagens também, ${a.White} a ${a.White}, e o Azul tem menos punições, ${p.Blue} a ${p.White}: o Azul ganha.`,
+      };
+  }
+  if (d === 0) {
+    /* an advantage is not enough, so the least is 2 points */
+    const not: Both = a.Blue + 1 < a.White
+      ? { en: `an advantage would still leave White ahead on advantages, ${a.White} to ${a.Blue + 1}`,
+          pt: `com uma vantagem o Branco ainda teria mais vantagens, ${a.White} a ${a.Blue + 1}` }
+      : p.Blue > p.White
+        ? { en: `an advantage would only make the advantages level, and Blue has more penalties, ${p.Blue} to ${p.White}`,
+            pt: `uma vantagem só empataria as vantagens, e o Azul tem mais punições, ${p.Blue} a ${p.White}` }
+        : { en: 'an advantage would make everything level, and then the referee decides',
+            pt: 'uma vantagem deixaria tudo igual, e aí o árbitro decide' };
+    return {
+      en: `The points are level, ${b} each, but ${not.en}. 2 points put Blue ahead: ${aMove(2, 'en')} wins it.`,
+      pt: `Os pontos estão iguais, ${b} a ${b}, mas ${not.pt}. Com 2 pontos o Azul passa na frente: ${aMove(2, 'pt')} ganha a luta.`,
+    };
+  }
+  const level = d as 2 | 3;
+  if (least === level) {
+    /* drawing level is enough: the tie-breakers are Blue's */
+    const why: Both = a.Blue > a.White
+      ? { en: `Blue has more advantages, ${a.Blue} to ${a.White}`, pt: `o Azul tem mais vantagens, ${a.Blue} a ${a.White}` }
+      : { en: `the advantages are level, ${a.Blue} each, and Blue has fewer penalties, ${p.Blue} to ${p.White}`,
+          pt: `as vantagens estão iguais, ${a.Blue} a ${a.Blue}, e o Azul tem menos punições, ${p.Blue} a ${p.White}` };
+    return {
+      en: `Blue is ${d} behind. ${cap(aMove(level, 'en'))} makes it ${w} each, and ${why.en}: ${aMove(level, 'en')} wins it.`,
+      pt: `O Azul está ${d} pontos atrás. ${cap(aMove(level, 'pt'))} empata em ${w} a ${w}, e ${why.pt}: ${aMove(level, 'pt')} ganha a luta.`,
+    };
+  }
+  /* drawing level is not enough: one more point is */
+  const not: Both = a.White > a.Blue
+    ? { en: `White has more advantages, ${a.White} to ${a.Blue}`, pt: `o Branco tem mais vantagens, ${a.White} a ${a.Blue}` }
+    : p.Blue > p.White
+      ? { en: `the advantages are level and Blue has more penalties, ${p.Blue} to ${p.White}`,
+          pt: `as vantagens estão iguais e o Azul tem mais punições, ${p.Blue} a ${p.White}` }
+      : { en: 'the advantages and penalties are level too, so the referee would decide',
+          pt: 'as vantagens e as punições também estão iguais, então o árbitro decidiria' };
+  const more = (level + 1) as 3 | 4;
+  return {
+    en: `Blue is ${d} behind. ${cap(aMove(level, 'en'))} only makes it ${w} each, and ${not.en}. ${more} points put Blue ahead: ${aMove(more, 'en')} wins it.`,
+    pt: `O Azul está ${d} pontos atrás. ${cap(aMove(level, 'pt'))} só empata em ${w} a ${w}, e ${not.pt}. Com ${more} pontos o Azul passa na frente: ${aMove(more, 'pt')} ganha a luta.`,
+  };
+}
 
 export function matchQuestion(step: MatchStep, last?: MatchQuestion): MatchQuestion {
   for (;;) {
@@ -190,12 +329,32 @@ export function matchQuestion(step: MatchStep, last?: MatchQuestion): MatchQuest
     let side: Side = 'Blue';
     const advantages = { Blue: 0, White: 0 };
     const penalties = { Blue: 0, White: 0 };
-    let answer: number | Side;
+    let answer: number | Side | Score;
     let options: (number | string)[];
+    const whites = (): Move[] => moves(rand(...(step.white ?? [1, 2])));
     if (step.task === 'total') {
-      if (step.both) { white = moves(rand(1, 2)); side = pick(['Blue', 'White'] as Side[]); }
+      if (step.both) { white = whites(); side = pick(['Blue', 'White'] as Side[]); }
       answer = pointsOf(side === 'Blue' ? blue : white);
+      options = choices(answer, 1, Math.max(20, answer + 10));
+    } else if (step.task === 'behind') {
+      /* a whole match, and Blue is behind */
+      white = whites();
+      answer = pointsOf(white) - pointsOf(blue);
+      if (answer <= 0) continue;
       options = choices(answer, 1, 20);
+    } else if (step.task === 'need') {
+      /* near the end: level on points, or 2 or 3 behind, with the tie-breakers
+         deciding whether drawing level is enough */
+      white = whites();
+      if (![0, 2, 3].includes(pointsOf(white) - pointsOf(blue))) continue;
+      advantages.Blue = rand(0, 2);
+      advantages.White = rand(0, 2);
+      penalties.Blue = rand(0, 1);
+      penalties.White = rand(0, 1);
+      const least = leastToWin({ blue, white, advantages, penalties });
+      if (!least) continue;
+      answer = least;
+      options = SCORES;
     } else if (step.task === 'ahead') {
       white = moves(rand(1, 2));
       answer = Math.abs(pointsOf(blue) - pointsOf(white));

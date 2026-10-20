@@ -10,14 +10,19 @@
  * the IBJJF way: level on points, the advantages decide; level on those too,
  * fewer penalties wins.
  *
+ * Years 3 and 4 add up long matches by putting the same points together
+ * (3 × 2 = 6), say how far behind Blue is, and work out the least he needs
+ * to win near the end: an advantage, a takedown, a guard pass or a mount,
+ * knowing that drawing level is sometimes enough and sometimes not.
+ *
  * Bilingual like Ref's Call: the flags switch every word and the voice. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { shuffle } from '../lib/random';
 import {
-  MATCH_STEPS, MOVES, SIDE_NAME, matchQuestion, missingOptions, pointsOf, refCall,
-  type Both, type Lang, type MatchQuestion, type MatchStep, type Move, type Side,
+  MATCH_STEPS, MOVES, SIDE_NAME, behindWhy, groupedSum, matchQuestion, missingOptions, needWhy, pointsOf, refCall, scoreLabel,
+  type Both, type Lang, type MatchQuestion, type MatchStep, type Move, type Score, type Side,
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
 import { beltBadge, movePicture, BELTS } from './bjj-art';
@@ -52,6 +57,12 @@ function listOf(moves: Move[], lang: Lang): string {
 
 /** "2 + 4 = 6" */
 const sumOf = (moves: Move[]): string => `${moves.map((m) => m.points).join(' + ')} = ${pointsOf(moves)}`;
+
+/** a sum the way it is said: "3 times 2 is 6", "3 vezes 2 são 6" */
+const said = (text: Both): Both => ({
+  en: text.en.replace(/ × /g, ' times ').replace(/ \+ /g, ' plus ').replace(/ = /g, ' is '),
+  pt: text.pt.replace(/ × /g, ' vezes ').replace(/ \+ /g, ' mais ').replace(/ = /g, ' são '),
+});
 
 function build(kit: Kit) {
   const langs = langSwitch();
@@ -117,7 +128,7 @@ function build(kit: Kit) {
     const show = (): void => kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${how[lang()]}`, ok);
     show();
     retext = () => { nameCards(); nameBoard(); show(); };
-    speak(how, lang());
+    speak(said(how), lang());
     await kit.wait(ok ? 2800 : 4000);
     return ok;
   }
@@ -128,6 +139,7 @@ function build(kit: Kit) {
       /* the whole match, both fighters' moves in the order they happened */
       const order = shuffle([...q.blue.map((m) => ({ m, s: 'Blue' as Side })), ...q.white.map((m) => ({ m, s: 'White' as Side }))]);
       strip.replaceChildren(...order.map(({ m, s }) => card(m, s, 'hidden')));
+      strip.classList.toggle('long', order.length > 6);
       board(q, { Blue: '?', White: '?' });
     } else {
       strip.replaceChildren(...q.blue.map((m) => card(m, 'Blue', step.shown ? 'shown' : 'hidden')));
@@ -147,10 +159,56 @@ function build(kit: Kit) {
     board(q, { Blue: pointsOf(q.blue), White: pointsOf(q.white) });
     nameBoard();
     const calls = (l: Lang): string => asked.map((m) => refCall(m, l)).join(' ');
-    return finish(picked === q.answer, {
+    /* a long match: the same points put together, rather than every call */
+    const grouped = step.white && asked.length >= 4 ? groupedSum(asked) : null;
+    return finish(picked === q.answer, grouped ?? {
       en: `${calls('en')} ${asked.map((m) => m.points).join(' and ')} make ${q.answer}.`,
       pt: `${calls('pt')} ${asked.map((m) => m.points).join(' mais ')} são ${q.answer}.`,
     });
+  }
+
+  /** after a whole match, how far behind Blue is */
+  async function behind(q: MatchQuestion): Promise<boolean> {
+    strip.replaceChildren();
+    const blue = pointsOf(q.blue);
+    const white = pointsOf(q.white);
+    board(q, { Blue: blue, White: white });
+    const words = (l: Lang): string => (l === 'pt'
+      ? `Fim da luta: o Azul tem ${blue} pontos e o Branco tem ${white}. Quantos pontos o Azul está atrás?`
+      : `The match is over: Blue has ${blue} points and White has ${white}. How many points is Blue behind?`);
+    retext = () => { story.textContent = words(lang()); nameBoard(); };
+    retext();
+    sum.textContent = `${white} − ${blue} = ?`;
+    speak({ en: words('en'), pt: words('pt') }, lang());
+    const picked = await kit.choices.ask(q.options as number[]);
+    kit.choices.reveal(q.answer as number, picked);
+    sum.textContent = `${white} − ${blue} = ${q.answer}`;
+    return finish(picked === q.answer, behindWhy(blue, white));
+  }
+
+  /** near the end: the least Blue needs to win */
+  async function need(q: MatchQuestion): Promise<boolean> {
+    strip.replaceChildren();
+    const blue = pointsOf(q.blue);
+    const white = pointsOf(q.white);
+    board(q, { Blue: blue, White: white }, true);
+    const d = white - blue;
+    const words = (l: Lang): string => {
+      const where = d === 0
+        ? (l === 'pt' ? 'os pontos estão iguais' : 'the points are level')
+        : (l === 'pt' ? `o Azul está ${d} pontos atrás` : `Blue is ${d} points behind`);
+      return l === 'pt'
+        ? `Faltam 30 segundos, e ${where}. Qual é o mínimo que o Azul precisa para ganhar?`
+        : `30 seconds to go, and ${where}. What is the least Blue needs to win?`;
+    };
+    const label = (s: string): string => scoreLabel((s === 'advantage' ? s : Number(s)) as Score, lang());
+    retext = () => { story.textContent = words(lang()); nameBoard(); kit.choices.relabel(label); };
+    speak({ en: words('en'), pt: words('pt') }, lang());
+    const chosen = kit.choices.askWords(q.options.map(String), label);
+    retext();
+    const picked = await chosen;
+    kit.choices.revealWord(String(q.answer), picked);
+    return finish(picked === String(q.answer), needWhy(q));
   }
 
   async function ahead(q: MatchQuestion): Promise<boolean> {
@@ -242,7 +300,10 @@ function build(kit: Kit) {
       const q = matchQuestion(step, last);
       last = q;
       sum.textContent = '';
+      strip.classList.remove('long');
       story.dataset.answer = step.task === 'missing' ? String(q.blue[1].points) : String(q.answer);
+      if (step.task === 'behind') return behind(q);
+      if (step.task === 'need') return need(q);
       if (step.task === 'ahead') return ahead(q);
       if (step.task === 'missing') return missing(q);
       if (step.task === 'tiebreak') return tiebreak(q);

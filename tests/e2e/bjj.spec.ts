@@ -191,6 +191,60 @@ test.describe('Match Maths', () => {
     await expect(page.locator('.mx-note')).toHaveClass(/good/);
   });
 
+  test('Years 3–4: a long match, added up by putting the same points together', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-maths': 7 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    expect(await page.locator('.bj-step').count()).toBeGreaterThanOrEqual(7);
+    const total = Number(await page.locator('.bj-story').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== total)!;
+    await page.locator(`.mx-choice[data-n="${wrong}"]`).click();
+    /* Blue's five or six moves always have two the same; White's two or three may not */
+    await expect(page.locator('.mx-note')).toContainText(/Group the same points: \d × \d = \d+|make \d+\./);
+    await expect(page.locator('.mx-note')).toContainText(String(total));
+    noProblems(watch);
+  });
+
+  test('Years 3–4: how far behind, counted up through the ten', async ({ page }) => {
+    await seed(page, { 'maths-step:match-maths': 8 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const [blue, white] = (await page.locator('.bj-score-points').allTextContents()).map(Number);
+    expect(white).toBeGreaterThan(blue);
+    await expect(page.locator('.bj-story')).toHaveText(`The match is over: Blue has ${blue} points and White has ${white}. How many points is Blue behind?`);
+    await answer(page, '.bj-story');
+    await expect(page.locator('.mx-note')).toContainText(`Blue is ${white - blue} points behind.`);
+  });
+
+  test('Years 3–4: the least Blue needs to win, in English and Portuguese', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-maths': 9 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.mx-choice[data-n="advantage"]')).toHaveText('An advantage');
+    await expect(page.locator('.mx-choice[data-n="3"]')).toHaveText('Guard pass: 3');
+    await expect(page.locator('.bj-score-extra')).toHaveCount(4);
+    await expect(page.locator('.bj-story')).toContainText('What is the least Blue needs to win?');
+    await page.getByRole('button', { name: 'Português' }).click();
+    await expect(page.locator('.mx-choice[data-n="2"]')).toHaveText('Queda: 2');
+    await expect(page.locator('.bj-story')).toContainText('Qual é o mínimo que o Azul precisa para ganhar?');
+    await answer(page, '.bj-story');
+    await expect(page.locator('.mx-note')).toContainText('Isso!');
+    await expect(page.locator('.mx-note')).toContainText(/ganha/);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a miss on what Blue needs says why less is not enough', async ({ page }) => {
+    await seed(page, { 'maths-step:match-maths': 9 });
+    await start(page, 'match-maths');
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    const want = await page.locator('.bj-story').getAttribute('data-answer');
+    await page.locator(`.mx-choice:not([data-n="${want}"])`).first().click();
+    await expect(page.locator('.mx-choice.right')).toHaveAttribute('data-n', want!);
+    await expect(page.locator('.mx-note')).toContainText(/wins it\.|Blue wins( on advantages)?\./);
+  });
+
   test('Year 2: a draw on points goes to the advantages, then the penalties', async ({ page }) => {
     const watch = watchPage(page);
     await seed(page, { 'maths-step:match-maths': 6 });
