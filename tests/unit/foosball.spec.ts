@@ -1,8 +1,8 @@
 /* Foosball Words: the rods for every word the game can ask. */
 
 import { describe, expect, it } from 'vitest';
-import { CUTS, FOOS_STEPS, foosQuestion, foosWords, sameSound, unfit, wordOf } from '../../src/content/foosball';
-import { BLOCKLIST, soundsAlike } from '../../src/content/index';
+import { CUTS, FOOS_STEPS, foosQuestion, foosWords, makeTable, sameSound, sillyOf, unfit, wordOf, wordsOn } from '../../src/content/foosball';
+import { BLOCKLIST, SILLY_WORDS, soundsAlike } from '../../src/content/index';
 import { NOT_BY_CHANCE } from '../../src/content/words';
 
 /** the same "random" rods every run */
@@ -116,5 +116,41 @@ describe('Foosball Words', () => {
     const swaps = q.rods.flatMap((rod, i) => rod.filter((p) => p !== ship.parts[i])
       .map((p) => wordOf(ship.parts.map((x, j) => (j === i ? p : x)))?.word.text)).filter(Boolean);
     expect(swaps.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it('make any word: finds every real word on the rods, and only those', () => {
+    const ship = CUTS.find((c) => c.word.text === 'ship')!;
+    const q = foosQuestion(ship, FOOS_STEPS[0], seeded(2));
+    const words = wordsOn(q.rods);
+    expect(words.map((c) => c.word.text)).toContain('ship');
+    const texts = new Set(combos(q.rods));
+    for (const c of words) {
+      expect(texts.has(c.word.text), c.word.text).toBe(true);
+      expect(wordOf(c.parts)?.word.text).toBe(c.word.text);
+    }
+    /* and every other setting is not a word on the list */
+    for (const text of texts) if (!words.some((c) => c.word.text === text)) expect(CUTS.some((c) => c.word.text === text), text).toBe(false);
+  });
+
+  it('make any word: a table with plenty to find, at every step', () => {
+    const rand = seeded(7);
+    for (const step of FOOS_STEPS) {
+      const sizes: number[] = [];
+      for (let i = 0; i < 40; i += 1) {
+        const { q, words } = makeTable(foosWords([], step.rods), step, rand);
+        expect(words.map((c) => c.word.text)).toContain(q.target.word.text);
+        sizes.push(words.length);
+      }
+      sizes.sort((a, b) => a - b);
+      /* never fewer than three words, and usually many more */
+      expect(sizes[0], step.name).toBeGreaterThanOrEqual(3);
+      expect(sizes[sizes.length >> 1], step.name).toBeGreaterThanOrEqual(5);
+    }
+  });
+
+  it('make any word: knows a made-up word from the lists', () => {
+    const silly = SILLY_WORDS[0];
+    expect(sillyOf([silly.text])?.text).toBe(silly.text);
+    expect(sillyOf(['sh', 'i', 'p'])).toBeUndefined();
   });
 });
