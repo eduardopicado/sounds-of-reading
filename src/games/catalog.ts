@@ -105,7 +105,7 @@ export const GAMES: Game[] = [
     load: () => import('./number-line-penalty') },
   { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', section: 'maths', ladder: BUS_STEPS,
     load: () => import('./team-buses') },
-  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', section: 'maths', ladder: SKIP_STEPS,
+  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s, then to 9s', tone: '#7CB342', section: 'maths', ladder: SKIP_STEPS,
     load: () => import('./keepy-uppy') },
   { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths', ladder: DRILL_STEPS,
     load: () => import('./training-drills') },
