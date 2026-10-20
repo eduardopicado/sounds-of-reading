@@ -59,10 +59,12 @@ for (const game of GAMES.filter((g) => g.ladder && !['clock-trainer', 'word-sear
 }
 
 /* the Years 3–4 boards: a grid with its letters and numbers, the compass, a
-   corner; two treats to compare and to add, and a $20 note */
+   corner; two treats to compare and to add, and a $20 note; the kitchen
+   scale, a scale numbered only now and then, and two bags */
 for (const [game, step] of [
   ['coach-whiteboard', 5], ['coach-whiteboard', 6], ['coach-whiteboard', 7], ['coach-whiteboard', 8],
   ['ice-cream-van', 6], ['ice-cream-van', 8], ['ice-cream-van', 9], ['ice-cream-van', 10],
+  ['weigh-in', 6], ['weigh-in', 8], ['weigh-in', 9],
 ] as const) {
   test(`${game} step ${step + 1}, with a question up, has no accessibility violations`, async ({ page }) => {
     await seed(page, { [`maths-step:${game}`]: step });

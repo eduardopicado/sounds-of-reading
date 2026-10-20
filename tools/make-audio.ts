@@ -45,7 +45,7 @@ import {
 import { clipId, speakable } from '../src/lib/clip-id';
 import { THEMES } from '../src/content/word-search';
 import { BOTAO_STEPS, HOW } from '../src/content/botao';
-import { refereeLines } from '../src/content/bjj';
+import { refereeLines, weighLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
@@ -132,6 +132,8 @@ export function clips(): Clip[] {
 
   /* jiu-jitsu: everything the two referee games say, both ways */
   for (const line of refereeLines()) { add(line.en); add(line.pt, 'pt'); }
+  /* and Weigh-In's questions: the ones with no weight in them */
+  for (const line of weighLines()) { add(line.en); add(line.pt, 'pt'); }
 
   return [...out.values()].sort((a, b) => speakable(a.text).localeCompare(speakable(b.text)));
 }

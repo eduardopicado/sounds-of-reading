@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { clips, fetchRetrying, ttsRequest, wanted } from '../../tools/make-audio';
 import { EFFECTS, sfxRequest } from '../../tools/make-sfx';
 import { ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS } from '../../src/content/index';
-import { refereeLines } from '../../src/content/bjj';
+import { refereeLines, weighLines } from '../../src/content/bjj';
 import { speakable } from '../../src/lib/clip-id';
 import { callFor } from '../../src/games/narration';
 import { TEAMS } from '../../src/games/teams';
@@ -108,6 +108,14 @@ describe('the list of clips', () => {
     for (const line of refereeLines()) {
       expect(list.get(speakable(line.en)), line.en).toBe('en');
       expect(list.get(speakable(line.pt)), line.pt).toBe('pt');
+    }
+  });
+
+  it("has Weigh-In's questions, both ways, and none with a weight in it", () => {
+    for (const line of weighLines()) {
+      expect(list.get(speakable(line.en)), line.en).toBe('en');
+      expect(list.get(speakable(line.pt)), line.pt).toBe('pt');
+      expect(`${line.en} ${line.pt}`).not.toMatch(/\d+ (kg|g)\b/);
     }
   });
 

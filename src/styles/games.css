@@ -1546,13 +1546,20 @@
 .wi-card { display: grid; justify-items: center; gap: 8px; width: 100%; max-width: 520px; padding: 10px; border-radius: 20px; background: var(--paper); color: var(--ink); }
 .wi-pic { width: 100%; max-width: 420px; height: auto; }
 .wi-block.counted { fill: var(--mint); }
-.wi-scale { width: 100%; max-width: 440px; height: auto; }
+.wi-scale { width: 100%; max-width: 500px; height: auto; }
 .wi-on-scale { font-size: 44px; line-height: 1; }
 .wi-kg { margin: 0; font-family: var(--display); font-weight: 800; font-size: 24px; }
 .wi-classes { border-collapse: collapse; font-size: 18px; min-width: 240px; }
 .wi-classes th, .wi-classes td { padding: 6px 14px; border-bottom: 1px solid rgba(20, 49, 47, .2); text-align: left; }
 .wi-classes th { font-family: var(--display); }
 .wi-classes tr.right { background: rgba(121, 211, 176, .45); }
+.wi-bags { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: 100%; }
+.wi-bag { display: grid; justify-items: center; gap: 4px; margin: 0; padding: 8px 6px 10px; border: 3px solid transparent; border-radius: 16px; }
+.wi-bag.heavier { border-color: var(--mint-dark); background: rgba(121, 211, 176, .25); }
+.wi-bag-pic { width: min(100%, 160px); height: auto; }
+.wi-bag figcaption { display: grid; justify-items: center; gap: 4px; }
+.wi-bag-name { font: 700 18px var(--display); }
+.wi-tag { padding: 4px 10px; border: 2px solid var(--ink); border-radius: 8px; background: #fff; font: 800 clamp(18px, 5vw, 24px) var(--display); white-space: nowrap; }
 
 /* ── Ice Cream Van ────────────────────────────────────────────────────── */
 
