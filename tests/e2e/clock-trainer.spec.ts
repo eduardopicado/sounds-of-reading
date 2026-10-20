@@ -209,8 +209,78 @@ test.describe('Short Hand, Long Hand', () => {
     await page.goto('/');
     await expect(page.locator('.sticker')).toHaveText(['🕰️']);
     await openGame(page, 'grown-ups');
-    await expect(page.locator('.mp-row[data-game="clock-trainer"] .mp-step')).toHaveText('quarters · step 3 of 5');
+    await expect(page.locator('.mp-row[data-game="clock-trainer"] .mp-step')).toHaveText('quarters · step 3 of 7');
     noProblems(watch);
+  });
+
+  test('Years 3–4: reads the time as past or to; a miss asks which side, and the answer says why', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'clock-trainer');
+    await tab(page, 'Read the clock').click();
+    await page.locator('.ct-level', { hasText: /^past and to$/ }).click();
+    await expect(page.locator('.ct-ask')).toHaveText('What time is it? Say it with past or to.');
+    /* the "to" side of the ring counts back to the top */
+    await expect(page.locator('.ct-minnum.to')).toHaveText(['25', '20', '15', '10', '5']);
+    await expect(page.locator('.ct-side-word')).toHaveText(['past', 'to']);
+    const choices = page.locator('.ct-choice');
+    await expect(choices).toHaveCount(3);
+    for (const text of await choices.allTextContents()) expect(text).toMatch(/^(\d+|quarter) (past|to) \d+$/);
+    const right = page.locator('.ct-choice[data-ok="1"]');
+    expect(await time(page)).toBe(await right.getAttribute('data-time'));
+    await page.locator('.ct-choice[data-ok="0"]').first().click();
+    await expect(page.locator('.ct-fb')).toContainText('Is the long hand on the past side or the to side?');
+    await right.click();
+    await expect(page.locator('.ct-fb')).toContainText(`We say ${await right.textContent()}.`);
+    await expect(page.locator('.ct-fb')).toContainText(/The long hand is on the (past|to) side/);
+    /* and back to digits on the levels before */
+    await page.locator('.ct-level', { hasText: 'fives' }).click();
+    await expect(page.locator('.ct-minnum.to')).toHaveCount(0);
+    await expect(page.locator('.ct-choice .ct-digits')).toHaveCount(3);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: sets a time from its words, making the o’clock first', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'clock-trainer');
+    await tab(page, 'Set the clock').click();
+    await page.locator('.ct-level', { hasText: /^past and to$/ }).click();
+    for (let round = 0; round < 3; round += 1) {
+      const words = (await page.locator('.ct-ask .ct-say').textContent())!;
+      const [, n, side, hour] = words.match(/^(\d+|quarter) (past|to) (\d+)$/)!;
+      const k = n === 'quarter' ? 15 : Number(n);
+      await expect(page.locator('.ct-fb')).toContainText(side === 'to' ? 'then take the long hand back' : 'then move the long hand on');
+      /* make the o'clock, then the long hand on, or back past the top */
+      await press(page, 'One hour forward', Number(hour) % 12);
+      await press(page, side === 'to' ? 'Five minutes back' : 'Five minutes forward', k / 5);
+      const h = side === 'to' ? (Number(hour) + 10) % 12 + 1 : Number(hour);
+      expect(await time(page)).toBe(`${h}:${String(side === 'to' ? 60 - k : k).padStart(2, '0')}`);
+      await page.getByRole('button', { name: 'Check my clock' }).click();
+      await expect(page.locator('.ct-fb')).toContainText(`We say ${words}.`);
+      await page.getByRole('button', { name: 'Next one' }).click();
+    }
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a time set on the wrong side is told which way to count', async ({ page }) => {
+    await openGame(page, 'clock-trainer');
+    await tab(page, 'Set the clock').click();
+    await page.locator('.ct-level', { hasText: /^past and to$/ }).click();
+    let words = '';
+    /* a "to" time, so the long hand has to go back from the top */
+    for (let i = 0; i < 20 && !/ to /.test(words); i += 1) {
+      if (i) {
+        await page.locator('.ct-level', { hasText: 'fives' }).click();
+        await page.locator('.ct-level', { hasText: /^past and to$/ }).click();
+      }
+      words = (await page.locator('.ct-ask .ct-say').textContent())!;
+    }
+    const [, n, hour] = words.match(/^(\d+|quarter) to (\d+)$/)!;
+    const k = n === 'quarter' ? 15 : Number(n);
+    /* the hour it has passed, and the minutes counted on from the top: past, not to */
+    await press(page, 'One hour forward', (Number(hour) + 11) % 12);
+    await press(page, 'Five minutes forward', k / 5);
+    await page.getByRole('button', { name: 'Check my clock' }).click();
+    await expect(page.locator('.ct-fb')).toContainText('The hour is right! "To" means before the top. Count back from the top in fives');
   });
 
   test('fits the screen without scrolling sideways', async ({ page }) => {

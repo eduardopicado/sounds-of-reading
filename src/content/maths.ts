@@ -2013,6 +2013,9 @@ export const pays = (coins: number[], price: number): boolean => coins.reduce((s
 export interface HandsStep extends Step {
   /** the minutes a time can have at this level */
   minutes: 'oclock' | 'half' | 'quarters' | 'fives' | 'any';
+  /** the time in words, minutes past and to the hour (Years 3–4): set from
+      the words, and read as words */
+  words?: boolean;
 }
 
 /** the levels, the same for setting the clock and for reading it */
@@ -2022,6 +2025,9 @@ export const HANDS_STEPS: HandsStep[] = [
   { name: 'quarters', minutes: 'quarters' },
   { name: 'fives', minutes: 'fives' },
   { name: 'any minute', minutes: 'any' },
+  /* Years 3–4: minutes past and to the hour */
+  { name: 'past and to', minutes: 'fives', words: true },
+  { name: 'past and to, every minute', minutes: 'any', words: true },
 ];
 
 export interface ClockTime { h: number; m: number }
@@ -2038,9 +2044,88 @@ export function handsTarget(step: HandsStep, last?: ClockTime): ClockTime {
   for (;;) {
     const list = from[step.minutes];
     const m = list ? pick(list) : step.minutes === 'fives' ? rand(0, 11) * 5 : rand(0, 59);
+    /* past and to: o'clock and half past are neither */
+    if (step.words && (m === 0 || m === 30)) continue;
     const t = { h: rand(0, 11), m };
     if (!last || !sameTime(t, last)) return t;
   }
+}
+
+/** which side of the clock the long hand is on: past the hour (the right
+    half, counting on from the top), or to the next (the left half, counting
+    back to the top) */
+export const pastOrTo = (m: number): 'past' | 'to' => (m <= 30 ? 'past' : 'to');
+
+/** "1 minute", "20 minutes" */
+const minutesOf = (n: number): string => `${n} ${n === 1 ? 'minute' : 'minutes'}`;
+/** a time in words at the start of a sentence: "Quarter to 5" */
+const saidFirst = (h: number, m: number): string => {
+  const words = timeWords(h, m);
+  return words[0].toUpperCase() + words.slice(1);
+};
+/** counting in fives up to n, and the little steps after: "5, 10, 15", 2 */
+const fivesTo = (n: number): { fives: string; extra: number } => {
+  const base = Math.floor(n / 5) * 5;
+  return { fives: Array.from({ length: base / 5 }, (_, i) => (i + 1) * 5).join(', '), extra: n - base };
+};
+
+/**
+ * Years 3–4: three ways of saying the time, one right. The wrong two are
+ * the mistakes children make with past and to: a "to" time named after the
+ * hour the short hand has passed (3:40 as 20 to 3), past and to swapped
+ * (3:40 as 20 past 3), and a "past" time given the next hour (3:20 as 20
+ * past 4). Each comes with the time it really says, so none is the same
+ * time as the right one.
+ */
+export function wordsChoices(t: ClockTime): { words: string; time: ClockTime; ok?: true }[] {
+  const at = (h: number, m: number) => ({ words: timeWords(h, m), time: { h: ((h % 12) + 12) % 12, m } });
+  const wrong = pastOrTo(t.m) === 'to'
+    ? [at(t.h - 1, t.m), at(t.h, 60 - t.m)]
+    : [at(t.h - 1, 60 - t.m), at(t.h + 1, t.m)];
+  return shuffle([...wrong, { ...at(t.h, t.m), ok: true as const }]);
+}
+
+/** why the time is said the way it is: which side the long hand is on, and
+    which hour that makes it */
+export function pastToExplained(t: ClockTime): string {
+  const hour = clockHour(t.h);
+  const next = clockHour(t.h + 1);
+  if (pastOrTo(t.m) === 'to') {
+    return `The long hand is on the to side, ${minutesOf(60 - t.m)} before the top. The short hand is heading for the ${next}. So it is ${timeWords(t.h, t.m)}.`;
+  }
+  return `The long hand is on the past side, ${minutesOf(t.m)} after the top. The short hand has gone past the ${hour}. So it is ${timeWords(t.h, t.m)}.`;
+}
+
+/** where to start when setting a time in words: the o'clock it is past, or
+    the o'clock it is to, and which way the long hand goes from there */
+export function pastToStart(t: ClockTime): string {
+  const words = saidFirst(t.h, t.m);
+  if (pastOrTo(t.m) === 'to') {
+    const next = clockHour(t.h + 1);
+    return `${words} is ${minutesOf(60 - t.m)} before ${next} o'clock. Make ${next} o'clock, then take the long hand back ${minutesOf(60 - t.m)}.`;
+  }
+  const hour = clockHour(t.h);
+  return `${words} is ${minutesOf(t.m)} after ${hour} o'clock. Make ${hour} o'clock, then move the long hand on ${minutesOf(t.m)}.`;
+}
+
+/** what is wrong when a time in words is set: the hour, or the minutes */
+export function pastToHint(want: ClockTime, what: 'hour' | 'minutes'): string {
+  const hour = clockHour(want.h);
+  const next = clockHour(want.h + 1);
+  const to = pastOrTo(want.m) === 'to';
+  const n = to ? 60 - want.m : want.m;
+  if (what === 'hour') {
+    return to
+      ? `${saidFirst(want.h, want.m)} is before ${next} o'clock, so the short hand has not reached the ${next} yet. It goes in the ${hour} zone, just before the ${next}. Make ${next} o'clock, then take the long hand back.`
+      : `${saidFirst(want.h, want.m)}: the short hand has gone past the ${hour}. Put it in the ${hour} zone: past the ${hour}, before the ${next}.`;
+  }
+  const { fives, extra } = fivesTo(n);
+  const count = fives
+    ? `${to ? 'Count back' : 'Count on'} from the top in fives: ${fives}.${extra ? ` Then ${extra} little ${extra === 1 ? 'step' : 'steps'} more.` : ''}`
+    : `Go ${extra} little ${extra === 1 ? 'step' : 'steps'} ${to ? 'back from' : 'on from'} the top.`;
+  return to
+    ? `"To" means before the top. ${count} The long hand goes on the to side.`
+    : `"Past" means after the top. ${count} The long hand goes on the past side.`;
 }
 
 /** the long hand moved to minute n, which may be past the top either way:

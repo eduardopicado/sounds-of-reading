@@ -1657,6 +1657,7 @@
 .ct {
   --ct-hour: #B8341A; --ct-hour-soft: #FDE2DA;
   --ct-min: #1458BF; --ct-min-soft: #D9E9FF;
+  --ct-to: #6B3FA0; --ct-to-soft: #EADFF7;
   --ct-hour-light: #FF8F75; --ct-min-light: #8CC0FF;
   --ct-face: #FFFFFF; --ct-line: #D3DEEA;
   --ct-good: #1B8A4B; --ct-good-soft: #DDF4E6;
@@ -1692,6 +1693,10 @@
 .ct-clock text { font-family: var(--display); text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .ct-ring { fill: none; stroke: var(--ct-min-soft); stroke-width: 44; }
 .ct-arc { fill: none; stroke: var(--ct-min); stroke-width: 44; opacity: .3; }
+.ct-ring-to { fill: none; stroke: var(--ct-to-soft); stroke-width: 44; }
+.ct-arc.to { stroke: var(--ct-to); }
+.ct-side-word { fill: var(--ct-min); font-size: 15px; font-weight: 700; opacity: .75; }
+.ct-side-word.to { fill: var(--ct-to); }
 .ct-face { fill: var(--ct-face); stroke: var(--ink); stroke-width: 4; }
 .ct-zone { fill: var(--ct-hour-soft); }
 .ct-tick { stroke: var(--ct-min); stroke-width: 2; stroke-linecap: round; }
@@ -1699,6 +1704,8 @@
 .ct-hournum { fill: var(--ct-hour); font-weight: 800; font-size: 31px; }
 .ct-minnum { fill: var(--ct-min); font-weight: 700; font-size: 17px; }
 .ct-minnum.on { font-size: 23px; font-weight: 800; }
+.ct-minnum.to { fill: var(--ct-to); }
+.ct-say { font-family: var(--display); font-weight: 800; }
 .ct-hhand { stroke: var(--ct-hour); stroke-width: 14; stroke-linecap: round; }
 .ct-mhand { stroke: var(--ct-min); stroke-width: 7; stroke-linecap: round; }
 .ct-pin { fill: var(--ink); }
@@ -1756,6 +1763,9 @@
 }
 .ct-choice:disabled { opacity: .45; cursor: default; }
 .ct-choice.right { background: var(--ct-good-soft); border-color: var(--ct-good); }
+/* past and to: the time in words is longer than its digits */
+.ct-choices.words .ct-choice { font-size: clamp(18px, 4.6vw, 24px); line-height: 1.15; padding: 6px; }
+.ct-ask .ct-say { display: block; margin-top: 6px; padding: 4px 14px; width: fit-content; border-radius: 14px; background: var(--paper); color: var(--ink); font-size: 1.15em; }
 .ct-fb {
   min-height: 3.2em; border-radius: 16px; padding: 12px 14px; font-family: var(--reading); font-weight: 700; font-size: 17px;
   background: var(--paper); color: var(--ink); border: 2px dashed var(--ct-line);
