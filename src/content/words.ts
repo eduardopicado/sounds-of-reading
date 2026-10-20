@@ -694,6 +694,52 @@ export const BIG_WORDS: string = [
   'see-saw 🛝', 'match-box', 'ketch-up',
 ].join(' | ');
 
+/*  Word Search — the themed lists, beside his tricky words and this week's
+ *  sounds (which the game takes from the lists above).
+ *
+ *  One word each, letters only, so it can be hidden in a grid. A name keeps
+ *  its capital here (Brazil) and is hidden in lower case like every other
+ *  word. Every word has a picture or a flag, because most of these he cannot
+ *  sound out yet: the picture tells him what he is looking for, and tapping
+ *  the word in the list says it. The content test checks each common word
+ *  against the dictionary, every word against the blocklist, and that each
+ *  fits the biggest grid.  */
+export interface SearchListSpec {
+  /** stable id, used in saved settings */
+  id: string;
+  /** what the chip shows */
+  name: string;
+  picture: string;
+  words: string;
+}
+
+export const SEARCH_LISTS: SearchListSpec[] = [
+  { id: 'countries', name: 'Countries', picture: '🌏', words:
+    'Australia 🇦🇺 | Brazil 🇧🇷 | Japan 🇯🇵 | China 🇨🇳 | India 🇮🇳 | France 🇫🇷 | Spain 🇪🇸 | Italy 🇮🇹 | ' +
+    'Germany 🇩🇪 | England 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Canada 🇨🇦 | Mexico 🇲🇽 | Egypt 🇪🇬 | Kenya 🇰🇪 | Fiji 🇫🇯 | Peru 🇵🇪 | ' +
+    'Chile 🇨🇱 | Greece 🇬🇷 | Ireland 🇮🇪 | Portugal 🇵🇹 | Argentina 🇦🇷 | Norway 🇳🇴 | Nepal 🇳🇵 | Samoa 🇼🇸' },
+  { id: 'cities', name: 'Cities', picture: '🏙️', words:
+    'Sydney 🇦🇺 | Melbourne 🇦🇺 | Brisbane 🇦🇺 | Perth 🇦🇺 | Adelaide 🇦🇺 | Darwin 🇦🇺 | Hobart 🇦🇺 | ' +
+    'Canberra 🇦🇺 | Newcastle 🇦🇺 | Auckland 🇳🇿 | London 🇬🇧 | Paris 🇫🇷 | Tokyo 🇯🇵 | Rome 🇮🇹 | Madrid 🇪🇸 | ' +
+    'Lisbon 🇵🇹 | Berlin 🇩🇪 | Cairo 🇪🇬 | Rio 🇧🇷 | Lima 🇵🇪 | Delhi 🇮🇳 | Beijing 🇨🇳 | Toronto 🇨🇦' },
+  { id: 'space', name: 'Space', picture: '🪐', words:
+    'Mercury ⚪ | Venus 🟡 | Earth 🌍 | Mars 🔴 | Jupiter 🟠 | Saturn 🪐 | Uranus 🟢 | Neptune 🔵 | ' +
+    'sun ☀️ | moon 🌙 | star ⭐ | comet ☄️ | rocket 🚀 | planet 🪐 | alien 👽 | astronaut 👩‍🚀' },
+  { id: 'animals', name: 'Animals', picture: '🦘', words:
+    'kangaroo 🦘 | koala 🐨 | crocodile 🐊 | shark 🦈 | dolphin 🐬 | turtle 🐢 | penguin 🐧 | parrot 🦜 | ' +
+    'lizard 🦎 | snake 🐍 | spider 🕷️ | whale 🐋 | tiger 🐯 | lion 🦁 | zebra 🦓 | monkey 🐒 | rabbit 🐇 | ' +
+    'horse 🐴 | elephant 🐘 | giraffe 🦒 | octopus 🐙 | camel 🐫 | frog 🐸 | owl 🦉' },
+  { id: 'colours', name: 'Colours', picture: '🎨', words:
+    'red ❤️ | orange 🧡 | yellow 💛 | green 💚 | blue 💙 | purple 💜 | pink 🩷 | brown 🤎 | black 🖤 | ' +
+    'white 🤍 | grey 🩶' },
+  { id: 'football', name: 'Football', picture: '⚽', words:
+    'goal 🥅 | ball ⚽ | kick 🦵 | boots 👟 | gloves 🧤 | pitch 🏟️ | flag 🚩 | card 🟨 | cup 🏆 | ' +
+    'medal 🏅 | shirt 👕 | fans 📣 | coach 📋 | team 👥 | score 🔢 | header 🙆 | save 🧤' },
+  { id: 'bjj', name: 'Jiu-jitsu', picture: '🥋', words:
+    'belt 🥋 | mat 🤼 | bow 🙇 | grip ✊ | guard 🛡️ | sweep 🧹 | mount 🐎 | takedown 🤼 | tap 👋 | ' +
+    'medal 🏅 | points 🔢 | coach 📋 | kimono 🥋 | gym 🏋️' },
+];
+
 /*  Words that sound exactly like another word in these lists, said with an
  *  Australian accent. A game that says a word and asks him to find it written
  *  can never offer both halves of a pair: "pair" called, with pair and pear
@@ -718,4 +764,12 @@ export const BLOCKLIST: string[] = [
   /* not 'shot': in this app it is a shot at goal */
   'kill', 'die', 'dead', 'death', 'gun', 'stab', 'blood',
   'drug', 'beer', 'wine', 'gin', 'rum', 'sex', 'nude', 'rape',
+  /* never in a word list, but a grid of letters can spell them by chance:
+     Word Search checks every line of every grid, both ways */
+  'shit', 'fuck', 'cunt', 'cum', 'tits', 'porn', 'anus', 'bitch', 'boob', 'twat', 'wank',
+  'prick', 'pussy', 'penis', 'nazi', 'hate',
 ];
+
+/*  Fine inside a word he reads (pea·cock in Big Words), but not to be spelt
+ *  on its own by the random letters of a Word Search grid.  */
+export const NOT_BY_CHANCE: string[] = ['cock'];

@@ -15,8 +15,11 @@
  *                   is wrong: the hour zone, or how to count the minutes
  *   Read the clock  three times to choose from, the wrong two being the
  *                   mistakes children make (src/content/maths.ts)
- * at five levels: o'clock, half past, quarters, fives, any minute. A right
- * answer first time wins a star, and every five stars a sticker.
+ * at seven levels: o'clock, half past, quarters, fives, any minute, and then
+ * (Years 3–4) minutes past and to the hour, in fives and to the minute: the
+ * time set from its words and read as words, with the minute ring counting
+ * back to the top on the "to" side. A right answer first time wins a star,
+ * and every five stars a sticker.
  *
  * Ported from a single-page trainer (docs/original-games/clock-trainer):
  * the teaching and the behaviour are kept; the look, the fonts, speech,
@@ -33,7 +36,7 @@ import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
 import {
   HANDS_STEPS, clockHour, handsChoices, handsTarget, hourExplained, minuteExplained, minuteHint, moveMinute,
-  sameTime, timeWords, type ClockTime,
+  pastOrTo, pastToExplained, pastToHint, pastToStart, sameTime, timeWords, wordsChoices, type ClockTime,
 } from '../content/maths';
 import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { svg } from '../ui/writing';
@@ -99,7 +102,9 @@ export function mount(root: HTMLElement): () => void {
   const clock = svg('svg', { class: 'ct-clock', viewBox: '0 0 400 400', role: 'img', 'aria-label': 'Clock you can move' });
   const ringG = svg('g', { class: 'ct-ringg' });
   const arc = svg('path', { class: 'ct-arc' });
-  ringG.append(svg('circle', { cx: C, cy: C, r: 174, class: 'ct-ring' }), arc);
+  /* past and to: the left half of the ring counts back to the top */
+  const toHalf = svg('path', { class: 'ct-ring-to', d: `M${C} ${C + 174} A174 174 0 0 1 ${C} ${C - 174}` });
+  ringG.append(svg('circle', { cx: C, cy: C, r: 174, class: 'ct-ring' }), toHalf, arc);
   const minNums: SVGElement[] = [];
   for (let i = 0; i < 12; i += 1) {
     const [x, y] = pol(175, i * 30);
@@ -122,6 +127,13 @@ export function mount(root: HTMLElement): () => void {
     n.textContent = String(i);
     clock.append(n);
   }
+  const sides = ([['past', 90], ['to', 270]] as const).map(([word, deg]) => {
+    const [x, y] = pol(62, deg);
+    const n = svg('text', { x, y, class: `ct-side-word ${word}` });
+    n.textContent = word;
+    clock.append(n);
+    return n;
+  });
   const hourHand = svg('line', { x1: C, y1: C, x2: C, y2: C - 80, class: 'ct-hhand' });
   const minuteHand = svg('line', { x1: C, y1: C, x2: C, y2: C - 143, class: 'ct-mhand' });
   clock.append(hourHand, minuteHand, svg('circle', { cx: C, cy: C, r: 10, class: 'ct-pin' }));
@@ -208,8 +220,10 @@ export function mount(root: HTMLElement): () => void {
     }
   }
 
-  /** the long hand moves in fives while setting the clock, until "any minute" */
-  const snap = (): number => (mode === 'make' && level <= 3 ? 5 : 1);
+  /** the long hand moves in fives while setting the clock, until a level of every minute */
+  const snap = (): number => (mode === 'make' && HANDS_STEPS[level].minutes !== 'any' ? 5 : 1);
+  /** past and to: the time in words, and the minute ring's "to" side */
+  const inWords = (): boolean => mode !== 'explore' && !!HANDS_STEPS[level].words;
 
   function newRound(): void {
     target = handsTarget(HANDS_STEPS[level], target ?? undefined);
@@ -219,17 +233,19 @@ export function mount(root: HTMLElement): () => void {
     if (mode === 'make') {
       t = { h: 0, m: 0 };
       locked = false;
-      ask.replaceChildren('Can you make the clock say ', digits(target, true));
+      ask.replaceChildren('Can you make the clock say ', inWords()
+        ? el('b', { class: 'ct-say', text: timeWords(target.h, target.m) })
+        : digits(target, true));
       choices.hidden = true;
       checkBtn.hidden = false;
-      feedback('', ...paint('First put the short hand in the right zone. Then move the long hand.'));
+      feedback('', ...paint(inWords() ? pastToStart(target) : 'First put the short hand in the right zone. Then move the long hand.'));
     } else {
       t = { ...target };
       locked = true;
-      ask.textContent = 'What time is it?';
+      ask.textContent = inWords() ? 'What time is it? Say it with past or to.' : 'What time is it?';
       checkBtn.hidden = true;
       buildChoices(target);
-      feedback('', ...paint('Look at the short hand first, then the long hand.'));
+      feedback('', ...paint(inWords() ? 'Is the long hand on the past side or the to side?' : 'Look at the short hand first, then the long hand.'));
     }
     lockUI();
     render();
@@ -237,11 +253,16 @@ export function mount(root: HTMLElement): () => void {
 
   function buildChoices(want: ClockTime): void {
     choices.hidden = false;
-    choices.replaceChildren(...handsChoices(want, HANDS_STEPS[level]).map((c) => {
+    /* in words, each with the time it really says; otherwise in digits */
+    const offered = inWords()
+      ? wordsChoices(want).map((c) => ({ ...c.time, ok: c.ok, words: c.words }))
+      : handsChoices(want, HANDS_STEPS[level]).map((c) => ({ ...c, words: '' }));
+    choices.classList.toggle('words', inWords());
+    choices.replaceChildren(...offered.map((c) => {
       const b = el('button', {
-        class: 'ct-choice', type: 'button', 'aria-label': `${clockHour(c.h)} ${pad(c.m)}`,
+        class: 'ct-choice', type: 'button', 'aria-label': c.words || `${clockHour(c.h)} ${pad(c.m)}`,
         dataset: { time: `${clockHour(c.h)}:${pad(c.m)}`, ok: c.ok ? '1' : '0' },
-      }, digits(c));
+      }, c.words ? el('span', { class: 'ct-say', text: c.words }) : digits(c));
       b.addEventListener('click', () => {
         if (done) return;
         if (c.ok) {
@@ -250,6 +271,8 @@ export function mount(root: HTMLElement): () => void {
           b.classList.add('right');
           sfx.cheer();
           feedback('good', 'Yes! It is ', digits(want), '. We say ', el('b', { text: timeWords(want.h, want.m) }), '.');
+          /* after a miss, why it is said that way */
+          if (inWords() && !first) fb.append(el('p', {}, ...paint(pastToExplained(want))));
           if (first) star();
           nextBtn.hidden = false;
           nextBtn.focus();
@@ -262,7 +285,9 @@ export function mount(root: HTMLElement): () => void {
           zoneOn = true;
           drawHelpers();
           render();
-          feedback('hint', ...paint('Not that one. Which zone is the short hand in? That is the hour. Then read the blue number next to the long hand.'));
+          feedback('hint', ...paint(inWords()
+            ? `Not that one. Is the long hand on the past side or the to side? A "to" time is named after the hour the short hand is heading for.`
+            : 'Not that one. Which zone is the short hand in? That is the hour. Then read the blue number next to the long hand.'));
         }
       });
       return b;
@@ -288,9 +313,11 @@ export function mount(root: HTMLElement): () => void {
     sfx.wrong();
     if (clockHour(t.h) !== clockHour(want.h)) {
       const hour = clockHour(want.h);
-      feedback('hint', ...paint(`Look at the short hand. Put it in the ${hour} zone: past the ${hour}, before the ${clockHour(want.h + 1)}.`));
+      feedback('hint', ...paint(inWords()
+        ? pastToHint(want, 'hour')
+        : `Look at the short hand. Put it in the ${hour} zone: past the ${hour}, before the ${clockHour(want.h + 1)}.`));
     } else {
-      feedback('hint', 'The hour is right! ', ...paint(minuteHint(want.m)));
+      feedback('hint', 'The hour is right! ', ...paint(inWords() ? pastToHint(want, 'minutes') : minuteHint(want.m)));
     }
   });
   nextBtn.addEventListener('click', () => { sfx.tap(); newRound(); });
@@ -350,13 +377,27 @@ export function mount(root: HTMLElement): () => void {
     const [x1, y1] = pol(147, (t.h % 12) * 30);
     const [x2, y2] = pol(147, (t.h % 12) * 30 + 30);
     zone.setAttribute('d', `M${C} ${C} L${x1} ${y1} A147 147 0 0 1 ${x2} ${y2} Z`);
+    /* past and to: the left half's numbers count back to the top, and a
+       "to" time fills the ring from the long hand up to the top */
+    const words = inWords();
+    const to = words && pastOrTo(t.m) === 'to';
+    toHalf.style.display = words ? '' : 'none';
+    for (const n of sides) n.style.display = words ? '' : 'none';
+    arc.classList.toggle('to', to);
     if (t.m === 0) arc.setAttribute('d', '');
     else {
       const [ex, ey] = pol(174, t.m * 6);
-      arc.setAttribute('d', `M${C} ${C - 174} A174 174 0 ${t.m > 30 ? 1 : 0} 1 ${ex} ${ey}`);
+      arc.setAttribute('d', to
+        ? `M${ex} ${ey} A174 174 0 0 1 ${C} ${C - 174}`
+        : `M${C} ${C - 174} A174 174 0 ${t.m > 30 ? 1 : 0} 1 ${ex} ${ey}`);
     }
-    const on = Math.floor(t.m / 5);
-    minNums.forEach((n, k) => n.setAttribute('class', k === on ? 'ct-minnum on' : 'ct-minnum'));
+    /* the number the counting has reached: back from the top on the "to" side */
+    const on = to ? Math.ceil(t.m / 5) % 12 : Math.floor(t.m / 5);
+    minNums.forEach((n, k) => {
+      const back = words && k > 6;
+      n.textContent = String(back ? 60 - k * 5 : k * 5);
+      n.setAttribute('class', `ct-minnum${back ? ' to' : ''}${k === on ? ' on' : ''}`);
+    });
     clock.setAttribute('aria-label', `Clock showing ${timeWords(t.h, t.m)}`);
     clock.dataset.time = `${clockHour(t.h)}:${pad(t.m)}`;
     if (mode === 'explore') explain();

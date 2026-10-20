@@ -48,6 +48,14 @@ CI runs all of these on every pull request and push, the browser tests as
 one job per device, side by side. GitHub Pages deploys
 only after CI has passed on a push to `main` (`.github/workflows/deploy.yml`).
 
+The recordings are made by hand, never in CI, with the ElevenLabs key in the
+environment (`public/audio/README.md`):
+
+```
+npm run make:audio       # the words
+npm run make:sfx         # the sound effects
+```
+
 ## Layout
 
 ```
@@ -65,16 +73,41 @@ src/content/big-words.ts two-syllable words from words.ts, each level worked out
                        from the spellings in its parts
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
+src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
+                       rod each, with the swaps that make other real words
+src/content/word-search.ts Word Search: the themed lists from words.ts, the grid
+                       steps, and the grids, checked so no blocked word is
+                       spelt by chance and every hidden word appears once
 src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; the
                        Year 2 steps sit at the top of each game's ladder; Times
                        Table Sprint goes on to 12 × 12, Years 3–4), and
                        timeWords(), the one way the app says a time
+src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
+                       and the first chess games' questions
+src/content/world.ts   World Map: the continents and oceans, a fact for each,
+                       and the direction and "between" questions;
+                       world-shapes.ts is the map itself (made by
+                       tools/make-world.ts from Natural Earth, never edited),
+                       projection.ts puts a longitude and latitude on it, and
+                       seas.ts says which ocean a point of water is in
+src/content/flags.ts   Flags: the countries, their flags, what is on each one,
+                       the look-alikes, and the questions
+src/content/capitals.ts Capital Cities: Australia's states and their capitals,
+                       and the world's; australia-shapes.ts is the map of the
+                       states (tools/make-australia.ts), australia-projection.ts
+                       puts a city on it
+src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (only
+                       + − × ÷ and square roots, so a flick does the same thing
+                       everywhere), the three-touch rule, and set pieces that
+                       come with a way to score, checked to work a little off
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
-                       games ask (Weigh-In's things and weight classes too),
-                       every word in English and Portuguese
-src/lib/               speech.ts (voices, and saying things), sfx.ts (synthesised
-                       sound effects), audio.ts and clip-id.ts (recorded words;
-                       none ship yet, see public/audio/README.md), storage.ts,
+                       games ask and say (Weigh-In's things and weight classes
+                       too), every word in English and Portuguese
+src/content/commentary.ts what the football commentator shouts, both languages
+src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
+                       effects, made from tones or recorded), audio.ts and
+                       clip-id.ts (recorded words; none ship yet, see
+                       public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
                        going), stickers.ts, colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),
@@ -95,14 +128,21 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        asks one question. A new maths game that needs a team
                        picture uses a country with its flag; club kits are
                        fine where it is a shirt
+                       chess-kit.ts draws the board and the pieces the chess
+                       games share (src/content/chess.ts has the rules);
                        bjj-art.ts draws the moves and the referee's signals;
                        bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
                        belt the BJJ games share
+                       world-kit.ts is the world map the geography games
+                       share, with its taps (a little off a coast counts)
                        teams.ts: the football teams, their flags and kits;
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere
-tools/                 content maintenance scripts (not shipped)
+tools/                 content maintenance scripts (not shipped); make-audio.ts and
+                       make-sfx.ts make the recordings in public/audio/;
+                       make-world.ts and make-australia.ts the maps, sharing
+                       shapes.ts
 tests/content.spec.ts  the content test
 tests/unit/            unit tests for the shared code, in Node with small fakes
 tests/e2e/             Playwright (review.spec.ts: regressions from the 2026-09 review)

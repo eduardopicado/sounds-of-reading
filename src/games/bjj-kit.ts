@@ -6,13 +6,15 @@
  * and say comes in both (src/content/bjj.ts), and a switch mid-question
  * changes the words in place rather than starting again.
  *
- * Portuguese is spoken by the device's Portuguese voice. On a device without
- * one, the words on screen still switch and the speech stays in English, the
- * same fallback as the football commentator. */
+ * Portuguese is a recording where one was made (tools/make-audio.ts), and
+ * otherwise the device's Portuguese voice. With neither, the words on screen
+ * still switch and the speech stays in English, the same fallback as the
+ * football commentator. */
 
 import { el } from '../lib/dom';
 import { read, write } from '../lib/storage';
 import { canSpeak, say } from '../lib/speech';
+import { hasClip } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import type { Both, Lang } from '../content/bjj';
 import { BELTS, type Gi } from './bjj-art';
@@ -60,9 +62,10 @@ export function langSwitch(): LangSwitch {
   };
 }
 
-/** say this in the chosen language, or in English where no Portuguese voice is installed */
+/** say this in the chosen language, or in English where there is neither a
+    recording of it nor a Portuguese voice installed */
 export function speak(text: Both, lang: Lang, onEnd?: () => void): void {
-  if (lang === 'pt' && canSpeak(PT)) say(text.pt, { lang: PT, onEnd });
+  if (lang === 'pt' && (hasClip(text.pt) || canSpeak(PT))) say(text.pt, { lang: PT, onEnd });
   else say(text.en, { onEnd });
 }
 

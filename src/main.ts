@@ -3,7 +3,7 @@ import './styles/games.css';
 
 import { startRouter, type Route } from './lib/router';
 import { unlockSpeech, watchVoices } from './lib/speech';
-import { loadClips } from './lib/audio';
+import { loadClips, unlockClips } from './lib/audio';
 import { unlockSfx, wakeSfx } from './lib/sfx';
 import * as home from './games/home';
 import { GAMES } from './games/catalog';
@@ -20,7 +20,8 @@ const routes: Route[] = [
 ];
 
 /* iOS keeps speech and audio locked until they are started inside a real
-   gesture, so the very first tap anywhere unlocks both. */
+   gesture, so the very first tap anywhere unlocks the device voice and the
+   sound effects. */
 function unlockOnFirstTap(): void {
   const once = () => {
     unlockSpeech();
@@ -30,9 +31,14 @@ function unlockOnFirstTap(): void {
   };
   document.addEventListener('pointerdown', once);
   document.addEventListener('keydown', once);
-  /* and every tap after that, since iOS silences audio again whenever the
-     iPad sleeps or the app is left and reopened */
+  /* Safari may count a touch as a tap only when the finger lifts, so the
+     recordings and the sound effects are woken then too, and on every tap:
+     the recordings until one has played, and the sound effects because iOS
+     silences them again whenever the iPad sleeps or the app is left and
+     reopened. Both are cheap to ask */
+  for (const type of ['pointerdown', 'pointerup', 'keydown']) document.addEventListener(type, unlockClips);
   document.addEventListener('pointerdown', wakeSfx);
+  document.addEventListener('pointerup', wakeSfx);
 }
 
 watchVoices();

@@ -2,18 +2,21 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BOARD_STEPS, GRID, boardQuestion, turned,
+  BOARD_STEPS, GRID, STEP_OF, boardQuestion, compassHelp, gridRef, refSquare, turnPath, turnWhy, turned,
   SHAPE_STEPS, SHAPES_3D, shapeQuestion, sidesOf,
   FACT_STEPS, factQuestion, factText, family,
-  SURVEY_STEPS, surveyQuestion,
-  CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords,
-  JUMP_STEPS, jumpQuestion, jumpsFor,
+  SURVEY_STEPS, countIn, surveyChoices, surveyQuestion,
+  CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
+  JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion,
-  BOUNCES, SKIP_STEPS, skipChoices, skipQuestion,
-  BUS_STEPS, anotherChoices, busQuestion, placeChoices, places, valueOf,
+  bigSumChoices, crosses, sumWhy, type SumQuestion,
+  BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
+  BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
+  toThousand,
+  lineText, roundOnTarget, roundQuestion, roundWhy,
   BENCH_STEPS, DICE, FLASH_STEPS, LINE_STEPS, SUM_STEPS, benchQuestion, choices, climb,
   flashLowest, flashMs, flashQuestion, lineQuestion, onTarget, sumQuestion, valueAt,
 } from '../../src/content/maths';
@@ -94,11 +97,41 @@ describe('Off the Bench', () => {
     }
   });
 
-  it('ends with Year 2: a stadium of 100, in tens and then any number', () => {
-    const top = BENCH_STEPS.slice(-2);
-    expect(top.map((s) => s.target)).toEqual([100, 100]);
-    expect(top[0].tens).toBe(true);
-    expect(top[1].tens).toBeFalsy();
+  it('Year 2 is a stadium of 100, in tens and then any number', () => {
+    const year2 = BENCH_STEPS.filter((s) => s.target === 100);
+    expect(year2).toHaveLength(2);
+    expect(year2[0].tens).toBe(true);
+    expect(year2[1].tens).toBeFalsy();
+  });
+
+  it('ends with Years 3–4: a stadium of 1000, in hundreds, then tens, then any number', () => {
+    const top = BENCH_STEPS.slice(-3);
+    expect(top.map((s) => [s.target, s.unit])).toEqual([[1000, 100], [1000, 10], [1000, 1]]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = benchQuestion(step);
+        expect(q.on % step.unit!).toBe(0);
+        /* each step needs the one before it: rows leave a stand part full, any number a row */
+        if (step.unit === 10) expect(q.on % 100).not.toBe(0);
+        if (step.unit === 1) expect(q.on % 10).not.toBe(0);
+      }
+    }
+  });
+
+  it('counts the empty seats to 1000 a row, a stand, then stands at a time', () => {
+    const seven = toThousand(637);
+    expect([seven.ones, seven.tens, seven.hundreds]).toEqual([3, 60, 300]);
+    expect(seven.text).toBe('Fill up the row: 3 more makes 640. Fill up the stand: 6 more rows of 10 make 700. Then 3 more stands of 100 make 1000. 3 and 60 and 300 make 363.');
+    expect(toThousand(700).text).toBe('3 more stands of 100 make 1000.');
+    expect(toThousand(900).text).toBe('1 more stand of 100 makes 1000.');
+    expect(toThousand(990).text).toBe('Fill up the stand: 1 more row of 10 makes 1000.');
+    for (let on = 1; on < 1000; on += 1) {
+      const t = toThousand(on);
+      expect(t.ones + t.tens + t.hundreds).toBe(1000 - on);
+      expect(t.ones).toBeLessThan(10);
+      expect(t.tens % 10).toBe(0);
+      expect(t.hundreds % 100).toBe(0);
+    }
   });
 
   it('does not ask the same question twice running', () => {
@@ -148,11 +181,62 @@ describe('Scoreboard Sums', () => {
     expect(SUM_STEPS[0].op).toBe('+');
     expect(SUM_STEPS.findIndex((s) => s.op === '-')).toBeGreaterThan(1);
   });
+
+  it('goes on, for Years 3–4, to the crowd: to 1000, then 10 000', () => {
+    const big = SUM_STEPS.filter((s) => s.big);
+    expect(SUM_STEPS.slice(-big.length)).toEqual(big);
+    expect(big.map((s) => s.max)).toEqual([1000, 1000, 1000, 1000, 1000, 10000, 10000]);
+    for (const step of big) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = sumQuestion(step);
+        const what = `${q.a} ${q.op} ${q.b}`;
+        expect(q.answer, what).toBeLessThan(step.max);
+        /* three-figure numbers to 1000, four to 10 000 */
+        const figures = step.max === 1000 ? 3 : 4;
+        expect(String(q.a)).toHaveLength(figures);
+        expect(String(q.b)).toHaveLength(figures);
+        if (step.big === 'round') {
+          expect(q.b % 100, what).toBe(0);
+          expect(q.a % (step.max === 1000 ? 10 : 100), what).toBe(0);
+        } else {
+          /* every place of the second number is a step of the working */
+          expect(String(q.b)).not.toContain('0');
+          expect(crosses(q.a, q.b, q.op), what).toBe(step.big === 'carry');
+        }
+        const c = bigSumChoices(q, step.max);
+        expect(c).toHaveLength(4);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) { expect(x).toBeGreaterThan(0); expect(x).toBeLessThan(step.max); }
+        /* the working ends at the answer */
+        expect(sumWhy(q).endsWith(` ${lineText(q.answer)}.`), sumWhy(q)).toBe(true);
+      }
+    }
+  });
+
+  it('splits the second number a place at a time, the way Year 2 splits tens and ones', () => {
+    const q = (a: number, b: number, op: '+' | '-'): SumQuestion => ({ a, b, op, answer: op === '+' ? a + b : a - b });
+    expect(sumWhy(q(38, 25, '+'))).toBe('38 and 20 is 58, and 5 more is 63.');
+    expect(sumWhy(q(52, 27, '-'))).toBe('52 take away 20 is 32, take away 7 more is 25.');
+    expect(sumWhy(q(30, 20, '+'))).toBe('30 and 20 make 50.');
+    expect(sumWhy(q(368, 257, '+'))).toBe('368 and 200 is 568, and 50 more is 618, and 7 more is 625.');
+    expect(sumWhy(q(652, 278, '-'))).toBe('652 take away 200 is 452, take away 70 more is 382, take away 8 more is 374.');
+    expect(sumWhy(q(2365, 1478, '+'))).toBe('2365 and 1000 is 3365, and 400 more is 3765, and 70 more is 3835, and 8 more is 3843.');
+  });
+
+  it('offers the slips made with big numbers: forgetting to carry, the smaller digit from the bigger', () => {
+    const q = (a: number, b: number, op: '+' | '-'): SumQuestion => ({ a, b, op, answer: op === '+' ? a + b : a - b });
+    expect(bigSumChoices(q(368, 257, '+'), 1000)).toContain(515);
+    expect(bigSumChoices(q(652, 278, '-'), 1000)).toContain(426);
+    expect(bigSumChoices(q(3800, 2500, '+'), 10000)).toContain(5300);
+    /* whole hundreds have only slips of a hundred or more */
+    for (const x of bigSumChoices(q(3400, 2500, '+'), 10000)) expect(x % 100).toBe(0);
+  });
 });
 
 describe('Number Line Penalty', () => {
   it('asks numbers on the line that are not already written under it', () => {
-    for (const step of LINE_STEPS) {
+    for (const step of LINE_STEPS.filter((s) => !s.round)) {
       expect(step.labels[0]).toBe(step.lo);
       expect(step.labels.at(-1)).toBe(step.hi);
       for (let i = 0; i < MANY; i += 1) {
@@ -165,6 +249,7 @@ describe('Number Line Penalty', () => {
         if (!allWritten) expect(step.labels).not.toContain(n);
         if (step.ask === 'tens') expect(n % 10).toBe(0);
         if (step.ask === 'hundreds') expect(n % 100).toBe(0);
+        if (step.ask === 'thousands') expect(n % 1000).toBe(0);
       }
     }
   });
@@ -189,8 +274,48 @@ describe('Number Line Penalty', () => {
     expect(onTarget(hundreds, 600, 700)).toBe(false);
   });
 
-  it('goes on to 1000 in Year 2', () => {
-    expect(LINE_STEPS.at(-1)!.hi).toBe(1000);
+  it('goes on to 1000 in Year 2, then to 10 000, rounding and tenths', () => {
+    expect(LINE_STEPS.map((s) => s.name).slice(-7)).toEqual([
+      '0 to 1000', '0 to 10 000 in thousands', '0 to 10 000', 'Nearest ten', 'Nearest hundred', '0 to 1 in tenths', '0 to 2 in tenths',
+    ]);
+    /* a near miss on 0 to 10 000 forgives what one on 0 to 1000 does, ten times over */
+    const big = LINE_STEPS.find((s) => s.name === '0 to 10 000')!;
+    expect(onTarget(big, 6300, 6650)).toBe(true);
+    expect(onTarget(big, 6300, 6800)).toBe(false);
+  });
+
+  it('writes a number the way it goes on the line', () => {
+    expect(lineText(10000)).toBe('10 000');
+    expect(lineText(5000)).toBe('5000');
+    expect(lineText(7, 10)).toBe('0.7');
+    expect(lineText(13, 10)).toBe('1.3');
+    expect(lineText(10, 10)).toBe('1');
+    expect(lineText(0, 10)).toBe('0');
+  });
+
+  it('rounds: a number inside one ten (or hundred), never halfway, never already round', () => {
+    for (const step of LINE_STEPS.filter((s) => s.round)) {
+      const r = step.round!;
+      for (let i = 0; i < MANY; i += 1) {
+        const q = roundQuestion(step);
+        expect(q.hi - q.lo).toBe(r);
+        expect(q.n).toBeGreaterThan(q.lo);
+        expect(q.n).toBeLessThan(q.hi);
+        expect(q.n - q.lo).not.toBe(r / 2);
+        expect(q.answer).toBe(Math.round(q.n / r) * r);
+        if (r === 100) expect(q.n % 10).not.toBe(0);
+        expect(q.lo).toBeGreaterThanOrEqual(r);
+      }
+    }
+  });
+
+  it('a rounding kick scores on the half of the line nearer the answer', () => {
+    const q = { lo: 40, hi: 50, tick: 1, n: 47, answer: 50 };
+    expect(roundOnTarget(q, 49)).toBe(true);
+    expect(roundOnTarget(q, 46)).toBe(true);
+    expect(roundOnTarget(q, 44)).toBe(false);
+    expect(roundWhy(q)).toBe('47 is 3 from 50 and 7 from 40, so it is nearer 50.');
+    expect(roundWhy({ ...q, n: 42, answer: 40 })).toBe('42 is 2 from 40 and 8 from 50, so it is nearer 40.');
   });
 });
 
@@ -319,6 +444,38 @@ describe('Team Buses', () => {
     const firstTrain = BUS_STEPS.findIndex((s) => s.trains);
     expect(BUS_STEPS.slice(0, firstTrain).every((s) => s.hi <= 120)).toBe(true);
   });
+
+  it('goes on, for Years 3–4, to planes of 1000, and numbers made in more than one way', () => {
+    const top = BUS_STEPS.slice(7);
+    expect(top.map((s) => s.task)).toEqual(['read', 'build', 'regroup', 'regroup']);
+    expect(places(3245, true, true)).toEqual({ thousands: 3, hundreds: 2, tens: 4, ones: 5 });
+    for (let n = 1; n < 10000; n += 1) expect(valueOf(places(n, true, true))).toBe(n);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const n = busQuestion(step);
+        if (step.task === 'regroup') {
+          /* whole buses, some in each place, so one digit alone is wrong */
+          expect(n % 10).toBe(0);
+          expect(Math.floor(n / 10) % 10).not.toBe(0);
+          expect(Math.floor(n / 100) % 10).not.toBe(0);
+          const c = regroupChoices(n, step.unit!);
+          expect(c).toContain(Math.floor(n / step.unit!));
+          expect(c).toContain(Math.floor(n / step.unit!) % 10);
+          expect(new Set(c).size).toBe(4);
+        } else {
+          const c = placeChoices(n, 9999);
+          expect(c).toContain(n);
+          expect(new Set(c).size).toBe(4);
+          for (const x of c) { expect(x).toBeGreaterThanOrEqual(1); expect(x).toBeLessThanOrEqual(9999); }
+        }
+      }
+    }
+  });
+
+  it('carries 350 in 35 buses, and 1250 in 12 trains: the slip is the digit on its own', () => {
+    expect(regroupChoices(350, 10)).toEqual(expect.arrayContaining([35, 5]));
+    expect(regroupChoices(1250, 100)).toEqual(expect.arrayContaining([12, 2]));
+  });
 });
 
 describe('Keepy-Uppy Count', () => {
@@ -356,6 +513,29 @@ describe('Keepy-Uppy Count', () => {
     const y1 = SKIP_STEPS.slice(0, 5).flatMap((s) => s.by);
     expect(new Set(y1)).toEqual(new Set([1, 2, 5, 10]));
     expect(SKIP_STEPS.slice(5).some((s) => s.by.includes(3))).toBe(true);
+  });
+
+  it('Years 3–4: counts along a times table, up and back, never past 12 of the step', () => {
+    const tables = SKIP_STEPS.filter((s) => s.facts);
+    /* above every Year 2 step, and every table from 3 to 9 but 5 */
+    expect(SKIP_STEPS.indexOf(tables[0])).toBe(SKIP_STEPS.findIndex((s) => s.name === 'Back in 10s and 5s') + 1);
+    expect(new Set(tables.flatMap((s) => s.by))).toEqual(new Set([3, 4, 6, 7, 8, 9]));
+    expect(tables.some((s) => s.dir === -1)).toBe(true);
+    for (const step of tables) {
+      const seen = new Set<number>();
+      for (let i = 0; i < MANY; i += 1) {
+        const q = skipQuestion(step);
+        for (const n of q.seq) {
+          expect(n % q.by).toBe(0);
+          expect(n).toBeLessThanOrEqual(12 * q.by);
+        }
+        const gap = q.seq[q.gap];
+        expect(gap).toBeGreaterThan(0);
+        expect(skipFact(q)).toBe(`${gap / q.by} × ${q.by} = ${gap}`);
+        seen.add(q.by);
+      }
+      expect(seen).toEqual(new Set(step.by));
+    }
   });
 });
 
@@ -395,13 +575,13 @@ describe('Training Drills', () => {
 
 describe('Half-Time Oranges', () => {
   it('shares bibs exactly, and names the pieces', () => {
-    for (const step of FRACTION_STEPS) {
+    for (const step of FRACTION_STEPS.filter((s) => s.task !== 'many' && s.task !== 'equal')) {
       for (let i = 0; i < MANY; i += 1) {
         const q = fractionQuestion(step);
         expect(step.parts).toContain(q.parts);
         expect(q.total % q.parts).toBe(0);
         expect(q.total).toBeGreaterThanOrEqual(q.parts);
-        expect(q.total).toBeLessThanOrEqual(q.parts === 2 ? 20 : 40);
+        expect(q.total).toBeLessThanOrEqual(q.parts === 2 ? 20 : q.parts === 3 ? 15 : q.parts === 5 ? 25 : 40);
         expect(q.answer).toBe(step.task === 'part-of' ? q.total / q.parts : q.parts);
       }
     }
@@ -412,6 +592,28 @@ describe('Half-Time Oranges', () => {
     const fair = Array.from({ length: 400 }, () => fractionQuestion(step).fair).filter(Boolean).length;
     expect(fair).toBeGreaterThan(120);
     expect(fair).toBeLessThan(280);
+  });
+
+  it('goes on, for Years 3–4, to thirds and fifths, more than one piece, and the same amount', () => {
+    expect(FRACTION_STEPS.slice(6).map((s) => s.task)).toEqual(['name', 'part-of', 'many', 'equal']);
+    for (const step of FRACTION_STEPS.slice(6)) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = fractionQuestion(step);
+        if (step.task === 'many') {
+          expect(q.k).toBeGreaterThanOrEqual(2);
+          expect(q.k).toBeLessThan(q.parts);
+          expect(q.answer).toBe((q.total / q.parts) * q.k);
+          /* the slip of one share only is always offered */
+          expect(q.options).toContain(q.total / q.parts);
+          expect(q.options).toContain(q.answer);
+          expect(new Set(q.options).size).toBe(q.options!.length);
+        }
+        if (step.task === 'equal') {
+          const o = q.other!;
+          expect(q.same).toBe(q.k * o.parts === o.k * q.parts);
+        }
+      }
+    }
   });
 
   it('is halves only until Year 2', () => {
@@ -440,12 +642,50 @@ describe('Jump Line', () => {
     expect(jumpsFor({ a: 9, b: 3, op: '-', answer: 6 }, false)).toEqual([-1, -1, -1]);
     for (const step of JUMP_STEPS) {
       const q = jumpQuestion(step);
-      expect(q.a + jumpsFor(q, step.tens).reduce((s, j) => s + j, 0)).toBe(q.answer);
+      expect(q.a + jumpsFor(q, sizesOf(step), step.bridge).reduce((s, j) => s + j, 0)).toBe(q.answer);
     }
   });
 
   it('stays within 20 until Year 2', () => {
     expect(JUMP_STEPS.filter((s) => !s.tens).every((s) => s.top <= 20)).toBe(true);
+  });
+
+  it('goes on, for Years 3–4, to 1000 and 10 000, and to the next ten or hundred first', () => {
+    const top = JUMP_STEPS.slice(7);
+    expect(top.map((s) => s.top)).toEqual([1000, 1000, 1000, 100, 100, 1000, 10000]);
+    for (const step of top) {
+      const sizes = sizesOf(step);
+      for (let i = 0; i < MANY; i += 1) {
+        const q = jumpQuestion(step);
+        const what = `${q.a} ${q.op} ${q.b}`;
+        for (const n of [q.a, q.answer]) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.top); }
+        const jumps = jumpsFor(q, sizes, step.bridge);
+        expect(q.a + jumps.reduce((s, j) => s + j, 0), what).toBe(q.answer);
+        /* every jump after the first is one of his buttons, and there are never too many */
+        for (const j of jumps.slice(step.bridge ? 1 : 0)) expect(sizes).toContain(Math.abs(j));
+        expect(jumps.length).toBeLessThanOrEqual(13);
+        if (step.b === 'hundreds') expect(q.b % 100).toBe(0);
+        if (step.b === 'thousands') { expect(q.b % 100).toBe(0); expect(q.b).toBeGreaterThan(1000); }
+        if (step.bridge) {
+          const first = bridgeOf(q, step.bridge);
+          const to = q.a + (q.op === '+' ? first : -first);
+          /* the first jump lands on a ten (or a hundred), is shorter than the
+             other part (so that part can be the slip), and the sum goes past it */
+          expect(to % step.bridge, what).toBe(0);
+          expect(first, what).toBeLessThan(step.bridge - first);
+          expect(q.b % step.bridge, what).toBeGreaterThan(first);
+        }
+      }
+    }
+  });
+
+  it('jumps to the next ten first: 38 + 25 is 2 to 40, then 23 more', () => {
+    const q = { a: 38, b: 25, op: '+' as const, answer: 63 };
+    expect(bridgeOf(q, 10)).toBe(2);
+    expect(jumpsFor(q, [10, 1], 10)).toEqual([2, 10, 10, 1, 1, 1]);
+    const back = { a: 63, b: 25, op: '-' as const, answer: 38 };
+    expect(jumpsFor(back, [10, 1], 10)).toEqual([-3, -10, -10, -1, -1]);
+    expect(jumpsFor({ a: 470, b: 260, op: '+', answer: 730 }, [100, 10], 100)).toEqual([30, 100, 100, 10, 10, 10]);
   });
 });
 
@@ -471,7 +711,8 @@ describe('Match Clock', () => {
         const q = clockQuestion(step);
         expect(q.options).toContain(q.answer);
         expect(new Set(q.options).size).toBe(q.options.length);
-        expect(q.options.length).toBeGreaterThanOrEqual(3);
+        /* am or pm is the one question with two answers */
+        expect(q.options.length).toBeGreaterThanOrEqual(step.task === 'ampm' ? 2 : 3);
         if (step.task === 'read' || step.task === 'set') {
           expect(step.minutes).toContain(q.m);
           expect(q.answer).toBe(timeWords(q.h, q.m));
@@ -485,6 +726,70 @@ describe('Match Clock', () => {
     for (let i = 0; i < 100; i += 1) {
       const q = clockQuestion(half);
       if (q.m === 30 && q.h < 12) expect(q.options.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it('goes on, for Years 3–4, to the minute, am and pm, how long, and the 24-hour clock', () => {
+    expect(CLOCK_STEPS.slice(8).map((s) => s.name)).toEqual(['Five minutes', 'To the minute', 'am or pm', 'How long until kick-off?', '24-hour time']);
+    expect(digital(15, 7)).toBe('3:07');
+    expect(digital(0, 30)).toBe('12:30');
+    expect(time24(19, 30)).toBe('19:30');
+    expect(time24(9, 5)).toBe('09:05');
+    expect(duration(35)).toBe('35 minutes');
+    expect(duration(65)).toBe('1 hour 5 minutes');
+    expect(duration(120)).toBe('2 hours');
+    expect(ampm(7, 30)).toBe('7:30 am');
+    expect(ampm(12, 30)).toBe('12:30 pm');
+    expect(ampm(19, 45)).toBe('7:45 pm');
+  });
+
+  it('reads five minutes and single minutes with the slips children make', () => {
+    const fives = CLOCK_STEPS.find((s) => s.name === 'Five minutes')!;
+    const q = (() => { for (;;) { const x = clockQuestion(fives); if (x.m === 20 && x.h === 3) return x; } })();
+    expect(q.options.sort()).toEqual(['20 past 3', '20 past 4', '20 to 4', '4 past 3'].sort());
+    const toMinute = CLOCK_STEPS.find((s) => s.name === 'To the minute')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const m = clockQuestion(toMinute);
+      expect(m.m % 5).not.toBe(0);
+      expect(m.answer).toBe(digital(m.h, m.m));
+      /* the hour after is always there to be tempted by */
+      expect(m.options).toContain(digital(m.h + 1, m.m));
+    }
+  });
+
+  it('counts on to kick-off, and offers the 100-minute hour as the slip', () => {
+    expect(countOn(14 * 60 + 40, 15 * 60 + 15)).toEqual({
+      jumps: [20, 15],
+      text: "From 2:40, 20 minutes makes 3 o'clock, then 15 minutes makes 3:15. 20 minutes and 15 minutes make 35 minutes.",
+    });
+    expect(countOn(14 * 60 + 40, 16 * 60 + 30).jumps).toEqual([20, 60, 30]);
+    expect(countOn(15 * 60, 15 * 60 + 45).text).toBe("From 3:00, 45 minutes makes 3:45.");
+    const elapsed = CLOCK_STEPS.find((s) => s.task === 'elapsed')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(elapsed);
+      expect(q.to).toBeGreaterThan(q.from);
+      expect(q.to - q.from).toBeLessThanOrEqual(120);
+      expect(q.answer).toBe(duration(q.to - q.from));
+      expect(countOn(q.from, q.to).jumps.reduce((a, b) => a + b, 0)).toBe(q.to - q.from);
+      /* 2:40 to 3:15 as 315 − 240: 40 minutes too many for every hour crossed */
+      const hours = Math.floor(q.to / 60) - Math.floor(q.from / 60);
+      if (hours) expect(q.options).toContain(duration(q.to - q.from + 40 * hours));
+    }
+  });
+
+  it('turns a ticket time into am and pm, and an event into am or pm', () => {
+    const t = CLOCK_STEPS.find((s) => s.task === 'twentyfour')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(t);
+      expect(q.h).toBeGreaterThanOrEqual(13);
+      expect(q.answer).toBe(`${q.h - 12}:${String(q.m).padStart(2, '0')} pm`);
+      expect(q.options).toContain(`${q.h - 12}:${String(q.m).padStart(2, '0')} am`);
+    }
+    const a = CLOCK_STEPS.find((s) => s.task === 'ampm')!;
+    for (let i = 0; i < MANY; i += 1) {
+      const q = clockQuestion(a);
+      expect(q.options).toEqual([`${digital(q.h, q.m)} am`, `${digital(q.h, q.m)} pm`]);
+      expect(q.answer.endsWith(q.h >= 12 ? 'pm' : 'am')).toBe(true);
     }
   });
 
@@ -507,13 +812,44 @@ describe('Fan Survey', () => {
         else if (step.task === 'more') {
           expect(q.votes[q.other]).toBeLessThan(q.votes[q.team]);
           expect(q.answer).toBe(q.votes[q.team] - q.votes[q.other]);
-        } else expect(q.answer).toBe(q.votes[q.team]);
+        } else if (step.task === 'total') expect(q.answer).toBe(q.votes.reduce((a, b) => a + b, 0));
+        else expect(q.answer).toBe(q.votes[q.team]);
       }
     }
   });
 
   it('keeps column graphs for Year 2', () => {
     expect(SURVEY_STEPS.slice(0, 3).map((s) => s.task)).toEqual(['count', 'tally', 'most']);
+  });
+
+  it('goes on, for Years 3–4, to pictures of many fans, a scale, and tables', () => {
+    const top = SURVEY_STEPS.slice(5);
+    expect(top.map((s) => [s.task, s.key])).toEqual([['key', 2], ['key', 5], ['key', 10], ['scale', 5], ['table', undefined], ['total', undefined]]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = surveyQuestion(step);
+        /* with a key, whole pictures only */
+        if (step.key) for (const v of q.votes) expect(v % step.key).toBe(0);
+        /* the scale is about the lines with no number on */
+        if (step.task === 'scale') expect(q.votes[q.team] % 10).toBe(5);
+        /* the tally asked has a gate of five in it */
+        if (step.task === 'table') expect(q.votes[q.team]).toBeGreaterThanOrEqual(6);
+        const c = surveyChoices(step, q);
+        expect(c).toHaveLength(4);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) expect(x).toBeGreaterThanOrEqual(1);
+      }
+    }
+  });
+
+  it('offers the slips: the pictures counted, not the fans; a gate as one mark; a row left out', () => {
+    const at = (task: string): (typeof SURVEY_STEPS)[number] => SURVEY_STEPS.find((s) => s.task === task && (task !== 'key' || s.key === 5))!;
+    expect(surveyChoices(at('key'), { votes: [20, 5, 10, 15], team: 0, other: 0, answer: 20 })).toContain(4);
+    expect(surveyChoices(at('scale'), { votes: [35, 10, 20, 45], team: 0, other: 0, answer: 35 })).toEqual(expect.arrayContaining([30, 40, 7]));
+    expect(surveyChoices(at('table'), { votes: [18, 4, 9, 22], team: 0, other: 0, answer: 18 })).toEqual(expect.arrayContaining([6, 15]));
+    expect(surveyChoices(at('total'), { votes: [12, 9, 15, 7], team: 0, other: 0, answer: 43 })).toContain(36);
+    expect(countIn(5, 4)).toBe('5, 10, 15, 20');
   });
 });
 
@@ -576,6 +912,38 @@ describe("Coach's Whiteboard", () => {
     expect(turned('up', 'quarter-anticlockwise')).toBe('left');
     expect(turned('left', 'half')).toBe('right');
     expect(turned('left', 'quarter-clockwise')).toBe('up');
+    expect(turned('up', 'three-quarter-clockwise')).toBe('left');
+    expect(turned('up', 'three-quarter-anticlockwise')).toBe('right');
+    for (const d of ['up', 'right', 'down', 'left'] as const) {
+      for (const t of ['quarter-clockwise', 'quarter-anticlockwise', 'half', 'three-quarter-clockwise', 'three-quarter-anticlockwise'] as const) {
+        expect(turnPath(d, t).at(-1)).toBe(turned(d, t));
+      }
+    }
+  });
+
+  it('counts a turn out in quarters, in compass points', () => {
+    expect(turnWhy('up', 'three-quarter-clockwise')).toBe('From north, a three-quarter turn clockwise is 3 quarter turns: east, south, west. He faces west.');
+    expect(turnWhy('down', 'quarter-anticlockwise')).toBe('From south, a quarter turn anticlockwise goes to east.');
+    expect(turnWhy('left', 'half')).toBe('From west, a half turn is 2 quarter turns: north, east. He faces east.');
+  });
+
+  it('adds grid references and the compass and right angles after Year 2', () => {
+    expect(BOARD_STEPS.map((s) => s.name).slice(4)).toEqual([
+      'Flip, slide or turn?', 'Grid references', 'North, south, east and west', 'Right angles',
+      'Three-quarter turns', 'North-east and the points between',
+    ]);
+  });
+
+  it('names a square by its letter across and number down', () => {
+    expect(gridRef([0, 0])).toBe('A1');
+    expect(gridRef([2, 2])).toBe('C3');
+    expect(gridRef([4, 4])).toBe('E5');
+    for (let x = 0; x < GRID; x += 1) for (let y = 0; y < GRID; y += 1) expect(refSquare(gridRef([x, y]))).toEqual([x, y]);
+  });
+
+  it('says which way a compass point goes on the board', () => {
+    expect(compassHelp([{ dir: 'north', n: 2 }, { dir: 'west', n: 1 }])).toBe('North is up and west is to the left.');
+    expect(compassHelp([{ dir: 'south-east', n: 1 }])).toBe('South-east is between south and east: down and to the right.');
   });
 
   it('keeps every move on the grid, and lands where the moves say', () => {
@@ -583,21 +951,48 @@ describe("Coach's Whiteboard", () => {
       for (let i = 0; i < MANY; i += 1) {
         const q = boardQuestion(step);
         if (step.task === 'side') { expect(q.ball).not.toBe(q.keeper); expect(q.answer).toBe(q.ball < q.keeper ? 'left' : 'right'); }
-        if (step.task === 'move' || step.task === 'moves') {
-          expect(q.moves).toHaveLength(step.task === 'move' ? 1 : 2);
+        if (step.task === 'move' || step.task === 'moves' || step.task === 'compass') {
+          expect(q.moves).toHaveLength(step.task === 'move' || step.points === 8 ? 1 : 2);
           let [x, y] = q.start;
           for (const m of q.moves) {
             expect(m.n).toBeGreaterThanOrEqual(1);
             expect(m.n).toBeLessThanOrEqual(3);
-            x += m.dir === 'right' ? m.n : m.dir === 'left' ? -m.n : 0;
-            y += m.dir === 'down' ? m.n : m.dir === 'up' ? -m.n : 0;
+            x += STEP_OF[m.dir][0] * m.n;
+            y += STEP_OF[m.dir][1] * m.n;
             for (const v of [x, y]) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+            /* compass moves are said as compass points, and the points between come last */
+            if (step.task === 'compass') expect(m.dir.includes('-')).toBe(step.points === 8);
+            else expect(['up', 'down', 'left', 'right']).toContain(m.dir);
           }
           expect(q.answer).toBe(`${x},${y}`);
           /* two moves go along different lines: across, then up or down */
-          if (q.moves.length === 2) expect(['left', 'right'].includes(q.moves[0].dir)).not.toBe(['left', 'right'].includes(q.moves[1].dir));
+          const across = (d: string): boolean => STEP_OF[d as keyof typeof STEP_OF][1] === 0;
+          if (q.moves.length === 2) expect(across(q.moves[0].dir)).not.toBe(across(q.moves[1].dir));
         }
         if (step.task === 'turn') expect(q.answer).toBe(turned(q.facing, q.turn));
+        if (step.task === 'turn' && !step.compass) expect(q.turn).not.toContain('three-quarter');
+        if (step.task === 'gridref') {
+          for (const v of q.end) { expect(v).toBeGreaterThanOrEqual(0); expect(v).toBeLessThan(GRID); }
+          if (q.way === 'tap') expect(q.answer).toBe(q.end.join());
+          else {
+            expect(q.answer).toBe(gridRef(q.end));
+            /* four different squares, the right one among them, each next to it */
+            expect(new Set(q.refs).size).toBe(4);
+            expect(q.refs).toContain(q.answer);
+            for (const r of q.refs) {
+              const [x, y] = refSquare(r);
+              expect(Math.max(Math.abs(x - q.end[0]), Math.abs(y - q.end[1]))).toBeLessThanOrEqual(1);
+            }
+            /* one has only the letter wrong, one only the number */
+            expect(q.refs.some((r) => r !== q.answer && r.slice(1) === q.answer.slice(1))).toBe(true);
+            expect(q.refs.some((r) => r !== q.answer && r[0] === q.answer[0])).toBe(true);
+          }
+        }
+        if (step.task === 'angle') {
+          expect(q.answer).toBe(q.angle < 90 ? 'smaller' : q.angle > 90 ? 'bigger' : 'right');
+          /* never so near a right angle that it needs a protractor */
+          expect(q.angle === 90 || Math.abs(q.angle - 90) >= 30).toBe(true);
+        }
       }
     }
   });

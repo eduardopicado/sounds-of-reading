@@ -21,15 +21,15 @@ describe('the games', () => {
     }
   });
 
-  it('every maths and jiu-jitsu game has the steps it climbs, for the progress card', () => {
-    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'bjj')) {
+  it('every maths, geography and jiu-jitsu game has the steps it climbs, for the progress card', () => {
+    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj')) {
       expect(g.ladder?.length, g.path).toBeGreaterThan(1);
     }
   });
 
   it('every game file is in the list, so none is left out of the home screen', () => {
     /* the files in src/games that are not a game */
-    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'narration', 'teams']);
+    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'chess-kit', 'narration', 'teams', 'world-kit']);
     const files = readdirSync(new URL('../../src/games', import.meta.url))
       .map((f) => f.replace(/\.ts$/, ''))
       .filter((f) => !parts.has(f));

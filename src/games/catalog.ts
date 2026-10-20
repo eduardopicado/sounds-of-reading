@@ -18,14 +18,23 @@ import {
 import { MATCH_STEPS, REF_STEPS, SIGNAL_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
+import { SEARCH_STEPS } from '../content/word-search';
+import { FOOS_STEPS } from '../content/foosball';
+import { BOTAO_STEPS } from '../content/botao';
+import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
+import { MAP_STEPS } from '../content/world';
+import { FLAG_STEPS } from '../content/flags';
+import { CAPITAL_STEPS } from '../content/capitals';
 
-export type Section = 'reading' | 'writing' | 'maths' | 'bjj';
+export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'chess';
 
 export const SECTIONS: { id: Section; title: string }[] = [
   { id: 'reading', title: 'Reading and spelling' },
   { id: 'writing', title: 'Handwriting' },
   { id: 'maths', title: 'Maths' },
+  { id: 'geography', title: 'Geography 🌏' },
   { id: 'bjj', title: 'Jiu-jitsu 🥋' },
+  { id: 'chess', title: 'Chess ♟️' },
 ];
 
 export interface Game {
@@ -78,6 +87,10 @@ export const GAMES: Game[] = [
     load: () => import('./coach-says') },
   { path: 'big-words', name: 'Big Words', emoji: '🐘', what: 'Long words in two parts', tone: '#8C7BD1', section: 'reading', ladder: BIG_STEPS,
     load: () => import('./big-words') },
+  { path: 'word-search', name: 'Word Search', emoji: '🔎', what: 'Find the hidden words', tone: '#3E9E8F', section: 'reading', ladder: SEARCH_STEPS,
+    load: () => import('./word-search') },
+  { path: 'foosball-words', name: 'Foosball Words', emoji: '🕹️', what: 'Slide the rods, spell the word', tone: '#2E8F52', section: 'reading', ladder: FOOS_STEPS,
+    load: () => import('./foosball-words') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',
@@ -92,7 +105,7 @@ export const GAMES: Game[] = [
     load: () => import('./number-line-penalty') },
   { path: 'team-buses', name: 'Team Buses', emoji: '🚌', what: 'Ten fans fill a bus', tone: '#E4B73E', section: 'maths', ladder: BUS_STEPS,
     load: () => import('./team-buses') },
-  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s', tone: '#7CB342', section: 'maths', ladder: SKIP_STEPS,
+  { path: 'keepy-uppy', name: 'Keepy-Uppy Count', emoji: '🤹', what: 'Count in 2s, 5s and 10s, then to 9s', tone: '#7CB342', section: 'maths', ladder: SKIP_STEPS,
     load: () => import('./keepy-uppy') },
   { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths', ladder: DRILL_STEPS,
     load: () => import('./training-drills') },
@@ -114,16 +127,40 @@ export const GAMES: Game[] = [
     load: () => import('./kit-shapes') },
   { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths', ladder: BOARD_STEPS,
     load: () => import('./coach-whiteboard') },
+  { path: 'futebol-de-botao', name: 'Futebol de Botão', emoji: '🔘', what: 'Flick the button, aim through the ball', tone: '#3B8D4A', section: 'maths', ladder: BOTAO_STEPS,
+    load: () => import('./futebol-de-botao') },
   { path: 'ice-cream-van', name: 'Ice Cream Van', emoji: '🍦', what: 'Pay with Aussie coins', tone: '#E58FB3', section: 'maths', ladder: KIOSK_STEPS,
     load: () => import('./ice-cream-van') },
+  { path: 'world-map', name: 'World Map', emoji: '🗺️', what: 'Continents and oceans', tone: '#3B82B8', section: 'geography', ladder: MAP_STEPS,
+    load: () => import('./world-map') },
+  { path: 'flags', name: 'Flags of the World', emoji: '🎌', what: 'Which flag is which country?', tone: '#C24B3A', section: 'geography', ladder: FLAG_STEPS,
+    load: () => import('./flags') },
+  { path: 'capitals', name: 'Capital Cities', emoji: '🏛️', what: 'Sydney, Canberra and the world', tone: '#8C6A3F', section: 'geography', ladder: CAPITAL_STEPS,
+    load: () => import('./capitals') },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj', ladder: REF_STEPS,
     load: () => import('./refs-call') },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj', ladder: MATCH_STEPS,
     load: () => import('./match-maths') },
-  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms', tone: '#4A7FA8', section: 'bjj', ladder: WEIGH_STEPS,
+  { path: 'weigh-in', name: 'Weigh-In', emoji: '⚖️', what: 'Heavier, lighter, kilograms, grams', tone: '#4A7FA8', section: 'bjj', ladder: WEIGH_STEPS,
     load: () => import('./weigh-in') },
   { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj', ladder: SIGNAL_STEPS,
     load: () => import('./refs-signals') },
+  { path: 'chess-pieces', name: 'Meet the Pieces', emoji: '♟️', what: 'How each chess piece moves', tone: '#769656', section: 'chess', ladder: PIECE_STEPS,
+    load: () => import('./chess-pieces') },
+  { path: 'chess-balls', name: 'Collect the Balls', emoji: '🐴', what: 'One piece, every ball, fewest moves', tone: '#5E7F45', section: 'chess', ladder: BALL_STEPS,
+    load: () => import('./chess-balls') },
+  { path: 'chess-squares', name: 'Board Squares', emoji: '🔡', what: 'Every square has a name: e4', tone: '#6B7FA8', section: 'chess', ladder: SQUARE_STEPS,
+    load: () => import('./chess-squares') },
+  { path: 'chess-setup', name: 'Set Up the Board', emoji: '🏰', what: 'Every piece on its square', tone: '#9A7B4F', section: 'chess', ladder: SETUP_STEPS,
+    load: () => import('./chess-setup') },
+  { path: 'chess-capture', name: 'Capture!', emoji: '⚔️', what: 'Take a piece, the free one, the best one', tone: '#8A6A3B', section: 'chess', ladder: CAPTURE_STEPS,
+    load: () => import('./chess-capture') },
+  { path: 'chess-pawns', name: 'Pawn Wars', emoji: '🏁', what: 'Pawns only: first to the other end', tone: '#4E6E8E', section: 'chess', ladder: PAWN_STEPS,
+    load: () => import('./chess-pawns') },
+  { path: 'chess-check', name: 'Check!', emoji: '👑', what: 'Is the king attacked? Get him out', tone: '#A0524B', section: 'chess', ladder: CHECK_STEPS,
+    load: () => import('./chess-check') },
+  { path: 'chess-mate', name: 'Mate in One', emoji: '🏆', what: 'Win the game in one move', tone: '#B8862E', section: 'chess', ladder: MATE_STEPS,
+    load: () => import('./chess-mate') },
 ];
 
 export const gameByPath = (path: string | undefined): Game | undefined => GAMES.find((g) => g.path === path);

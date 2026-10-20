@@ -9,7 +9,7 @@ once opened, and nothing ever leaves the device.
 
 ## The games
 
-The home screen groups the tiles into four sections, with three of the
+The home screen groups the tiles into five sections, with three of the
 coach's picks for today at the top.
 
 ### Reading and spelling
@@ -32,6 +32,8 @@ coach's picks for today at the top.
 | **Build the Word** | Hears a word and builds it from sound or letter tiles. |
 | **Coach Says** | Reads the coach's written instruction — "Put the frog in the box, then tap the hen" — and does it. The pictures carry no words, so reading is the only way to know what to do. |
 | **Big Words** | Reads two-syllable words a part at a time (sun·set, rab·bit), then whole, then (Year 2) taps where a word splits. |
+| **Foosball Words** | Hears a word and sees its picture, then slides the rods of a foosball table, one rod per sound, until the players in the shooting lane spell it (sh · i · p), and shoots. The other players on a rod mostly make another real word (chip, shop, shin), so a wrong shot is named: "That says chop. Listen: ship." A second miss slides the rods to the answer. Three sounds, then more players, then words of four sounds on four rods. A second way to play, chosen in setup: make any word you can on the same rods. Every new real word scores and joins the list ("3 of 9 words found"); a word made already, a made-up word, or one not on the word list bounces off. No setting of the rods ever spells a blocked word. |
+| **Word Search** | Finds hidden words in a grid of letters by dragging across them or tapping both ends; each one is said aloud as it is found, and its tricky letters or its sound light up. His tricky words, this week's sounds, or a theme (countries, cities, space, animals, colours, football, jiu-jitsu) with a picture or a flag beside every word, and the word said when he taps it. The grids grow from 6 × 6 with every word across, to down as well, then (Years 3–4) slants and backwards. A grid found with no help moves him up. It prints as a sheet. |
 
 ### Handwriting
 
@@ -45,22 +47,35 @@ coach's picks for today at the top.
 | Game | What the child does |
 |---|---|
 | **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many; then (Year 2) rows and columns; then (Years 3–4) arrays that are times-table facts, up to 12 rows of 12, drawn in blocks of five so 7 rows reads as 5 and 2. A miss splits the array into those two easier parts. |
-| **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? |
-| **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20. |
-| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000. |
-| **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. |
-| **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. |
+| **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? Then (Years 3–4) a stadium of 1000, ten stands of 100: whole stands, then whole rows, then any number, counted by filling up the row, then the stand, then the empty stands. |
+| **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20; then (Year 2) a season of goals to 100, in racks of ten. Years 3–4: the crowd at the ground, to 1000 and then 10 000 (fans through the gates, fans going home at half-time), in crates of a hundred at first and then in his head. A miss splits the second number into hundreds, tens and ones (368 and 200 is 568, and 50 more is 618, and 7 more is 625), and the wrong choices are the slips made with big numbers: forgetting to carry, taking the smaller digit from the bigger, a ten or a hundred out. |
+| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000; then (Years 3–4) to 10 000. Rounding is a kick too: the line is one ten (or hundred), 40 to 50, with the number marked and halfway dashed, and he kicks to the end it is nearer. Then lines from 0 to 1 and 0 to 2 in tenths. |
+| **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. Years 3–4: planes of 1000, to read and to build crowds to 10 000; then the same crowd another way: with the trains cancelled, 180 fans need 18 buses, and with the plane grounded, 1250 fans need 12 trains and 5 buses (1250 is 12 hundreds and 5 tens). Reading only one digit (8 buses, 2 trains) is the slip offered. |
+| **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. Years 3–4: by 4s, 6s, 8s, 7s and 9s, the counting side of the times tables, and back down them, never past 12 of each; the gap comes with its fact (28 is 4 × 7). |
 | **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |
 | **Times Table Sprint** | The times tables to 12 × 12, by heart (Years 3–4): types the answer on a number pad before the bar runs out. A table at a time (×2 and ×10, ×5, ×3, ×4, ×6, ×8, ×7, ×9, ×11, ×12), the earlier ones coming back as review, then all of them mixed, then the same facts as division. Every fact is remembered on its own: the slow and missed ones come back most, and he moves up a table only when he knows every fact in it. A miss shows the fact built from easier ones (7 lots of 6 is 5 lots and 2 more) on rows of dots. |
-| **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group. |
-| **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. |
-| **Match Clock** | Reads and sets o'clock and half past, and the days of the week in order; then (Year 2) quarter past and quarter to, the months, and the Australian seasons. |
-| **Short Hand, Long Hand** | Drags the hands of a clock whose two scales are kept apart — red hours with a shaded "hour zone", blue minutes on their own ring — then sets the clock to a time and reads one, from o'clock up to any minute. |
-| **Fan Survey** | Counts fans waving flags, reads tally marks and a picture graph; then (Year 2) reads a column graph and says how many more. |
+| **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group; then (Years 3–4) thirds and fifths, two thirds or three quarters of the squad, and whether two fractions cover the same amount. |
+| **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. Years 3–4: to 1000 in jumps of a hundred and ten; to the next ten or hundred first (38 + 25: how far to 40? Then 23 more), with the other part of the ten offered as the slip; and to 10 000 in jumps of a thousand and a hundred. |
+| **Match Clock** | Reads and sets o'clock and half past, and the days of the week in order; then (Year 2) quarter past and quarter to, the months, and the Australian seasons. Years 3–4: five minutes (20 past 3, 25 to 4), then to the minute (3:47); am or pm on match day; how long until kick-off, counted on from now (2:40, 20 minutes makes 3 o'clock, 15 more makes 3:15); and the 24-hour time on a ticket (19:30 is 7:30 pm). |
+| **Short Hand, Long Hand** | Drags the hands of a clock whose two scales are kept apart — red hours with a shaded "hour zone", blue minutes on their own ring — then sets the clock to a time and reads one, from o'clock up to any minute. Years 3–4: minutes past and to the hour, in fives and then every minute. He sets "20 to 4" from its words (make 4 o'clock, then take the long hand back) and reads the time as words. The minute ring counts back to the top on the "to" side, and the wrong words offered are the usual slips: 20 to 3 for 3:40, or past and to swapped. |
+| **Fan Survey** | Counts fans waving flags, reads tally marks and a picture graph; then (Year 2) reads a column graph and says how many more. Years 3–4: picture graphs where each picture is 2, 5 or 10 fans (counting the pictures, not the fans, is the slip offered), a column graph numbered every 10 with a line every 5 (35 is the line with no number between 30 and 40), tallies turned into a table, and the total of a table (leaving a row out is the slip). |
 | **Fact Family Formation** | Three players are one family (3, 5, 8): turns a fact around and takes it back within 10 and 20; then (Year 2) finds a missing number, and does it with tens to 100. |
 | **Kit and Ball Shapes** | Names flat shapes, counts sides and corners, and names the solid objects of football (the ball is a sphere, the cone a cone); then (Year 2) pentagons and hexagons, and whether a kit is the same on both sides. |
-| **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. |
-| **Ice Cream Van** | Which Australian coin is worth more (the $2 is smaller than the 50c), which coin pays exactly; then (Year 2) a handful of mixed coins, paying the exact price from his purse, and change from a note. |
+| **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. Years 3–4: grid references like a street directory (finds C3, then names the square the ball is on), moves by the compass with north up the board, right angles held against the corner of a page, three-quarter turns in compass points, and north-east and the other points between. |
+| **Futebol de Botão** | The Brazilian table game. Pulls back one of his buttons and lets go: it slides, and the ball goes off along the line through the middle of the button and the middle of the ball, so to shoot at the goal he hits the ball on its far side. Three touches, as in the regra carioca, and the third has to be another button. Open goal, then the side of the ball, then past the goleiro, off the wall round a defender, a pass first, and a whole team; the ball's way shows while he aims at first, then only a little, then not at all. Out of touches, or stuck, the table is set back and a way to score is played for him. |
+| **Ice Cream Van** | Which Australian coin is worth more (the $2 is smaller than the 50c), which coin pays exactly; then (Year 2) a handful of mixed coins, paying the exact price from his purse, and change from a note. Years 3–4: which price tag says "3 dollars and 5 cents" ($3.05, not $3.50), paying to the 5 cents, which of two treats is cheaper ($3.45 or $3.54), the total of two treats, and the change from a $5, $10 or $20 note, counted up the way a shopkeeper does. |
+
+### Geography 🌏
+
+| Game | What the child does |
+|---|---|
+| **World Map** | A map of the whole world, each continent its own colour and the oceans in blues. Finds the seven continents with their names on the map, then the five oceans, then both with no names; then reads which name belongs to the place that glows. Year 2: what is north, south, east and west of Australia (Asia, Antarctica and the Southern Ocean, the Indian, the Pacific), which ocean is between two continents, and north, south, east and west across the world. Each place he finds comes with one true thing about it. A tap just off a coast counts for that continent. |
+| **Flags of the World** | Picks Brazil's flag from three, then names a flag he is shown, then Australia's neighbours (New Zealand, Papua New Guinea, Indonesia, Fiji). Finds the country on the world map with its flag beside the question, the big countries first. Year 2: flags that are easy to mix up (Australia's six white stars and New Zealand's four red ones; Indonesia red on top, Poland white on top), which flag has a maple leaf or the Southern Cross, and the neighbours and smaller countries on the map. A miss says what the right flag looks like, in words he can check against the picture. |
+| **Capital Cities** | A map of Australia's states and territories: finds New South Wales and the others with their names, then without; then (Years 3–4) says which city is a state's capital, and finds the capitals as dots on the map. Then the capitals of the countries in Flags of the World, with the flag, and the ones where the capital is not the biggest city: Canberra, Brasília, Washington, D.C. A wrong city is told whose capital it is. |
+
+The maps are drawn from Natural Earth's countries and states (public
+domain), inside the app; the world in the Natural Earth projection. The Southern Ocean is south of
+Australia the way Australian maps draw it.
 
 ### Jiu-jitsu 🥋
 
@@ -69,9 +84,27 @@ In English or Portuguese, switched with the 🇦🇺 and 🇧🇷 flags, mid-que
 | Game | What the child does |
 |---|---|
 | **Ref's Call** | Sees a move (takedown, sweep, mount…) and calls its IBJJF points, reads the move's name alone, finds the move worth 3; then (Year 2) says whether the referee gives points, an advantage or a penalty. |
-| **Match Maths** | Adds up a match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. |
-| **Weigh-In** | Which side of the balance is heavier, measuring in blocks; then (Year 2) reads the kilograms off the scale, finds his weight class, and adds or takes off the gi. |
+| **Match Maths** | Adds up a match move by move (takedown + mount = 2 + 4 = 6), says how far ahead a fighter is and which move made the score; then (Year 2) a whole match, and a draw settled on advantages and penalties. Years 3–4: a long match added up by putting the same points together (3 × 2 = 6), how far behind Blue is, and the least he needs to win with 30 seconds to go: an advantage, a takedown, a guard pass or a mount, since drawing level wins only when the advantages or penalties are his. |
+| **Weigh-In** | Which side of the balance is heavier, measuring in blocks; then (Year 2) reads the kilograms off the scale, finds his weight class, and adds or takes off the gi. Years 3–4: weighs small things in grams on a kitchen scale, works out how many more grams make a kilogram, reads scales whose marks are not all numbered (each space worth 2, 20, 25, 50 or 100), and says which of two bags is heavier and by how much (3 kg 200 g against 2 kg 800 g). |
 | **Ref's Signals** | Reads the referee's hands — fingers for points, an open hand for an advantage, a fist for a penalty; then (Year 2) plays referee, and learns the calls shouted at every competition: Combate! Parou! Lute! |
+
+### Chess ♟️
+
+The way chess is first taught to young children: one piece at a time on an
+almost empty board, with a football to reach, then taking pieces, the first
+real game (pawns only), the board itself, check, and checkmate. The pieces are
+drawn in the app, so they look the same on every device.
+
+| Game | What the child does |
+|---|---|
+| **Meet the Pieces** | Moves one piece to the ball: the rook and the bishop first, then the queen, the king, the pawn (two squares on its first move), and the knight's L-jump. Then taps every ball a piece can reach in one move, and then with his own pawns in the way. A miss puts a dot on every square the piece can reach and says how it moves. |
+| **Collect the Balls** | One piece, several balls: collect them all in the fewest moves there are (the bishop only ever reaches its own colour; a ball next to the knight takes it three jumps). A wrong square shows where the piece can go; 👀 shows it on demand; ↺ starts again. |
+| **Board Squares** | Every square has a name: finds e4 (letters along the bottom, numbers up the side, like a grid reference), names the square the ball is on, finds squares with the letters and numbers hidden, and says whether a square is light or dark (a1 is always dark). |
+| **Set Up the Board** | The board is set out but for one piece: tap the square it goes on. Rooks in the corners, knights next to them, then bishops; the queen on her own colour and the king beside her; the pawns in front; then Black's side. |
+| **Capture!** | Takes a black piece by landing on it: which one can his piece take (only one can)? Then the knight, king and pawn, which take differently (a pawn only on the slant). Then two he could take, one guarded by a pawn: take the free one, or the pawn takes his piece back. Then two free ones: take the one worth more (pawn 1, knight or bishop 3, rook 5, queen 9). |
+| **Pawn Wars** | The first real game: his pawns against the computer's, pawns only. First pawn to the far end wins, or take all of theirs. Tap a pawn to see where it can go. Three pawns each, then five, then all eight, then a computer that keeps its pawns safe and pushes the ones nothing can stop. |
+| **Check!** | Is the white king in check — can a black piece take him? Then taps the piece giving check, then moves the king to a square where nothing attacks him. Every dot shows what a piece attacks; the safe squares are ringed. |
+| **Mate in One** | White to move: find the checkmate. The back row (the king shut in by his own pawns), the queen beside the king with her own king guarding her, then two rooks up the board. A move that is not mate says why (no check, or the king can get out) and shows the mate. |
 
 The maths and jiu-jitsu games follow the NSW Mathematics K–10 syllabus from
 Kindergarten to Year 2, and each climbs its own levels: up after three right
@@ -183,8 +216,15 @@ secretly is one, that every Word Builder build comes out the way it is labelled
 both ways round, that nothing is on the blocklist, that no word is both real
 and silly, that every grapheme really sits where the file says it does, that
 every pair of real words that sound the same with an Australian accent is
-listed (Penalty Shootout must never offer a word's twin), and that both tones
-of every sound colour clear WCAG AA.
+listed (Penalty Shootout must never offer a word's twin), that every Word
+Search word has a picture, fits the biggest grid and is a real word (names
+aside), and that both tones of every sound colour clear WCAG AA.
+
+Word Search grids are checked as they are made: every line is read both ways,
+and a blocked word may only appear inside a word he is meant to find, never
+spelt by the letters filling the gaps. `NOT_BY_CHANCE` in the content file
+lists words that are fine inside another (pea·cock) but not on their own in a
+grid.
 
 This is what holds the handover's section 8 fixed: *vain*, *zip*, *ding*,
 *zing*, *gone*, *zone*, *vice*, *mink*, *gale*, *vat*, *thatch*, *mace*,
@@ -226,10 +266,10 @@ downloaded. So a download can add another accent but never a clearer voice;
 English and Portuguese, with each voice's tier and the one the app uses. The Portuguese commentator picks its own voice the same way, and
 can sound much better than the English one.
 
-The app can also play recordings of the words instead, made ahead of time by
-`npm run make:audio` (see `public/audio/README.md`). None ship yet: the
-generator has no text-to-speech service wired up, so every word is spoken by
-the device.
+The app can also play recordings of the words instead, made ahead of time
+with ElevenLabs by `npm run make:audio`, and recorded sound effects made by
+`npm run make:sfx` (see `public/audio/README.md`). None ship yet, so every
+word is spoken by the device and every sound is made from tones.
 
 ## Design rules
 

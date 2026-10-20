@@ -3,7 +3,7 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { openGame } from './helpers';
+import { openGame, seed } from './helpers';
 import { GAMES } from '../../src/games/catalog';
 
 const PAGES: [string, string][] = [
@@ -42,13 +42,37 @@ test('Penalty Shootout mid-match has no accessibility violations', async ({ page
 
 /* A game that waits for Start shows only the Start tray when it opens, so
    the check above never saw a question. Each is checked again with its
-   first question up: the choices, the picture, the feedback line. */
-for (const game of GAMES.filter((g) => g.ladder && g.path !== 'clock-trainer')) {
+   first question up: the choices, the picture, the feedback line. Short
+   Hand, Long Hand and Word Search open straight onto their question, which
+   the check above already sees. */
+for (const game of GAMES.filter((g) => g.ladder && !['clock-trainer', 'word-search'].includes(g.path))) {
   test(`${game.name}, with a question up, has no accessibility violations`, async ({ page }) => {
     await openGame(page, game.path);
     await page.getByRole('button', { name: '▶ Start' }).click();
     await expect(page.locator('.mx-board')).toBeVisible();
     await page.waitForTimeout(400);
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+      .analyze();
+    expect(results.violations.map((v) => ({ id: v.id, nodes: v.nodes.slice(0, 3).map((n) => n.html.slice(0, 120)) }))).toEqual([]);
+  });
+}
+
+/* the Years 3–4 boards: a grid with its letters and numbers, the compass, a
+   corner; two treats to compare and to add, and a $20 note; the kitchen
+   scale, a scale numbered only now and then, and two bags; a long match,
+   and the scoreboard near the end */
+for (const [game, step] of [
+  ['coach-whiteboard', 5], ['coach-whiteboard', 6], ['coach-whiteboard', 7], ['coach-whiteboard', 8],
+  ['ice-cream-van', 6], ['ice-cream-van', 8], ['ice-cream-van', 9], ['ice-cream-van', 10],
+  ['weigh-in', 6], ['weigh-in', 8], ['weigh-in', 9],
+  ['match-maths', 7], ['match-maths', 8], ['match-maths', 9],
+] as const) {
+  test(`${game} step ${step + 1}, with a question up, has no accessibility violations`, async ({ page }) => {
+    await seed(page, { [`maths-step:${game}`]: step });
+    await openGame(page, game);
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.mx-choice, .cw-cell:enabled, .iv-pick:enabled').first()).toBeVisible({ timeout: 10000 });
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   HANDS_STEPS, clockHour, handsChoices, handsTarget, hourExplained, minuteExplained, minuteHint, moveMinute,
-  sameTime, timeWords,
+  pastOrTo, pastToExplained, pastToHint, pastToStart, sameTime, timeWords, wordsChoices,
 } from '../../src/content/maths';
 
 const MANY = 400;
@@ -81,6 +81,9 @@ describe('the games', () => {
       quarters: (m) => m % 15 === 0,
       fives: (m) => m % 5 === 0,
       'any minute': (m) => m >= 0 && m < 60,
+      /* past and to: never o'clock or half past, which are neither */
+      'past and to': (m) => m % 5 === 0 && m !== 0 && m !== 30,
+      'past and to, every minute': (m) => m > 0 && m < 60 && m !== 30,
     };
     for (const s of HANDS_STEPS) {
       let last;
@@ -116,5 +119,65 @@ describe('the games', () => {
     expect(keys(handsChoices({ h: 3, m: 25 }, step('fives'))).sort()).toEqual(['3:5', '5:15']);
     /* 4 o'clock: the hands swapped (12:20), then the hour one on (5:00) */
     expect(keys(handsChoices({ h: 4, m: 0 }, step("o'clock"))).sort()).toEqual(['12:20', '5:0']);
+  });
+});
+
+describe('past and to (Years 3–4)', () => {
+  const words = HANDS_STEPS.filter((s) => s.words);
+
+  it('comes after any minute, in fives and then every minute', () => {
+    expect(HANDS_STEPS.findIndex((s) => s.words)).toBe(HANDS_STEPS.findIndex((s) => s.name === 'any minute') + 1);
+    expect(words.map((s) => s.minutes)).toEqual(['fives', 'any']);
+  });
+
+  it('puts 1 to 30 minutes on the past side and 31 to 59 on the to side', () => {
+    expect(pastOrTo(5)).toBe('past');
+    expect(pastOrTo(29)).toBe('past');
+    expect(pastOrTo(31)).toBe('to');
+    expect(pastOrTo(55)).toBe('to');
+  });
+
+  it('offers the words for three different times, the wrong ones the slips children make', () => {
+    const said = (t: { h: number; m: number }) => wordsChoices(t).filter((c) => !c.ok).map((c) => c.words).sort();
+    /* 3:40: the hour it has passed, and past and to swapped */
+    expect(said({ h: 3, m: 40 })).toEqual(['20 past 3', '20 to 3']);
+    /* 3:20: past and to swapped, and the next hour */
+    expect(said({ h: 3, m: 20 })).toEqual(['20 past 4', '20 to 3']);
+    expect(said({ h: 3, m: 45 })).toEqual(['quarter past 3', 'quarter to 3']);
+    /* round the top of the clock */
+    expect(said({ h: 0, m: 50 })).toEqual(['10 past 12', '10 to 12']);
+    for (const s of words) {
+      for (let i = 0; i < MANY; i += 1) {
+        const t = handsTarget(s);
+        const list = wordsChoices(t);
+        expect(list).toHaveLength(3);
+        expect(list.filter((c) => c.ok)).toHaveLength(1);
+        const right = list.find((c) => c.ok)!;
+        expect(right.words).toBe(timeWords(t.h, t.m));
+        expect(sameTime(right.time, t)).toBe(true);
+        /* each says its own time, and no two the same */
+        for (const c of list) expect(c.words).toBe(timeWords(c.time.h, c.time.m));
+        expect(new Set(list.map((c) => `${clockHour(c.time.h)}:${c.time.m}`)).size).toBe(3);
+      }
+    }
+  });
+
+  it('says why: the side the long hand is on, and the hour that makes it', () => {
+    expect(pastToExplained({ h: 3, m: 40 })).toBe('The long hand is on the to side, 20 minutes before the top. The short hand is heading for the 4. So it is 20 to 4.');
+    expect(pastToExplained({ h: 3, m: 25 })).toBe('The long hand is on the past side, 25 minutes after the top. The short hand has gone past the 3. So it is 25 past 3.');
+    expect(pastToExplained({ h: 3, m: 59 })).toContain('1 minute before the top');
+  });
+
+  it('starts a time in words from its o’clock, and says what is wrong', () => {
+    expect(pastToStart({ h: 3, m: 40 })).toBe("20 to 4 is 20 minutes before 4 o'clock. Make 4 o'clock, then take the long hand back 20 minutes.");
+    expect(pastToStart({ h: 3, m: 25 })).toBe("25 past 3 is 25 minutes after 3 o'clock. Make 3 o'clock, then move the long hand on 25 minutes.");
+    expect(pastToHint({ h: 3, m: 40 }, 'hour')).toContain('It goes in the 3 zone, just before the 4.');
+    /* a sentence never starts in lower case */
+    expect(pastToStart({ h: 4, m: 45 })).toBe("Quarter to 5 is 15 minutes before 5 o'clock. Make 5 o'clock, then take the long hand back 15 minutes.");
+    expect(pastToHint({ h: 4, m: 15 }, 'hour')).toMatch(/^Quarter past 4: /);
+    expect(pastToHint({ h: 3, m: 40 }, 'minutes')).toBe('"To" means before the top. Count back from the top in fives: 5, 10, 15, 20. The long hand goes on the to side.');
+    expect(pastToHint({ h: 3, m: 43 }, 'minutes')).toBe('"To" means before the top. Count back from the top in fives: 5, 10, 15. Then 2 little steps more. The long hand goes on the to side.');
+    expect(pastToHint({ h: 3, m: 23 }, 'minutes')).toBe('"Past" means after the top. Count on from the top in fives: 5, 10, 15, 20. Then 3 little steps more. The long hand goes on the past side.');
+    expect(pastToHint({ h: 3, m: 57 }, 'minutes')).toBe('"To" means before the top. Go 3 little steps back from the top. The long hand goes on the to side.');
   });
 });

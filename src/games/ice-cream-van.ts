@@ -5,6 +5,9 @@
  * for an ice cream exactly, and how much a handful of the same coin is.
  * Year 2: a handful of mixed coins, picking coins from his purse to pay the
  * exact price, and the change from a $5 or $10 note.
+ * Years 3–4: dollars and cents written down ($3.05 is not $3.50), prices to
+ * the 5 cents, which of two treats is cheaper, two treats added up, and the
+ * change from a $5, $10 or $20 note, counted up the way a shopkeeper does.
  *
  * The coins are shown at their real sizes relative to each other. They are
  * photographs of the real coins by default — the echidna, the lyrebird, the
@@ -17,7 +20,8 @@ import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import {
-  KIOSK_STEPS, coinOf, kioskQuestion, money, moneyWords, pays, type KioskQuestion, type KioskStep,
+  KIOSK_STEPS, cheaperWhy, coinOf, countUp, kioskQuestion, money, moneyWords, pays, priceWhy, priceWords, totalWhy,
+  type KioskQuestion, type KioskStep, type Treat,
 } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { svg } from '../ui/writing';
@@ -100,9 +104,9 @@ export function coinPic(cents: number): Element {
   return pic;
 }
 
-/** a banknote, plain, in its colour: the $5 is pink, the $10 blue */
+/** a banknote, plain, in its colour: the $5 is pink, the $10 blue, the $20 red */
 function notePic(cents: number): SVGSVGElement {
-  const colour = cents === 500 ? '#E7A3C8' : '#7DB4E6';
+  const colour = cents === 500 ? '#E7A3C8' : cents === 1000 ? '#7DB4E6' : '#EE8F70';
   const pic = svg('svg', { class: 'iv-note', width: 150, height: 74, viewBox: '0 0 150 74', role: 'img', 'aria-label': `${money(cents)} note` },
     svg('rect', { x: 2, y: 2, width: 146, height: 70, rx: 8, fill: colour, stroke: INK, 'stroke-width': 3 }),
     svg('rect', { x: 100, y: 12, width: 34, height: 50, rx: 6, fill: 'rgba(255,255,255,.55)', stroke: INK, 'stroke-width': 1.5 }));
@@ -111,6 +115,10 @@ function notePic(cents: number): SVGSVGElement {
   pic.append(t);
   return pic;
 }
+
+/** "a soft serve" → "A soft serve", "the soft serve" */
+const capName = (t: Treat): string => `${t.name[0].toUpperCase()}${t.name.slice(1)}`;
+const theName = (t: Treat): string => t.name.replace(/^an? /, 'the ');
 
 const coinRow = (coins: number[]): HTMLElement =>
   el('div', { class: 'iv-coins' }, ...coins.map((c) => el('span', { class: 'iv-slot', dataset: { cents: String(c) } }, coinPic(c))));
@@ -230,14 +238,65 @@ function build(kit: Kit) {
     });
   }
 
-  async function change(q: KioskQuestion): Promise<boolean> {
+  async function change(q: KioskQuestion, step: KioskStep): Promise<boolean> {
     showTreat(q);
     stage.replaceChildren(el('div', { class: 'iv-coins' }, notePic(q.paid!)));
     ask.textContent = `It costs ${money(q.price)}. You pay with ${money(q.paid!)}. How much change?`;
     say(`It costs ${moneyWords(q.price)}. You pay with ${moneyWords(q.paid!)}. How much change?`);
     const picked = Number(await kit.choices.askWords(q.options.map(String), (o) => money(Number(o))));
     kit.choices.revealWord(String(q.answer), String(picked));
-    return finish(picked === q.answer, `${money(q.price)} and ${money(q.answer)} make ${money(q.paid!)}: the change is ${money(q.answer)}.`);
+    return finish(picked === q.answer, step.fives ? countUp(q.price, q.paid!).text
+      : `${money(q.price)} and ${money(q.answer)} make ${money(q.paid!)}: the change is ${money(q.answer)}.`);
+  }
+
+  /** which price tag says "3 dollars and 45 cents"? */
+  async function read(q: KioskQuestion): Promise<boolean> {
+    counter.replaceChildren(
+      el('span', { class: 'iv-van', text: '🚐', 'aria-hidden': 'true' }),
+      el('span', { class: 'iv-treat', text: q.treat.picture, 'aria-hidden': 'true' }),
+      el('span', { class: 'iv-tag blank', text: '?' }));
+    ask.textContent = `${capName(q.treat)} costs ${priceWords(q.price)}. Which price tag says that?`;
+    say(ask.textContent);
+    const picked = Number(await kit.choices.askWords(q.options.map(String), (o) => money(Number(o))));
+    kit.choices.revealWord(String(q.answer), String(picked));
+    showTreat(q);
+    return finish(picked === q.answer, priceWhy(q.price));
+  }
+
+  /** two treats, two prices: tap the cheaper one */
+  async function cheaper(q: KioskQuestion): Promise<boolean> {
+    counter.replaceChildren(el('span', { class: 'iv-van', text: '🚐', 'aria-hidden': 'true' }));
+    ask.textContent = 'Which is cheaper?';
+    say(`Which is cheaper: ${theName(q.treat)} at ${moneyWords(q.price)}, or ${theName(q.other!)} at ${moneyWords(q.otherPrice!)}?`);
+    const offers = ([[q.treat, q.price], [q.other!, q.otherPrice!]] as const);
+    const picked = await new Promise<number>((resolve) => {
+      stage.replaceChildren(el('div', { class: 'iv-two' }, ...offers.map(([t, price]) => el('button', {
+        class: 'iv-pick iv-offer', type: 'button', dataset: { cents: String(price) }, 'aria-label': `${t.name}, ${money(price)}`,
+        on: {
+          click: () => {
+            for (const b of stage.querySelectorAll('button')) (b as HTMLButtonElement).disabled = true;
+            sfx.tap();
+            resolve(price);
+          },
+        },
+      }, el('span', { class: 'iv-treat', text: t.picture, 'aria-hidden': 'true' }), el('span', { class: 'iv-tag', text: money(price) })))));
+    });
+    mark(q.answer, picked);
+    const cheap = q.answer === q.price ? q.treat : q.other!;
+    return finish(picked === q.answer, `${cheaperWhy(q.price, q.otherPrice!)} Get ${theName(cheap)}!`);
+  }
+
+  /** two treats: how much for both? */
+  async function total(q: KioskQuestion): Promise<boolean> {
+    counter.replaceChildren(
+      el('span', { class: 'iv-treat', text: q.treat.picture, 'aria-hidden': 'true' }), el('span', { class: 'iv-tag', text: money(q.price) }),
+      el('span', { class: 'iv-plus', text: '+', 'aria-hidden': 'true' }),
+      el('span', { class: 'iv-treat', text: q.other!.picture, 'aria-hidden': 'true' }), el('span', { class: 'iv-tag', text: money(q.otherPrice!) }));
+    ask.textContent = `${capName(q.treat)} and ${q.other!.name}. How much for both?`;
+    say(`${q.treat.name}, ${moneyWords(q.price)}, and ${q.other!.name}, ${moneyWords(q.otherPrice!)}. How much for both?`);
+    const picked = Number(await kit.choices.askWords(q.options.map(String), (o) => money(Number(o))));
+    kit.choices.revealWord(String(q.answer), String(picked));
+    return finish(picked === q.answer, totalWhy(q.price, q.otherPrice!));
   }
 
   return {
@@ -253,7 +312,10 @@ function build(kit: Kit) {
       if (q.task === 'one') return one(q);
       if (q.task === 'count' || q.task === 'mixed') return count(q, q.task === 'mixed');
       if (q.task === 'pay') return pay(q);
-      return change(q);
+      if (q.task === 'read') return read(q);
+      if (q.task === 'cheaper') return cheaper(q);
+      if (q.task === 'total') return total(q);
+      return change(q, step);
     },
   };
 }

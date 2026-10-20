@@ -1,7 +1,7 @@
 /* The maths games, played through by reading the screen the way he does. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {
@@ -45,15 +45,24 @@ async function kickToNumber(page: Page, right: boolean): Promise<void> {
   const line = page.locator('.mx-line[data-ready="1"]');
   await expect(line).toBeVisible({ timeout: 8000 });
   const asked = Number(await line.getAttribute('data-asked'));
-  const labels = (await page.locator('.mx-label').allTextContents()).map(Number);
-  const lo = labels[0];
-  const hi = labels[labels.length - 1];
-  const target = right ? asked : (asked > (lo + hi) / 2 ? lo : hi);
+  /* the ends of the line on show, as written (0.7 on a line of tenths) */
+  const lo = Number(await line.getAttribute('data-lo'));
+  const hi = Number(await line.getAttribute('data-hi'));
+  /* rounding: the right answer is the nearer end, not the number itself */
+  const answer = await line.getAttribute('data-answer');
+  const target = right ? Number(answer ?? asked) : (asked > (lo + hi) / 2 ? lo : hi);
   const box = await line.boundingBox();
   if (!box) throw new Error('no line');
   /* the line runs from 40 to 960 of the svg's 1000 units */
   const x = box.x + box.width * (40 + ((target - lo) / (hi - lo)) * 920) / 1000;
   await page.mouse.click(x, box.y + box.height / 2);
+}
+
+/** the last number under the line is inside the goal, not cut off at its edge */
+async function lastLabelFits(page: Page): Promise<void> {
+  const goal = await page.locator('.mx-goal').boundingBox();
+  const label = await page.locator('.mx-label').last().boundingBox();
+  expect(label!.x + label!.width).toBeLessThanOrEqual(goal!.x + goal!.width);
 }
 
 async function playRound(page: Page, answer: () => Promise<void>): Promise<void> {
@@ -225,6 +234,34 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-spot.counted')).toHaveCount(need);
   });
 
+  test('Years 3–4: Off the Bench fills a stadium of 1000, in whole stands', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:off-the-bench': 6 });
+    await startGame(page, 'off-the-bench');
+    await expect(page.locator('.mx-step')).toHaveText('Fill 1000 in hundreds');
+    await expect(page.locator('.ob-stand')).toHaveCount(10);
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    for (const t of await page.locator('.mx-choice').allTextContents()) expect(Number(t) % 100).toBe(0);
+    const on = Number(await page.locator('.ob-1000').getAttribute('data-on'));
+    await tapNumber(page, 1000 - on);
+    await expect(page.locator('.mx-note')).toContainText(`${on} and ${1000 - on} make 1000`);
+    /* every seat is full */
+    await expect(page.locator('.ob-row.gap, .ob-seat.gap')).toHaveCount(0);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a miss on 1000 fills up the row, then the stand, then counts the stands', async ({ page }) => {
+    await seed(page, { 'maths-step:off-the-bench': 8 });
+    await startGame(page, 'off-the-bench');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const on = Number(await page.locator('.ob-1000').getAttribute('data-on'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== 1000 - on)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`Fill up the row: ${10 - (on % 10)} more makes`);
+    await expect(page.locator('.ob-seat.counted')).toHaveCount(10 - (on % 10));
+    await expect(page.locator('.ob-stand.counted')).toHaveCount(Math.floor((1000 - on) / 100));
+  });
+
   test('Year 2: Scoreboard Sums to 100 in racks of ten, and splits a miss into tens and ones', async ({ page }) => {
     await seed(page, { 'maths-step:scoreboard-sums': 7 });
     await startGame(page, 'scoreboard-sums');
@@ -239,14 +276,125 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toHaveText(`${a} and ${b - (b % 10)} is ${a + b - (b % 10)}, and ${b % 10} more is ${answer}.`);
   });
 
+  test('Years 3–4: Scoreboard Sums counts the crowd, in crates of a hundred', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:scoreboard-sums': 12 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add to 1000');
+    await expect(page.locator('.mx-ask')).toContainText('come through the gates');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, , b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ').map(Number);
+    await expect(page.locator('.mx-hundred')).toHaveCount(Math.floor(a / 100) + Math.floor(b / 100));
+    await expect(page.locator('.mx-hundred.new')).toHaveCount(Math.floor(b / 100));
+    await expectTapTargets(page, '.mx-choice');
+    await tapNumber(page, a + b);
+    await expect(page.locator('.mx-note')).toHaveText(`Yes! ${a} and ${b} make ${a + b}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: a miss past a hundred is split into hundreds, tens and ones, and the carry slip is offered', async ({ page }) => {
+    await seed(page, { 'maths-step:scoreboard-sums': 14 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add past a ten or a hundred');
+    await expect(page.locator('.mx-hundred')).toHaveCount(0);
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, , b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ').map(Number);
+    const answer = a + b;
+    /* each column added on its own, forgetting to carry */
+    const column = [1, 10, 100].reduce((sum, p) => sum + ((Math.floor(a / p) % 10 + Math.floor(b / p) % 10) % 10) * p, 0);
+    const offered = (await page.locator('.mx-choice').allTextContents()).map(Number);
+    expect(offered).toContain(column);
+    await tapNumber(page, column);
+    const [h, t, o] = [b - (b % 100), b % 100 - (b % 10), b % 10];
+    await expect(page.locator('.mx-note')).toHaveText(`${a} and ${h} is ${a + h}, and ${t} more is ${a + h + t}, and ${o} more is ${answer}.`);
+    /* and the crates come out to see it */
+    await expect(page.locator('.mx-hundred')).toHaveCount(Math.floor(a / 100) + Math.floor(b / 100));
+  });
+
+  test('Years 3–4: Scoreboard Sums goes on to 10 000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:scoreboard-sums': 17 });
+    await startGame(page, 'scoreboard-sums');
+    await expect(page.locator('.mx-step')).toHaveText('Add and take away to 10 000');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const [a, op, b] = ((await page.locator('.mx-sum').textContent()) ?? '').split(' ');
+    expect(a).toHaveLength(4);
+    expect(b).toHaveLength(4);
+    const answer = op === '+' ? Number(a) + Number(b) : Number(a) - Number(b);
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText('Yes!');
+    noProblems(watch);
+  });
+
   test('Year 2: the number line goes to 1000', async ({ page }) => {
     await seed(page, { 'maths-step:number-line-penalty': 7 });
     await startGame(page, 'number-line-penalty');
     await expect(page.locator('.mx-label').last()).toHaveText('1000');
+    await lastLabelFits(page);
     await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
     expect(Number(await page.locator('.mx-line').getAttribute('data-asked')) % 100).toBe(0);
     await kickToNumber(page, true);
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
+  });
+
+  test('Years 3–4: the number line goes to 10 000, in thousands', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 9 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('0 to 10 000 in thousands');
+    await expect(page.locator('.mx-label')).toHaveText(['0', '5000', '10 000']);
+    await lastLabelFits(page);
+    await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
+    expect(Number(await page.locator('.mx-line').getAttribute('data-asked')) % 1000).toBe(0);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText('GOAL!');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: rounding is a kick to the nearer end of one ten', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 11 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('Nearest ten');
+    const line = page.locator('.mx-line[data-ready="1"]');
+    await expect(line).toBeVisible();
+    const n = Number(await line.getAttribute('data-asked'));
+    const answer = Number(await line.getAttribute('data-answer'));
+    const lo = Math.floor(n / 10) * 10;
+    expect(n % 10).not.toBe(0);
+    expect(n % 10).not.toBe(5);
+    expect(answer).toBe(Math.round(n / 10) * 10);
+    /* the line is just that ten, with the number marked and halfway dashed */
+    await expect(page.locator('.mx-label')).toHaveText([String(lo), String(lo + 10)]);
+    await expect(page.locator('.mx-ask')).toContainText(`Kick it to the ten nearest ${n}`);
+    await expect(page.locator('.mx-asked')).toBeVisible();
+    await expect(page.locator('.mx-half')).toHaveCount(1);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText(`GOAL! ${n} is nearer ${answer}.`);
+    /* a kick to the far end is saved, and says how far each end is */
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    const m = Number(await line.getAttribute('data-asked'));
+    const near = Math.round(m / 10) * 10;
+    const far = near === Math.floor(m / 10) * 10 ? near + 10 : near - 10;
+    await kickToNumber(page, false);
+    await expect(page.locator('.mx-note')).toContainText(
+      `Saved! ${m} is ${Math.abs(near - m)} from ${near} and ${Math.abs(far - m)} from ${far}, so it is nearer ${near}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: the line from 0 to 1 counts in tenths', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 13 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-step')).toHaveText('0 to 1 in tenths');
+    await expect(page.locator('.mx-label')).toHaveText(['0', '0.5', '1']);
+    await expect(page.locator('.mx-line[data-ready="1"]')).toBeVisible();
+    const asked = await page.locator('.mx-line').getAttribute('data-asked');
+    expect(asked).toMatch(/^0\.[1-9]$/);
+    await expect(page.locator('.mx-ask .mx-big')).toHaveText(asked!);
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText(`GOAL! ${asked} is right there.`);
+    noProblems(watch);
   });
 
   test('Years 3–4: Flash Count flashes a times-table fact in blocks of five, and a miss splits it', async ({ page }) => {
@@ -363,6 +511,62 @@ test.describe('maths games', () => {
     await expect(page.locator('.tb-bus')).toHaveCount(Math.floor(n / 10) - 1);
   });
 
+  test('Years 3–4: Team Buses reads planes of 1000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:team-buses': 7 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-plane')).toHaveCount(Math.floor(n / 1000));
+    await expect(page.locator('.tb-train')).toHaveCount(Math.floor(n / 100) % 10);
+    await tapNumber(page, n);
+    await expect(page.locator('.mx-note')).toContainText(`That's ${n}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Team Buses builds a crowd to 10 000 with planes', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 8 });
+    await startGame(page, 'team-buses');
+    await expect(page.getByRole('button', { name: 'Add a plane of 1000' })).toBeVisible();
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    for (let i = 0; i < Math.floor(n / 1000); i += 1) await page.getByRole('button', { name: 'Add a plane of 1000' }).click();
+    for (let i = 0; i < Math.floor(n / 100) % 10; i += 1) await page.getByRole('button', { name: 'Add a train of 100' }).click();
+    for (let i = 0; i < Math.floor(n / 10) % 10; i += 1) await page.getByRole('button', { name: 'Add a bus of 10' }).click();
+    for (let i = 0; i < n % 10; i += 1) await page.getByRole('button', { name: 'Add a fan' }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(`Yes! ${n} is`);
+  });
+
+  test('Years 3–4: no trains, so 350 fans need 35 buses; reading only the tens is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:team-buses': 9 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-train.broken')).toHaveCount(Math.floor(n / 100));
+    const tens = Math.floor(n / 10) % 10;
+    await tapNumber(page, tens);
+    await expect(page.locator('.mx-note')).toContainText(`${n} is ${n / 10} tens!`);
+    await expect(page.locator('.tb-bus')).toHaveCount(n / 10);
+    await expect(page.locator('.tb-train')).toHaveCount(0);
+  });
+
+  test('Years 3–4: no plane, so 1250 fans need 12 trains and 5 buses', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:team-buses': 10 });
+    await startGame(page, 'team-buses');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const n = Number(await page.locator('.tb-yard').getAttribute('data-n'));
+    await expect(page.locator('.tb-plane.broken')).toHaveCount(Math.floor(n / 1000));
+    const trains = Math.floor(n / 100);
+    const buses = (n % 100) / 10;
+    await tapNumber(page, trains);
+    await expect(page.locator('.mx-note')).toContainText(`Yes! A plane is 10 trains`);
+    await expect(page.locator('.mx-note')).toContainText(`${n} is ${trains} hundreds and ${buses} ${buses === 1 ? 'ten' : 'tens'}!`);
+    await expect(page.locator('.tb-train')).toHaveCount(trains);
+    await expect(page.locator('.tb-bus')).toHaveCount(buses);
+    noProblems(watch);
+  });
+
   test('Keepy-Uppy Count: a whole round, filling the gaps', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'keepy-uppy');
@@ -394,6 +598,38 @@ test.describe('maths games', () => {
     expect(shown[0]).toBeGreaterThan(shown[1]);
     await tapNumber(page, Number(await page.locator('.ku-touches').getAttribute('data-answer')));
     await expect(page.locator('.mx-note')).toContainText('Keepy-uppy!');
+  });
+
+  test('Years 3–4: Keepy-Uppy counts by 7s and 9s, and says the fact', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:keepy-uppy': 11 });
+    await startGame(page, 'keepy-uppy');
+    for (let i = 1; i <= 3; i += 1) {
+      await expect(page.locator('.score')).toContainText(`Question ${i}`, { timeout: 10000 });
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      const shown = (await page.locator('.ku-ball:not(.gap)').allTextContents()).map(Number);
+      const by = shown[1] - shown[0];
+      expect([7, 9]).toContain(by);
+      const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+      await tapNumber(page, answer);
+      await expect(page.locator('.mx-note')).toHaveText(`Keepy-uppy! ${answer}! ${answer / by} × ${by} = ${answer}.`);
+    }
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Keepy-Uppy back down a times table, a miss naming the table', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 12 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const shown = (await page.locator('.ku-ball:not(.gap)').allTextContents()).map(Number);
+    const by = shown[0] - shown[1];
+    expect(by).toBeGreaterThan(2);
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.ku-hop').first()).toHaveText(`−${by}`);
+    await expect(page.locator('.mx-note')).toContainText(`Back in ${by}s: `);
+    await expect(page.locator('.mx-note')).toContainText(`The ${by} times table: ${answer / by} × ${by} = ${answer}.`);
   });
 
   test('Training Drills: a whole round of groups and sharing', async ({ page }) => {
@@ -483,6 +719,40 @@ test.describe('maths games', () => {
     expect((await page.locator('.ht-flag').first().textContent())?.length).toBeGreaterThan(0);
   });
 
+  test('Years 3–4: Half-Time Oranges names thirds and fifths', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 6 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice')).toHaveText(['a half', 'a third', 'a quarter', 'a fifth', 'an eighth'], { timeout: 10000 });
+    const answer = (await page.locator('.ht-board').getAttribute('data-answer'))!;
+    expect(['a third', 'a fifth']).toContain(answer);
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`each one is ${answer}`);
+  });
+
+  test('Years 3–4: Half-Time Oranges, two thirds of the bibs, the shares counted', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:half-time-oranges': 8 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText(/^\d+ bibs shared between \d teams\. How many is \d (thirds|quarters|fifths) of them\?$/);
+    const answer = Number(await page.locator('.ht-board').getAttribute('data-answer'));
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`= ${answer}.`);
+    expect(await page.locator('.ht-share.counted').count()).toBeGreaterThanOrEqual(2);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Half-Time Oranges, is it the same amount?', async ({ page }) => {
+    await seed(page, { 'maths-step:half-time-oranges': 9 });
+    await startGame(page, 'half-time-oranges');
+    await expect(page.locator('.ht-fig')).toHaveCount(2, { timeout: 10000 });
+    await expect(page.locator('.mx-choice')).toHaveText(['Yes', 'No']);
+    const answer = (await page.locator('.ht-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(answer === 'Yes' ? 'covers just the same as' : 'than');
+  });
+
   test('Year 2: Half-Time Oranges names halves, quarters and eighths', async ({ page }) => {
     await seed(page, { 'maths-step:half-time-oranges': 2 });
     await startGame(page, 'half-time-oranges');
@@ -557,6 +827,80 @@ test.describe('maths games', () => {
     noProblems(watch);
   });
 
+  test('Years 3–4: Jump Line jumps a hundred at a time, to 1000', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 7 });
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Jump on 100', exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Jump on 10', exact: true })).toBeVisible();
+    await expect(page.locator('.jl-label').last()).toHaveText('1000');
+    const b = Number(await page.locator('.jl-line').getAttribute('data-b'));
+    for (let i = 0; i < b / 100; i += 1) await page.getByRole('button', { name: 'Jump on 100', exact: true }).click();
+    await expect(page.locator('.jl-hop')).toHaveCount(b / 100);
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(/jumps? of a hundred/);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Jump Line goes to the next ten first, then jumps the rest', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 10 });
+    await startGame(page, 'jump-line');
+    await expect(page.locator('.mx-ask')).toContainText('how far is it to the next ten?', { timeout: 10000 });
+    const line = page.locator('.jl-line');
+    const [a, b, first] = await Promise.all(['data-a', 'data-b', 'data-bridge'].map(async (k) => Number(await line.getAttribute(k))));
+    expect((a + first) % 10).toBe(0);
+    await tapNumber(page, first);
+    /* the jump to the ten is drawn, and the ball is on the ten */
+    await expect(line).toHaveAttribute('data-at', String(a + first));
+    await expect(page.locator('.mx-ask')).toHaveText(`Now jump the rest: ${b - first} more.`);
+    const rest = b - first;
+    for (let i = 0; i < Math.floor(rest / 10); i += 1) await page.getByRole('button', { name: 'Jump on 10', exact: true }).click();
+    for (let i = 0; i < rest % 10; i += 1) await page.getByRole('button', { name: 'Jump on 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toHaveText(`Yes! ${a} + ${b}: ${first} to ${a + first}, then ${rest} more is ${a + b}.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: back to the ten first, and the other part of the ten is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:jump-line': 11 });
+    await startGame(page, 'jump-line');
+    await expect(page.locator('.mx-ask')).toContainText('how far is it back to the ten?', { timeout: 10000 });
+    const line = page.locator('.jl-line');
+    const [a, b, first] = await Promise.all(['data-a', 'data-b', 'data-bridge'].map(async (k) => Number(await line.getAttribute(k))));
+    /* 63: 3 back to 60, and the 7 that makes the ten is offered too */
+    await tapNumber(page, 10 - first);
+    await expect(page.locator('.mx-note')).toHaveText(`${a} is ${first} from ${a - first}.`);
+    await expect(line).toHaveAttribute('data-at', String(a - first), { timeout: 4000 });
+    const rest = b - first;
+    for (let i = 0; i < Math.floor(rest / 10); i += 1) await page.getByRole('button', { name: 'Jump back 10', exact: true }).click();
+    for (let i = 0; i < rest % 10; i += 1) await page.getByRole('button', { name: 'Jump back 1', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    /* he got there, but not by knowing the first jump: it does not count, and the way is said */
+    await expect(page.locator('.mx-note')).toHaveText(`${a} − ${b}: back ${first} to ${a - first}, then ${rest} more back is ${a - b}.`);
+    await expect(page.locator('.mx-note')).not.toHaveClass(/good/);
+  });
+
+  test('Years 3–4: Jump Line to 10 000 in thousands and hundreds', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:jump-line': 13 });
+    await startGame(page, 'jump-line');
+    await expect(page.getByRole('button', { name: 'Jump on 1000', exact: true })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.jl-label').last()).toHaveText('10 000');
+    /* the last number fits inside the line */
+    const svgBox = (await page.locator('.jl-line').boundingBox())!;
+    const label = (await page.locator('.jl-label').last().boundingBox())!;
+    expect(label.x + label.width).toBeLessThanOrEqual(svgBox.x + svgBox.width + 1);
+    const b = Number(await page.locator('.jl-line').getAttribute('data-b'));
+    for (let i = 0; i < Math.floor(b / 1000); i += 1) await page.getByRole('button', { name: 'Jump on 1000', exact: true }).click();
+    for (let i = 0; i < (b % 1000) / 100; i += 1) await page.getByRole('button', { name: 'Jump on 100', exact: true }).click();
+    await page.getByRole('button', { name: 'Done ✓' }).click();
+    await expect(page.locator('.mx-note')).toContainText(/of a thousand and \d+ of a hundred on/);
+    await expect(page.locator('.mx-note')).toHaveClass(/good/);
+    noProblems(watch);
+  });
+
   test('Match Clock: a whole round of reading the clock', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'match-clock');
@@ -597,6 +941,62 @@ test.describe('maths games', () => {
     await page.getByRole('button', { name: 'Done ✓' }).click();
     await expect(page.locator('.mx-note')).toContainText('looks like this');
     await expect(page.locator('.mc-clock')).toHaveAttribute('data-minutes', String(want));
+  });
+
+  /** answer this Match Clock question wrong, to see how it explains */
+  async function missClock(page: Page): Promise<string> {
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = (await page.locator('.mc-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().click();
+    return answer;
+  }
+
+  test('Years 3–4: Match Clock to five minutes, then to the minute', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:match-clock': 8 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-step')).toHaveText('Five minutes');
+    const five = await missClock(page);
+    await expect(page.locator('.mc-clock')).toHaveAttribute('aria-label', `A clock showing ${five}`);
+    await expect(page.locator('.mx-note')).toContainText('The long hand points at the');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Match Clock to the minute, written 3:47', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 9 });
+    await startGame(page, 'match-clock');
+    const answer = await missClock(page);
+    expect(answer).toMatch(/^\d{1,2}:\d\d$/);
+    await expect(page.locator('.mx-note')).toContainText(`It's ${answer}. The long hand is`);
+  });
+
+  test('Years 3–4: Match Clock am or pm on match day', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 10 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mx-choice')).toHaveCount(2, { timeout: 10000 });
+    await expect(page.locator('.mx-choice').first()).toHaveText(/ am$/);
+    await expect(page.locator('.mc-digital')).toBeVisible();
+    const answer = (await page.locator('.mc-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`It's ${answer}.`);
+  });
+
+  test('Years 3–4: Match Clock counts on to kick-off', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 11 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mc-clock')).toHaveCount(2);
+    await expect(page.locator('.mc-fig figcaption')).toHaveText([/^Now \d{1,2}:\d\d$/, /^Kick-off \d{1,2}:\d\d$/]);
+    await missClock(page);
+    await expect(page.locator('.mx-note')).toContainText(/^From \d{1,2}:\d\d, /);
+  });
+
+  test('Years 3–4: Match Clock reads a 24-hour ticket', async ({ page }) => {
+    await seed(page, { 'maths-step:match-clock': 12 });
+    await startGame(page, 'match-clock');
+    await expect(page.locator('.mc-ticket-time')).toHaveText(/^Kick-off (1[3-9]|2[0-2]):\d\d$/);
+    const answer = await missClock(page);
+    expect(answer).toMatch(/ pm$/);
+    await expect(page.locator('.mx-note')).toContainText('After midday, take 12 away from the hour');
   });
 
   test('Match Clock: the day after training', async ({ page }) => {
@@ -668,6 +1068,59 @@ test.describe('maths games', () => {
     const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
     await tapNumber(page, answer);
     await expect(page.locator('.mx-note')).toContainText(`That's ${answer} more.`);
+  });
+
+  test('Years 3–4: Fan Survey, each picture is 5 fans, and counting the pictures is the slip', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:fan-survey': 6 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-key')).toHaveText('Each ● is 5 fans', { timeout: 10000 });
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 8000 });
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer / 5);
+    const fives = Array.from({ length: answer / 5 }, (_, i) => (i + 1) * 5).join(', ');
+    await expect(page.locator('.mx-note')).toContainText(`each ● is 5 fans: ${fives}. That's ${answer} fans.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Fan Survey reads a line with no number on the scale', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 8 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-bar')).toHaveCount(4, { timeout: 10000 });
+    /* numbered every 10, a line every 5 */
+    await expect(page.locator('.fs-scale')).toHaveText(['0', '10', '20', '30', '40', '50']);
+    await expect(page.locator('.fs-grid')).toHaveCount(10);
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    expect(answer % 10).toBe(5);
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`halfway between ${answer - 5} and ${answer + 5}: that's ${answer}.`);
+  });
+
+  test('Years 3–4: Fan Survey turns tallies into a table, then adds it up', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:fan-survey': 9 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-sheet .fs-tally')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.fs-gap')).toHaveText('?');
+    const answer = Number(await page.locator('.fs-board').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.fs-gap')).toHaveText(String(answer));
+    await expect(page.locator('.mx-note')).toContainText('Count the gates of five, then the rest');
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Fan Survey adds up a table, and leaving a row out is the slip', async ({ page }) => {
+    await seed(page, { 'maths-step:fan-survey': 10 });
+    await startGame(page, 'fan-survey');
+    await expect(page.locator('.fs-total')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText('How many fans voted altogether?');
+    const numbers = (await page.locator('.fs-sheet .fs-n').allTextContents()).map(Number);
+    const answer = numbers.reduce((a, b) => a + b, 0);
+    expect(Number(await page.locator('.fs-board').getAttribute('data-answer'))).toBe(answer);
+    const offered = (await page.locator('.mx-choice').allTextContents()).map(Number);
+    expect(offered).toContain(answer - Math.min(...numbers));
+    await tapNumber(page, answer - Math.min(...numbers));
+    await expect(page.locator('.mx-note')).toHaveText(`${numbers.join(' + ')} = ${answer}.`);
   });
 
   test('Fact Family Formation: a whole round', async ({ page }) => {
@@ -743,8 +1196,8 @@ test.describe('maths games', () => {
       const board = page.locator('.cw-board');
       await expect(page.locator('.mx-choice, .cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
       const answer = await board.getAttribute('data-answer');
-      if (await page.locator('.cw-grid').count()) await page.locator(`.cw-cell[data-at="${answer}"]`).click();
-      else await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+      if (await page.locator('.mx-choice').count()) await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+      else await page.locator(`.cw-cell[data-at="${answer}"]`).click();
     });
     await expect(page.locator('.results')).toContainText('8 of 8');
     noProblems(watch);
@@ -770,10 +1223,92 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('leaves him facing');
   });
 
+  test("Years 3–4: Coach's Whiteboard grid references, found and then named", async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:coach-whiteboard': 5 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-step')).toHaveText('Grid references');
+    /* first, find the square: a wrong one lights up the column and the row */
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-head')).toHaveText(['', 'A', 'B', 'C', 'D', 'E', '1', '2', '3', '4', '5']);
+    const at = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    const [x, y] = at.split(',').map(Number);
+    const ref = `${'ABCDE'[x]}${y + 1}`;
+    await expect(page.locator('.mx-ask')).toContainText(`Put the ball on ${ref}`);
+    await expect(page.locator(`.cw-cell[data-at="${at}"]`)).toHaveAttribute('aria-label', ref);
+    await page.locator(`.cw-cell:not([data-at="${at}"])`).first().click();
+    await expect(page.locator('.cw-cell.wrong')).toHaveCount(1);
+    await expect(page.locator('.cw-head.on')).toHaveText(['ABCDE'[x], String(y + 1)]);
+    await expect(page.locator(`.cw-cell.end[data-at="${at}"]`)).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toHaveText(
+      `${ref}: along the letters to ${'ABCDE'[x]}, then down the numbers to ${y + 1}. The ball goes where they meet.`);
+    /* then name the square the ball is on */
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    await expect(page.locator('.mx-choice')).toHaveCount(4, { timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText('Which square is the ball on?');
+    await expect(page.locator('.cw-cell:enabled')).toHaveCount(0);
+    const named = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    const [nx, ny] = [named.charCodeAt(0) - 65, Number(named.slice(1)) - 1];
+    await expect(page.locator(`.cw-cell[data-at="${nx},${ny}"] .cw-ball`)).toBeVisible();
+    await page.locator(`.mx-choice[data-n="${named}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`Yes! ${named}: along the letters`);
+    noProblems(watch);
+  });
+
+  test("Years 3–4: Coach's Whiteboard moves by the compass, north up the board", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 6 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-rose')).toBeVisible();
+    await expect(page.locator('.cw-rose-between')).toHaveCount(0);
+    await expect(page.locator('.mx-ask')).toHaveText(/^Run \d squares? (north|south|east|west), then \d squares? (north|south|east|west)\. Tap/);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.cw-cell:not([data-at="${answer}"])`).first().click();
+    await expect(page.locator(`.cw-cell.end[data-at="${answer}"]`)).toHaveCount(1);
+    /* the miss says which way on the board each point is */
+    await expect(page.locator('.mx-note')).toContainText(/(North is up|South is down|East is to the right|West is to the left)/i);
+  });
+
+  test("Years 3–4: Coach's Whiteboard north-east and the points between", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 9 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.cw-cell:enabled').first()).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.cw-rose-between')).toHaveCount(4);
+    await expect(page.locator('.mx-ask')).toHaveText(/^Run \d squares? (north|south)-(east|west)\. Tap/);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.cw-cell[data-at="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText('Yes!');
+    await expect(page.locator('.cw-cell.path').first()).toHaveText(/[↗↘↙↖]/);
+  });
+
+  test("Years 3–4: Coach's Whiteboard right angles, held against the corner of a page", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 7 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveText(['Smaller', 'Right angle', 'Bigger'], { timeout: 10000 });
+    await expect(page.locator('.cw-corner .cw-angle')).toBeVisible();
+    await expect(page.locator('.cw-right')).toHaveCount(0);
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().click();
+    await expect(page.locator('.cw-right')).toBeVisible();
+    await expect(page.locator('.mx-note')).toContainText('corner of a page');
+  });
+
+  test("Years 3–4: Coach's Whiteboard three-quarter turns, in compass points", async ({ page }) => {
+    await seed(page, { 'maths-step:coach-whiteboard': 8 });
+    await startGame(page, 'coach-whiteboard');
+    await expect(page.locator('.mx-choice')).toHaveText(['North', 'East', 'South', 'West'], { timeout: 10000 });
+    await expect(page.locator('.mx-ask')).toHaveText(/^He is facing (north|east|south|west)\. He makes a /);
+    await expect(page.locator('.cw-turn .cw-rose')).toBeVisible();
+    const answer = (await page.locator('.cw-board').getAttribute('data-answer'))!;
+    await page.locator(`.mx-choice[data-n="${answer}"]`).click();
+    await expect(page.locator('.mx-note.good')).toContainText(`Yes! From `);
+    await expect(page.locator('.mx-note.good')).toContainText(answer.toLowerCase());
+  });
+
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(17);
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(18);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
     await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
   });

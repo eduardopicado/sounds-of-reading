@@ -4,7 +4,9 @@
  * he says what goes in it to keep the ball up. Counting on and back in ones
  * from any number is Kindergarten; counting by 2s, 5s and 10s from 0 is Year
  * 1, the start of multiplying; Year 2 counts by 10s from any number (23, 33,
- * 43), the odd numbers, by 3s, and back in 10s and 5s.
+ * 43), the odd numbers, by 3s, and back in 10s and 5s. Years 3 and 4 count
+ * by 4s, 6s, 8s, 7s and 9s, the counting side of the times tables, and back
+ * down them, each gap with its fact: 28 is 4 × 7.
  *
  * The numbers bounce in one at a time and are read out with the gap, so he
  * hears the rhythm before he answers. A wrong answer writes the step on every
@@ -13,7 +15,7 @@
 import { el, prefersReducedMotion } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
-import { SKIP_STEPS, skipChoices, skipQuestion, type SkipQuestion, type SkipStep } from '../content/maths';
+import { SKIP_STEPS, skipChoices, skipFact, skipQuestion, type SkipQuestion, type SkipStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { player } from './teams';
 
@@ -39,6 +41,8 @@ function build(kit: Kit) {
   /** the gap, or the number, as said aloud */
   const spoken = (q: SkipQuestion, fill: boolean): string =>
     q.seq.map((n, i) => (i === q.gap && !fill ? 'what?' : String(n))).join(', ');
+  /** a sum the way it is said: "4 times 7 is 28" */
+  const said = (text: string): string => text.replace(/×/g, 'times').replace(/=/g, 'is');
 
   function steps(q: SkipQuestion, step: SkipStep): void {
     const sign = step.dir === 1 ? '+' : '−';
@@ -82,14 +86,16 @@ function build(kit: Kit) {
       balls[q.gap].textContent = String(answer);
       balls[q.gap].classList.remove('gap');
       balls[q.gap].classList.add(picked === answer ? 'right' : 'filled');
+      /* a times table's gap comes with its fact */
+      const fact = step.facts ? skipFact(q) : '';
       const how = step.by.length === 1 && step.by[0] === 1
         ? `${step.dir === 1 ? 'Counting on' : 'Counting back'}: ${spoken(q, true)}.`
-        : `${step.dir === 1 ? 'Up' : 'Back'} in ${q.by}s: ${spoken(q, true)}.`;
+        : `${step.dir === 1 ? 'Up' : 'Back'} in ${q.by}s: ${spoken(q, true)}.${fact ? ` The ${q.by} times table: ${fact}.` : ''}`;
       if (picked === answer) {
         sfx.cheer();
         juggler.classList.add('trick');
-        kit.note(`Keepy-uppy! ${answer}!`, true);
-        say(`Yes! ${spoken(q, true)}`);
+        kit.note(`Keepy-uppy! ${answer}!${fact ? ` ${fact}.` : ''}`, true);
+        say(`Yes! ${spoken(q, true)}${fact ? `. ${said(fact)}.` : ''}`);
         await kit.wait(2400);
         juggler.classList.remove('trick');
         return true;
@@ -97,7 +103,7 @@ function build(kit: Kit) {
       sfx.wrong();
       steps(q, step);
       kit.note(how);
-      say(how);
+      say(said(how));
       await kit.wait(3600);
       return false;
     },

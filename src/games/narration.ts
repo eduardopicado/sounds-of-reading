@@ -5,13 +5,16 @@
  * football in his family. It comes after the kick, as the celebration, and
  * the word he read is said straight after it in English, as before.
  *
- * With no Portuguese voice on the device, the English voice cannot say these
- * lines, so it calls the moment in English instead. A grown-up can choose
- * English or no commentator in the setup panel. */
+ * With no Portuguese voice on the device and no recording of the line, the
+ * English voice cannot say it, so it calls the moment in English instead. A
+ * grown-up can choose English or no commentator in the setup panel. The
+ * lines themselves are in src/content/commentary.ts. */
 
 import { pick } from '../lib/random';
 import { canSpeak, say } from '../lib/speech';
+import { hasClip } from '../lib/audio';
 import { read, write } from '../lib/storage';
+import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../content/commentary';
 import type { Team } from './teams';
 
 export type Narration = 'pt' | 'en' | 'off';
@@ -28,14 +31,9 @@ export const setNarration = (v: Narration): void => write(KEY, v);
 
 /** what the commentator shouts: a goal for `team`, or a save */
 export function callFor(moment: Moment, team: Team, lang: 'pt' | 'en'): string {
-  if (lang === 'pt') {
-    if (moment === 'save') return pick(['Defendeu o goleiro!', 'Que defesa!', 'Pegou o goleiro!']);
-    return team.pt
-      ? pick([`Goooool ${team.pt}!`, `É gol ${team.pt}!`, `Golaço ${team.pt}!`])
-      : pick(['Goooool!', 'Golaço!', 'É gol!']);
-  }
-  if (moment === 'save') return pick(['What a save!', 'Saved by the keeper!']);
-  return team.kind === 'you' ? 'Goooal!' : `Goooal for ${team.name}!`;
+  if (lang === 'pt') return pick(moment === 'save' ? PT_SAVES : ptGoals(team.pt));
+  if (moment === 'save') return pick(EN_SAVES);
+  return enGoal(team.kind === 'you' ? undefined : team.name);
 }
 
 /**
@@ -45,11 +43,14 @@ export function callFor(moment: Moment, team: Team, lang: 'pt' | 'en'): string {
  */
 export function narrate(moment: Moment, team: Team, then: () => void, later: (fn: () => void, ms: number) => void): void {
   const choice = narrationChoice();
-  const lang = choice === 'pt' && !canSpeak(PT) ? 'en' : choice;
-  if (lang === 'off') { then(); return; }
+  if (choice === 'off') { then(); return; }
   let done = false;
   const next = (): void => { if (!done) { done = true; then(); } };
-  say(callFor(moment, team, lang), { lang: lang === 'pt' ? PT : undefined, onEnd: next });
+  /* in Portuguese when there is a recording of the line or a voice to say it,
+     and in English otherwise */
+  const pt = choice === 'pt' ? callFor(moment, team, 'pt') : '';
+  if (pt && (hasClip(pt) || canSpeak(PT))) say(pt, { lang: PT, onEnd: next });
+  else say(callFor(moment, team, 'en'), { onEnd: next });
   later(next, 2400);
 }
 
