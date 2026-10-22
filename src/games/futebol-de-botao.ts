@@ -14,9 +14,9 @@
  * make first, and a whole team in the way.
  *
  * When the ball comes off the side of the table, the angles are drawn where
- * it bounced, in degrees, the way a book draws them: the angle it went in at
- * and the angle it came off at, the same, either side of a dashed line that
- * meets the wall at a right angle, with the square mark for 90°.
+ * it bounced, in degrees: the angle between its way and the wall going in,
+ * and the same angle coming off. Sent straight at the wall, it comes
+ * straight back, and that right angle gets the square mark for 90°.
  *
  * Three touches, as in the regra carioca, and before the third the ball has
  * to go to another of his buttons. A goal is shouted by the commentator. If
@@ -172,10 +172,10 @@ function build(kit: Kit) {
   };
 
   /**
-   * Where the ball came off the rim, drawn as a book draws it: the wall, a
-   * dashed line square to it with the right-angle mark, and on each side
-   * the angle between the ball's way and the wall, in degrees. Straight at
-   * the wall, the right-angle mark is the whole story.
+   * Where the ball came off the rim: the wall, and on each side the angle
+   * between the ball's way and the wall, as a wedge with its degrees. Only
+   * a ball sent straight at the wall makes a right angle with it, and that
+   * one gets the square mark for 90° instead of a wedge.
    */
   function drawBounces(bounces: readonly Bounce[]): void {
     const unit = (v: Point): Point => { const l = Math.sqrt(v.x * v.x + v.y * v.y) || 1; return { x: v.x / l, y: v.y / l }; };
@@ -195,17 +195,14 @@ function build(kit: Kit) {
       const rays = [unit({ x: -b.into.x, y: -b.into.y }), unit(b.out)];
       const sideOf = (r: Point): Point => (r.x * wall.x + r.y * wall.y < 0 ? { x: -wall.x, y: -wall.y } : wall);
       const [into, out] = angles(b);
-      const first = sideOf(rays[0]);
-      const S = 2.6;
-      /* drawn last, so the angles' wedges never cover it */
-      const square = svg('path', { class: 'bt-right', d: `M${pt()} L${pt([first, S])} L${pt([first, S], [n, S])} L${pt([n, S])} Z` });
-      const lines: SVGElement[] = [
-        svg('path', { class: 'bt-wall-mark', d: `M${pt([wall, -10])} L${pt([wall, 10])}` }),
-        svg('path', { class: 'bt-normal', d: `M${pt()} L${pt([n, 13])}` }),
-      ];
+      const wallMark = svg('path', { class: 'bt-wall-mark', d: `M${pt([wall, -10])} L${pt([wall, 10])}` });
       if (into === 90 && out === 90) {
-        const by = unit({ x: first.x + n.x, y: first.y + n.y });
-        return [...lines, square, label({ x: p.x + by.x * 6.4, y: p.y + by.y * 6.4 }, '90°')];
+        /* the ball's own way is the line square to the wall */
+        const S = 2.6;
+        const by = unit({ x: wall.x + n.x, y: wall.y + n.y });
+        return [wallMark,
+          svg('path', { class: 'bt-right', d: `M${pt()} L${pt([wall, S])} L${pt([wall, S], [n, S])} L${pt([n, S])} Z` }),
+          label({ x: p.x + by.x * 6.4, y: p.y + by.y * 6.4 }, '90°')];
       }
       const RHO = 7;
       const wedges: SVGElement[] = [];
@@ -217,7 +214,7 @@ function build(kit: Kit) {
         const by = unit({ x: side.x + r.x, y: side.y + r.y });
         labels.push(label({ x: p.x + by.x * (RHO + 3.6), y: p.y + by.y * (RHO + 3.6) }, `${i === 0 ? into : out}°`));
       }
-      return [...lines, ...wedges, square, ...labels];
+      return [wallMark, ...wedges, ...labels];
     }));
   }
 

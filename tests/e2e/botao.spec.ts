@@ -117,15 +117,16 @@ test.describe('Futebol de Botão', () => {
     const [shot] = await plan(page);
     await flick(page, shot);
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'scored', { timeout: 10000 });
-    /* where it came off the wall: the same angle each side, the line square
-       to the wall with its right-angle mark, and the same numbers in words */
+    /* where it came off the wall: the same angle each side, measured from the
+       wall, and the same numbers in words. No right angle in it, so no
+       right-angle mark: that is only for a ball sent straight at the wall */
     const degrees = page.locator('.bt-marks .bt-deg');
     await expect(degrees).toHaveCount(2);
     const [into, out] = await degrees.allTextContents();
     expect(into).toMatch(/^\d+°$/);
     expect(out).toBe(into);
-    await expect(page.locator('.bt-marks .bt-right')).toHaveCount(1);
-    await expect(page.locator('.bt-marks .bt-normal')).toHaveCount(1);
+    await expect(page.locator('.bt-marks .bt-arc')).toHaveCount(2);
+    await expect(page.locator('.bt-marks .bt-right')).toHaveCount(0);
     await expect(page.locator('.mx-note')).toHaveText(`GOL! In one touch! It went into the wall at ${into} and came off at ${out}: the same angle.`);
     /* and gone when the next attack starts */
     await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 6000 });
