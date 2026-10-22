@@ -163,7 +163,7 @@ test.describe('the grown-ups corner', () => {
 
   test('groups the settings into cards', async ({ page }) => {
     await openGame(page, 'grown-ups');
-    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Stickers']);
+    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Team crests', 'Stickers']);
     /* the sounds of the two default levels, one line each */
     await expect(page.locator('.sound-group .group-name')).toHaveText(['Level 4', 'Level 5']);
   });
