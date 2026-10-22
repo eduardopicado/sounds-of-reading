@@ -16,8 +16,10 @@
 
 import type { Step } from './maths';
 
+/* shaped like a real table (a Klopf is 1.86 m by 1.21 m), about half as
+   long again as it is wide */
 export const W = 64;
-export const L = 90;
+export const L = 98;
 /** a button's radius, and the ball's */
 export const R = 5;
 export const BALL = 1.6;
@@ -27,6 +29,12 @@ export const NET = 5;
 export const POST = 0.8;
 /** the goleiro: a block this wide, just in front of the line */
 export const KEEPER_W = 6;
+/** the markings at each end, across and deep: the small area (the goal
+    area), the penalty area, the spot, and the radius of the arc on the
+    penalty area's edge. As on a real table the goal is clearly narrower
+    than the small area; the areas are drawn larger than on a real pitch so
+    the goal can stay big enough to score in */
+export const MARKS = { box: [32, 7], penalty: [50, 18], spot: 12, arc: 8.5 } as const;
 export const KEEPER_Y: readonly [number, number] = [0.6, 3.4];
 const MID = (MOUTH[0] + MOUTH[1]) / 2;
 
@@ -445,8 +453,8 @@ export const HOW: Record<PlanKind, string> = {
 
 /** a pull back of one table unit sets a button off at this speed */
 export const PULL = 5;
-/** the table as drawn: the rim round it and the nets, in table units */
-export const VIEW = { x: -3, y: -NET - 2, w: W + 6, h: L + NET + 5 } as const;
+/** the table as drawn: the rim round it and a goal at each end, in table units */
+export const VIEW = { x: -3, y: -NET - 2, w: W + 6, h: L + 2 * NET + 4 } as const;
 
 /** the flick a pull back gives: the other way, harder the further he pulls */
 export function flickFor(button: number, pullX: number, pullY: number): Flick {

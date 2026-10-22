@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BALL, BOTAO_STEPS, KEEPER_W, L, MAX_SPEED, MOUTH, PULL, R, W,
+  BALL, BOTAO_STEPS, KEEPER_W, L, MARKS, MAX_SPEED, MOUTH, POST, PULL, R, W,
   angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, simulate, slant,
   type Point, type Table,
 } from '../../src/content/botao';
@@ -105,6 +105,21 @@ describe('the table', () => {
     const shot = simulate(t, { button: 0, vx: 0, vy: -100 });
     expect(shot.goal).toBe(true);
     expect(shot.bounces).toEqual([]);
+  });
+
+  it('is shaped like a real table: half as long again as it is wide, the goal clearly narrower than the small area', () => {
+    expect(L / W).toBeGreaterThan(1.45);
+    expect(L / W).toBeLessThan(1.6);
+    const [boxW, boxD] = MARKS.box;
+    const [penW, penD] = MARKS.penalty;
+    expect(MOUTH[1] - MOUTH[0]).toBeLessThanOrEqual(0.75 * boxW);
+    expect(boxW).toBeLessThan(penW);
+    expect(boxD).toBeLessThan(MARKS.spot);
+    expect(MARKS.spot).toBeLessThan(penD);
+    /* the arc round the spot reaches past the penalty area's edge */
+    expect(MARKS.spot + MARKS.arc).toBeGreaterThan(penD);
+    /* and the goleiro leaves a gap each side the ball fits through */
+    expect((MOUTH[1] - MOUTH[0] - KEEPER_W) / 2).toBeGreaterThan(2 * BALL + 2 * POST);
   });
 
   it('lets the goleiro stop a shot hit straight at him', () => {
