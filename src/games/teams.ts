@@ -2,9 +2,10 @@
  *
  * He asked for the real thing: World Cup winners and the big clubs. Countries
  * come with their flag. Clubs come as their kit colours and nothing more — a
- * club crest is someone's trademark and is never drawn here, but a green shirt
- * is Palmeiras to anyone who follows them, and that is all a six-year-old
- * needs to know who he is playing.
+ * club crest is someone's trademark and the app never comes with one, but a
+ * green shirt is Palmeiras to anyone who follows them, and that is all a
+ * six-year-old needs to know who he is playing. A grown-up can add a crest
+ * from their own iPad's pictures, kept on that iPad (src/lib/crests.ts).
  *
  * The shirt is a small inline SVG so it needs no image files, stays sharp at
  * any size and works offline. */

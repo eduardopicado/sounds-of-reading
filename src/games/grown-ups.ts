@@ -15,7 +15,9 @@ import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { strongSounds, weakSounds } from '../lib/coach';
+import { clearCrest, crestFromFile, crestOf, setCrest } from '../lib/crests';
 import { GAMES } from './catalog';
+import { TEAMS } from './teams';
 
 const card = (title: string, cls: string, ...children: (Node | null)[]): HTMLElement =>
   el('section', { class: `gu-card ${cls}` }, el('h2', { text: title }), ...children);
@@ -225,11 +227,51 @@ export function mount(root: HTMLElement): () => void {
     }
   }
 
+  /* ── team crests ────────────────────────────────────────────────────── */
+
+  const teamName = (id: string): string => {
+    const t = TEAMS.find((x) => x.id === id) ?? TEAMS[0];
+    return t.kind === 'you' ? 'his own team' : t.name;
+  };
+  const crestTeam = el('select', { 'aria-label': 'Which team' },
+    ...TEAMS.map((t) => el('option', { value: t.id, text: t.kind === 'you' ? '⭐ You: his own team' : `${t.flag ? `${t.flag} ` : ''}${t.name}` })));
+  const crestShown = el('span', { class: 'gu-crest' });
+  /* the picker opens from the label round it, which is what a finger taps */
+  const crestFile = el('input', { type: 'file', accept: 'image/*', class: 'gu-crest-file' });
+  const crestPick = el('label', { class: 'btn ghost small gu-crest-pick' }, '🖼️ Choose a picture', crestFile);
+  const crestRemove = el('button', { class: 'btn ghost small', type: 'button', text: 'Remove' });
+  const crestSaid = el('p', { class: 'gu-crest-said', 'aria-live': 'polite' });
+  const crestList = el('div', { class: 'gu-crest-list' });
+
+  function drawCrests(said = ''): void {
+    const id = crestTeam.value;
+    const crest = crestOf(id);
+    crestShown.replaceChildren(crest ? el('img', { src: crest, alt: `The crest for ${teamName(id)}` }) : el('span', { class: 'none', text: 'No crest' }));
+    crestRemove.hidden = !crest;
+    crestSaid.textContent = said;
+    const kept = TEAMS.filter((t) => crestOf(t.id));
+    crestList.replaceChildren(...(kept.length ? [el('span', { class: 'lbl', text: 'Crests on this iPad' })] : []),
+      ...kept.map((t) => el('img', { src: crestOf(t.id)!, alt: teamName(t.id), title: teamName(t.id) })));
+  }
+  crestTeam.addEventListener('change', () => drawCrests());
+  crestFile.addEventListener('change', () => {
+    const file = crestFile.files?.[0];
+    crestFile.value = '';
+    if (!file) return;
+    const id = crestTeam.value;
+    crestFromFile(file).then(
+      (crest) => drawCrests(setCrest(id, crest) ? `Saved for ${teamName(id)}, on this iPad.` : 'This iPad would not keep the picture. Try removing another crest first.'),
+      () => drawCrests('That picture would not open. Try a photo, or a PNG or JPEG file.'),
+    );
+  });
+  crestRemove.addEventListener('click', () => { clearCrest(crestTeam.value); drawCrests('Removed.'); });
+
   function draw(): void {
     drawWeek();
     drawReport();
     drawChallenge();
     drawSound();
+    drawCrests();
   }
 
   drawVoices();
@@ -246,6 +288,10 @@ export function mount(root: HTMLElement): () => void {
     card('Challenge', 'challenge', challengeRow,
       el('p', { class: 'tag', text: 'Pro mode makes every game a notch harder. The coach gives more practice to the sounds that need it, and moves the week up a level when one is mastered.' })),
     card('Sound', 'sound', soundRow, voiceRow),
+    card('Team crests', 'crests',
+      el('div', { class: 'row' }, crestTeam, crestShown, crestPick, crestRemove),
+      crestSaid, crestList,
+      el('p', { class: 'tag', text: 'Add a team’s crest from this iPad’s pictures and Futebol de Botão puts it on that team’s buttons, cut to a circle: a square picture works best. It stays on this iPad. The app itself never comes with club crests, which belong to the clubs.' })),
     card('Stickers', 'stickers',
       el('div', { class: 'row' },
         confirmButton('Start a new sticker book', 'Tap again to clear every sticker', () => { clearStickers(); }))),
