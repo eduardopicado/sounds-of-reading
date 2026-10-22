@@ -109,13 +109,42 @@ test.describe('Futebol de Botão', () => {
     noProblems(watch);
   });
 
-  test('off the wall: the way shown bounces off the side into the goal', async ({ page }) => {
+  test('off the wall: the way shown bounces off the side into the goal, and the angles are drawn', async ({ page }) => {
+    const watch = watchPage(page);
     await start(page, 3);
     await expect(page.locator('.bt-btn.them')).toHaveCount(1);
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-kind', 'wall');
     const [shot] = await plan(page);
     await flick(page, shot);
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'scored', { timeout: 10000 });
+    /* where it came off the wall: the same angle each side, the line square
+       to the wall with its right-angle mark, and the same numbers in words */
+    const degrees = page.locator('.bt-marks .bt-deg');
+    await expect(degrees).toHaveCount(2);
+    const [into, out] = await degrees.allTextContents();
+    expect(into).toMatch(/^\d+°$/);
+    expect(out).toBe(into);
+    await expect(page.locator('.bt-marks .bt-right')).toHaveCount(1);
+    await expect(page.locator('.bt-marks .bt-normal')).toHaveCount(1);
+    await expect(page.locator('.mx-note')).toHaveText(`GOL! In one touch! It went into the wall at ${into} and came off at ${out}: the same angle.`);
+    /* and gone when the next attack starts */
+    await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 6000 });
+    await expect(page.locator('.bt-marks > *')).toHaveCount(0);
+    noProblems(watch);
+  });
+
+  test('off the wall, shown: the angles it will bounce at before the flick, and after it', async ({ page }) => {
+    const watch = watchPage(page);
+    await start(page, 3);
+    await page.getByRole('button', { name: '👀 Show me a way' }).click();
+    /* the way to go, all of it, with where it will come off the wall */
+    await expect(page.locator('.bt-ghost')).toBeVisible({ timeout: 4000 });
+    await expect(page.locator('.bt-marks .bt-deg')).toHaveCount(2);
+    const before = await page.locator('.bt-marks .bt-deg').allTextContents();
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'shown', { timeout: 15000 });
+    await expect(page.locator('.mx-note')).toHaveText(`${HOW.wall} It went into the wall at ${before[0]} and came off at ${before[1]}: the same angle.`, { timeout: 5000 });
+    expect(await page.locator('.bt-marks .bt-deg').allTextContents()).toEqual(before);
+    noProblems(watch);
   });
 
   test('pass, then shoot: Show me passes to the other button, scores, and counts as missed', async ({ page }) => {
@@ -126,7 +155,8 @@ test.describe('Futebol de Botão', () => {
     await expect(page.locator('.mx-note')).toHaveText('Stuck? Watch: here is one way.');
     await expect(page.locator('.bt-ghost')).toBeVisible({ timeout: 4000 });
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'shown', { timeout: 20000 });
-    await expect(page.locator('.mx-note')).toHaveText(HOW.pass, { timeout: 5000 });
+    /* a pass that goes off the wall on its way says its angles after this */
+    await expect(page.locator('.mx-note')).toContainText(HOW.pass, { timeout: 5000 });
     await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 10000 });
     await expect(page.locator('.score')).toContainText('Goals 0');
     noProblems(watch);

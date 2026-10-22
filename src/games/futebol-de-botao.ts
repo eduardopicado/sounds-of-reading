@@ -13,6 +13,11 @@
  * little way, then not at all; there is a wall to play it off, a pass to
  * make first, and a whole team in the way.
  *
+ * When the ball comes off the side of the table, the angles are drawn where
+ * it bounced, in degrees, the way a book draws them: the angle it went in at
+ * and the angle it came off at, the same, either side of a dashed line that
+ * meets the wall at a right angle, with the square mark for 90°.
+ *
  * Three touches, as in the regra carioca, and before the third the ball has
  * to go to another of his buttons. A goal is shouted by the commentator. If
  * the touches run out, or he asks, the table is set back and a way to score
@@ -25,8 +30,8 @@ import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import {
   BALL, BOTAO_STEPS, HOW, KEEPER_W, KEEPER_Y, L, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
-  botaoQuestion, flickFor, keeperFor, mayFlick, simulate,
-  type BotaoStep, type Flick, type Point, type Shot, type Table,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, simulate,
+  type Bounce, type BotaoStep, type Flick, type Point, type Shot, type Table,
 } from '../content/botao';
 import { mountMaths, type Kit } from './maths-kit';
 import { narrate } from './narration';
@@ -106,7 +111,9 @@ function build(kit: Kit) {
   const keeperEl = svg('rect', { class: 'bt-keeper', x: -KEEPER_W / 2, y: KEEPER_Y[0], width: KEEPER_W, height: KEEPER_Y[1] - KEEPER_Y[0], rx: 0.8 });
   const ballEl = svg('g', { class: 'bt-ball' }, svg('circle', { r: BALL }));
   const discs = svg('g', {});
-  board.append(pitch(), trail, path, ghost, keeperEl, discs, ballEl, band, arrow);
+  /* the angles the ball comes off the rim at */
+  const marks = svg('g', { class: 'bt-marks' });
+  board.append(pitch(), trail, path, ghost, keeperEl, discs, ballEl, marks, band, arrow);
   const showMe = el('button', { class: 'btn ghost small', type: 'button', text: '👀 Show me a way' }) as HTMLButtonElement;
   const node = el('div', { class: 'mx-stage bt-stage' }, tell, touchesEl, el('div', { class: 'bt-wrap' }, board), showMe);
 
@@ -160,8 +167,76 @@ function build(kit: Kit) {
   const clearAim = (): void => {
     for (const n of [path, trail, arrow]) n.setAttribute('points', '');
     for (const k of ['x1', 'y1', 'x2', 'y2']) band.setAttribute(k, '0');
+    marks.replaceChildren();
     board.classList.remove('aiming');
   };
+
+  /**
+   * Where the ball came off the rim, drawn as a book draws it: the wall, a
+   * dashed line square to it with the right-angle mark, and on each side
+   * the angle between the ball's way and the wall, in degrees. Straight at
+   * the wall, the right-angle mark is the whole story.
+   */
+  function drawBounces(bounces: readonly Bounce[]): void {
+    const unit = (v: Point): Point => { const l = Math.sqrt(v.x * v.x + v.y * v.y) || 1; return { x: v.x / l, y: v.y / l }; };
+    marks.replaceChildren(...bounces.flatMap((b) => {
+      const { at: p, normal: n } = b;
+      const pt = (...parts: [Point, number][]): string => {
+        const q = parts.reduce((s, [v, k]) => ({ x: s.x + v.x * k, y: s.y + v.y * k }), p);
+        return `${q.x.toFixed(2)} ${q.y.toFixed(2)}`;
+      };
+      const label = (where: Point, text: string): SVGElement => {
+        const t = svg('text', { class: 'bt-deg', x: where.x.toFixed(2), y: where.y.toFixed(2), 'font-size': 3.6, 'text-anchor': 'middle', 'dominant-baseline': 'central' });
+        t.textContent = text;
+        return t;
+      };
+      /* along the wall, and the side of it each of the ball's ways is on */
+      const wall = { x: n.y, y: -n.x };
+      const rays = [unit({ x: -b.into.x, y: -b.into.y }), unit(b.out)];
+      const sideOf = (r: Point): Point => (r.x * wall.x + r.y * wall.y < 0 ? { x: -wall.x, y: -wall.y } : wall);
+      const [into, out] = angles(b);
+      const first = sideOf(rays[0]);
+      const S = 2.6;
+      /* drawn last, so the angles' wedges never cover it */
+      const square = svg('path', { class: 'bt-right', d: `M${pt()} L${pt([first, S])} L${pt([first, S], [n, S])} L${pt([n, S])} Z` });
+      const lines: SVGElement[] = [
+        svg('path', { class: 'bt-wall-mark', d: `M${pt([wall, -10])} L${pt([wall, 10])}` }),
+        svg('path', { class: 'bt-normal', d: `M${pt()} L${pt([n, 13])}` }),
+      ];
+      if (into === 90 && out === 90) {
+        const by = unit({ x: first.x + n.x, y: first.y + n.y });
+        return [...lines, square, label({ x: p.x + by.x * 6.4, y: p.y + by.y * 6.4 }, '90°')];
+      }
+      const RHO = 7;
+      const wedges: SVGElement[] = [];
+      const labels: SVGElement[] = [];
+      for (const [i, r] of rays.entries()) {
+        const side = sideOf(r);
+        const sweep = side.x * r.y - side.y * r.x > 0 ? 1 : 0;
+        wedges.push(svg('path', { class: 'bt-arc', d: `M${pt()} L${pt([side, RHO])} A${RHO} ${RHO} 0 0 ${sweep} ${pt([r, RHO])} Z` }));
+        const by = unit({ x: side.x + r.x, y: side.y + r.y });
+        labels.push(label({ x: p.x + by.x * (RHO + 3.6), y: p.y + by.y * (RHO + 3.6) }, `${i === 0 ? into : out}°`));
+      }
+      return [...lines, ...wedges, square, ...labels];
+    }));
+  }
+
+  /** the way the ball went in a shot, up to a frame */
+  const wayOf = (shot: Shot, upTo = shot.frames.length - 1): Point[] => {
+    const way: Point[] = [];
+    for (const fr of shot.frames.slice(0, upTo + 1)) {
+      const last = way.at(-1);
+      if (!last || last.x !== fr[0].x || last.y !== fr[0].y) way.push(fr[0]);
+    }
+    return way;
+  };
+
+  /** after a shot off the rim: where the ball went, and its angles */
+  function showBounces(shot: Shot): void {
+    if (!shot.bounces.length) return;
+    path.setAttribute('points', line(wayOf(shot)));
+    drawBounces(shot.bounces);
+  }
 
   /** the arrow from a button: which way, and how hard */
   function drawArrow(from: Point, f: Flick): void {
@@ -180,19 +255,23 @@ function build(kit: Kit) {
     ]));
   }
 
-  /** where the ball would go: all the way, or only the start of it */
+  /** where the ball would go: all the way, or only the start of it, with the
+      angles it would come off the rim at in the part that shows */
   function drawGuide(t: Table, f: Flick, guide: BotaoStep['guide']): void {
-    if (guide === 'none') { path.setAttribute('points', ''); trail.setAttribute('points', ''); return; }
+    if (guide === 'none') { path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
     const shot = simulate(t, f);
-    const ballWay: Point[] = [];
-    let gone = 0;
-    for (const fr of shot.frames) {
-      const last = ballWay.at(-1);
-      if (last) gone += Math.sqrt((fr[0].x - last.x) ** 2 + (fr[0].y - last.y) ** 2);
-      if (guide === 'short' && gone > 16) break;
-      if (!last || last.x !== fr[0].x || last.y !== fr[0].y) ballWay.push(fr[0]);
+    let shown = shot.frames.length - 1;
+    if (guide === 'short') {
+      let gone = 0;
+      for (const [i, fr] of shot.frames.entries()) {
+        const prev = shot.frames[i - 1]?.[0];
+        if (prev) gone += Math.sqrt((fr[0].x - prev.x) ** 2 + (fr[0].y - prev.y) ** 2);
+        if (gone > 16) { shown = i - 1; break; }
+      }
     }
+    const ballWay = wayOf(shot, shown);
     path.setAttribute('points', ballWay.length > 1 ? line(ballWay) : '');
+    drawBounces(shot.bounces.filter((b) => b.frame <= shown));
     /* his button's own way, faint, until it reaches the ball */
     const mine = shot.frames.map((fr) => fr[1 + f.button]);
     const hit = shot.bumps.find((b) => b.what === 'touch');
@@ -258,7 +337,9 @@ function build(kit: Kit) {
         await kit.wait(1400);
         let t: Table = q.table;
         draw(t);
+        clearAim();
         setPips(0, null);
+        const bounces: Bounce[] = [];
         for (const f of q.plan.flicks) {
           /* the spot his button meets the ball */
           const shot = simulate(t, f);
@@ -273,12 +354,16 @@ function build(kit: Kit) {
           clearAim();
           ghost.setAttribute('hidden', '');
           await play(t, shot);
+          showBounces(shot);
+          bounces.push(...shot.bounces);
           t = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
           draw(t);
           if (shot.goal) node.dataset.goal = 'shown';
           await kit.wait(500);
         }
-        kit.note(HOW[q.plan.kind]);
+        /* the angles are on the screen only: a sentence with a number in it
+           is not one of the recordings */
+        kit.note(bounces.length ? `${HOW[q.plan.kind]} ${bounceWords(bounces[0])}` : HOW[q.plan.kind]);
         say(HOW[q.plan.kind]);
         await kit.wait(3200);
         void end(false);
@@ -292,11 +377,13 @@ function build(kit: Kit) {
         touches.push(f.button);
         setPips(touches.length, null);
         await play(table, shot);
+        showBounces(shot);
+        const off = shot.bounces.length ? ` ${bounceWords(shot.bounces[0])}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
         if (shot.goal) {
           node.dataset.goal = 'scored';
           sfx.cheer();
-          kit.note(`GOL! ${touches.length === 1 ? 'In one touch!' : `In ${touches.length} touches.`}`, true);
+          kit.note(`GOL! ${touches.length === 1 ? 'In one touch!' : `In ${touches.length} touches.`}${off}`, true);
           narrate('goal', kit.us(), () => undefined, kit.life.later);
           void end(true);
           return;
@@ -315,7 +402,7 @@ function build(kit: Kit) {
         const tired = touches.length === 2 && touches[0] === touches[1] ? touches[0] : null;
         setPips(touches.length, tired);
         const left = TOUCHES - touches.length;
-        kit.note(`${what} ${left} ${left === 1 ? 'touch' : 'touches'} left.${tired === null ? '' : ' The last one has to be another button: pass!'}`);
+        kit.note(`${what}${off} ${left} ${left === 1 ? 'touch' : 'touches'} left.${tired === null ? '' : ' The last one has to be another button: pass!'}`);
         busy = false;
         showMe.disabled = false;
       };
@@ -339,6 +426,8 @@ function build(kit: Kit) {
         }
         drag = { button: best, pointer: e.pointerId };
         try { board.setPointerCapture(e.pointerId); } catch { /* the drag still works inside the table */ }
+        /* the last shot's way and angles go as he aims the next */
+        clearAim();
         board.classList.add('aiming');
       };
       onMove = (e) => {
@@ -348,7 +437,7 @@ function build(kit: Kit) {
         const f = flickFor(drag.button, p.x - from.x, p.y - from.y);
         band.setAttribute('x1', from.x.toFixed(2)); band.setAttribute('y1', from.y.toFixed(2));
         band.setAttribute('x2', p.x.toFixed(2)); band.setAttribute('y2', p.y.toFixed(2));
-        if (Math.sqrt((p.x - from.x) ** 2 + (p.y - from.y) ** 2) < 1.5) { arrow.setAttribute('points', ''); path.setAttribute('points', ''); trail.setAttribute('points', ''); return; }
+        if (Math.sqrt((p.x - from.x) ** 2 + (p.y - from.y) ** 2) < 1.5) { arrow.setAttribute('points', ''); path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
         drawArrow(from, f);
         drawGuide(table, f, step.guide);
       };
