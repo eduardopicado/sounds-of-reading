@@ -29,7 +29,7 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import {
-  BALL, BOTAO_STEPS, HOW, KEEPER_W, KEEPER_Y, L, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
+  BALL, BOTAO_STEPS, HOW, KEEPER_W, KEEPER_Y, L, MARKS, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
   angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, simulate,
   type Bounce, type BotaoStep, type Flick, type Point, type Shot, type Table,
 } from '../content/botao';
@@ -149,16 +149,38 @@ function pitch(): SVGGElement {
     svg('rect', { x: 0, y: 0, width: 2.4, height: L, fill: 'url(#bt-rimright)' }),
     net,
     line({ x: 0.6, y: 0.6, width: W - 1.2, height: L - 1.2 }),
-    line({ x: 13, y: 0.6, width: W - 26, height: 15 }),
-    line({ x: 23, y: 0.6, width: W - 46, height: 6 }),
-    line({ x: 13, y: L - 15.6, width: W - 26, height: 15 }),
+    ...ends(),
     svg('line', { x1: 0.6, y1: L / 2, x2: W - 0.6, y2: L / 2, class: 'bt-line' }),
     svg('circle', { cx: W / 2, cy: L / 2, r: 8, class: 'bt-line' }),
-    svg('circle', { cx: W / 2, cy: 11, r: 0.6, class: 'bt-spot' }),
     svg('circle', { cx: W / 2, cy: L / 2, r: 0.6, class: 'bt-spot' }),
     /* the frame's shadow on the felt in front of the goal */
     svg('path', { class: 'bt-goal-shadow', d: `M${left + SHADOW.x} ${SHADOW.y} L${right + SHADOW.x} ${SHADOW.y}` }),
   );
+}
+
+/** the markings at each end: the penalty area with the arc on its edge, the
+    small area, the spot, and the quarter circles in the corners */
+function ends(): SVGElement[] {
+  const edge = 0.6;
+  const [boxW, boxD] = MARKS.box;
+  const [penW, penD] = MARKS.penalty;
+  const { spot, arc } = MARKS;
+  /* where the arc round the spot meets the penalty area's edge */
+  const half = Math.sqrt(arc * arc - (penD - spot) ** 2);
+  const corner = 1.6;
+  return [0, 1].flatMap((end) => {
+    /* the top end as drawn, and the bottom one turned round */
+    const y = (d: number): number => (end === 0 ? edge + d : L - edge - d);
+    const sweep = end === 0 ? 0 : 1;
+    return [
+      svg('rect', { class: 'bt-line', x: (W - penW) / 2, y: Math.min(y(0), y(penD)), width: penW, height: penD }),
+      svg('rect', { class: 'bt-line', x: (W - boxW) / 2, y: Math.min(y(0), y(boxD)), width: boxW, height: boxD }),
+      svg('circle', { class: 'bt-spot', cx: W / 2, cy: y(spot), r: 0.6 }),
+      svg('path', { class: 'bt-line', d: `M${W / 2 - half} ${y(penD)} A${arc} ${arc} 0 0 ${sweep} ${W / 2 + half} ${y(penD)}` }),
+      svg('path', { class: 'bt-line', d: `M${edge + corner} ${y(0)} A${corner} ${corner} 0 0 ${1 - sweep} ${edge} ${y(corner)}` }),
+      svg('path', { class: 'bt-line', d: `M${W - edge - corner} ${y(0)} A${corner} ${corner} 0 0 ${sweep} ${W - edge} ${y(corner)}` }),
+    ];
+  });
 }
 
 /** the goal's frame: the posts where the ball hits them, the uprights and

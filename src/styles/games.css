@@ -1979,8 +1979,9 @@
 .bt-pip { width: 18px; height: 18px; border: 3px solid var(--paper); border-radius: 50%; }
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
-.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .7)); width: min(100%, 600px, calc((100svh - 230px) * .7)); }
-.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 100; touch-action: none; user-select: none; -webkit-user-select: none; }
+/* the table's shape is VIEW in src/content/botao.ts, 70 wide and 108 long */
+.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .648)); width: min(100%, 600px, calc((100svh - 230px) * .648)); }
+.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 108; touch-action: none; user-select: none; -webkit-user-select: none; }
 /* the table: a wooden frame lit from above, its edge dropping to the felt,
    mown stripes, the felt lit in the middle, the rim's shadow along the top
    and the left (the gradients are in shading(), futebol-de-botao.ts) */

@@ -16,17 +16,24 @@
 
 import type { Step } from './maths';
 
+/* shaped like a real table (a Klopf is 1.86 m by 1.21 m), about half as
+   long again as it is wide */
 export const W = 64;
-export const L = 90;
+export const L = 98;
 /** a button's radius, and the ball's */
 export const R = 5;
 export const BALL = 1.6;
-/** the goal mouth, post to post, and how deep the net is */
-export const MOUTH: readonly [number, number] = [21, 43];
+/** the goal mouth, post to post, and how deep the net is: as on a real
+    table, the goal is narrower than the small area in front of it */
+export const MOUTH: readonly [number, number] = [22, 42];
 export const NET = 5;
 export const POST = 0.8;
 /** the goleiro: a block this wide, just in front of the line */
-export const KEEPER_W = 6;
+export const KEEPER_W = 5;
+/** the markings at each end, across and deep: the small area (the goal
+    area), the penalty area, the spot, and the radius of the arc on the
+    penalty area's edge, the way a botão table draws them */
+export const MARKS = { box: [22, 6], penalty: [38, 14], spot: 10, arc: 7.4 } as const;
 export const KEEPER_Y: readonly [number, number] = [0.6, 3.4];
 const MID = (MOUTH[0] + MOUTH[1]) / 2;
 
