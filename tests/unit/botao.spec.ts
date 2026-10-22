@@ -107,12 +107,12 @@ describe('the table', () => {
     expect(shot.bounces).toEqual([]);
   });
 
-  it('is shaped like a real table: half as long again as it is wide, the goal narrower than the small area', () => {
+  it('is shaped like a real table: half as long again as it is wide, the goal clearly narrower than the small area', () => {
     expect(L / W).toBeGreaterThan(1.45);
     expect(L / W).toBeLessThan(1.6);
     const [boxW, boxD] = MARKS.box;
     const [penW, penD] = MARKS.penalty;
-    expect(MOUTH[1] - MOUTH[0]).toBeLessThan(boxW);
+    expect(MOUTH[1] - MOUTH[0]).toBeLessThanOrEqual(0.75 * boxW);
     expect(boxW).toBeLessThan(penW);
     expect(boxD).toBeLessThan(MARKS.spot);
     expect(MARKS.spot).toBeLessThan(penD);

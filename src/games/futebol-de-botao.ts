@@ -80,7 +80,6 @@ function shading(): SVGDefsElement {
     /* its rim: lit on the top left, in its own shade on the bottom right */
     linear('bt-bevel', [1, 1], [0, '#fff', 0.55], [42, '#fff', 0], [58, '#000', 0], [100, '#000', 0.5]),
     radial('bt-ballshade', [0, '#fff', 1], [50, '#f2f2f2', 1], [100, '#8c8c8c', 1]),
-    radial('bt-postshade', [0, '#fff', 1], [100, '#8c8c8c', 1]),
     linear('bt-woodshade', [0, 1], [0, '#B07A43', 1], [100, '#6A421D', 1]),
     /* the felt, lit in the middle and darker towards the rim */
     svg('radialGradient', { id: 'bt-feltlight', cx: '50%', cy: '42%', r: '72%' }, ...stops([0, '#fff', 0.12], [55, '#fff', 0], [100, '#000', 0.24])),
@@ -112,11 +111,10 @@ function button(team: Team, cls: string): SVGGElement {
 }
 
 /** the table and the inside of the goal: everything the ball rolls over */
-function pitch(): SVGGElement {
-  const line = (attrs: Record<string, string | number>): SVGElement => svg('rect', { ...attrs, class: 'bt-line' });
+/** the inside of a goal, as a box seen from in front, drawn at the top: its
+    back is further away, so a little narrower, and its sides show as slivers */
+function goalNet(): SVGGElement {
   const [left, right] = MOUTH;
-  /* the inside of the goal as a box seen from in front: its back is
-     further away, so a little narrower, and its sides show as slivers */
   const [backL, backR] = [left + GOAL_BACK, right - GOAL_BACK];
   /* x across the box at depth y, from the front (0) to the back (−NET), k from 0 to 1 across */
   const across = (k: number, y: number): number => {
@@ -136,6 +134,18 @@ function pitch(): SVGGElement {
   net.append(
     svg('path', { class: 'bt-net-edge', d: `M${left} 0 L${backL} ${-NET} L${backR} ${-NET} L${right} 0` }),
     svg('line', { class: 'bt-backbar', x1: backL, y1: -NET, x2: backR, y2: -NET }));
+  return net;
+}
+
+function pitch(): SVGGElement {
+  const line = (attrs: Record<string, string | number>): SVGElement => svg('rect', { ...attrs, class: 'bt-line' });
+  const [left, right] = MOUTH;
+  const net = goalNet();
+  net.classList.add('ours');
+  /* the other side's goal at the bottom, the top one turned round. It is
+     only to look at: he always attacks the top, and the bottom of the
+     table stays a wall, so a ball that gets there comes back */
+  const theirs = svg('g', { class: 'bt-goal-far', transform: `translate(0 ${L}) scale(1 -1)` }, goalNet(), goalFrame());
   /* mown stripes across the felt */
   const stripes = Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' }));
   return svg('g', {},
@@ -148,6 +158,7 @@ function pitch(): SVGGElement {
     svg('rect', { x: 0, y: 0, width: W, height: 2.4, fill: 'url(#bt-rimdown)' }),
     svg('rect', { x: 0, y: 0, width: 2.4, height: L, fill: 'url(#bt-rimright)' }),
     net,
+    theirs,
     line({ x: 0.6, y: 0.6, width: W - 1.2, height: L - 1.2 }),
     ...ends(),
     svg('line', { x1: 0.6, y1: L / 2, x2: W - 0.6, y2: L / 2, class: 'bt-line' }),
@@ -183,16 +194,15 @@ function ends(): SVGElement[] {
   });
 }
 
-/** the goal's frame: the posts where the ball hits them, the uprights and
-    the crossbar standing up from the line. Drawn over the ball, so a ball in
-    the net is behind the crossbar */
+/** the goal's frame: the uprights standing on the line, their round feet
+    where the ball hits a post, and the crossbar across their tops. Drawn
+    over the ball, so a ball in the net is behind the crossbar */
 function goalFrame(): SVGGElement {
   const [left, right] = MOUTH;
   return svg('g', { class: 'bt-goal' },
-    ...MOUTH.map((x) => svg('line', { x1: x, y1: 0, x2: x, y2: -LIFT, class: 'bt-upright' })),
+    ...MOUTH.map((x) => svg('line', { x1: x, y1: 0, x2: x, y2: -LIFT, class: 'bt-upright', 'stroke-width': 2 * POST })),
     svg('line', { x1: left, y1: -LIFT, x2: right, y2: -LIFT, class: 'bt-crossbar' }),
     svg('line', { x1: left, y1: -LIFT - 0.25, x2: right, y2: -LIFT - 0.25, class: 'bt-crossbar-shine' }),
-    ...MOUTH.map((x) => svg('circle', { cx: x, cy: 0, r: POST, class: 'bt-post' })),
   );
 }
 
@@ -228,7 +238,7 @@ function build(kit: Kit) {
   const field = pitch();
   board.append(shading(), field, trail, path, ghost, keeperEl, discs, ballEl, goalFrame(), marks, band, arrow);
   /* the net shakes when the ball goes in */
-  const net = field.querySelector('.bt-net')!;
+  const net = field.querySelector('.bt-net.ours')!;
   const bulge = (): void => {
     net.classList.remove('bulge');
     void net.getBoundingClientRect();

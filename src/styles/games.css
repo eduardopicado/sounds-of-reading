@@ -1979,9 +1979,9 @@
 .bt-pip { width: 18px; height: 18px; border: 3px solid var(--paper); border-radius: 50%; }
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
-/* the table's shape is VIEW in src/content/botao.ts, 70 wide and 108 long */
-.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .648)); width: min(100%, 600px, calc((100svh - 230px) * .648)); }
-.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 108; touch-action: none; user-select: none; -webkit-user-select: none; }
+/* the table's shape is VIEW in src/content/botao.ts, 70 wide and 112 long */
+.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .625)); width: min(100%, 600px, calc((100svh - 230px) * .625)); }
+.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 112; touch-action: none; user-select: none; -webkit-user-select: none; }
 /* the table: a wooden frame lit from above, its edge dropping to the felt,
    mown stripes, the felt lit in the middle, the rim's shadow along the top
    and the left (the gradients are in shading(), futebol-de-botao.ts) */
@@ -2010,10 +2010,10 @@
 }
 .bt-goal { pointer-events: none; }
 .bt-goal-shadow { stroke: rgba(0, 0, 0, .3); stroke-width: 1; stroke-linecap: round; }
-.bt-upright { stroke: #D6D6D6; stroke-width: .9; stroke-linecap: round; }
+/* the uprights' width is the posts' (POST), set where they are drawn */
+.bt-upright { stroke: #E2E2E2; stroke-linecap: round; }
 .bt-crossbar { stroke: #CFCFCF; stroke-width: 1.15; stroke-linecap: round; }
 .bt-crossbar-shine { stroke: #fff; stroke-width: .45; stroke-linecap: round; }
-.bt-post { fill: url(#bt-postshade); stroke: #333; stroke-width: .2; }
 /* raised things: a shadow under each, a bevelled rim, a shine on the face */
 .bt-shadow { fill: rgba(0, 0, 0, .32); }
 .bt-keeper-block { stroke: #111; stroke-width: .4; }
