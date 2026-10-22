@@ -32,7 +32,7 @@ import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../
 import { nearWords } from '../content/near-words';
 import { pieces, type Piece } from '../content/graphemes';
 import { confetti, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
-import { TEAMS, YOU, label, player, teamById, type Team } from './teams';
+import { TEAMS, YOU, label, player, rivalFor, teamById, type Team } from './teams';
 import { narrate, narrationSelect } from './narration';
 
 /** how long the goal or the save stays on screen before the next word:
@@ -293,7 +293,7 @@ export function mount(root: HTMLElement): () => void {
     const pool = playable();
     queue = coachPick(pool, Number(lenSel.value));
     us = teamById(teamSel.value) ?? YOU;
-    rival = pick(TEAMS.filter((t) => t !== YOU && t !== us && t !== rival));
+    rival = rivalFor(us, rival);
     scored = 0; log = []; current = null; busy = false;
     goals.set(0);
     totalEl.textContent = String(queue.length);

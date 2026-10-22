@@ -5,10 +5,19 @@
  * club crest is someone's trademark and the app never comes with one, but a
  * green shirt is Palmeiras to anyone who follows them, and that is all a
  * six-year-old needs to know who he is playing. A grown-up can add a crest
- * from their own iPad's pictures, kept on that iPad (src/lib/crests.ts).
+ * from their own iPad's pictures, kept on that iPad (src/lib/crests.ts), and
+ * every shirt and button of that team wears it.
+ *
+ * Two sides are his own rather than real: You, and the Rivals, for the
+ * favourite opponent a grown-up gives a crest to — a friend's team, or the
+ * club across town. The Rivals only play when he picks them.
  *
  * The shirt is a small inline SVG so it needs no image files, stays sharp at
  * any size and works offline. */
+
+import { crestOf } from '../lib/crests';
+import { pick } from '../lib/random';
+import { read } from '../lib/storage';
 
 export type Pattern =
   | 'plain'    // one colour, collar and cuffs in the second
@@ -23,7 +32,7 @@ export interface Team {
   name: string;
   /** on the scoreboard, where a phone has room for about ten letters */
   short: string;
-  kind: 'you' | 'country' | 'club';
+  kind: 'you' | 'rivals' | 'country' | 'club';
   /** countries only */
   flag?: string;
   colours: [string, string];
@@ -38,8 +47,12 @@ export interface Team {
 /** the side he plays for until he picks one */
 export const YOU: Team = { id: 'you', name: 'You', short: 'You', kind: 'you', flag: '⭐', colours: ['#F3B229', '#10403E'], pattern: 'plain', shorts: '#10403E' };
 
+/** his favourite opponent, made up: in purple, which no real team here wears */
+export const RIVALS: Team = { id: 'rivals', name: 'The Rivals', short: 'Rivals', kind: 'rivals', flag: '🛡️', colours: ['#6B3FA0', '#FFFFFF'], pattern: 'plain', shorts: '#2E1A47' };
+
 export const TEAMS: Team[] = [
   YOU,
+  RIVALS,
   /* every World Cup winner, and the two he is likeliest to be asked about */
   { id: 'brazil', name: 'Brazil', short: 'Brazil', kind: 'country', flag: '🇧🇷', colours: ['#FFD500', '#009B3A'], pattern: 'plain', shorts: '#1F3FA8', pt: 'do Brasil' },
   { id: 'argentina', name: 'Argentina', short: 'Argentina', kind: 'country', flag: '🇦🇷', colours: ['#75AADB', '#FFFFFF'], pattern: 'stripes', shorts: '#1B1B3A', pt: 'da Argentina' },
@@ -66,6 +79,20 @@ export const TEAMS: Team[] = [
 ];
 
 export const teamById = (id: string | null | undefined): Team | undefined => TEAMS.find((t) => t.id === id);
+
+/** a country or a club, rather than one of his own sides */
+export const real = (t: Team): boolean => t.kind === 'country' || t.kind === 'club';
+
+/** the side he plays for, chosen in Penalty Shootout and Pass and Shoot and
+    the same in every football game */
+export const ourTeam = (): Team => teamById(read<string>('shootout-team', YOU.id)) ?? YOU;
+
+/** who he plays: the opponent he chose in Penalty Shootout, unless that is
+    his own side, or else any real team but his own and the one just played */
+export function rivalFor(us: Team, last?: Team): Team {
+  const chosen = teamById(read<string>('shootout-rival', 'any'));
+  return chosen && chosen !== us ? chosen : pick(TEAMS.filter((t) => real(t) && t !== us && t !== last));
+}
 
 /** a team's name as it is shown, flag first where there is one */
 export const label = (team: Team, short = false): string =>
@@ -114,12 +141,33 @@ export function kit(team: Team, size: number): SVGSVGElement {
      stands out on the grass */
   root.append(svg('path', { d: 'M27 5 Q32 11 37 5', fill: 'none', stroke: team.colours[1], 'stroke-width': 3 }));
   root.append(svg('path', { d: SHIRT, fill: 'none', stroke: '#0B302F', 'stroke-width': 2, 'stroke-linejoin': 'round' }));
+  /* high on the left of the chest, where a crest is worn and clear of a
+     number on the front (Fact Family); too small to make out below 32px */
+  if (size >= 32) root.append(...badge(team, 40, 16.5, 6));
   return root;
 }
 
 const INK = '#0B302F';
 const SKIN = '#E6B48A';
 const HAIR = '#3B2A1E';
+
+/** the crest a grown-up added for the team, cut to a circle on a thin white
+    ring, as a badge is sewn on; nothing when there is none */
+function badge(team: Team, cx: number, cy: number, r: number): SVGElement[] {
+  const crest = crestOf(team.id);
+  if (!crest) return [];
+  const id = `pk-crest-${(clips += 1)}`;
+  const clip = svg('clipPath', { id });
+  clip.append(svg('circle', { cx, cy, r }));
+  return [
+    clip,
+    svg('circle', { cx, cy, r: r + 0.9, fill: '#FFFFFF', stroke: INK, 'stroke-width': 0.8 }),
+    svg('image', {
+      href: crest, x: cx - r, y: cy - r, width: 2 * r, height: 2 * r,
+      preserveAspectRatio: 'xMidYMid slice', 'clip-path': `url(#${id})`, class: 'pk-crest',
+    }),
+  ];
+}
 
 /**
  * A player in the team's kit. The keeper stands arms up, gloves on, the way
@@ -160,6 +208,7 @@ export function player(team: Team, height: number, pose: 'keeper' | 'kicker'): S
   const torso = 'M28 30 Q40 34 52 30 L54 60 H26 Z';
   root.append(...cloth(team, torso, { x: 26, y: 29, w: 28, h: 32 }));
   root.append(svg('path', { d: torso, fill: 'none', ...line }));
+  if (height >= 60) root.append(...badge(team, 45, 41, 6));
 
   /* head: hair, eyes, a smile */
   root.append(svg('circle', { cx: 40, cy: 18, r: 11, fill: SKIN, ...line }));

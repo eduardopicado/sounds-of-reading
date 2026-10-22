@@ -136,7 +136,10 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        belt the BJJ games share
                        world-kit.ts is the world map the geography games
                        share, with its taps (a little off a coast counts)
-                       teams.ts: the football teams, their flags and kits;
+                       teams.ts: the football teams, their flags and kits,
+                       and the side he plays and the opponent, the same in
+                       every football game (rivalFor; never his own made-up
+                       sides at random);
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere

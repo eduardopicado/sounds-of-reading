@@ -1,5 +1,6 @@
 /* Team crests: the square cut from a picture, and keeping them on this
- * device, only ever as pictures the app made.
+ * device, only ever as pictures the app made. And the Rivals, the made-up
+ * opponent a crest is often for, who play only when he picks them.
  *
  *   npm run test:unit */
 
@@ -63,5 +64,36 @@ describe('team crests', () => {
   it('survive what is saved being the wrong kind of thing', async () => {
     const { crestOf } = await load({ crests: ['not', 'an', 'object'] });
     expect(crestOf('you')).toBeNull();
+  });
+});
+
+describe('the opponent', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  async function teams(seed: Record<string, unknown> = {}) {
+    await load(seed);
+    return import('../../src/games/teams');
+  }
+
+  it('is a real team at random: never one of his own sides, his team, or the last one', async () => {
+    const { RIVALS, YOU, ourTeam, real, rivalFor, teamById } = await teams({ 'shootout-team': 'brazil' });
+    const us = ourTeam();
+    expect(us.id).toBe('brazil');
+    const last = teamById('flamengo')!;
+    for (let i = 0; i < 200; i += 1) {
+      const them = rivalFor(us, last);
+      expect(real(them)).toBe(true);
+      expect([YOU, RIVALS, us, last]).not.toContain(them);
+    }
+  });
+
+  it('is the one he picked, the Rivals included, every time', async () => {
+    const { RIVALS, ourTeam, rivalFor } = await teams({ 'shootout-rival': 'rivals' });
+    for (let i = 0; i < 20; i += 1) expect(rivalFor(ourTeam())).toBe(RIVALS);
+  });
+
+  it('is never his own side, even when he picked it', async () => {
+    const { ourTeam, rivalFor } = await teams({ 'shootout-team': 'palmeiras', 'shootout-rival': 'palmeiras' });
+    for (let i = 0; i < 50; i += 1) expect(rivalFor(ourTeam()).id).not.toBe('palmeiras');
   });
 });

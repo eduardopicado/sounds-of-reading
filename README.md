@@ -133,9 +133,15 @@ the reading voice, team crests, and a fresh sticker book.
 
 A team crest is a picture a grown-up chooses from the iPad for one of the
 teams. It is cut to a square from its middle, made small and kept on the
-iPad, and Futebol de Botão shows it on that team's buttons, cut to a
-circle. The app itself never comes with club crests, which belong to the
-clubs.
+iPad, and shown cut to a circle: on that team's shirts in the football
+games, and on its buttons in Futebol de Botão. The app itself never comes
+with club crests, which belong to the clubs.
+
+Besides his own team there is a second made-up side, the Rivals, for a
+favourite opponent the list doesn't have, such as a friend's team or the
+club across town. Give them a crest, then pick them under Play against in
+Penalty Shootout. Every football game then plays them, just as every game
+plays as the team he picks there.
 
 ## The sounds
 

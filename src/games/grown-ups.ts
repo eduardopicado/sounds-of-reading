@@ -231,10 +231,15 @@ export function mount(root: HTMLElement): () => void {
 
   const teamName = (id: string): string => {
     const t = TEAMS.find((x) => x.id === id) ?? TEAMS[0];
-    return t.kind === 'you' ? 'his own team' : t.name;
+    return t.kind === 'you' ? 'his own team' : t.kind === 'rivals' ? 'the Rivals' : t.name;
   };
   const crestTeam = el('select', { 'aria-label': 'Which team' },
-    ...TEAMS.map((t) => el('option', { value: t.id, text: t.kind === 'you' ? '⭐ You: his own team' : `${t.flag ? `${t.flag} ` : ''}${t.name}` })));
+    ...TEAMS.map((t) => el('option', {
+      value: t.id,
+      text: t.kind === 'you' ? '⭐ You: his own team'
+        : t.kind === 'rivals' ? '🛡️ The Rivals: his favourite opponent'
+          : `${t.flag ? `${t.flag} ` : ''}${t.name}`,
+    })));
   const crestShown = el('span', { class: 'gu-crest' });
   /* the picker opens from the label round it, which is what a finger taps */
   const crestFile = el('input', { type: 'file', accept: 'image/*', class: 'gu-crest-file' });
@@ -291,7 +296,8 @@ export function mount(root: HTMLElement): () => void {
     card('Team crests', 'crests',
       el('div', { class: 'row' }, crestTeam, crestShown, crestPick, crestRemove),
       crestSaid, crestList,
-      el('p', { class: 'tag', text: 'Add a team’s crest from this iPad’s pictures and Futebol de Botão puts it on that team’s buttons, cut to a circle: a square picture works best. It stays on this iPad. The app itself never comes with club crests, which belong to the clubs.' })),
+      el('p', { class: 'tag', text: 'Add a team’s crest from this iPad’s pictures and the football games put it on that team’s shirts, and on its buttons in Futebol de Botão, cut to a circle: a square picture works best. It stays on this iPad. The app itself never comes with club crests, which belong to the clubs.' }),
+      el('p', { class: 'tag', text: 'The Rivals are for his favourite opponent, a friend’s team or the club across town: give them its crest, then pick 🛡️ Rivals under Play against in Penalty Shootout, and every football game plays them.' })),
     card('Stickers', 'stickers',
       el('div', { class: 'row' },
         confirmButton('Start a new sticker book', 'Tap again to clear every sticker', () => { clearStickers(); }))),

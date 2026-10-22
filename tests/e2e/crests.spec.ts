@@ -2,7 +2,7 @@
  * Botão puts it on that team's buttons, cut to a circle. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, watchPage } from './helpers';
+import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
 
 /** a picture twice as wide as it is tall, red on the left and blue on the
     right, made in the page as a PNG the way a photo would arrive */
@@ -76,6 +76,39 @@ test.describe('team crests', () => {
     await expect(page.locator('.bt-btn.us').first()).toBeVisible();
     await expect(page.locator('.bt-btn.us image.bt-crest')).toHaveCount(0);
     await expect(page.locator('.bt-btn.us .bt-flag').first()).toHaveText('⭐');
+    noProblems(watch);
+  });
+
+  test('the Rivals wear theirs, and once he picks them every football game plays them', async ({ page }) => {
+    const watch = watchPage(page);
+    /* Botão from the step with a defender in the way */
+    await seed(page, { 'maths-step:futebol-de-botao': 3 });
+    await openGame(page, 'grown-ups');
+    const card = page.locator('.gu-card.crests');
+    const picture = await widePicture(page);
+    await card.locator('.gu-crest-file').setInputFiles({ name: 'ours.png', mimeType: 'image/png', buffer: picture });
+    await expect(card.locator('.gu-crest-said')).toHaveText('Saved for his own team, on this iPad.');
+    await card.getByRole('combobox', { name: 'Which team' }).selectOption('rivals');
+    await card.locator('.gu-crest-file').setInputFiles({ name: 'theirs.png', mimeType: 'image/png', buffer: picture });
+    await expect(card.locator('.gu-crest-said')).toHaveText('Saved for the Rivals, on this iPad.');
+    await expect(card.locator('.gu-crest-list img')).toHaveCount(2);
+
+    /* both sides' shirts wear their crest: the kits at kick-off, his taker
+       and their keeper */
+    await openGame(page, 'penalty-shootout');
+    await openSetup(page);
+    await page.getByLabel('Play against').selectOption('rivals');
+    await expect(page.locator('.pk-overlay .pk-big')).toContainText('Rivals');
+    await expect(page.locator('.pk-overlay .pk-kit image.pk-crest')).toHaveCount(2);
+    await expect(page.locator('.pk-keeper image.pk-crest')).toHaveCount(1);
+    await page.getByRole('button', { name: 'Kick off ⚽' }).click();
+    await expect(page.locator('.pk-taker image.pk-crest')).toHaveCount(1);
+
+    /* and Futebol de Botão plays them too, their button in their crest */
+    await openGame(page, 'futebol-de-botao');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.bt-btn.them')).toHaveCount(1);
+    await expect(page.locator('.bt-btn.them image.bt-crest')).toHaveCount(1);
     noProblems(watch);
   });
 
