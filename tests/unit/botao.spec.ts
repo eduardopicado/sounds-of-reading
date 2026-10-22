@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALL, BOTAO_STEPS, KEEPER_W, L, MAX_SPEED, MOUTH, PULL, R, W,
-  botaoQuestion, flickFor, keeperFor, mayFlick, oneTouch, robust, simulate,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, simulate, slant,
   type Point, type Table,
 } from '../../src/content/botao';
 
@@ -55,17 +55,56 @@ describe('a flick', () => {
 });
 
 describe('the table', () => {
-  it('bounces the ball off a wall at nearly the slant it went in', () => {
+  it('bounces the ball off a wall at exactly the angle it went in', () => {
     /* pushed up and to the left at 45°, into the left wall */
     const ball = { x: 14, y: 70 };
     const t = table(ball, [{ x: ball.x + 7, y: ball.y + 7 }]);
     const shot = simulate(t, { button: 0, vx: -70, vy: -70 });
-    const wall = shot.bumps.find((b) => b.what === 'wall')!;
-    expect(wall).toBeDefined();
-    const way = (a: Point, b: Point): number => Math.atan2(Math.abs(b.x - a.x), Math.abs(b.y - a.y)) * 180 / Math.PI;
-    const into = way(shot.frames[wall.frame - 4][0], shot.frames[wall.frame - 1][0]);
-    const out = way(shot.frames[wall.frame + 1][0], shot.frames[wall.frame + 4][0]);
-    expect(Math.abs(into - out)).toBeLessThan(5);
+    expect(shot.bumps.some((b) => b.what === 'wall')).toBe(true);
+    const [b] = shot.bounces;
+    expect(b.normal).toEqual({ x: 1, y: 0 });
+    expect(b.at.x).toBeCloseTo(BALL);
+    const [into, out] = angles(b);
+    expect(into).toBe(out);
+    expect(into).toBeGreaterThan(35);
+    expect(into).toBeLessThan(55);
+    /* and the frames agree: it really went off that way */
+    /* the angle to the wall, which runs up and down the table */
+    const way = (a: Point, c: Point): number => Math.atan2(Math.abs(c.x - a.x), Math.abs(c.y - a.y)) * 180 / Math.PI;
+    expect(way(shot.frames[b.frame - 3][0], shot.frames[b.frame - 1][0])).toBeCloseTo(into, -0.5);
+    expect(way(shot.frames[b.frame + 1][0], shot.frames[b.frame + 3][0])).toBeCloseTo(out, -0.5);
+  });
+
+  it('says how steeply the ball met the wall: 90° straight at it, small when it only grazes it', () => {
+    const left = { x: 1, y: 0 };
+    expect(slant({ x: -10, y: 0 }, left)).toBe(90);
+    expect(slant({ x: -10, y: -10 }, left)).toBe(45);
+    expect(slant({ x: -1, y: -10 }, left)).toBe(6);
+    /* the same on every wall, whichever way along it the ball goes */
+    expect(slant({ x: 3, y: 4 }, { x: 0, y: -1 })).toBe(53);
+    expect(slant({ x: -3, y: 4 }, { x: 0, y: -1 })).toBe(53);
+    expect(slant({ x: 4, y: -3 }, { x: -1, y: 0 })).toBe(53);
+  });
+
+  it('comes straight back from a shot straight at the wall, a right angle', () => {
+    const ball = { x: 20, y: 60 };
+    const shot = simulate(table(ball, [{ x: ball.x + 10, y: ball.y }]), { button: 0, vx: -80, vy: 0 });
+    const [b] = shot.bounces;
+    expect(angles(b)).toEqual([90, 90]);
+    expect(bounceWords(b)).toBe('It went straight at the wall, at a right angle, 90°, and came straight back.');
+  });
+
+  it('tells him the angle in and the angle out', () => {
+    const b = { frame: 1, at: { x: BALL, y: 40 }, normal: { x: 1, y: 0 }, into: { x: -30, y: -40 }, out: { x: 30, y: -40 } };
+    expect(bounceWords(b)).toBe('It went into the wall at 37° and came off at 37°: the same angle.');
+    expect(bounceWords({ ...b, out: { x: 20, y: -40 } })).toBe('It went into the wall at 37° and came off at 27°.');
+  });
+
+  it('counts no bounce for a goal: the net is not a wall', () => {
+    const t = table({ x: MID, y: 40 }, [{ x: MID, y: 52 }]);
+    const shot = simulate(t, { button: 0, vx: 0, vy: -100 });
+    expect(shot.goal).toBe(true);
+    expect(shot.bounces).toEqual([]);
   });
 
   it('lets the goleiro stop a shot hit straight at him', () => {

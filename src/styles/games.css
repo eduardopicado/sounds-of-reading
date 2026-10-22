@@ -2001,6 +2001,14 @@
 .bt-arrow { fill: var(--mustard); stroke: var(--deep); stroke-width: .35; stroke-linejoin: round; }
 .bt-ghost { fill: rgba(255, 255, 255, .18); stroke: #fff; stroke-width: .5; stroke-dasharray: 1.2 .8; }
 .bt-ghost[hidden], .bt-keeper[hidden] { display: none; }
+/* the angles off the rim: the wall, each angle's wedge and degrees (the
+   numbers on a dark halo), and the right-angle mark for a ball sent
+   straight at the wall */
+.bt-marks { pointer-events: none; }
+.bt-wall-mark { stroke: var(--paper); stroke-width: .6; stroke-linecap: round; }
+.bt-right { fill: var(--deep-3); stroke: var(--paper); stroke-width: .5; stroke-linejoin: miter; }
+.bt-arc { fill: rgba(243, 178, 41, .55); stroke: var(--paper); stroke-width: .35; }
+.bt-deg { fill: var(--paper); font-family: var(--reading); font-weight: 700; paint-order: stroke; stroke: var(--deep-3); stroke-width: .9; stroke-linejoin: round; }
 
 /* ── World Map ─────────────────────────────────────────────────────────── */
 

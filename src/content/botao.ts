@@ -46,6 +46,11 @@ export interface Flick { button: number; vx: number; vy: number }
 
 export type Bump = 'touch' | 'block' | 'keeper' | 'post' | 'wall';
 
+/** the ball coming off the rim: when (a frame number), where its middle was,
+    the way into the table from that wall, and the ball's way just before and
+    just after */
+export interface Bounce { frame: number; at: Point; normal: Point; into: Point; out: Point }
+
 export interface Shot {
   /** every disc's place, sixty times a second: the ball, then his, then theirs */
   frames: Point[][];
@@ -54,6 +59,8 @@ export interface Shot {
   goal: boolean;
   /** what the ball hit, in order, and when (a frame number); who is which button */
   bumps: { what: Bump; frame: number; who?: number }[];
+  /** every time the ball came off the rim, for showing its angles */
+  bounces: Bounce[];
   /** did the flicked button reach the ball itself */
   touched: boolean;
 }
@@ -67,8 +74,10 @@ const MAX_STEPS = 240 * 8;
 /* slowing down: a steady drag of the felt, and a little more the faster it goes */
 const SLOW = { button: [40, 0.9], ball: [18, 0.6] } as const;
 const MASS = { button: 1, ball: 0.3 };
-/* the ball comes off the rim at nearly the slant it went in; a button, heavier, thuds */
-const BOUNCE = { disc: 0.9, ball: 0.95, button: 0.5, net: 0.1 };
+/* the ball comes off the rim at exactly the angle it went in, which the game
+   shows in degrees; off a post or the goleiro it loses a little. A button,
+   heavier, thuds */
+const BOUNCE = { disc: 0.9, rim: 1, ball: 0.95, button: 0.5, net: 0.1 };
 
 interface Disc { x: number; y: number; vx: number; vy: number; r: number; m: number; ball: boolean }
 
@@ -91,20 +100,21 @@ function offPoint(d: Disc, cx: number, cy: number, pad = 0): boolean {
   return true;
 }
 
-/** the rim of the table, and the net once the ball is in it */
-function offRim(d: Disc): boolean {
-  let hit = false;
-  const e = d.ball ? BOUNCE.ball : BOUNCE.button;
+/** the rim of the table, and the net once the ball is in it: the way into
+    the table from the wall it came off, or null */
+function offRim(d: Disc): Point | null {
+  let hit: Point | null = null;
+  const e = d.ball ? BOUNCE.rim : BOUNCE.button;
   const inMouth = d.ball && d.x > MOUTH[0] && d.x < MOUTH[1];
   const inNet = inMouth && d.y < 0;
   /* in the net, its sides keep the ball in */
   const lo = inNet ? MOUTH[0] + d.r : d.r;
   const hi = inNet ? MOUTH[1] - d.r : W - d.r;
-  if (d.x < lo) { d.x = lo; if (d.vx < 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); hit = !inNet; }
-  if (d.x > hi) { d.x = hi; if (d.vx > 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); hit = !inNet; }
-  if (d.y > L - d.r) { d.y = L - d.r; if (d.vy > 0) d.vy = -d.vy * e; hit = true; }
+  if (d.x < lo) { d.x = lo; if (d.vx < 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: 1, y: 0 }; }
+  if (d.x > hi) { d.x = hi; if (d.vx > 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: -1, y: 0 }; }
+  if (d.y > L - d.r) { d.y = L - d.r; if (d.vy > 0) d.vy = -d.vy * e; hit = { x: 0, y: -1 }; }
   const top = inMouth ? -NET + d.r : d.r;
-  if (d.y < top) { d.y = top; if (d.vy < 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); hit = !inMouth; }
+  if (d.y < top) { d.y = top; if (d.vy < 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); if (!inMouth) hit = { x: 0, y: 1 }; }
   return hit;
 }
 
@@ -141,6 +151,7 @@ export function simulate(table: Table, flick: Flick): Shot {
   const snap = (): Point[] => discs.map((d) => ({ x: d.x, y: d.y }));
   const frames: Point[][] = [snap()];
   const bumps: Shot['bumps'] = [];
+  const bounces: Bounce[] = [];
   let goal = false;
   let touched = false;
   let after = 0;
@@ -182,7 +193,15 @@ export function simulate(table: Table, flick: Flick): Shot {
       }
     }
     for (const d of discs) {
-      if (offRim(d) && d === ball) bump('wall', step);
+      const into = { x: d.vx, y: d.vy };
+      const wall = offRim(d);
+      if (wall && d === ball) {
+        bump('wall', step);
+        /* a real bounce, not a ball resting against the rim or crawling into it */
+        if (into.x * wall.x + into.y * wall.y < -3) {
+          bounces.push({ frame: Math.ceil(step / PER_FRAME), at: { x: d.x, y: d.y }, normal: wall, into, out: { x: d.vx, y: d.vy } });
+        }
+      }
       for (const px of MOUTH) if (offPoint(d, px, 0, POST) && d === ball) bump('post', step);
       if (table.keeper !== null && offKeeper(d, table.keeper) && d === ball) bump('keeper', step);
       slow(d);
@@ -200,8 +219,30 @@ export function simulate(table: Table, flick: Flick): Shot {
     end: { ball: at(ball), us: discs.slice(1, 1 + ours).map(at), them: discs.slice(1 + ours).map(at), keeper: table.keeper },
     goal,
     bumps,
+    bounces,
     touched,
   };
+}
+
+/**
+ * How steeply the ball met the wall: the angle between its way and the
+ * wall, in whole degrees, 90 when it went straight at it. Only for showing
+ * him; the physics never needs an angle.
+ */
+export function slant(way: Point, normal: Point): number {
+  const across = Math.abs(way.x * normal.x + way.y * normal.y);
+  const along = Math.abs(way.x * normal.y - way.y * normal.x);
+  return Math.round(Math.atan2(across, along) * 180 / Math.PI);
+}
+
+/** the angle the ball went into the wall at, and the angle it came off at */
+export const angles = (b: Bounce): [number, number] => [slant(b.into, b.normal), slant(b.out, b.normal)];
+
+/** what he is told about a bounce */
+export function bounceWords(b: Bounce): string {
+  const [into, out] = angles(b);
+  if (into === 90 && out === 90) return 'It went straight at the wall, at a right angle, 90°, and came straight back.';
+  return `It went into the wall at ${into}° and came off at ${out}°${into === out ? ': the same angle' : ''}.`;
 }
 
 /* ── the rules ─────────────────────────────────────────────────────────── */
