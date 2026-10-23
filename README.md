@@ -129,7 +129,19 @@ his week: hold **⚙ Grown-ups** at the bottom of the home screen for three
 seconds. It has this week's sounds and levels, how it is going (the sounds
 that are going well and the ones that need practice, and the step reached in
 each maths and jiu-jitsu game), Pro mode, the coach, speech and sound effects,
-the reading voice, and a fresh sticker book.
+the reading voice, team crests, and a fresh sticker book.
+
+A team crest is a picture a grown-up chooses from the iPad for one of the
+teams. It is cut to a square from its middle, made small and kept on the
+iPad, and shown cut to a circle: on that team's shirts in the football
+games, and on its buttons in Futebol de Botão. The app itself never comes
+with club crests, which belong to the clubs.
+
+Besides his own team there is a second made-up side, the Rivals, for a
+favourite opponent the list doesn't have, such as a friend's team or the
+club across town. Give them a crest, then pick them under Play against in
+Penalty Shootout. Every football game then plays them, just as every game
+plays as the team he picks there.
 
 ## The sounds
 

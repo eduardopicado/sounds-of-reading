@@ -219,8 +219,8 @@ describe('saved settings', () => {
 
 describe('commentary', () => {
   it('knows every team in Portuguese, with its article', async () => {
-    const { TEAMS } = await import('../../src/games/teams');
-    const missing = TEAMS.filter((t) => t.kind !== 'you' && !/^(do|da|de) \S/.test(t.pt ?? ''));
+    const { TEAMS, real } = await import('../../src/games/teams');
+    const missing = TEAMS.filter((t) => real(t) && !/^(do|da|de) \S/.test(t.pt ?? ''));
     expect(missing.map((t) => t.id)).toEqual([]);
   });
 

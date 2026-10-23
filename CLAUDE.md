@@ -109,7 +109,8 @@ src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
                        clip-id.ts (recorded words; none ship yet, see
                        public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
-                       going), stickers.ts, colour.ts, highlight.ts (a word with
+                       going), stickers.ts, crests.ts (team crests a grown-up adds,
+                       kept on the device), colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),
                        strokes.ts (judging a traced stroke), recorder.ts (the
                        microphone, for Be the Commentator), dom.ts, random.ts
@@ -135,7 +136,10 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        belt the BJJ games share
                        world-kit.ts is the world map the geography games
                        share, with its taps (a little off a coast counts)
-                       teams.ts: the football teams, their flags and kits;
+                       teams.ts: the football teams, their flags and kits,
+                       and the side he plays and the opponent, the same in
+                       every football game (rivalFor; never his own made-up
+                       sides at random);
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere

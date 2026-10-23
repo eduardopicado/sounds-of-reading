@@ -26,14 +26,13 @@
 
 import { el } from '../lib/dom';
 import { lifetime } from '../lib/life';
-import { pick, shuffle } from '../lib/random';
+import { shuffle } from '../lib/random';
 import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
-import { read } from '../lib/storage';
 import { ALL_COMMENTARY, LEVELS, type CommentaryLine, type Level, type Mood } from '../content/index';
 import { confetti, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 import { canRecord, closeMic, forget, openMic, play, record, stopPlaying, type Recording, type Take } from '../lib/recorder';
-import { TEAMS, YOU, teamById } from './teams';
+import { YOU, ourTeam, rivalFor } from './teams';
 
 /** the longest take, in seconds: plenty for one line, not so long a forgotten
     recording runs on */
@@ -255,9 +254,9 @@ export function mount(root: HTMLElement): () => void {
     takes = lines.map(() => null);
     index = 0;
     busy = false;
-    const team = teamById(read<string>('shootout-team', YOU.id)) ?? YOU;
+    const team = ourTeam();
     us = team === YOU ? 'the Reds' : team.short;
-    them = pick(TEAMS.filter((t) => t !== YOU && t !== team)).short;
+    them = rivalFor(team).short;
     totalEl.textContent = String(lines.length);
     results.hide();
     card.hidden = false;

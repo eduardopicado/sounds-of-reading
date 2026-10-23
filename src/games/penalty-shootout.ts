@@ -32,7 +32,7 @@ import { LEVELS, picturable, realWords, sound, type Level, type Word } from '../
 import { nearWords } from '../content/near-words';
 import { confetti, createSetup, resultsTray, topbar } from '../ui/components';
 import { read, write } from '../lib/storage';
-import { TEAMS, YOU, kit, label, player, teamById, type Team } from './teams';
+import { RIVALS, TEAMS, YOU, kit, label, player, real, teamById, type Team } from './teams';
 import { narrate, narrationSelect } from './narration';
 
 type Phase = 'kickoff' | 'shoot' | 'save' | 'over';
@@ -55,8 +55,10 @@ export function mount(root: HTMLElement): () => void {
   );
   kicksSel.addEventListener('change', () => newMatch());
 
-  /* who he plays for, and who against. Both are remembered on this device:
-     a boy who supports Palmeiras supports Palmeiras every time. */
+  /* who he plays for, and who against. Both are remembered on this device,
+     and every football game plays the same two: a boy who supports Palmeiras
+     supports Palmeiras every time. The Rivals are the opponent a grown-up
+     made up and gave a crest to, so they only play when he picks them. */
   const teamOptions = (first?: HTMLOptionElement) => [
     ...(first ? [first] : []),
     el('optgroup', { label: 'Countries' },
@@ -67,7 +69,8 @@ export function mount(root: HTMLElement): () => void {
   const ourSel = el('select', { 'aria-label': 'Your team' },
     ...teamOptions(el('option', { value: YOU.id, text: label(YOU) })));
   const theirSel = el('select', { 'aria-label': 'Play against' },
-    ...teamOptions(el('option', { value: 'any', text: 'Anyone' })));
+    el('option', { value: 'any', text: 'Anyone' }),
+    ...teamOptions(el('option', { value: RIVALS.id, text: label(RIVALS) })));
   ourSel.value = teamById(read<string>('shootout-team', YOU.id))?.id ?? YOU.id;
   theirSel.value = teamById(read<string>('shootout-rival', 'any'))?.id ?? 'any';
   ourSel.addEventListener('change', () => { write('shootout-team', ourSel.value); newMatch(); });
@@ -406,7 +409,7 @@ export function mount(root: HTMLElement): () => void {
     const chosen = teamById(theirSel.value);
     rival = chosen && chosen !== us
       ? chosen
-      : pick(TEAMS.filter((t) => t !== YOU && t !== us && t !== rival));
+      : pick(TEAMS.filter((t) => real(t) && t !== us && t !== rival));
     ourName.replaceChildren(kit(us, 24), el('span', { class: 'pk-label', text: label(us, true) }));
     theirName.replaceChildren(kit(rival, 24), el('span', { class: 'pk-label', text: label(rival, true) }));
     drawBoard();

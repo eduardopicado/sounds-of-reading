@@ -21,8 +21,7 @@ import { markPlayed } from '../lib/played';
 import { climb, type Climb, type Step } from '../content/maths';
 import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { narrationSelect } from './narration';
-import { pick } from '../lib/random';
-import { TEAMS, YOU, teamById, type Team } from './teams';
+import { ourTeam, rivalFor, type Team } from './teams';
 
 export interface Kit {
   life: Life;
@@ -152,8 +151,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   const noteEl = el('p', { class: 'mx-note', 'aria-live': 'polite' });
   const choices = choiceRow();
 
-  const ourTeam = (): Team => teamById(read<string>('shootout-team', YOU.id)) ?? YOU;
-  let rivalTeam: Team = pick(TEAMS.filter((t) => t !== YOU));
+  let rivalTeam: Team = rivalFor(ourTeam());
 
   const kit: Kit = {
     life,
@@ -230,7 +228,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   function start(): void {
     life.clear();
     round += 1;
-    rivalTeam = pick(TEAMS.filter((t) => t !== YOU && t !== ourTeam()));
+    rivalTeam = rivalFor(ourTeam());
     totalEl.textContent = lenSel.value;
     firsts.set(0);
     readyEl.hidden = true;

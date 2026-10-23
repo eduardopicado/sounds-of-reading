@@ -24,6 +24,7 @@
  * is played for him, with the spot his button has to hit drawn on it. All
  * the physics is in src/content/botao.ts. */
 
+import { crestOf } from '../lib/crests';
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
@@ -90,19 +91,28 @@ function shading(): SVGDefsElement {
     linear('bt-netdepth', [0, 1], [0, '#000', 0.5], [100, '#000', 0.12]),
     /* the goleiro's block, lit on top */
     linear('bt-blockshade', [0, 1], [0, '#fff', 0.45], [45, '#fff', 0], [100, '#000', 0.4]),
+    /* a crest, cut to the button's face */
+    svg('clipPath', { id: 'bt-crest-clip' }, svg('circle', { r: R * 0.72 })),
   );
 }
 
+/** a button's face, inside its rim */
+const FACE = R * 0.72;
+
 /** a button, raised off the felt: its shadow, the rim in a team's second
-    colour with a bevel, the face in its first with a shine, the flag on top */
+    colour with a bevel, the face in its first with a shine, and on top the
+    crest a grown-up added for the team (src/lib/crests.ts), or its flag */
 function button(team: Team, cls: string): SVGGElement {
+  const crest = crestOf(team.id);
   const g = svg('g', { class: `bt-btn ${cls}` },
     svg('circle', { r: R, cx: SHADOW.x, cy: SHADOW.y, class: 'bt-shadow' }),
     svg('circle', { r: R, fill: team.colours[1], class: 'bt-rim' }),
     svg('circle', { r: R - 0.2, class: 'bt-bevel' }),
-    svg('circle', { r: R * 0.72, fill: team.colours[0], class: 'bt-face' }),
-    svg('circle', { r: R * 0.72, class: 'bt-shine' }));
-  if (team.flag) {
+    svg('circle', { r: FACE, fill: team.colours[0], class: 'bt-face' }),
+    /* the crest like the sticker on a real botão: cut to a circle, under the shine */
+    crest ? svg('image', { href: crest, x: -FACE, y: -FACE, width: 2 * FACE, height: 2 * FACE, preserveAspectRatio: 'xMidYMid slice', 'clip-path': 'url(#bt-crest-clip)', class: 'bt-crest' }) : null,
+    svg('circle', { r: FACE, class: 'bt-shine' }));
+  if (!crest && team.flag) {
     const flag = svg('text', { class: 'bt-flag', 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 4.6 });
     flag.textContent = team.flag;
     g.append(flag);

@@ -15,7 +15,7 @@ import { canSpeak, say } from '../lib/speech';
 import { hasClip } from '../lib/audio';
 import { read, write } from '../lib/storage';
 import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../content/commentary';
-import type { Team } from './teams';
+import { real, type Team } from './teams';
 
 export type Narration = 'pt' | 'en' | 'off';
 export type Moment = 'goal' | 'save';
@@ -33,7 +33,7 @@ export const setNarration = (v: Narration): void => write(KEY, v);
 export function callFor(moment: Moment, team: Team, lang: 'pt' | 'en'): string {
   if (lang === 'pt') return pick(moment === 'save' ? PT_SAVES : ptGoals(team.pt));
   if (moment === 'save') return pick(EN_SAVES);
-  return enGoal(team.kind === 'you' ? undefined : team.name);
+  return enGoal(real(team) ? team.name : undefined);
 }
 
 /**
