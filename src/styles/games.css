@@ -1535,10 +1535,24 @@
 /* the file input stays in the page, for the label and for a keyboard, but unseen */
 .grown-ups .gu-crest-file { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .grown-ups .gu-crest-said:empty { display: none; }
-.grown-ups .gu-crest-said { margin: 8px 0 0; }
-.grown-ups .gu-crest-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.grown-ups .gu-crest-said { margin: 0; }
+/* one slot per side: the crest on the left, who it is for beside it, then its buttons */
+.grown-ups .gu-crest-slot {
+  display: grid; grid-template-columns: 56px 1fr; gap: 8px 12px; align-items: start;
+  padding: 12px 0; border-top: 1px solid rgba(255, 246, 231, .18);
+}
+.grown-ups .gu-crest-slot > .gu-crest { grid-row: span 2; }
+.grown-ups .gu-crest[hidden], .grown-ups .gu-crest-buttons[hidden] { display: none; }
+.grown-ups .gu-crest-slot > .gu-crest[hidden] + .gu-crest-who { grid-column: 1 / -1; }
+.grown-ups .gu-crest-who { display: grid; gap: 4px; }
+.grown-ups .gu-crest-who select { justify-self: start; max-width: 100%; }
+.grown-ups .gu-crest-about { font-size: 14px; opacity: .85; }
+.grown-ups .gu-crest-buttons { display: flex; flex-wrap: wrap; gap: 8px; grid-column: 2; }
+.grown-ups .gu-crest-slot > .gu-crest-said { grid-column: 1 / -1; }
+.grown-ups .gu-crest-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 4px; }
 .grown-ups .gu-crest-list:empty { display: none; }
-.grown-ups .gu-crest-list img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--paper); }
+.grown-ups .gu-crest-kept { padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.grown-ups .gu-crest-kept img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--paper); display: block; }
 .grown-ups .gu-card .row + .row, .grown-ups .gu-card .row + .sound-groups, .grown-ups .sound-groups + .row { margin-top: 12px; }
 .sound-groups .row + .row { margin-top: 8px; }
 .sound-group .group-name {

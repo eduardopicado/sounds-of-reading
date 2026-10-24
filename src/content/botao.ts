@@ -12,7 +12,8 @@
  * the table, the posts, the goleiro and each other.
  *
  * The table is W wide and L long, and he always attacks the goal at the
- * top, y = 0. */
+ * top, y = 0. There is a goal at each end, and both are open: a button can
+ * go into the mouth as well as the ball, and the net stops what goes in. */
 
 import type { Step } from './maths';
 
@@ -65,6 +66,8 @@ export interface Shot {
   /** where everything stopped */
   end: Table;
   goal: boolean;
+  /** the ball went into his own net, at the far end */
+  own: boolean;
   /** what the ball hit, in order, and when (a frame number); who is which button */
   bumps: { what: Bump; frame: number; who?: number }[];
   /** every time the ball came off the rim, for showing its angles */
@@ -108,19 +111,21 @@ function offPoint(d: Disc, cx: number, cy: number, pad = 0): boolean {
   return true;
 }
 
-/** the rim of the table, and the net once the ball is in it: the way into
-    the table from the wall it came off, or null */
+/** the rim of the table, and the nets: the way into the table from the
+    wall it came off, or null. Across a goal mouth there is no wall, for a
+    button any more than for the ball: what goes in stops against the net */
 function offRim(d: Disc): Point | null {
   let hit: Point | null = null;
   const e = d.ball ? BOUNCE.rim : BOUNCE.button;
-  const inMouth = d.ball && d.x > MOUTH[0] && d.x < MOUTH[1];
-  const inNet = inMouth && d.y < 0;
-  /* in the net, its sides keep the ball in */
+  const inMouth = d.x > MOUTH[0] && d.x < MOUTH[1];
+  const inNet = inMouth && (d.y < 0 || d.y > L);
+  /* in a net, its sides keep it in */
   const lo = inNet ? MOUTH[0] + d.r : d.r;
   const hi = inNet ? MOUTH[1] - d.r : W - d.r;
   if (d.x < lo) { d.x = lo; if (d.vx < 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: 1, y: 0 }; }
   if (d.x > hi) { d.x = hi; if (d.vx > 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: -1, y: 0 }; }
-  if (d.y > L - d.r) { d.y = L - d.r; if (d.vy > 0) d.vy = -d.vy * e; hit = { x: 0, y: -1 }; }
+  const bottom = inMouth ? L + NET - d.r : L - d.r;
+  if (d.y > bottom) { d.y = bottom; if (d.vy > 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); if (!inMouth) hit = { x: 0, y: -1 }; }
   const top = inMouth ? -NET + d.r : d.r;
   if (d.y < top) { d.y = top; if (d.vy < 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); if (!inMouth) hit = { x: 0, y: 1 }; }
   return hit;
@@ -136,8 +141,8 @@ function slow(d: Disc): void {
   const s = len(d.vx, d.vy);
   if (s === 0) return;
   const [steady, more] = d.ball ? SLOW.ball : SLOW.button;
-  /* the net stops a ball quickly */
-  const net = d.ball && d.y < 0 ? 8 : 1;
+  /* a net stops a ball quickly */
+  const net = d.ball && (d.y < 0 || d.y > L) ? 8 : 1;
   const next = s - (steady + more * s) * net * DT;
   if (next <= 0) { d.vx = 0; d.vy = 0; return; }
   d.vx *= next / s;
@@ -161,6 +166,7 @@ export function simulate(table: Table, flick: Flick): Shot {
   const bumps: Shot['bumps'] = [];
   const bounces: Bounce[] = [];
   let goal = false;
+  let own = false;
   let touched = false;
   let after = 0;
   /* a ball resting against something is one bump, not one every step */
@@ -210,13 +216,15 @@ export function simulate(table: Table, flick: Flick): Shot {
           bounces.push({ frame: Math.ceil(step / PER_FRAME), at: { x: d.x, y: d.y }, normal: wall, into, out: { x: d.vx, y: d.vy } });
         }
       }
-      for (const px of MOUTH) if (offPoint(d, px, 0, POST) && d === ball) bump('post', step);
+      for (const py of [0, L]) for (const px of MOUTH) if (offPoint(d, px, py, POST) && d === ball) bump('post', step);
       if (table.keeper !== null && offKeeper(d, table.keeper) && d === ball) bump('keeper', step);
       slow(d);
     }
-    /* over the line: a goal, and a moment more for it to hit the net */
+    /* over the line: a goal, or one in his own net, and a moment more for
+       it to hit the net */
     if (ball.y + BALL < 0) goal = true;
-    if (goal) after += 1;
+    if (ball.y - BALL > L) own = true;
+    if (goal || own) after += 1;
     const done = after > 90 || discs.every((d) => d.vx === 0 && d.vy === 0);
     if (step % PER_FRAME === 0 || done) frames.push(snap());
     if (done) break;
@@ -226,6 +234,7 @@ export function simulate(table: Table, flick: Flick): Shot {
     frames,
     end: { ball: at(ball), us: discs.slice(1, 1 + ours).map(at), them: discs.slice(1 + ours).map(at), keeper: table.keeper },
     goal,
+    own,
     bumps,
     bounces,
     touched,
