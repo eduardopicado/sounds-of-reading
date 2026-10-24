@@ -14,13 +14,19 @@ coach's picks for today at the top.
 
 ### Reading and spelling
 
+Bingo, Memory Match, Build the Word and Roll & Read have a switch at the
+top: **🔤 Phonics**, this week's sounds as before, or **👀 Sight words**, the
+school's sight words up to his level, as his teacher's sight word games use
+them. Each game remembers which it was on this iPad; the ⚙ panel picks the
+sight word sets.
+
 | Game | What the child does |
 |---|---|
-| **Memory Match** | Flips cards to find pairs — a word with its picture, or two words that share a sound. |
-| **Bingo** | The app says a word and shows its picture; he finds it written on his card. |
+| **Memory Match** | Flips cards to find pairs — a word with its picture, or two words that share a sound. With sight words, the same word twice, dealt among its lookalikes (there, their, where), and said only once it is matched. |
+| **Bingo** | The app says a word and shows its picture; he finds it written on his card. With sight words there is no picture, only the voice, and the card never holds two words that sound the same. |
 | **Sound Sort** | A word appears with nothing marked. He drags it (or taps a bin) into the right bin, and the sound lights up. |
 | **Word Builder** | One part of the word stays put, he swaps the other. Each build is spoken and judged real or silly. |
-| **Roll & Read** | Taps a die, reads the words it lands on aloud. A parent taps ✅ or 🔁, and a bar chart builds up. |
+| **Roll & Read** | Taps a die, reads the words it lands on aloud. A parent taps ✅ or 🔁, and a bar chart builds up. With sight words, each face is one of the school's sets, and the chart is kept word by word, the ones missed most first. |
 | **Real or Silly?** | Reads a word with no help, then decides whether it is a word at all. |
 | **Sentence Smash** | Picks a phrase from each of four rows and hears the silly sentence read back. |
 | **Same Sound, Two Ways** | Hears a word with its vowel missing and chooses the spelling: ai or ay, oi or oy. |
@@ -29,7 +35,7 @@ coach's picks for today at the top.
 | **Penalty Shootout** | Reads the word to score past the keeper, then hears one and dives to save it. |
 | **Pass and Shoot** | Passes along a line of players, one sound each, then shoots at the word he blended. |
 | **Be the Commentator** | Reads a football commentary line with expression, records it and hears it back. |
-| **Build the Word** | Hears a word and builds it from sound or letter tiles. |
+| **Build the Word** | Hears a word and builds it from sound or letter tiles. With sight words, from letters like fridge magnets, among the letters he would write if he trusted the sound, and never ones that could spell its twin (no i for there, which would make their). |
 | **Coach Says** | Reads the coach's written instruction — "Put the frog in the box, then tap the hen" — and does it. The pictures carry no words, so reading is the only way to know what to do. |
 | **Big Words** | Reads two-syllable words a part at a time (sun·set, rab·bit), then whole, then (Year 2) taps where a word splits. |
 | **Foosball Words** | Hears a word and sees its picture, then slides the rods of a foosball table, one rod per sound, until the players in the shooting lane spell it (sh · i · p), and shoots. The other players on a rod mostly make another real word (chip, shop, shin), so a wrong shot is named: "That says chop. Listen: ship." A second miss slides the rods to the answer. Three sounds, then more players, then words of four sounds on four rods. A second way to play, chosen in setup: make any word you can on the same rods. Every new real word scores and joins the list ("3 of 9 words found"); a word made already, a made-up word, or one not on the word list bounces off. No setting of the rods ever spells a blocked word. |

@@ -740,10 +740,11 @@ export const SEARCH_LISTS: SearchListSpec[] = [
     'medal 🏅 | points 🔢 | coach 📋 | kimono 🥋 | gym 🏋️' },
 ];
 
-/*  Words that sound exactly like another word in these lists, said with an
- *  Australian accent. A game that says a word and asks him to find it written
- *  can never offer both halves of a pair: "pair" called, with pair and pear
- *  in the goal, has no right answer.
+/*  Words that sound exactly like another word in these lists, the sight
+ *  words included, said with an Australian accent. A game that says a word
+ *  and asks him to find it written can never offer both halves of a pair:
+ *  "pair" called, with pair and pear in the goal, has no right answer, and
+ *  nor has "there" on a Bingo card with their.
  *
  *  The content test works these out from a pronouncing dictionary, with the
  *  r after a vowel left silent the way it is here (so saw and sore would be
@@ -753,6 +754,9 @@ export const SOUNDS_ALIKE: string[] = [
   'bare bear', 'be bee', 'dew due', 'hair hare', 'hew hue', 'knew new',
   'knight night', 'pair pear', 'plain plane', 'read red', 'stair stare',
   'wear where', 'which witch',
+  /* with the sight words */
+  'bin been', 'dew do', 'due do', 'he here', 'i eye', 'no know', 'right write',
+  'their there', 'to too two', 'wood would',
 ];
 
 /*  Words never to show a six-year-old, whatever a word list says about them.

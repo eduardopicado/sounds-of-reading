@@ -14,7 +14,14 @@
  *
  * Sound tiles come first — one tile per sound, the way he sounds it out.
  * Letter tiles are the next step, where sh is two tiles and he has to know
- * that; Pro mode starts there. */
+ * that; Pro mode starts there.
+ *
+ * Or the school's sight words, built the way his teacher does it with fridge
+ * magnets: letter tiles only, since the whole point of "said" is that it is
+ * not built from its sounds. The wrong tiles are the letters he would reach
+ * for if he trusted the sound, an e for said and a u for come, and they can
+ * never spell a word that sounds the same: no i among the tiles for there,
+ * or he could build their (src/content/sight.ts). */
 
 import { el, replay } from '../lib/dom';
 import { lifetime } from '../lib/life';
@@ -23,15 +30,26 @@ import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { pro } from '../lib/settings';
 import { coachPick, mark } from '../lib/coach';
-import { award } from '../lib/stickers';
-import { picturable, realWords, sound, type Word } from '../content/index';
+import { award, awardFace } from '../lib/stickers';
+import { REAL_WORDS, SIGHT_SETS, picturable, realWords, sound, type SightWord, type Span, type Word } from '../content/index';
 import { answerFor, tilesFor, type TileMode } from '../content/spelling';
+import { TRICKY, buildable, magnetFor, sightTiles, sightWordsIn } from '../content/sight';
+import type { Tones } from '../lib/colour';
+import { shuffle } from '../lib/random';
 import { celebrate, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
 
 /** the longest word for letter tiles: more slots than this do not fit a phone */
 const MAX_LETTERS = 7;
 
 interface Tile { text: string; node: HTMLButtonElement; placed: number | null }
+
+/** a word to build: a phonics word with its picture and sound, or a sight word */
+interface Item { text: string; spans: Span[]; tones: Tones; picture?: string; word?: Word; sight?: SightWord }
+
+/* the words a heard sight word must never be built as: every sight word, and
+   the phonics words too (right, for write) */
+const EVERY_WORD: readonly { text: string }[] = [...sightWordsIn(SIGHT_SETS), ...REAL_WORDS];
+
 
 export function mount(root: HTMLElement): () => void {
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -48,7 +66,9 @@ export function mount(root: HTMLElement): () => void {
   const setup = createSetup({
     extra: [el('div', { class: 'row' }, el('span', { class: 'lbl', text: 'This game' }), modeSel, lenSel)],
     onChange: () => start(),
+    sight: 'build-the-word',
   });
+  const sightMode = (): boolean => setup.kind() === 'sight';
 
   const pos = counter('Word');
   const totalEl = el('span', { text: '0' });
@@ -66,23 +86,24 @@ export function mount(root: HTMLElement): () => void {
   const results = resultsTray('Words you built', resultList,
     el('button', { class: 'btn', type: 'button', text: 'Play again', on: { click: () => start() } }),
   );
-  const empty = el('p', { class: 'tag', hidden: 'hidden',
-    text: 'Not enough words with pictures here yet. Try adding a level or another sound.' });
+  const empty = el('p', { class: 'tag', hidden: 'hidden' });
+  const bar = topbar({
+    title: 'Build the', swash: 'Word',
+    tagline: 'Listen, then build the word, one sound at a time.',
+    onSetup: (open) => setup.open(open),
+  });
+  const tagline = bar.querySelector('.titles .tag');
 
   const node = el('div', { class: 'wrap' },
-    topbar({
-      title: 'Build the', swash: 'Word',
-      tagline: 'Listen, then build the word, one sound at a time.',
-      onSetup: (open) => setup.open(open),
-    }),
-    setup.node,
+    bar,
+    setup.switchNode, setup.node,
     scoreLine(el('span', {}, pos.node, ' of ', totalEl), firstTry.node),
     empty, board, results.node,
   );
 
-  let queue: Word[] = [];
+  let queue: Item[] = [];
   let index = 0;
-  let current: Word | null = null;
+  let current: Item | null = null;
   let answer: string[] = [];
   let slots: (Tile | null)[] = [];
   let slotNodes: HTMLButtonElement[] = [];
@@ -91,12 +112,13 @@ export function mount(root: HTMLElement): () => void {
   let misses = 0;
   let firsts = 0;
   let busy = false;
-  let log: { word: Word; ok: boolean }[] = [];
+  let log: { item: Item; ok: boolean }[] = [];
   /* everything it plans goes through its lifetime, which leaving ends */
   const life = lifetime();
   const later = life.later;
 
-  const mode = (): TileMode => modeSel.value as TileMode;
+  /* sight words are built from letters, always */
+  const mode = (): TileMode => (sightMode() ? 'letters' : modeSel.value as TileMode);
   /* one wrong tile per two right ones, at least two; one more in Pro */
   const wrongCount = (n: number): number => Math.max(2, Math.ceil(n / 2)) + (pro() ? 1 : 0);
 
@@ -106,6 +128,9 @@ export function mount(root: HTMLElement): () => void {
       return a && (mode() === 'sounds' || a.length <= MAX_LETTERS);
     });
   }
+
+  const phonicsItem = (w: Word): Item => ({ text: w.text, spans: w.spans, tones: sound(w.sound).tones, picture: w.picture, word: w });
+  const sightItem = (w: SightWord): Item => ({ text: w.text, spans: w.spans, tones: TRICKY, sight: w });
 
   /* ── drawing ─────────────────────────────────────────────────────────── */
 
@@ -125,17 +150,20 @@ export function mount(root: HTMLElement): () => void {
   /* ── one word ────────────────────────────────────────────────────────── */
 
   function showWord(): void {
-    const word = queue[index];
-    const set = tilesFor(word, mode(), wrongCount(answerFor(word, mode())?.length ?? 3));
+    const item = queue[index];
+    const set = item.sight
+      ? sightTiles(item.sight, wrongCount(item.text.length), EVERY_WORD)
+      : tilesFor(item.word!, mode(), wrongCount(answerFor(item.word!, mode())?.length ?? 3));
     if (!set) { index += 1; next(); return; }
-    current = word;
+    current = item;
     answer = set.answer;
     misses = 0;
     busy = false;
     locked = answer.map(() => false);
     slots = answer.map(() => null);
     pos.set(index + 1);
-    pic.textContent = word.picture ?? '🔤';
+    /* a sight word has no picture: he has only what he hears */
+    pic.textContent = item.picture ?? (item.sight ? '👂' : '🔤');
     note.textContent = '';
     note.className = 'bw-note';
 
@@ -149,7 +177,10 @@ export function mount(root: HTMLElement): () => void {
 
     tray.replaceChildren();
     tiles = set.tiles.map((text) => {
-      const tile: Tile = { text, node: el('button', { class: 'bw-tile', type: 'button', text }), placed: null };
+      const node = item.sight
+        ? el('button', { class: 'bw-tile magnet', type: 'button', text, vars: { '--magnet': magnetFor(text) } })
+        : el('button', { class: 'bw-tile', type: 'button', text });
+      const tile: Tile = { text, node, placed: null };
       tile.node.addEventListener('click', () => place(tile));
       tray.append(tile.node);
       return tile;
@@ -157,7 +188,7 @@ export function mount(root: HTMLElement): () => void {
     drawSlots();
     board.dataset.word = String(index);
     /* hearing it is the question */
-    say(word.text);
+    say(item.text);
   }
 
   function next(): void {
@@ -187,8 +218,8 @@ export function mount(root: HTMLElement): () => void {
   }
 
   function check(): void {
-    const word = current;
-    if (!word) return;
+    const item = current;
+    if (!item) return;
     busy = true;
     const right = slots.every((t, i) => t?.text === answer[i]);
     if (right) {
@@ -197,18 +228,19 @@ export function mount(root: HTMLElement): () => void {
       slotsEl.classList.add('done');
       const ok = misses === 0;
       if (ok) { firsts += 1; firstTry.set(firsts); }
-      mark(word, ok);
-      log.push({ word, ok });
+      if (item.word) mark(item.word, ok);
+      log.push({ item, ok });
       sfx.right();
       note.className = 'bw-note good';
-      note.replaceChildren(marked(word.text, word.spans, { tones: sound(word.sound).tones }), ' ✓');
-      say(word.text);
+      /* for a sight word, this is where the part that lies lights up */
+      note.replaceChildren(marked(item.text, item.spans, { tones: item.tones }), ' ✓');
+      say(item.text);
       later(() => { slotsEl.classList.remove('done'); index += 1; next(); }, 1400);
       return;
     }
 
     misses += 1;
-    if (misses === 1) mark(word, false);
+    if (misses === 1 && item.word) mark(item.word, false);
     sfx.wrong();
     /* the right ones stay and lock; the wrong ones bounce back to the tray */
     slots.forEach((t, i) => {
@@ -220,17 +252,17 @@ export function mount(root: HTMLElement): () => void {
       slots.forEach((t, i) => {
         if (t && !locked[i]) { t.placed = null; slots[i] = null; }
       });
-      if (misses >= 2) { showAnswer(word); return; }
+      if (misses >= 2) { showAnswer(item); return; }
       note.className = 'bw-note';
       note.textContent = 'Nearly! The green ones are right. Listen again and try the rest.';
       drawSlots();
       busy = false;
-      say(word.text);
+      say(item.text);
     }, 600);
   }
 
   /** two misses: build it for him, so the round ends on the right spelling */
-  function showAnswer(word: Word): void {
+  function showAnswer(item: Item): void {
     const free = [...tiles];
     answer.forEach((text, i) => {
       if (locked[i]) return;
@@ -239,10 +271,10 @@ export function mount(root: HTMLElement): () => void {
       locked[i] = true;
     });
     drawSlots();
-    log.push({ word, ok: false });
+    log.push({ item, ok: false });
     note.className = 'bw-note';
-    note.replaceChildren('It is spelled ', marked(word.text, word.spans, { tones: sound(word.sound).tones }), '.');
-    say(word.text);
+    note.replaceChildren('It is spelled ', marked(item.text, item.spans, { tones: item.tones }), '.');
+    say(item.text);
     later(() => { index += 1; next(); }, 2200);
   }
 
@@ -250,7 +282,15 @@ export function mount(root: HTMLElement): () => void {
 
   function start(): void {
     life.clear();
-    queue = coachPick(playable(), Number(lenSel.value));
+    const sight = sightMode();
+    modeSel.hidden = sight;
+    if (tagline) tagline.textContent = sight ? 'Listen, then build the word from the letters.' : 'Listen, then build the word, one sound at a time.';
+    empty.textContent = sight
+      ? 'No sight words to build here yet. Try adding another set.'
+      : 'Not enough words with pictures here yet. Try adding a level or another sound.';
+    queue = sight
+      ? shuffle(setup.sightWords().filter(buildable)).slice(0, Number(lenSel.value)).map(sightItem)
+      : coachPick(playable(), Number(lenSel.value)).map(phonicsItem);
     index = 0; firsts = 0; log = []; current = null;
     firstTry.set(0);
     totalEl.textContent = String(queue.length);
@@ -267,12 +307,14 @@ export function mount(root: HTMLElement): () => void {
     resultList.replaceChildren();
     for (const entry of log) {
       const li = el('li', { class: entry.ok ? '' : 'miss' });
-      li.append(el('span', { class: 'mk-pic', text: entry.word.picture ?? '' }), ' ',
-        marked(entry.word.text, entry.word.spans, { tones: sound(entry.word.sound).tones }));
+      if (entry.item.picture) li.append(el('span', { class: 'mk-pic', text: entry.item.picture }), ' ');
+      li.append(marked(entry.item.text, entry.item.spans, { tones: entry.item.tones }));
       if (!entry.ok) li.append(el('span', { class: 'mk', text: 'again' }));
       resultList.append(li);
     }
-    const sticker = award(log.map((e) => e.word.sound));
+    const practised = log.flatMap((e) => (e.item.word ? [e.item.word.sound] : []));
+    /* sight words practise no sound, so their sticker is the game's own */
+    const sticker = practised.length ? award(practised) : awardFace('build-the-word', '🔤');
     results.show(sticker);
     celebrate(firsts === log.length ? 'Every one right!' : 'Good spelling!');
   }

@@ -5,8 +5,10 @@
 import { el, prefersReducedMotion } from '../lib/dom';
 import { go } from '../lib/router';
 import { sfx } from '../lib/sfx';
-import { LEVELS, PRACTICE_SOUNDS, type Level, type Sound } from '../content/index';
+import { LEVELS, PRACTICE_SOUNDS, SIGHT_SETS, type Level, type SightWord, type Sound } from '../content/index';
+import { TRICKY, sightSetsUpTo, sightWordsIn } from '../content/sight';
 import { settings, updateSettings } from '../lib/settings';
+import { read, write } from '../lib/storage';
 import { say } from '../lib/speech';
 
 /* ── header ───────────────────────────────────────────────────────────── */
@@ -103,7 +105,13 @@ export interface SetupOptions {
   onChange: () => void;
   /** some games practise one sound at a time and cannot take an empty pick */
   minSounds?: number;
+  /** a game that can play the school's sight words instead of this week's
+      sounds: its id, under which this device remembers which it was last */
+  sight?: string;
 }
+
+/** phonics: words he sounds out, this week's sounds; sight: the school's sight words */
+export type WordKind = 'phonics' | 'sight';
 
 export interface Setup {
   node: HTMLElement;
@@ -112,6 +120,14 @@ export interface Setup {
   filter: () => Filter;
   /** sounds available under the current levels, after the th merge */
   available: () => Sound[];
+  /** which words the game is playing: always phonics for a game without the switch */
+  kind: () => WordKind;
+  /** the sight words in the sets chosen, each once */
+  sightWords: () => SightWord[];
+  /** the sight word sets chosen, in the order they are taught */
+  sightSets: () => string[];
+  /** the Phonics / Sight words switch, for the game to put on its screen; null without one */
+  switchNode: HTMLElement | null;
 }
 
 /** the two th sounds become one option when the parent has merged them */
@@ -237,15 +253,67 @@ export function createSetup(o: SetupOptions): Setup {
     },
   });
 
+  const soundsRow = el('div', { class: 'row setup-sounds-row' }, el('span', { class: 'lbl', text: 'Sounds' }), now, toggle);
+
+  /* the sight word sets, for a game with the switch: the school's sets up to
+     this week's level to start with, changed here for this session only */
+  let kind: WordKind = o.sight && read<string>(`words:${o.sight}`, 'phonics') === 'sight' ? 'sight' : 'phonics';
+  let sets = sightSetsUpTo(settings().levels);
+  const setRow = el('div', { class: 'row setup-sight-row' });
+  function drawSets(): void {
+    setRow.replaceChildren(el('span', { class: 'lbl', text: 'Sight words' }));
+    for (const name of SIGHT_SETS) {
+      setRow.append(chip(name, sets.includes(name), () => {
+        sets = sets.includes(name) ? sets.filter((x) => x !== name) : [...sets, name];
+        /* never leave him with nothing to play */
+        if (!sets.length) sets = [name];
+        drawSets(); o.onChange();
+      }, TRICKY.light));
+    }
+  }
+
+  let switchNode: HTMLElement | null = null;
+  let switchButtons: HTMLButtonElement[] = [];
+  function showKind(): void {
+    soundsRow.hidden = kind === 'sight';
+    if (kind === 'sight') pickers.hidden = true;
+    setRow.hidden = kind !== 'sight';
+    for (const b of switchButtons) b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
+    switchNode?.setAttribute('data-kind', kind);
+  }
+  if (o.sight) {
+    const game = o.sight;
+    drawSets();
+    switchButtons = ([['phonics', '🔤 Phonics'], ['sight', '👀 Sight words']] as const).map(([value, text]) =>
+      el('button', {
+        type: 'button', class: 'kind-btn', text, 'aria-pressed': 'false', dataset: { kind: value },
+        on: {
+          click: () => {
+            if (kind === value) return;
+            sfx.tap();
+            kind = value;
+            write(`words:${game}`, kind);
+            showKind();
+            o.onChange();
+          },
+        },
+      }));
+    switchNode = el('div', { class: 'kind-switch', role: 'group', 'aria-label': 'Which words' }, ...switchButtons);
+  }
+
   const panel = el('div', { class: 'panel', hidden: 'hidden' }, ...(o.extra ?? []),
-    el('div', { class: 'row setup-sounds-row' }, el('span', { class: 'lbl', text: 'Sounds' }), now, toggle),
-    pickers);
+    soundsRow, pickers, ...(o.sight ? [setRow] : []));
+  showKind();
 
   return {
     node: panel,
     open: (on) => { panel.hidden = !on; },
     filter: () => ({ sounds: expand(sounds), levels }),
     available: soundsInLevels,
+    kind: () => kind,
+    sightWords: () => sightWordsIn(sets),
+    sightSets: () => SIGHT_SETS.filter((name) => sets.includes(name)),
+    switchNode,
   };
 }
 
