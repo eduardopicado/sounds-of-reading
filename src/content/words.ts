@@ -641,6 +641,33 @@ export const COMMENTARY: string[] = [
   'The ball is in the net! @8',
 ];
 
+/*  Read and Point — little stories to read together and point out the sight
+ *  words in, the way his teacher suggests with a picture book.
+ *
+ *  Title | the story @level. Every word, the title's too, is one he can read
+ *  at the story's level, from the word lists or the school's sight words, and
+ *  the level is exactly the highest level of any word in it: the content
+ *  test checks both, as it does for the commentary. Each story says a few
+ *  sight words more than once, so there is something to hunt for.  */
+export const STORIES: string[] = [
+  'Ants | The ants sat in a tin. A tin of ants! The ants had lots of sap. The ants nip and the ants snap. Is it a tin of pins? No, it is a tin of ants! @1',
+  'I Spin | I spin and I spin. I spin as the ants spin. I tip, and I sit. I sit on the ants! No! The ants nip me. @1',
+  'The Big Kick | The kid can run. He can kick. He did a big kick, and it went up, up, up! It went in the net. Yes! The kid is top dog. @2',
+  'The Duck | A duck sat on a rock in the pond. A dog went to the pond. The dog can not get the duck. The duck went up! What a sad dog. The dog sat in the mud. @2',
+  'The Fox and the Frog | A fox and a frog sat on a log. The frog can jump and hop. The fox can run fast. They are off! Then the frog fell in the pond! The fox will help him. He got the frog back on the log. @3',
+  'My Big Box | I have a big box. What is in the box? A hat, a bat and a bell. I put the hat on. I hit the bell with the bat. It is fun! Then I put them back in the box. @3',
+  'Lunch at the Shop | We went to the shop for lunch. I had some fish. Which fish do you like? I like the thick one. There is a shell in my dish! It was so much fun. @4',
+  'The Long Shot | Who has it? He has it! He can run so fast. He is at the box. A long shot, and it is in! What a shot! I wish I had a shot like that. @4',
+  'The Goal | Today is a big day. We play at three. The rain is on the street. Can we play in the rain? Yes! I get it in the goal. What a goal! The team play in the rain all day. @5',
+  'The Night Train | At night we go on a train. The train is long. We sit by the window. I can not sleep. I have a dream of a boat on the sea. Then the train is at the end. We are here! @5',
+  'Football at the Park | My brother and I went to the park. We took a football. My brother said, "You start." I took a big kick. The football went up and down. Then a dog took it! We had to look all round the park for it. @6',
+  'The Storm | It was a dark night. There was a big storm. The wind was loud. The rain was on the roof. Mother said, "Come and sit by me." We sat and read a book. In the morning the sun was out. @6',
+  'The Bike Race | I have a white bike. Today is the bike race. Five of us line up at the gate. Go! I ride as fast as I can. I ride up the hill and down the side. I would like to win. I come home with a prize! @7',
+  'The Kite | My father and I have a kite. It is red and white. We go to the hill on a windy day. The kite flies up, up, up. It is so high! Then the kite fell in a tree. Father got it down with a long stick. What a funny day! @7',
+  'The Big Match | Once a week we have a big match. My friend and I play for the school team. Before the match, we catch the ball and kick the ball. I got a goal. Then I got another! My friend got one too. We love football. @8',
+  'Draw with Me | I love to draw. I draw a bear and a chair. I draw my friend with long hair. Then I draw a hare. I saw a hare at the farm. Mother said, "That is good work!" I will draw again soon. @8',
+];
+
 /*  Coach Says — read an instruction, then do it.
  *
  *  The first game that checks he understood a sentence, not only that he

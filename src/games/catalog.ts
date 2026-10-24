@@ -73,6 +73,8 @@ export const GAMES: Game[] = [
     load: () => import('./same-sound') },
   { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A', section: 'reading',
     load: () => import('./tricky-words') },
+  { path: 'read-and-point', name: 'Read and Point', emoji: '👉', what: 'Find the sight words in a story', tone: '#5E8FD6', section: 'reading',
+    load: () => import('./read-and-point') },
   { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF', section: 'reading',
     load: () => import('./sound-rocket') },
   { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E', section: 'reading',

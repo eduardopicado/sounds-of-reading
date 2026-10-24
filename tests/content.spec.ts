@@ -8,7 +8,7 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
-  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY,
+  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY, ALL_STORIES, type Story,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
@@ -24,6 +24,8 @@ import { wanted } from '../tools/make-audio';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
 import { NOT_BY_CHANCE } from '../src/content/words';
+import { huntFor, pieces as storyPieces, sightCounts } from '../src/content/stories';
+import { sightSetsUpTo, sightWordsIn } from '../src/content/sight';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
 
@@ -574,6 +576,56 @@ describe('commentary', () => {
 
   it('shows no blocked word', () => {
     expect(ALL_COMMENTARY.filter((l) => wordsOf(l.text).some((w) => blocked(w))).map((l) => l.text)).toEqual([]);
+  });
+});
+
+/* ── Read and Point ─────────────────────────────────────────────────────── */
+
+describe('read and point stories', () => {
+  const readableAt = new Map<string, number>();
+  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level));
+  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level ?? 8));
+  const wordsOf = (s: Story) => `${s.title} ${s.text}`.toLowerCase().match(/[a-z]+/g) ?? [];
+
+  /* the point is to read it together; a word he cannot read yet turns it
+     back into decoding, or guessing */
+  it('use only words he can read, from the lists or the sight words, the title too', () => {
+    const unknown = ALL_STORIES.flatMap((s) => wordsOf(s).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${s.title}"`));
+    expect(unknown).toEqual([]);
+  });
+
+  it('are each at the level of their hardest word, no earlier and no later', () => {
+    const wrong = ALL_STORIES.filter((s) => Math.max(1, ...wordsOf(s).map((w) => readableAt.get(w) ?? 9)) !== s.level)
+      .map((s) => `${s.title} @${s.level}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('come two to a level at least, from 1 to 8', () => {
+    for (let level = 1; level <= 8; level += 1) {
+      expect(ALL_STORIES.filter((s) => s.level === level).length, `level ${level}`).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('each have a sight word of their level to hunt for, more than once', () => {
+    for (const s of ALL_STORIES) {
+      const sight = sightWordsIn(sightSetsUpTo([s.level]));
+      for (let n = 0; n < 10; n += 1) {
+        const target = huntFor(s, sight);
+        expect(target, s.title).not.toBeNull();
+        expect(sightCounts(s, sight).get(target!), `${target} in ${s.title}`).toBeGreaterThanOrEqual(2);
+      }
+    }
+  });
+
+  it('cut into words without losing a letter or a mark', () => {
+    for (const s of ALL_STORIES) {
+      expect(storyPieces(s).map((p) => p.lead + p.text + p.tail).join(' ')).toBe(s.text);
+      expect(s.sentences.join(' ')).toBe(s.text);
+    }
+  });
+
+  it('show no blocked word', () => {
+    expect(ALL_STORIES.filter((s) => wordsOf(s).some((w) => blocked(w))).map((s) => s.title)).toEqual([]);
   });
 });
 
