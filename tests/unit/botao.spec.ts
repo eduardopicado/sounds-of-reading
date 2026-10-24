@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BALL, BOTAO_STEPS, KEEPER_W, L, MARKS, MAX_SPEED, MOUTH, POST, PULL, R, W,
+  BALL, BOTAO_STEPS, KEEPER_W, L, MARKS, MAX_SPEED, MOUTH, NET, POST, PULL, R, W,
   angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, simulate, slant,
   type Point, type Table,
 } from '../../src/content/botao';
@@ -136,10 +136,46 @@ describe('the table', () => {
     expect(shot.goal).toBe(false);
   });
 
-  it('keeps a button out of the goal and on the table', () => {
+  it('has no wall across a goal mouth: a button sent at the goal goes in and stops against the net', () => {
     const t = table({ x: 5, y: 85 }, [{ x: MID, y: 20 }]);
+    const shot = simulate(t, { button: 0, vx: 0, vy: -MAX_SPEED });
+    const way = shot.frames.map((f) => f[1].y);
+    /* in past the line, as far as the back of the net, and no bounce back off the line */
+    expect(Math.min(...way)).toBeLessThan(0.5);
+    expect(Math.min(...way)).toBeGreaterThanOrEqual(-NET + R - 0.01);
+    expect(shot.end.us[0].y).toBeLessThan(R - 2);
+    expect(shot.end.us[0].x).toBeCloseTo(MID, 6);
+  });
+
+  it('keeps a button on the table beside the goal: the rim is a wall there', () => {
+    const t = table({ x: MID, y: 85 }, [{ x: 8, y: 20 }]);
     const end = simulate(t, { button: 0, vx: 0, vy: -MAX_SPEED }).end;
     expect(end.us[0].y).toBeGreaterThanOrEqual(R - 0.01);
+    expect(end.us[0].y).toBeGreaterThan(R + 2);
+  });
+
+  it('has an open goal at the far end too: the ball in there is an own goal, not a bounce', () => {
+    const t = table({ x: MID, y: 80 }, [{ x: MID, y: 68 }]);
+    const shot = simulate(t, { button: 0, vx: 0, vy: 100 });
+    expect(shot.own).toBe(true);
+    expect(shot.goal).toBe(false);
+    expect(shot.bounces).toEqual([]);
+    expect(shot.end.ball.y).toBeGreaterThan(L);
+    expect(shot.end.ball.y).toBeLessThanOrEqual(L + NET - BALL + 0.01);
+    /* and a button sent in there on its own stops against that net */
+    const alone = simulate(table({ x: 5, y: 10 }, [{ x: MID, y: 75 }]), { button: 0, vx: 0, vy: MAX_SPEED });
+    const way = alone.frames.map((f) => f[1].y);
+    expect(Math.max(...way)).toBeGreaterThan(L - 0.5);
+    expect(Math.max(...way)).toBeLessThanOrEqual(L + NET - R + 0.01);
+    expect(alone.own).toBe(false);
+  });
+
+  it('scores no own goal from a shot at his own end that misses the mouth', () => {
+    const t = table({ x: 10, y: 80 }, [{ x: 10, y: 68 }]);
+    const shot = simulate(t, { button: 0, vx: 0, vy: 100 });
+    expect(shot.own).toBe(false);
+    expect(shot.bounces.length).toBeGreaterThan(0);
+    expect(shot.end.ball.y).toBeLessThanOrEqual(L - BALL + 0.01);
   });
 });
 

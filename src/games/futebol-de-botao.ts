@@ -152,10 +152,9 @@ function pitch(): SVGGElement {
   const [left, right] = MOUTH;
   const net = goalNet();
   net.classList.add('ours');
-  /* the other side's goal at the bottom, the top one turned round. It is
-     only to look at: he always attacks the top, and the bottom of the
-     table stays a wall, so a ball that gets there comes back */
-  const theirs = svg('g', { class: 'bt-goal-far', transform: `translate(0 ${L}) scale(1 -1)` }, goalNet(), goalFrame());
+  /* his own goal at the bottom, the top one turned round: he always attacks
+     the top, but this one is open too, and a ball that goes in is an own goal */
+  const theirs = svg('g', { class: 'bt-goal-far', transform: FAR }, goalNet());
   /* mown stripes across the felt */
   const stripes = Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' }));
   return svg('g', {},
@@ -204,6 +203,9 @@ function ends(): SVGElement[] {
   });
 }
 
+/** the far end, drawn as the top one turned round */
+const FAR = `translate(0 ${L}) scale(1 -1)`;
+
 /** the goal's frame: the uprights standing on the line, their round feet
     where the ball hits a post, and the crossbar across their tops. Drawn
     over the ball, so a ball in the net is behind the crossbar */
@@ -246,15 +248,17 @@ function build(kit: Kit) {
   /* the angles the ball comes off the rim at */
   const marks = svg('g', { class: 'bt-marks' });
   const field = pitch();
-  board.append(shading(), field, trail, path, ghost, keeperEl, discs, ballEl, goalFrame(), marks, band, arrow);
-  /* the net shakes when the ball goes in */
-  const net = field.querySelector('.bt-net.ours')!;
-  const bulge = (): void => {
+  board.append(shading(), field, trail, path, ghost, keeperEl, discs, ballEl,
+    goalFrame(), svg('g', { class: 'bt-goal-far', transform: FAR }, goalFrame()), marks, band, arrow);
+  /* a net shakes when the ball goes in */
+  const bulge = (net: Element): void => {
     net.classList.remove('bulge');
     void net.getBoundingClientRect();
     net.classList.add('bulge');
     kit.life.later(() => net.classList.remove('bulge'), 900);
   };
+  const ourNet = field.querySelector('.bt-net.ours')!;
+  const ownNet = field.querySelector('.bt-goal-far .bt-net')!;
   const showMe = el('button', { class: 'btn ghost small', type: 'button', text: '👀 Show me a way' }) as HTMLButtonElement;
   const node = el('div', { class: 'mx-stage bt-stage' }, tell, touchesEl, el('div', { class: 'bt-wrap' }, board), showMe);
 
@@ -292,7 +296,8 @@ function build(kit: Kit) {
       const tick = (): void => {
         const i = Math.min(shot.frames.length - 1, Math.floor((performance.now() - start) / (1000 / 60)));
         frame(t, shot.frames[i]);
-        if (shot.goal && !netted && shot.frames[i][0].y + BALL < 0) { netted = true; bulge(); }
+        if (shot.goal && !netted && shot.frames[i][0].y + BALL < 0) { netted = true; bulge(ourNet); }
+        if (shot.own && !netted && shot.frames[i][0].y - BALL > L) { netted = true; bulge(ownNet); }
         for (; heard < shot.bumps.length && shot.bumps[heard].frame <= i; heard += 1) {
           const what = shot.bumps[heard].what;
           if (what === 'touch') sfx.clack();
@@ -396,7 +401,10 @@ function build(kit: Kit) {
   }
 
   /** where the ball would go: all the way, or only the start of it, with the
-      angles it would come off the rim at in the part that shows */
+      angles it would come off the rim at in the part that shows. The short
+      way still goes as far as the wall when the ball would come off it, so
+      the angles there are always on show while he aims, and change as he
+      does */
   function drawGuide(t: Table, f: Flick, guide: BotaoStep['guide']): void {
     if (guide === 'none') { path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
     const shot = simulate(t, f);
@@ -408,6 +416,8 @@ function build(kit: Kit) {
         if (prev) gone += Math.sqrt((fr[0].x - prev.x) ** 2 + (fr[0].y - prev.y) ** 2);
         if (gone > 16) { shown = i - 1; break; }
       }
+      const wall = shot.bounces[0];
+      if (wall) shown = Math.max(shown, wall.frame);
     }
     const ballWay = wayOf(shot, shown);
     path.setAttribute('points', ballWay.length > 1 ? line(ballWay) : '');
@@ -520,6 +530,7 @@ function build(kit: Kit) {
         showBounces(shot);
         const off = shot.bounces.length ? ` ${bounceWords(shot.bounces[0])}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
+        if (shot.own) { void demo('Own goal! That one went into your own net.'); return; }
         if (shot.goal) {
           node.dataset.goal = 'scored';
           sfx.cheer();
