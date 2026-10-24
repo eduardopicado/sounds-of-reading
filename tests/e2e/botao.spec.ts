@@ -134,6 +134,41 @@ test.describe('Futebol de Botão', () => {
     noProblems(watch);
   });
 
+  test('off the wall, while he aims: the angles are on show, and move as he turns his aim', async ({ page }) => {
+    const watch = watchPage(page);
+    await start(page, 3);
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-guide', 'short');
+    const [shot] = await plan(page);
+    const { x, y, scale } = await onScreen(page, shot.button);
+    const pull = (f: Flick): { x: number; y: number } => ({ x: x - (f.vx / PULL) * scale, y: y - (f.vy / PULL) * scale });
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    const there = pull(shot);
+    await page.mouse.move(there.x, there.y, { steps: 6 });
+    /* held, not let go: where it would come off the wall, and the same angle each side */
+    const degrees = page.locator('.bt-marks .bt-deg');
+    await expect(degrees).toHaveCount(2);
+    const [into, out] = await degrees.allTextContents();
+    expect(into).toMatch(/^\d+°$/);
+    expect(out).toBe(into);
+    const wall = await page.locator('.bt-marks .bt-wall-mark').getAttribute('d');
+    /* turned a little: the ball meets the wall somewhere else, still at the same angle each side */
+    const turn = 4 * Math.PI / 180;
+    const turned = { ...shot, vx: shot.vx * Math.cos(turn) - shot.vy * Math.sin(turn), vy: shot.vx * Math.sin(turn) + shot.vy * Math.cos(turn) };
+    const moved = pull(turned);
+    await page.mouse.move(moved.x, moved.y, { steps: 3 });
+    await expect(page.locator('.bt-marks .bt-wall-mark')).not.toHaveAttribute('d', wall!);
+    await expect(degrees).toHaveCount(2);
+    const [into2, out2] = await degrees.allTextContents();
+    expect(out2).toBe(into2);
+    /* back on the button and let go: no flick */
+    await page.mouse.move(x, y, { steps: 4 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-touches', '0');
+    noProblems(watch);
+  });
+
   test('off the wall, shown: the angles it will bounce at before the flick, and after it', async ({ page }) => {
     const watch = watchPage(page);
     await start(page, 3);
