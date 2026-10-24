@@ -40,20 +40,24 @@ export interface PlacedStroke {
 
 export interface Layout { width: number; glyphs: { g: Glyph; dx: number }[]; strokes: PlacedStroke[] }
 
-/** one or two letters side by side (A then a) */
-export function layout(item: string): Layout {
+/** the room between the letters of a word: closer than between A and a,
+    the way they sit in a word he writes */
+export const WORD_GAP = 4;
+
+/** one or two letters side by side (A then a), or a whole word with `gap` WORD_GAP */
+export function layout(item: string, gap = GAP): Layout {
   let x = 0;
   const glyphs = [...item].map((ch) => {
     const g = glyph(ch);
     const at = { g, dx: x };
-    x += g.width + GAP;
+    x += g.width + gap;
     return at;
   });
   const strokes = glyphs.flatMap(({ g, dx }) => g.strokes.map((d, i) => {
     const points = samplePath(d).map((p) => ({ x: p.x + dx, y: p.y }));
     return { d, dx, points, dot: points.length === 1, n: i + 1 };
   }));
-  return { width: x - GAP, glyphs, strokes };
+  return { width: x - gap, glyphs, strokes };
 }
 
 /** the four lines: head, waist (dashed), base (strongest) and tail */

@@ -46,7 +46,7 @@ sight word sets.
 
 | Game | What the child does |
 |---|---|
-| **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. |
+| **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. A switch at the top turns to whole sight words at his level, traced letter after letter, and he can write in pencil, crayon, paint, chalk on a blackboard, or sand. |
 | **Tall, Small, Tail** | Sorts letters by where they sit on the lines, then finds every b among b d p q. |
 
 ### Maths

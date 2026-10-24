@@ -273,32 +273,20 @@ export function createSetup(o: SetupOptions): Setup {
   }
 
   let switchNode: HTMLElement | null = null;
-  let switchButtons: HTMLButtonElement[] = [];
   function showKind(): void {
     soundsRow.hidden = kind === 'sight';
     if (kind === 'sight') pickers.hidden = true;
     setRow.hidden = kind !== 'sight';
-    for (const b of switchButtons) b.setAttribute('aria-pressed', String(b.dataset.kind === kind));
-    switchNode?.setAttribute('data-kind', kind);
   }
   if (o.sight) {
     const game = o.sight;
     drawSets();
-    switchButtons = ([['phonics', '🔤 Phonics'], ['sight', '👀 Sight words']] as const).map(([value, text]) =>
-      el('button', {
-        type: 'button', class: 'kind-btn', text, 'aria-pressed': 'false', dataset: { kind: value },
-        on: {
-          click: () => {
-            if (kind === value) return;
-            sfx.tap();
-            kind = value;
-            write(`words:${game}`, kind);
-            showKind();
-            o.onChange();
-          },
-        },
-      }));
-    switchNode = el('div', { class: 'kind-switch', role: 'group', 'aria-label': 'Which words' }, ...switchButtons);
+    switchNode = kindSwitch([['phonics', '🔤 Phonics'], ['sight', '👀 Sight words']], kind, (value) => {
+      kind = value;
+      write(`words:${game}`, kind);
+      showKind();
+      o.onChange();
+    });
   }
 
   const panel = el('div', { class: 'panel', hidden: 'hidden' }, ...(o.extra ?? []),
@@ -315,6 +303,33 @@ export function createSetup(o: SetupOptions): Setup {
     sightSets: () => SIGHT_SETS.filter((name) => sets.includes(name)),
     switchNode,
   };
+}
+
+/* ── a two-way switch ─────────────────────────────────────────────────── */
+
+/**
+ * One pill with two halves, at the top of a game that can play two kinds of
+ * thing: phonics or sight words, letters or whole words. Always on show, so
+ * it is clear which is on.
+ */
+export function kindSwitch<T extends string>(choices: readonly (readonly [T, string])[], value: T, onPick: (value: T) => void,
+  label = 'Which words'): HTMLElement {
+  let now = value;
+  const buttons = choices.map(([v, text]) => el('button', {
+    type: 'button', class: 'kind-btn', text, 'aria-pressed': String(v === now), dataset: { kind: v },
+    on: {
+      click: () => {
+        if (v === now) return;
+        sfx.tap();
+        now = v;
+        for (const b of buttons) b.setAttribute('aria-pressed', String(b.dataset.kind === now));
+        node.dataset.kind = now;
+        onPick(v);
+      },
+    },
+  }));
+  const node = el('div', { class: 'kind-switch', role: 'group', 'aria-label': label, dataset: { kind: now } }, ...buttons);
+  return node;
 }
 
 /* ── win overlay ──────────────────────────────────────────────────────── */
