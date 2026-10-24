@@ -6,7 +6,7 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, STORIES,
   type SoundSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
@@ -250,6 +250,26 @@ export const ALL_COMMENTARY: CommentaryLine[] = COMMENTARY.map((raw) => {
   if (!'!?.'.includes(last)) throw new ContentError(`commentary: "${text}" must end with ! ? or .`);
   const mood: Mood = last === '!' ? 'excited' : last === '?' ? 'asking' : 'calm';
   return { text, chunks, level: Number(m[2]) as Level, mood };
+});
+
+/** a little story for Read and Point */
+export interface Story {
+  title: string;
+  /** the whole story, as written */
+  text: string;
+  /** its sentences, for reading it aloud one at a time */
+  sentences: string[];
+  /** the highest level of any word in it */
+  level: Level;
+}
+
+export const ALL_STORIES: Story[] = STORIES.map((raw) => {
+  const m = /^(.*?)\s*\|\s*(.*\S)\s+@([1-8])$/.exec(raw.trim());
+  if (!m) throw new ContentError(`story: "${raw}" needs a title, a | and a level at the end, like @3`);
+  const text = m[2];
+  /* a sentence ends at . ! or ?, with any closing quote that goes with it */
+  const sentences = text.split(/(?<=[.!?]["”]?)\s+/).filter(Boolean);
+  return { title: m[1], text, sentences, level: Number(m[3]) as Level };
 });
 
 /* every word mapped to the words it sounds exactly like */

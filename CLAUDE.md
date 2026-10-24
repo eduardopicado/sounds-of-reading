@@ -74,6 +74,9 @@ src/content/big-words.ts two-syllable words from words.ts, each level worked out
 src/content/sight.ts   sight words for the games with the Phonics / Sight words
                        switch: the sets for his level, lookalikes, a board with
                        no sound-alike twins, letter tiles that cannot spell one
+src/content/stories.ts Read and Point: the stories (STORIES in words.ts, every
+                       word readable at the story's level) cut into words to
+                       tap, and the sight word to hunt for in each
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
 src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
