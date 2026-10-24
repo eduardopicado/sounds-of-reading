@@ -6,6 +6,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { noProblems, openGame, openSetup, watchPage } from './helpers';
+import { sightSetsUpTo, sightWordsIn } from '../../src/content/sight';
 
 type Pt = { x: number; y: number };
 
@@ -64,9 +65,9 @@ const where = (page: Page): Promise<string> => page.evaluate(() => {
 });
 
 /** trace whatever comes next until the round is over */
-async function writeRound(page: Page, draw = drawWithMouse): Promise<void> {
+async function writeRound(page: Page, draw = drawWithMouse, most = 80): Promise<void> {
   const results = page.locator('.results');
-  for (let guard = 0; guard < 80; guard += 1) {
+  for (let guard = 0; guard < most; guard += 1) {
     await expect(page.locator('.tr-pad.good')).toHaveCount(0);
     if (await results.isVisible()) return;
     const before = await where(page);
@@ -94,6 +95,66 @@ test.describe('Trace It', () => {
     await expect(page.locator('.tr-results li.miss')).toHaveCount(0);
     /* writing earns a sticker of its own */
     await expect(page.locator('.results .sticker')).toHaveText('✏️');
+    noProblems(watch);
+  });
+
+  test('whole sight words: the switch turns to words at his level, each traced letter by letter', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'trace-it');
+    const kinds = page.getByRole('group', { name: 'Letters or words' });
+    await expect(kinds.getByRole('button', { name: '✏️ Letters' })).toHaveAttribute('aria-pressed', 'true');
+    await kinds.getByRole('button', { name: '👀 Sight words' }).click();
+    await expect(page.locator('.score')).toContainText('Word 1 of 4');
+    /* the default week is levels 4 and 5 */
+    const sight = new Set(sightWordsIn(sightSetsUpTo([4, 5])).map((w) => w.text));
+    const word = (await page.locator('.tr-big').first().textContent())!;
+    expect(sight.has(word), word).toBe(true);
+    await expect(page.locator('.tr-pad')).toHaveAttribute('aria-label', `Writing lines with the word ${word} to trace`);
+    /* four words, two goes each: drawn as a pen in the page, which is quick */
+    await writeRound(page, drawWithPen, 240);
+    await expect(page.locator('.results h2')).toContainText('Words you wrote');
+    const written = await page.locator('.tr-results .tr-big').allTextContents();
+    expect(written).toHaveLength(4);
+    for (const w of written) expect(sight.has(w), w).toBe(true);
+    await expect(page.locator('.tr-results li.miss')).toHaveCount(0);
+    /* no letter-family sheet to print for words */
+    await expect(page.getByRole('button', { name: '🖨 Print a practice sheet' })).toBeHidden();
+    /* remembered on this device */
+    await page.reload();
+    await expect(kinds.getByRole('button', { name: '👀 Sight words' })).toHaveAttribute('aria-pressed', 'true');
+    noProblems(watch);
+  });
+
+  test('writes with pencil, crayon, paint, chalk or sand, and remembers which', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'trace-it');
+    const tools = page.getByRole('group', { name: 'Write with' });
+    await expect(tools.getByRole('button', { name: 'Pencil' })).toHaveAttribute('aria-pressed', 'true');
+    const look = () => page.evaluate(() => ({
+      pad: getComputedStyle(document.querySelector('.tr-pad')!).backgroundColor,
+      ink: getComputedStyle(document.querySelector('.tr-ink')!).stroke,
+    }));
+    const pencil = await look();
+    await tools.getByRole('button', { name: 'Chalk' }).click();
+    await expect(page.locator('.tr-board')).toHaveAttribute('data-tool', 'chalk');
+    const chalk = await look();
+    /* a blackboard, and chalk with grain in it */
+    expect(chalk.pad).toBe('rgb(34, 56, 47)');
+    expect(chalk.ink).toContain('tr-tex-chalk');
+    expect(chalk.pad).not.toBe(pencil.pad);
+    /* the stroke he writes stays in chalk (a word has more than one, so it stays on the page) */
+    await page.getByRole('group', { name: 'Letters or words' }).getByRole('button', { name: '👀 Sight words' }).click();
+    await drawWithMouse(page, await strokeOnScreen(page));
+    await expect(page.locator('.tr-inked')).toHaveCount(1);
+    expect(await page.evaluate(() => getComputedStyle(document.querySelector('.tr-inked')!).stroke)).toContain('tr-tex-chalk');
+    for (const [name, tex] of [['Crayon', 'tr-tex-crayon'], ['Sand', 'tr-tex-sand']] as const) {
+      await tools.getByRole('button', { name }).click();
+      expect((await look()).ink).toContain(tex);
+    }
+    await tools.getByRole('button', { name: 'Paint' }).click();
+    expect((await look()).ink).toBe('rgb(123, 63, 196)');
+    await page.reload();
+    await expect(page.getByRole('group', { name: 'Write with' }).getByRole('button', { name: 'Paint' })).toHaveAttribute('aria-pressed', 'true');
     noProblems(watch);
   });
 
