@@ -1644,6 +1644,12 @@
   font-family: var(--reading); font-weight: 700; font-size: 30px;
 }
 .bw-tile:disabled { opacity: .45; cursor: default; }
+/* sight words in Build the Word: letters like fridge magnets, each in its
+   own bright plastic on a paper tile */
+.bw-tile.magnet {
+  background: var(--paper); color: var(--magnet); font-size: clamp(30px, 8vw, 42px);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .28); text-shadow: 0 2px 0 rgba(0, 0, 0, .16);
+}
 .bw-split { display: inline-flex; align-items: stretch; }
 .bw-letter { padding: 0 1px; }
 .bw-gap {

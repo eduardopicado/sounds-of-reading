@@ -34,65 +34,18 @@ import { sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
 import { marked, setMarked } from '../lib/highlight';
 import { ALL_SIGHT_WORDS, SIGHT_SETS, type SightWord } from '../content/index';
-import { tonesFor } from '../lib/colour';
+import { TRICKY, lookalikes, sightSetsUpTo } from '../content/sight';
 import { celebrate, chip, counter, resultsTray, scoreLine, topbar } from '../ui/components';
 import { pro, settings } from '../lib/settings';
-
-/* Tricky words practise no sound, so there is no sound's colour to borrow.
-   One tone stands for "this is the bit that lies", everywhere in the game. */
-const TRICKY = tonesFor(350);
 
 /** how long the word stays on screen before he has to remember it */
 const LOOK_MS = 1600;
 /** and in Pro mode, a glance: long enough to read a known word, not to sound one out */
 const PRO_LOOK_MS = 1000;
 
-/**
- * How easily one word could be mistaken for another.
- *
- * Shared letters matter more than order — a child reading "their" as "there"
- * is not misreading the sequence, he is seeing the same handful of letters in
- * a word of the same length. Length difference is a mild penalty rather than
- * a bar, so "who" can still sit beside "how".
- */
-function lookalike(a: string, b: string): number {
-  const bag = [...b];
-  let shared = 0;
-  for (const ch of a) {
-    const i = bag.indexOf(ch);
-    if (i >= 0) { shared += 1; bag.splice(i, 1); }
-  }
-  return shared / Math.max(a.length, b.length) - Math.abs(a.length - b.length) * 0.05;
-}
-
-/** the three words most easily confused with this one */
-function distractors(target: SightWord, pool: SightWord[]): SightWord[] {
-  return pool
-    .filter((w) => w.text !== target.text)
-    .map((w) => ({ w, score: lookalike(target.text, w.text) }))
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3)
-    .map((x) => x.w);
-}
-
-/**
- * The school's sets up to the child's level, since sight words build up the
- * same way the sounds do: a level 5 child is still meeting the level 1 words.
- * The extra set outside the school list waits until a parent turns it on.
- */
-function startingSets(): string[] {
-  const levels = settings().levels;
-  const upTo = levels.length ? Math.max(...levels) : 8;
-  const sets = SIGHT_SETS.filter((name) => {
-    const level = ALL_SIGHT_WORDS.find((w) => w.set === name)?.level;
-    return level != null && level <= upTo;
-  });
-  return sets.length ? sets : SIGHT_SETS.slice(0, 1);
-}
-
 export function mount(root: HTMLElement): () => void {
   const life = lifetime();
-  let chosen: string[] = startingSets();
+  let chosen: string[] = sightSetsUpTo(settings().levels);
 
   const setRow = el('div', { class: 'row' });
   const lenSel = el('select', { 'aria-label': 'How many words' },
@@ -210,7 +163,7 @@ export function mount(root: HTMLElement): () => void {
   function drawChoices(word: SightWord): void {
     choices.replaceChildren();
     choices.style.gridTemplateColumns = 'repeat(2, 1fr)';
-    const options = shuffle([word, ...distractors(word, pool())]);
+    const options = shuffle([word, ...lookalikes(word, pool(), 3)]);
     for (const option of options) {
       const btn = el('button', {
         class: 'bin choice', type: 'button', vars: { '--tone': TRICKY.light },

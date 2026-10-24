@@ -391,10 +391,11 @@ describe('words that sound alike', () => {
   });
 
   /* A game that says a word and asks him to find it written has no right
-     answer if its twin is on screen too. This names any pair missing. */
-  it('lists every pair of real words that are said the same way', () => {
+     answer if its twin is on screen too. This names any pair missing,
+     among the sight words as well: Bingo and Build the Word say those too. */
+  it('lists every pair of real words and sight words that are said the same way', () => {
     const byVoice = new Map<string, Set<string>>();
-    for (const w of REAL_WORDS) {
+    for (const w of [...REAL_WORDS, ...ALL_SIGHT_WORDS]) {
       const key = sayAustralian(w.text);
       if (!key) continue;
       byVoice.set(key, (byVoice.get(key) ?? new Set()).add(w.text.toLowerCase()));
@@ -412,7 +413,7 @@ describe('words that sound alike', () => {
   });
 
   it('lists only words that are in the content', () => {
-    const known = new Set(REAL_WORDS.map((w) => w.text.toLowerCase()));
+    const known = new Set([...REAL_WORDS, ...ALL_SIGHT_WORDS].map((w) => w.text.toLowerCase()));
     const stray = SOUNDS_ALIKE.flatMap((line) => line.split(/\s+/)).filter((w) => w && !known.has(w));
     expect(stray).toEqual([]);
   });
