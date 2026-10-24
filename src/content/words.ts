@@ -653,7 +653,7 @@ export const STORIES: string[] = [
   'I Spin | I spin and I spin. I spin as the ants spin. I tip, and I sit. I sit on the ants! No! The ants nip me. @1',
   'The Big Kick | The kid can run. He can kick. He did a big kick, and it went up, up, up! It went in the net. Yes! The kid is top dog. @2',
   'The Duck | A duck sat on a rock in the pond. A dog went to the pond. The dog can not get the duck. The duck went up! What a sad dog. The dog sat in the mud. @2',
-  'The Fox and the Frog | A fox and a frog sat on a log. The frog can jump and hop. The fox can run fast. They want to win. Then the frog fell in the pond! The fox will help him. He got the frog back on the log. @3',
+  'The Fox and the Frog | A fox and a frog sat on a log. The frog can jump and hop. The fox can run fast. They are off! Then the frog fell in the pond! The fox will help him. He got the frog back on the log. @3',
   'My Big Box | I have a big box. What is in the box? A hat, a bat and a bell. I put the hat on. I hit the bell with the bat. It is fun! Then I put them back in the box. @3',
   'Lunch at the Shop | We went to the shop for lunch. I had some fish. Which fish do you like? I like the thick one. There is a shell in my dish! It was so much fun. @4',
   'The Long Shot | Who has it? He has it! He can run so fast. He is at the box. A long shot, and it is in! What a shot! I wish I had a shot like that. @4',
