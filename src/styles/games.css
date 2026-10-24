@@ -832,6 +832,45 @@
 @keyframes tr-write { to { stroke-dashoffset: 0; } }
 @keyframes tr-dot { to { opacity: 1; } }
 
+/* what he writes with: a chip each, with a swatch of the stuff */
+.tr-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tr-tool {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 12px;
+  border-radius: 99px; border: 2px solid rgba(255, 246, 231, .45); background: transparent; color: var(--on-deep);
+  font: 700 15px var(--reading); cursor: pointer;
+}
+.tr-tool[aria-pressed="true"] { background: var(--mustard); border-color: var(--mustard); color: var(--deep-2); }
+.tr-swatch { width: 18px; height: 18px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .7); }
+.tr-tool[data-tool="pencil"] .tr-swatch { background: #1D5FD1; }
+.tr-tool[data-tool="crayon"] .tr-swatch { background: #D9432F; }
+.tr-tool[data-tool="paint"] .tr-swatch { background: #7B3FC4; }
+.tr-tool[data-tool="chalk"] .tr-swatch { background: radial-gradient(circle, #fff 35%, #22382F 40%); }
+.tr-tool[data-tool="sand"] .tr-swatch { background: #E3C084; }
+
+/* crayon and paint on paper; chalk on a blackboard; a finger through sand.
+   The grain is a pattern made once (trace-it.ts), so strokes cost no more
+   to draw than pencil does */
+.tr-board[data-tool="crayon"] .tr-ink, .tr-board[data-tool="crayon"] .tr-inked { stroke: url(#tr-tex-crayon); stroke-width: 10; }
+.tr-board[data-tool="crayon"] .tr-inked.dot { fill: url(#tr-tex-crayon); stroke: none; }
+.tr-board[data-tool="paint"] .tr-ink, .tr-board[data-tool="paint"] .tr-inked { stroke: #7B3FC4; stroke-width: 14; }
+.tr-board[data-tool="paint"] .tr-inked.dot { fill: #7B3FC4; stroke: none; }
+.tr-board[data-tool="chalk"] .tr-pad { background: #22382F; }
+.tr-board[data-tool="chalk"] .wl { stroke: rgba(255, 255, 255, .32); }
+.tr-board[data-tool="chalk"] .wl.base { stroke: rgba(255, 255, 255, .6); }
+.tr-board[data-tool="chalk"] .tr-track.solid { stroke: rgba(255, 255, 255, .16); }
+.tr-board[data-tool="chalk"] .tr-track.dots { stroke: rgba(255, 255, 255, .6); }
+.tr-board[data-tool="chalk"] .tr-track.dot { fill: rgba(255, 255, 255, .35); }
+.tr-board[data-tool="chalk"] .tr-ink, .tr-board[data-tool="chalk"] .tr-inked { stroke: url(#tr-tex-chalk); stroke-width: 9; }
+.tr-board[data-tool="chalk"] .tr-inked.dot { fill: url(#tr-tex-chalk); stroke: none; }
+.tr-board[data-tool="sand"] .tr-pad { background: #E9CD95; }
+.tr-board[data-tool="sand"] .wl { stroke: rgba(110, 72, 30, .4); }
+.tr-board[data-tool="sand"] .wl.base { stroke: rgba(110, 72, 30, .7); }
+.tr-board[data-tool="sand"] .tr-track.solid { stroke: rgba(110, 72, 30, .16); }
+.tr-board[data-tool="sand"] .tr-ink, .tr-board[data-tool="sand"] .tr-inked { stroke: url(#tr-tex-sand); stroke-width: 12; }
+.tr-board[data-tool="sand"] .tr-inked.dot { fill: url(#tr-tex-sand); stroke: none; }
+/* a stroke that missed is red whatever it was written with */
+.tr-board[data-tool] .tr-ink.wrong { stroke: var(--tomato); }
+
 .tr-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; }
 .tr-note.oops { color: var(--mustard); font-weight: 700; }
 .tr-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
