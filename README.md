@@ -31,6 +31,7 @@ sight word sets.
 | **Sentence Smash** | Picks a phrase from each of four rows and hears the silly sentence read back. |
 | **Same Sound, Two Ways** | Hears a word with its vowel missing and chooses the spelling: ai or ay, oi or oy. |
 | **Tricky Words** | Sees a sight word for a moment, then finds it among four lookalikes. |
+| **Read and Point** | Reads a little story at his level with a grown-up and taps the sight words in it, as his teacher suggests with a picture book: every copy of one word ("Find every the", with a count), or every sight word up to his level. A wrong tap says the word he tapped; "Read it to me" reads the story a sentence at a time, the sentence lit. |
 | **Sound Rocket** | Steers a rocket to catch falling words with the sound and dodge the rest. |
 | **Penalty Shootout** | Reads the word to score past the keeper, then hears one and dives to save it. |
 | **Pass and Shoot** | Passes along a line of players, one sound each, then shoots at the word he blended. |
@@ -154,7 +155,7 @@ plays as the team he picks there.
 The school's eight-level program, from `s a t p i n` up to `aw air are ear eer
 ore dge tch`, plus `ph` from the class sound sheet. 78 sounds a child can
 practise, about 1,000 real words, 700 silly ones, 50 word families, 170
-sentence phrases, 135 tricky words and 60 two-syllable words.
+sentence phrases, 135 tricky words, 60 two-syllable words and 16 short stories.
 
 Levels are cumulative, so every word carries the level a child needs to decode
 it — not just the level of the sound it practises. "phone" practises `ph` from
