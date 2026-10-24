@@ -487,6 +487,13 @@ describe('pass and shoot', () => {
     expect(cut('catch')).toBe('c a tch');
   });
 
+  /* ve says v at the end of a word, and is only ever there */
+  it('takes ve as one sound at the end of a word, and nowhere else', () => {
+    expect(cut('curve')).toBe('c ur ve');
+    expect(cut('vet')).toBe('v e t');
+    expect(cut('oven')).toBeNull();
+  });
+
   /* a player can hold one sound, and a word of two syllables or a split
      spelling would need a guess to cut, so the game never gets one */
   it('leaves out what it cannot cut without guessing', () => {
