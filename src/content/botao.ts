@@ -255,6 +255,21 @@ export function slant(way: Point, normal: Point): number {
 /** the angle the ball went into the wall at, and the angle it came off at */
 export const angles = (b: Bounce): [number, number] => [slant(b.into, b.normal), slant(b.out, b.normal)];
 
+/**
+ * The one bounce whose angles he is shown: the ball's first off the rim, when
+ * the button he flicked sent it there with nothing else touching it on the
+ * way. A ball that glances off another button, a post or the goleiro first
+ * still comes off the wall at the angle it went in, but its way has a corner
+ * he did not make and cannot see the reason for, so its angles would only
+ * puzzle him. A second bounce adds clutter and nothing new.
+ */
+export function shownBounce(shot: Shot, button: number): Bounce | null {
+  const first = shot.bounces[0];
+  if (!first) return null;
+  const before = shot.bumps.filter((b) => b.frame <= first.frame && b.what !== 'wall');
+  return before.length > 0 && before.every((b) => b.what === 'touch' && b.who === button) ? first : null;
+}
+
 /** what he is told about a bounce */
 export function bounceWords(b: Bounce): string {
   const [into, out] = angles(b);
