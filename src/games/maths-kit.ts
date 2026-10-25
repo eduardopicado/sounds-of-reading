@@ -185,7 +185,8 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
 
   const score = scoreLine(el('span', {}, pos.node, ' of ', totalEl), firsts.node, stepEl);
 
-  const node = el('div', { class: 'wrap' },
+  /* which game, so one can be styled on its own (Futebol de Botão's status bar) */
+  const node = el('div', { class: 'wrap', 'data-game': game.id },
     topbar({ title: game.title, swash: game.swash, tagline: game.tagline, onSetup: (open) => { panel.hidden = !open; } }),
     panel,
     score,

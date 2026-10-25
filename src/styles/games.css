@@ -2043,6 +2043,23 @@
 .ht-fig figcaption { color: var(--paper); font: 700 20px var(--display); }
 
 /* Futebol de Botão: the table is an SVG in table units, sized to fit the screen's height */
+/* the attack, the goals and the step on one bar, a part each */
+.wrap[data-game="futebol-de-botao"] .score {
+  display: grid; grid-template-columns: auto auto minmax(0, auto); align-items: center;
+  width: fit-content; max-width: 100%; margin: 4px auto 10px; padding: 3px 0;
+  border: 1px solid rgba(255, 246, 231, .22); border-radius: 16px; background: rgba(255, 246, 231, .07);
+}
+.wrap[data-game="futebol-de-botao"] .score > * { padding: 0 14px; text-align: center; }
+.wrap[data-game="futebol-de-botao"] .score > * + * { border-left: 1px solid rgba(255, 246, 231, .22); }
+.wrap[data-game="futebol-de-botao"] .score[hidden] { display: none; }
+@media (max-width: 400px) {
+  .wrap[data-game="futebol-de-botao"] .score > * { padding: 0 9px; }
+}
+/* Pro, as the handoff has it: a gold pill under the title */
+.wrap[data-game="futebol-de-botao"] .pro-badge {
+  display: block; width: fit-content; margin: 4px auto 0; padding: 2px 15px; border-radius: 30px;
+  font-size: 12px; font-weight: 800; letter-spacing: 2px;
+}
 .bt-stage { gap: 8px; }
 .bt-tell { margin: 0; }
 .bt-touches { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--paper); font: 700 18px var(--display); }
@@ -2051,17 +2068,26 @@
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
 /* the table's shape is VIEW in src/content/botao.ts, 70 wide and 112 long */
-.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .625)); width: min(100%, 600px, calc((100svh - 230px) * .625)); }
+/* the tray the table sits in, from the design handoff's demo: warm wood lit
+   from the top left, its edge, and its side showing below it */
+.bt-wrap {
+  width: min(100%, 600px, calc((100vh - 260px) * .625)); width: min(100%, 600px, calc((100svh - 260px) * .625));
+  border: 6px solid #A86B38; border-radius: 18px;
+  background: linear-gradient(115deg, #B77840, #D69B5D 18%, #8E502C 82%, #B67B45);
+  box-shadow: 0 7px 0 #764826, 0 12px 22px rgba(0, 0, 0, .25);
+}
 .bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 112; touch-action: none; user-select: none; -webkit-user-select: none; }
-/* the table: a wooden frame lit from above, its edge dropping to the felt,
-   mown stripes, the felt lit in the middle, the rim's shadow along the top
-   and the left (the gradients are in shading(), futebol-de-botao.ts) */
-.bt-wood { fill: url(#bt-woodshade); }
-.bt-wood-edge { fill: #4A2D12; }
-.bt-felt { fill: #2E8B4F; }
-.bt-stripe { fill: rgba(0, 0, 0, .07); }
-.bt-line { fill: none; stroke: rgba(255, 255, 255, .75); stroke-width: .4; }
-.bt-spot { fill: rgba(255, 255, 255, .8); }
+/* the table: where the wood drops to the felt, the felt mown in squares, lit
+   in the middle, the rim's shadow along the top and the left (the gradients
+   are in shading(), futebol-de-botao.ts), and the lines; the colours are the
+   handoff's pitch.svg */
+.bt-wood-edge { fill: #54361F; }
+.bt-felt-lip { fill: none; stroke: #BA8953; stroke-width: .3; }
+.bt-felt { fill: #369658; }
+.bt-stripe { fill: rgba(0, 0, 0, .12); }
+.bt-stripe.down { fill: rgba(0, 0, 0, .08); }
+.bt-line { fill: none; stroke: #E8EEE2; stroke-width: .43; }
+.bt-spot { fill: #E8EEE2; }
 /* the goal: the inside of the net darker towards the back, the frame
    standing up from the line, its shadow on the felt; the net shakes on a goal */
 .bt-net-turf { fill: #2A7F48; }
@@ -2091,6 +2117,9 @@
 .bt-keeper-shine { fill: url(#bt-blockshade); }
 .bt-keeper.moving { transition: transform .4s ease; }
 .bt-btn .bt-rim { stroke: rgba(0, 0, 0, .55); stroke-width: .5; }
+/* a button's side, in its rim's colour in shade */
+.bt-side { stroke: rgba(0, 0, 0, .6); stroke-width: .4; }
+.bt-side-shade { fill: rgba(0, 0, 0, .45); }
 .bt-bevel { fill: url(#bt-bevel); }
 .bt-face { stroke: rgba(0, 0, 0, .35); stroke-width: .3; }
 .bt-shine { fill: url(#bt-shine); }

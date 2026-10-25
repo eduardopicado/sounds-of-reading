@@ -66,6 +66,8 @@ const SHADOW = { x: 0.55, y: 0.85 } as const;
 const LIFT = 1.9;
 /** how much narrower the back of the net looks each side, being further away */
 const GOAL_BACK = 1.2;
+/** how far a button's side shows below its top */
+const DEPTH = 0.7;
 
 /** the shading laid over the table, the buttons, the ball and the goal: a
     highlight and a shade on top of any colour, so one set serves every team */
@@ -81,9 +83,8 @@ function shading(): SVGDefsElement {
     /* its rim: lit on the top left, in its own shade on the bottom right */
     linear('bt-bevel', [1, 1], [0, '#fff', 0.55], [42, '#fff', 0], [58, '#000', 0], [100, '#000', 0.5]),
     radial('bt-ballshade', [0, '#fff', 1], [50, '#f2f2f2', 1], [100, '#8c8c8c', 1]),
-    linear('bt-woodshade', [0, 1], [0, '#B07A43', 1], [100, '#6A421D', 1]),
     /* the felt, lit in the middle and darker towards the rim */
-    svg('radialGradient', { id: 'bt-feltlight', cx: '50%', cy: '42%', r: '72%' }, ...stops([0, '#fff', 0.12], [55, '#fff', 0], [100, '#000', 0.24])),
+    svg('radialGradient', { id: 'bt-feltlight', cx: '50%', cy: '42%', r: '72%' }, ...stops([0, '#fff', 0.12], [55, '#fff', 0], [100, '#000', 0.12])),
     /* the rim's shadow on the felt, along the top and down the left */
     linear('bt-rimdown', [0, 1], [0, '#000', 0.4], [100, '#000', 0]),
     linear('bt-rimright', [1, 0], [0, '#000', 0.4], [100, '#000', 0]),
@@ -99,13 +100,16 @@ function shading(): SVGDefsElement {
 /** a button's face, inside its rim */
 const FACE = R * 0.72;
 
-/** a button, raised off the felt: its shadow, the rim in a team's second
-    colour with a bevel, the face in its first with a shine, and on top the
-    crest a grown-up added for the team (src/lib/crests.ts), or its flag */
+/** a button, raised off the felt: its shadow, its side showing below it,
+    the rim in a team's second colour with a bevel, the face in its first
+    with a shine, and on top the crest a grown-up added for the team
+    (src/lib/crests.ts), or its flag. Its top is where the physics has it */
 function button(team: Team, cls: string): SVGGElement {
   const crest = crestOf(team.id);
   const g = svg('g', { class: `bt-btn ${cls}` },
-    svg('circle', { r: R, cx: SHADOW.x, cy: SHADOW.y, class: 'bt-shadow' }),
+    svg('circle', { r: R, cx: SHADOW.x, cy: SHADOW.y + DEPTH, class: 'bt-shadow' }),
+    svg('circle', { r: R, cy: DEPTH, fill: team.colours[1], class: 'bt-side' }),
+    svg('circle', { r: R, cy: DEPTH, class: 'bt-side-shade' }),
     svg('circle', { r: R, fill: team.colours[1], class: 'bt-rim' }),
     svg('circle', { r: R - 0.2, class: 'bt-bevel' }),
     svg('circle', { r: FACE, fill: team.colours[0], class: 'bt-face' }),
@@ -155,14 +159,19 @@ function pitch(): SVGGElement {
   /* his own goal at the bottom, the top one turned round: he always attacks
      the top, but this one is open too, and a ball that goes in is an own goal */
   const theirs = svg('g', { class: 'bt-goal-far', transform: FAR }, goalNet());
-  /* mown stripes across the felt */
-  const stripes = Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' }));
+  /* mown stripes across the felt and down it, so it is mown in squares */
+  const stripes = [
+    ...Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' })),
+    ...Array.from({ length: 3 }, (_, i) => svg('rect', { x: (2 * i + 1) * (W / 6), y: 0, width: W / 6, height: L, class: 'bt-stripe down' })),
+  ];
+  /* the wood is the tray the table sits in (.bt-wrap, games.css), so the
+     margin round the felt is left clear for it; here is only where the wood
+     drops to the felt, dark, with a pale line just inside it */
   return svg('g', {},
-    svg('rect', { x: VIEW.x, y: VIEW.y, width: VIEW.w, height: VIEW.h, rx: 3, class: 'bt-wood' }),
-    /* the rim's inner edge, where it drops to the felt */
-    svg('rect', { x: -0.9, y: -0.9, width: W + 1.8, height: L + 1.8, rx: 0.8, class: 'bt-wood-edge' }),
+    svg('rect', { x: -0.9, y: -0.9, width: W + 1.8, height: L + 1.8, rx: 0.4, class: 'bt-wood-edge' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, class: 'bt-felt' }),
     ...stripes,
+    svg('rect', { x: 0.15, y: 0.15, width: W - 0.3, height: L - 0.3, class: 'bt-felt-lip' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, fill: 'url(#bt-feltlight)' }),
     svg('rect', { x: 0, y: 0, width: W, height: 2.4, fill: 'url(#bt-rimdown)' }),
     svg('rect', { x: 0, y: 0, width: 2.4, height: L, fill: 'url(#bt-rimright)' }),
