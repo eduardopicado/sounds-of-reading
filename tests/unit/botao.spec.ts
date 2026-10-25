@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALL, BOTAO_STEPS, KEEPER_W, L, MARKS, MAX_SPEED, MOUTH, NET, POST, PULL, R, W,
-  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, simulate, slant,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, shownBounce, simulate, slant,
   type Point, type Table,
 } from '../../src/content/botao';
 
@@ -73,6 +73,30 @@ describe('the table', () => {
     const way = (a: Point, c: Point): number => Math.atan2(Math.abs(c.x - a.x), Math.abs(c.y - a.y)) * 180 / Math.PI;
     expect(way(shot.frames[b.frame - 3][0], shot.frames[b.frame - 1][0])).toBeCloseTo(into, -0.5);
     expect(way(shot.frames[b.frame + 1][0], shot.frames[b.frame + 3][0])).toBeCloseTo(out, -0.5);
+  });
+
+  /* the angles he is shown are for a ball he sent at the wall himself */
+  it('shows the angles of a bounce his button sent straight there', () => {
+    const ball = { x: 14, y: 70 };
+    const shot = simulate(table(ball, [{ x: ball.x + 7, y: ball.y + 7 }]), { button: 0, vx: -70, vy: -70 });
+    expect(shot.bounces.length).toBeGreaterThan(0);
+    expect(shownBounce(shot, 0)).toEqual(shot.bounces[0]);
+  });
+
+  it('shows none for a ball that glanced off something else on its way to the wall', () => {
+    /* pushed straight up, it clips his other button and goes off left into the wall */
+    const ball = { x: 20, y: 60 };
+    const viaMate = simulate(table(ball, [{ x: 20, y: 70 }, { x: 24, y: 45 }]), { button: 0, vx: 0, vy: -90 });
+    expect(viaMate.bumps.some((b) => b.what === 'touch' && b.who === 1)).toBe(true);
+    expect(viaMate.bounces.length).toBeGreaterThan(0);
+    expect(shownBounce(viaMate, 0)).toBeNull();
+    /* the same off a defender */
+    const viaThem = simulate(table(ball, [{ x: 20, y: 70 }], { them: [{ x: 24, y: 45 }] }), { button: 0, vx: 0, vy: -90 });
+    expect(viaThem.bumps.some((b) => b.what === 'block')).toBe(true);
+    expect(viaThem.bounces.length).toBeGreaterThan(0);
+    expect(shownBounce(viaThem, 0)).toBeNull();
+    /* and a ball that never met the wall has nothing to show */
+    expect(shownBounce(simulate(table({ x: MID, y: 40 }, [{ x: MID, y: 52 }]), { button: 0, vx: 0, vy: -70 }), 0)).toBeNull();
   });
 
   it('says how steeply the ball met the wall: 90° straight at it, small when it only grazes it', () => {

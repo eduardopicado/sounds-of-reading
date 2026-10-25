@@ -66,6 +66,34 @@ test.describe('Futebol de Botão', () => {
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-touches', '0');
   });
 
+  /* the pull counts from where the finger came down: one resting on the
+     edge of a button is no pull, and lifting it is no flick */
+  test('a finger resting on a button, anywhere on it, sends nothing anywhere', async ({ page }) => {
+    const watch = watchPage(page);
+    await start(page, 4);
+    const { x, y, scale } = await onScreen(page, 0);
+    const edge = y + 3.5 * scale;
+    /* down on the lower part of the button, the slightest wobble, and up */
+    await page.mouse.move(x, edge);
+    await page.mouse.down();
+    await page.mouse.move(x + 0.5, edge + 0.5);
+    await expect(page.locator('.bt-arrow')).toHaveAttribute('points', '');
+    await expect(page.locator('.bt-marks > *')).toHaveCount(0);
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-touches', '0');
+    /* pulled back from there, the arrow shows; brought back, still nothing */
+    await page.mouse.move(x, edge);
+    await page.mouse.down();
+    await page.mouse.move(x, edge + 8 * scale, { steps: 4 });
+    await expect(page.locator('.bt-arrow')).not.toHaveAttribute('points', '');
+    await page.mouse.move(x, edge, { steps: 4 });
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-touches', '0');
+    noProblems(watch);
+  });
+
   test('no guide at the top of the ladder: the arrow only', async ({ page }) => {
     await start(page, 5);
     await expect(page.locator('.bt-keeper')).toBeVisible();
