@@ -2043,6 +2043,18 @@
 .ht-fig figcaption { color: var(--paper); font: 700 20px var(--display); }
 
 /* Futebol de Botão: the table is an SVG in table units, sized to fit the screen's height */
+/* the attack, the goals and the step on one bar, a part each */
+.wrap[data-game="futebol-de-botao"] .score {
+  display: grid; grid-template-columns: auto auto minmax(0, auto); align-items: center;
+  width: fit-content; max-width: 100%; margin: 4px auto 10px; padding: 3px 0;
+  border: 1px solid rgba(255, 246, 231, .22); border-radius: 16px; background: rgba(255, 246, 231, .07);
+}
+.wrap[data-game="futebol-de-botao"] .score > * { padding: 0 14px; text-align: center; }
+.wrap[data-game="futebol-de-botao"] .score > * + * { border-left: 1px solid rgba(255, 246, 231, .22); }
+.wrap[data-game="futebol-de-botao"] .score[hidden] { display: none; }
+@media (max-width: 400px) {
+  .wrap[data-game="futebol-de-botao"] .score > * { padding: 0 9px; }
+}
 .bt-stage { gap: 8px; }
 .bt-tell { margin: 0; }
 .bt-touches { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--paper); font: 700 18px var(--display); }
@@ -2057,11 +2069,16 @@
    mown stripes, the felt lit in the middle, the rim's shadow along the top
    and the left (the gradients are in shading(), futebol-de-botao.ts) */
 .bt-wood { fill: url(#bt-woodshade); }
+.bt-wood-side { fill: #5A3415; }
+.bt-grain-dark { fill: none; stroke: rgba(70, 35, 10, .22); stroke-width: .22; }
+.bt-grain-pale { fill: none; stroke: rgba(255, 228, 186, .16); stroke-width: .3; }
+.bt-wood-lit { fill: none; stroke: rgba(255, 234, 200, .35); stroke-width: .35; }
+.bt-wood-cut { fill: #D9A86E; }
 .bt-wood-edge { fill: #4A2D12; }
-.bt-felt { fill: #2E8B4F; }
-.bt-stripe { fill: rgba(0, 0, 0, .07); }
-.bt-line { fill: none; stroke: rgba(255, 255, 255, .75); stroke-width: .4; }
-.bt-spot { fill: rgba(255, 255, 255, .8); }
+.bt-felt { fill: #2F9050; }
+.bt-stripe { fill: rgba(0, 0, 0, .1); }
+.bt-line { fill: none; stroke: rgba(255, 255, 255, .92); stroke-width: .42; }
+.bt-spot { fill: rgba(255, 255, 255, .92); }
 /* the goal: the inside of the net darker towards the back, the frame
    standing up from the line, its shadow on the felt; the net shakes on a goal */
 .bt-net-turf { fill: #2A7F48; }
@@ -2091,6 +2108,9 @@
 .bt-keeper-shine { fill: url(#bt-blockshade); }
 .bt-keeper.moving { transition: transform .4s ease; }
 .bt-btn .bt-rim { stroke: rgba(0, 0, 0, .55); stroke-width: .5; }
+/* a button's side, in its rim's colour in shade */
+.bt-side { stroke: rgba(0, 0, 0, .6); stroke-width: .4; }
+.bt-side-shade { fill: rgba(0, 0, 0, .45); }
 .bt-bevel { fill: url(#bt-bevel); }
 .bt-face { stroke: rgba(0, 0, 0, .35); stroke-width: .3; }
 .bt-shine { fill: url(#bt-shine); }
