@@ -2077,6 +2077,7 @@
 .bt-wood-edge { fill: #4A2D12; }
 .bt-felt { fill: #2F9050; }
 .bt-stripe { fill: rgba(0, 0, 0, .1); }
+.bt-stripe.down { fill: rgba(0, 0, 0, .07); }
 .bt-line { fill: none; stroke: rgba(255, 255, 255, .92); stroke-width: .42; }
 .bt-spot { fill: rgba(255, 255, 255, .92); }
 /* the goal: the inside of the net darker towards the back, the frame

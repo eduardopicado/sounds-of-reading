@@ -167,8 +167,11 @@ function pitch(): SVGGElement {
   /* his own goal at the bottom, the top one turned round: he always attacks
      the top, but this one is open too, and a ball that goes in is an own goal */
   const theirs = svg('g', { class: 'bt-goal-far', transform: FAR }, goalNet());
-  /* mown stripes across the felt */
-  const stripes = Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' }));
+  /* mown stripes across the felt and down it, so it is mown in squares */
+  const stripes = [
+    ...Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' })),
+    ...Array.from({ length: 3 }, (_, i) => svg('rect', { x: (2 * i + 1) * (W / 6), y: 0, width: W / 6, height: L, class: 'bt-stripe down' })),
+  ];
   /* the frame's top, with the table's side showing below it */
   const top = { x: VIEW.x, y: VIEW.y, width: VIEW.w, height: VIEW.h - SIDE, rx: 3 };
   return svg('g', {},
