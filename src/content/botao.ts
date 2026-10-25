@@ -462,8 +462,19 @@ export const HOW: Record<PlanKind, string> = {
 
 /** a pull back of one table unit sets a button off at this speed */
 export const PULL = 5;
-/** the table as drawn: the rim round it and a goal at each end, in table units */
-export const VIEW = { x: -3, y: -NET - 2, w: W + 6, h: L + 2 * NET + 4 } as const;
+/**
+ * The wooden tray the table sits in: the design handoff's picture of it
+ * (src/assets/botao/tray.webp), 699 × 987, with its felt at 47 across and
+ * 58 down, 609 by 838. The tray's front shows below its rim, so it is deeper
+ * at the bottom than at the top.
+ */
+export const TRAY = { w: 699, h: 987, felt: { x: 47, y: 58, w: 609, h: 838 } } as const;
+/** the table as drawn, in table units: the tray laid so its felt is exactly
+    ours, with a goal at each end on its rim */
+export const VIEW = (() => {
+  const [kx, ky] = [W / TRAY.felt.w, L / TRAY.felt.h];
+  return { x: -TRAY.felt.x * kx, y: -TRAY.felt.y * ky, w: TRAY.w * kx, h: TRAY.h * ky } as const;
+})();
 
 /** the flick a pull back gives: the other way, harder the further he pulls */
 export function flickFor(button: number, pullX: number, pullY: number): Flick {
