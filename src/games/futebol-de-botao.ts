@@ -28,6 +28,7 @@
  * is played for him, with the spot his button has to hit drawn on it. All
  * the physics is in src/content/botao.ts. */
 
+import tray from '../assets/botao/tray.webp';
 import { crestOf } from '../lib/crests';
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
@@ -168,14 +169,11 @@ function pitch(): SVGGElement {
     ...Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' })),
     ...Array.from({ length: 3 }, (_, i) => svg('rect', { x: (2 * i + 1) * (W / 6), y: 0, width: W / 6, height: L, class: 'bt-stripe down' })),
   ];
-  /* the wood is the tray the table sits in (.bt-wrap, games.css), so the
-     margin round the felt is left clear for it; here is only where the wood
-     drops to the felt, dark, with a pale line just inside it */
   return svg('g', {},
-    svg('rect', { x: -0.9, y: -0.9, width: W + 1.8, height: L + 1.8, rx: 0.4, class: 'bt-wood-edge' }),
+    /* the wooden tray, the handoff's picture of it, its felt under ours (VIEW, botao.ts) */
+    svg('image', { href: tray, x: VIEW.x, y: VIEW.y, width: VIEW.w, height: VIEW.h, preserveAspectRatio: 'none', class: 'bt-tray' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, class: 'bt-felt' }),
     ...stripes,
-    svg('rect', { x: 0.15, y: 0.15, width: W - 0.3, height: L - 0.3, class: 'bt-felt-lip' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, fill: 'url(#bt-feltlight)' }),
     svg('rect', { x: 0, y: 0, width: W, height: 2.4, fill: 'url(#bt-rimdown)' }),
     svg('rect', { x: 0, y: 0, width: 2.4, height: L, fill: 'url(#bt-rimright)' }),
@@ -273,7 +271,9 @@ function build(kit: Kit) {
   const ourNet = field.querySelector('.bt-net.ours')!;
   const ownNet = field.querySelector('.bt-goal-far .bt-net')!;
   const showMe = el('button', { class: 'btn ghost small', type: 'button', text: '👀 Show me a way' }) as HTMLButtonElement;
-  const node = el('div', { class: 'mx-stage bt-stage' }, tell, touchesEl, el('div', { class: 'bt-wrap' }, board), showMe);
+  /* the table's shape, for its size on the screen (games.css) */
+  const wrap = el('div', { class: 'bt-wrap', vars: { '--bt-shape': String(VIEW.w / VIEW.h) } }, board);
+  const node = el('div', { class: 'mx-stage bt-stage' }, tell, touchesEl, wrap, showMe);
 
   let ours: SVGGElement[] = [];
   let theirs: SVGGElement[] = [];

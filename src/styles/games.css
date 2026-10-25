@@ -2073,22 +2073,21 @@
 .bt-pip { width: 18px; height: 18px; border: 3px solid var(--paper); border-radius: 50%; }
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
-/* the table's shape is VIEW in src/content/botao.ts, 70 wide and 112 long */
-/* the tray the table sits in, from the design handoff's demo: warm wood lit
-   from the top left, its edge, and its side showing below it */
+/* the table's shape (--bt-shape, width over height) is VIEW in
+   src/content/botao.ts, set on .bt-wrap where it is made */
 .bt-wrap {
-  width: min(100%, 600px, calc((100vh - 260px) * .625)); width: min(100%, 600px, calc((100svh - 260px) * .625));
-  border: 6px solid #A86B38; border-radius: 18px;
-  background: linear-gradient(115deg, #B77840, #D69B5D 18%, #8E502C 82%, #B67B45);
-  box-shadow: 0 7px 0 #764826, 0 12px 22px rgba(0, 0, 0, .25);
+  width: min(100%, 600px, calc((100vh - 260px) * var(--bt-shape))); width: min(100%, 600px, calc((100svh - 260px) * var(--bt-shape)));
+  /* the tray's own corners, from its picture (38 of 699 across, of 987 down), and its shadow on the page */
+  border-radius: 5.4% / 3.9%;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .35);
 }
-.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 112; touch-action: none; user-select: none; -webkit-user-select: none; }
-/* the table: where the wood drops to the felt, the felt mown in squares, lit
-   in the middle, the rim's shadow along the top and the left (the gradients
-   are in shading(), futebol-de-botao.ts), and the lines; the colours are the
-   handoff's pitch.svg */
-.bt-wood-edge { fill: #54361F; }
-.bt-felt-lip { fill: none; stroke: #BA8953; stroke-width: .3; }
+.bt-table { display: block; width: 100%; height: auto; aspect-ratio: var(--bt-shape); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* a picture, so a long press on it must not offer to save it */
+.bt-tray { pointer-events: none; }
+/* the table: the tray (the handoff's picture of it), the felt mown in
+   squares, lit in the middle, the rim's shadow along the top and the left
+   (the gradients are in shading(), futebol-de-botao.ts), and the lines;
+   the colours are the handoff's pitch.svg */
 .bt-felt { fill: #369658; }
 .bt-stripe { fill: rgba(0, 0, 0, .12); }
 .bt-stripe.down { fill: rgba(0, 0, 0, .08); }
