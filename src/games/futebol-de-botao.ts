@@ -6,17 +6,21 @@
  *
  * He puts a finger on one of his buttons and pulls back, as the palheta
  * presses on its edge: an arrow shows which way it will go and how hard. He
- * lets go and it slides. The ball goes off along the line through the middle
- * of the button and the middle of the ball, so to send it at the goal he
- * hits it on its far side from the goal. That is the lesson of the first
- * steps, where the ball's way shows while he aims. Then it shows only a
- * little way, then not at all; there is a wall to play it off, a pass to
- * make first, and a whole team in the way.
+ * lets go and it slides. The pull counts from where his finger came down,
+ * so a finger resting on a button, anywhere on it, sends nothing anywhere.
+ * The ball goes off along the line through the middle of the button and the
+ * middle of the ball, so to send it at the goal he hits it on its far side
+ * from the goal. That is the lesson of the first steps, where the ball's way
+ * shows while he aims. Then it shows only a little way, then not at all;
+ * there is a wall to play it off, a pass to make first, and a whole team in
+ * the way.
  *
- * When the ball comes off the side of the table, the angles are drawn where
- * it bounced, in degrees: the angle between its way and the wall going in,
- * and the same angle coming off. Sent straight at the wall, it comes
- * straight back, and that right angle gets the square mark for 90°.
+ * When his button sends the ball off the side of the table, the angles are
+ * drawn where it bounced, in degrees: the angle between its way and the
+ * wall going in, and the same angle coming off. Sent straight at the wall,
+ * it comes straight back, and that right angle gets the square mark for
+ * 90°. Only that first bounce, and only when nothing else touched the ball
+ * on its way there (shownBounce, botao.ts).
  *
  * Three touches, as in the regra carioca, and before the third the ball has
  * to go to another of his buttons. A goal is shouted by the commentator. If
@@ -32,7 +36,7 @@ import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import {
   BALL, BOTAO_STEPS, HOW, KEEPER_W, KEEPER_Y, L, MARKS, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
-  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, simulate,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, shownBounce, simulate,
   type Bounce, type BotaoStep, type Flick, type Point, type Shot, type Table,
 } from '../content/botao';
 import { mountMaths, type Kit } from './maths-kit';
@@ -385,11 +389,14 @@ function build(kit: Kit) {
     return way;
   };
 
-  /** after a shot off the rim: where the ball went, and its angles */
-  function showBounces(shot: Shot): void {
-    if (!shot.bounces.length) return;
+  /** after a shot he sent off the rim: where the ball went, and the angles
+      it came off at (shownBounce, botao.ts, says which bounce that is) */
+  function showBounces(shot: Shot, button: number): Bounce | null {
+    const bounce = shownBounce(shot, button);
+    if (!bounce) return null;
     path.setAttribute('points', line(wayOf(shot)));
-    drawBounces(shot.bounces);
+    drawBounces([bounce]);
+    return bounce;
   }
 
   /** the arrow from a button: which way, and how hard */
@@ -410,13 +417,14 @@ function build(kit: Kit) {
   }
 
   /** where the ball would go: all the way, or only the start of it, with the
-      angles it would come off the rim at in the part that shows. The short
-      way still goes as far as the wall when the ball would come off it, so
-      the angles there are always on show while he aims, and change as he
-      does */
+      angles it would come off the rim at. The short way still goes as far
+      as the wall when his button would send the ball straight there, so
+      those angles are on show while he aims, and change as he does; it
+      never runs on past another button, a post or the goleiro */
   function drawGuide(t: Table, f: Flick, guide: BotaoStep['guide']): void {
     if (guide === 'none') { path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
     const shot = simulate(t, f);
+    const wall = shownBounce(shot, f.button);
     let shown = shot.frames.length - 1;
     if (guide === 'short') {
       let gone = 0;
@@ -425,12 +433,11 @@ function build(kit: Kit) {
         if (prev) gone += Math.sqrt((fr[0].x - prev.x) ** 2 + (fr[0].y - prev.y) ** 2);
         if (gone > 16) { shown = i - 1; break; }
       }
-      const wall = shot.bounces[0];
       if (wall) shown = Math.max(shown, wall.frame);
     }
     const ballWay = wayOf(shot, shown);
     path.setAttribute('points', ballWay.length > 1 ? line(ballWay) : '');
-    drawBounces(shot.bounces.filter((b) => b.frame <= shown));
+    drawBounces(wall && wall.frame <= shown ? [wall] : []);
     /* his button's own way, faint, until it reaches the ball */
     const mine = shot.frames.map((fr) => fr[1 + f.button]);
     const hit = shot.bumps.find((b) => b.what === 'touch');
@@ -444,8 +451,14 @@ function build(kit: Kit) {
     ours.forEach((g, i) => g.classList.toggle('tired', i === tired));
   }
 
-  /* the finger: the button it came down on, and where it is now */
-  let drag: { button: number; pointer: number } | null = null;
+  /* the finger: the button it came down on, and where it came down. The
+     pull is how far it has moved since, not how far it is from the middle
+     of the button: a finger resting anywhere on the button is no pull,
+     and lifting it is no flick */
+  let drag: { button: number; pointer: number; from: Point } | null = null;
+  const pullOf = (e: PointerEvent, from: Point): Point => { const p = toTable(e); return { x: p.x - from.x, y: p.y - from.y }; };
+  /** a pull too small to see is no pull */
+  const tiny = (pull: Point): boolean => Math.sqrt(pull.x * pull.x + pull.y * pull.y) < 1.5;
   const toTable = (e: PointerEvent): Point => {
     const box = board.getBoundingClientRect();
     return { x: VIEW.x + ((e.clientX - box.left) / box.width) * VIEW.w, y: VIEW.y + ((e.clientY - box.top) / box.height) * VIEW.h };
@@ -498,7 +511,9 @@ function build(kit: Kit) {
         draw(t);
         clearAim();
         setPips(0, null);
-        const bounces: Bounce[] = [];
+        /* the bounce whose angles are on the table at the end, if the last
+           flick made one: the words say what the picture shows */
+        let last: Bounce | null = null;
         for (const f of q.plan.flicks) {
           /* the spot his button meets the ball */
           const shot = simulate(t, f);
@@ -513,8 +528,7 @@ function build(kit: Kit) {
           clearAim();
           ghost.setAttribute('hidden', '');
           await play(t, shot);
-          showBounces(shot);
-          bounces.push(...shot.bounces);
+          last = showBounces(shot, f.button);
           t = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
           draw(t);
           if (shot.goal) node.dataset.goal = 'shown';
@@ -522,7 +536,7 @@ function build(kit: Kit) {
         }
         /* the angles are on the screen only: a sentence with a number in it
            is not one of the recordings */
-        kit.note(bounces.length ? `${HOW[q.plan.kind]} ${bounceWords(bounces[0])}` : HOW[q.plan.kind]);
+        kit.note(last ? `${HOW[q.plan.kind]} ${bounceWords(last)}` : HOW[q.plan.kind]);
         say(HOW[q.plan.kind]);
         await kit.wait(3200);
         void end(false);
@@ -536,8 +550,8 @@ function build(kit: Kit) {
         touches.push(f.button);
         setPips(touches.length, null);
         await play(table, shot);
-        showBounces(shot);
-        const off = shot.bounces.length ? ` ${bounceWords(shot.bounces[0])}` : '';
+        const bounce = showBounces(shot, f.button);
+        const off = bounce ? ` ${bounceWords(bounce)}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
         if (shot.own) { void demo('Own goal! That one went into your own net.'); return; }
         if (shot.goal) {
@@ -584,7 +598,7 @@ function build(kit: Kit) {
           kit.note('That button has had two touches. Use another one!');
           return;
         }
-        drag = { button: best, pointer: e.pointerId };
+        drag = { button: best, pointer: e.pointerId, from: p };
         try { board.setPointerCapture(e.pointerId); } catch { /* the drag still works inside the table */ }
         /* the last shot's way and angles go as he aims the next */
         clearAim();
@@ -592,25 +606,25 @@ function build(kit: Kit) {
       };
       onMove = (e) => {
         if (!drag || e.pointerId !== drag.pointer) return;
-        const p = toTable(e);
-        const from = table.us[drag.button];
-        const f = flickFor(drag.button, p.x - from.x, p.y - from.y);
-        band.setAttribute('x1', from.x.toFixed(2)); band.setAttribute('y1', from.y.toFixed(2));
-        band.setAttribute('x2', p.x.toFixed(2)); band.setAttribute('y2', p.y.toFixed(2));
-        if (Math.sqrt((p.x - from.x) ** 2 + (p.y - from.y) ** 2) < 1.5) { arrow.setAttribute('points', ''); path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
-        drawArrow(from, f);
+        const pull = pullOf(e, drag.from);
+        const at = table.us[drag.button];
+        /* the band from the button, as far back as he has pulled */
+        band.setAttribute('x1', at.x.toFixed(2)); band.setAttribute('y1', at.y.toFixed(2));
+        band.setAttribute('x2', (at.x + pull.x).toFixed(2)); band.setAttribute('y2', (at.y + pull.y).toFixed(2));
+        if (tiny(pull)) { arrow.setAttribute('points', ''); path.setAttribute('points', ''); trail.setAttribute('points', ''); marks.replaceChildren(); return; }
+        const f = flickFor(drag.button, pull.x, pull.y);
+        drawArrow(at, f);
         drawGuide(table, f, step.guide);
       };
       onUp = (e) => {
         if (!drag || e.pointerId !== drag.pointer) return;
-        const p = toTable(e);
-        const from = table.us[drag.button];
+        const pull = pullOf(e, drag.from);
         const which = drag.button;
         drag = null;
         clearAim();
         /* a tap, or a pull too small to see, is not a flick */
-        if (Math.sqrt((p.x - from.x) ** 2 + (p.y - from.y) ** 2) < 1.5) return;
-        void flick(flickFor(which, p.x - from.x, p.y - from.y));
+        if (tiny(pull)) return;
+        void flick(flickFor(which, pull.x, pull.y));
       };
     }),
   };
