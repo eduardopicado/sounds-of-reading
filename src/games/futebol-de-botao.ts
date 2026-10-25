@@ -66,9 +66,8 @@ const SHADOW = { x: 0.55, y: 0.85 } as const;
 const LIFT = 1.9;
 /** how much narrower the back of the net looks each side, being further away */
 const GOAL_BACK = 1.2;
-/** how far a button's side shows below its top, and the table's below its frame */
+/** how far a button's side shows below its top */
 const DEPTH = 0.7;
-const SIDE = 1.1;
 
 /** the shading laid over the table, the buttons, the ball and the goal: a
     highlight and a shade on top of any colour, so one set serves every team */
@@ -84,15 +83,8 @@ function shading(): SVGDefsElement {
     /* its rim: lit on the top left, in its own shade on the bottom right */
     linear('bt-bevel', [1, 1], [0, '#fff', 0.55], [42, '#fff', 0], [58, '#000', 0], [100, '#000', 0.5]),
     radial('bt-ballshade', [0, '#fff', 1], [50, '#f2f2f2', 1], [100, '#8c8c8c', 1]),
-    /* the wood, warm and lit from the top left, and its grain along the frame:
-       thin dark lines and a few pale ones, the same at the top and the
-       bottom of each tile so they run on */
-    linear('bt-woodshade', [1, 1], [0, '#C98E52', 1], [45, '#A56C3A', 1], [100, '#7A4A24', 1]),
-    svg('pattern', { id: 'bt-grain', patternUnits: 'userSpaceOnUse', width: 9, height: 40 },
-      svg('path', { class: 'bt-grain-dark', d: 'M1.2 0 Q2 10 1.4 20 T1.2 40 M4.1 0 Q3.5 10 4.4 20 T4.1 40 M6.8 0 Q7.4 10 6.6 20 T6.8 40' }),
-      svg('path', { class: 'bt-grain-pale', d: 'M2.7 0 Q3.2 10 2.6 20 T2.7 40 M8.1 0 Q7.6 10 8.3 20 T8.1 40' })),
     /* the felt, lit in the middle and darker towards the rim */
-    svg('radialGradient', { id: 'bt-feltlight', cx: '50%', cy: '42%', r: '72%' }, ...stops([0, '#fff', 0.12], [55, '#fff', 0], [100, '#000', 0.24])),
+    svg('radialGradient', { id: 'bt-feltlight', cx: '50%', cy: '42%', r: '72%' }, ...stops([0, '#fff', 0.12], [55, '#fff', 0], [100, '#000', 0.12])),
     /* the rim's shadow on the felt, along the top and down the left */
     linear('bt-rimdown', [0, 1], [0, '#000', 0.4], [100, '#000', 0]),
     linear('bt-rimright', [1, 0], [0, '#000', 0.4], [100, '#000', 0]),
@@ -172,18 +164,14 @@ function pitch(): SVGGElement {
     ...Array.from({ length: 5 }, (_, i) => svg('rect', { x: 0, y: (2 * i + 1) * (L / 10), width: W, height: L / 10, class: 'bt-stripe' })),
     ...Array.from({ length: 3 }, (_, i) => svg('rect', { x: (2 * i + 1) * (W / 6), y: 0, width: W / 6, height: L, class: 'bt-stripe down' })),
   ];
-  /* the frame's top, with the table's side showing below it */
-  const top = { x: VIEW.x, y: VIEW.y, width: VIEW.w, height: VIEW.h - SIDE, rx: 3 };
+  /* the wood is the tray the table sits in (.bt-wrap, games.css), so the
+     margin round the felt is left clear for it; here is only where the wood
+     drops to the felt, dark, with a pale line just inside it */
   return svg('g', {},
-    svg('rect', { x: VIEW.x, y: VIEW.y, width: VIEW.w, height: VIEW.h, rx: 3, class: 'bt-wood-side' }),
-    svg('rect', { ...top, class: 'bt-wood' }),
-    svg('rect', { ...top, fill: 'url(#bt-grain)' }),
-    svg('rect', { x: top.x + 0.35, y: top.y + 0.35, width: top.width - 0.7, height: top.height - 0.7, rx: 2.7, class: 'bt-wood-lit' }),
-    /* the rim's inner edge: pale where the wood is cut, dark where it drops to the felt */
-    svg('rect', { x: -1.3, y: -1.3, width: W + 2.6, height: L + 2.6, rx: 1.1, class: 'bt-wood-cut' }),
-    svg('rect', { x: -0.9, y: -0.9, width: W + 1.8, height: L + 1.8, rx: 0.8, class: 'bt-wood-edge' }),
+    svg('rect', { x: -0.9, y: -0.9, width: W + 1.8, height: L + 1.8, rx: 0.4, class: 'bt-wood-edge' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, class: 'bt-felt' }),
     ...stripes,
+    svg('rect', { x: 0.15, y: 0.15, width: W - 0.3, height: L - 0.3, class: 'bt-felt-lip' }),
     svg('rect', { x: 0, y: 0, width: W, height: L, fill: 'url(#bt-feltlight)' }),
     svg('rect', { x: 0, y: 0, width: W, height: 2.4, fill: 'url(#bt-rimdown)' }),
     svg('rect', { x: 0, y: 0, width: 2.4, height: L, fill: 'url(#bt-rimright)' }),

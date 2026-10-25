@@ -2055,6 +2055,11 @@
 @media (max-width: 400px) {
   .wrap[data-game="futebol-de-botao"] .score > * { padding: 0 9px; }
 }
+/* Pro, as the handoff has it: a gold pill under the title */
+.wrap[data-game="futebol-de-botao"] .pro-badge {
+  display: block; width: fit-content; margin: 4px auto 0; padding: 2px 15px; border-radius: 30px;
+  font-size: 12px; font-weight: 800; letter-spacing: 2px;
+}
 .bt-stage { gap: 8px; }
 .bt-tell { margin: 0; }
 .bt-touches { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--paper); font: 700 18px var(--display); }
@@ -2063,23 +2068,26 @@
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
 /* the table's shape is VIEW in src/content/botao.ts, 70 wide and 112 long */
-.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .625)); width: min(100%, 600px, calc((100svh - 230px) * .625)); }
+/* the tray the table sits in, from the design handoff's demo: warm wood lit
+   from the top left, its edge, and its side showing below it */
+.bt-wrap {
+  width: min(100%, 600px, calc((100vh - 260px) * .625)); width: min(100%, 600px, calc((100svh - 260px) * .625));
+  border: 6px solid #A86B38; border-radius: 18px;
+  background: linear-gradient(115deg, #B77840, #D69B5D 18%, #8E502C 82%, #B67B45);
+  box-shadow: 0 7px 0 #764826, 0 12px 22px rgba(0, 0, 0, .25);
+}
 .bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 112; touch-action: none; user-select: none; -webkit-user-select: none; }
-/* the table: a wooden frame lit from above, its edge dropping to the felt,
-   mown stripes, the felt lit in the middle, the rim's shadow along the top
-   and the left (the gradients are in shading(), futebol-de-botao.ts) */
-.bt-wood { fill: url(#bt-woodshade); }
-.bt-wood-side { fill: #5A3415; }
-.bt-grain-dark { fill: none; stroke: rgba(70, 35, 10, .22); stroke-width: .22; }
-.bt-grain-pale { fill: none; stroke: rgba(255, 228, 186, .16); stroke-width: .3; }
-.bt-wood-lit { fill: none; stroke: rgba(255, 234, 200, .35); stroke-width: .35; }
-.bt-wood-cut { fill: #D9A86E; }
-.bt-wood-edge { fill: #4A2D12; }
-.bt-felt { fill: #2F9050; }
-.bt-stripe { fill: rgba(0, 0, 0, .1); }
-.bt-stripe.down { fill: rgba(0, 0, 0, .07); }
-.bt-line { fill: none; stroke: rgba(255, 255, 255, .92); stroke-width: .42; }
-.bt-spot { fill: rgba(255, 255, 255, .92); }
+/* the table: where the wood drops to the felt, the felt mown in squares, lit
+   in the middle, the rim's shadow along the top and the left (the gradients
+   are in shading(), futebol-de-botao.ts), and the lines; the colours are the
+   handoff's pitch.svg */
+.bt-wood-edge { fill: #54361F; }
+.bt-felt-lip { fill: none; stroke: #BA8953; stroke-width: .3; }
+.bt-felt { fill: #369658; }
+.bt-stripe { fill: rgba(0, 0, 0, .12); }
+.bt-stripe.down { fill: rgba(0, 0, 0, .08); }
+.bt-line { fill: none; stroke: #E8EEE2; stroke-width: .43; }
+.bt-spot { fill: #E8EEE2; }
 /* the goal: the inside of the net darker towards the back, the frame
    standing up from the line, its shadow on the felt; the net shakes on a goal */
 .bt-net-turf { fill: #2A7F48; }
