@@ -162,6 +162,30 @@ test.describe('Futebol de Botão', () => {
     noProblems(watch);
   });
 
+  /* the words about a shot, its angles among them, are above the table in
+     the instruction's place, so they are on the screen with it */
+  test('says what happened above the table, where the instruction was, on the screen', async ({ page }) => {
+    const watch = watchPage(page);
+    await start(page, 3);
+    const tell = page.locator('.bt-tell');
+    const note = page.locator('.mx-note');
+    await expect(tell).toBeVisible();
+    await expect(note).toBeHidden();
+    const [shot] = await plan(page);
+    await flick(page, shot);
+    await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'scored', { timeout: 10000 });
+    await expect(note).toContainText('It went into the wall at');
+    await expect(tell).toBeHidden();
+    const [words, table] = [(await note.boundingBox())!, (await page.locator('.bt-table').boundingBox())!];
+    expect(words.y + words.height).toBeLessThanOrEqual(table.y);
+    expect(words.y).toBeGreaterThanOrEqual(0);
+    /* and the instruction is back for the next attack */
+    await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 6000 });
+    await expect(tell).toBeVisible();
+    await expect(note).toBeHidden();
+    noProblems(watch);
+  });
+
   test('off the wall, while he aims: the angles are on show, and move as he turns his aim', async ({ page }) => {
     const watch = watchPage(page);
     await start(page, 3);
