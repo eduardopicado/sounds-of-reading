@@ -15,12 +15,16 @@
  * there is a wall to play it off, a pass to make first, and a whole team in
  * the way.
  *
- * When his button sends the ball off the side of the table, the angles are
- * drawn where it bounced, in degrees: the angle between its way and the
- * wall going in, and the same angle coming off. Sent straight at the wall,
- * it comes straight back, and that right angle gets the square mark for
- * 90°. Only that first bounce, and only when nothing else touched the ball
- * on its way there (shownBounce, botao.ts).
+ * While he aims, on the steps with a guide, the angles are drawn where his
+ * button would send the ball off the side of the table, in degrees: the
+ * angle between its way and the wall going in, and the same angle coming
+ * off. Sent straight at the wall, it comes straight back, and that right
+ * angle gets the square mark for 90°. Only that first bounce, and only when
+ * nothing else touches the ball on its way there (shownBounce, botao.ts).
+ * After his shot its angles are said in the sentence above the table, and
+ * nothing is left drawn on it: a line and angles there with no button in
+ * his hand would look like the guide come on by itself. Show me a way draws
+ * them, before each flick and after it.
  *
  * Three touches, as in the regra carioca, and before the third the ball has
  * to go to another of his buttons. A goal is shouted by the commentator. If
@@ -389,8 +393,9 @@ function build(kit: Kit) {
     return way;
   };
 
-  /** after a shot he sent off the rim: where the ball went, and the angles
-      it came off at (shownBounce, botao.ts, says which bounce that is) */
+  /** after a flick in Show me a way that sent the ball off the rim: where
+      the ball went, and the angles it came off at (shownBounce, botao.ts,
+      says which bounce that is) */
   function showBounces(shot: Shot, button: number): Bounce | null {
     const bounce = shownBounce(shot, button);
     if (!bounce) return null;
@@ -550,7 +555,9 @@ function build(kit: Kit) {
         touches.push(f.button);
         setPips(touches.length, null);
         await play(table, shot);
-        const bounce = showBounces(shot, f.button);
+        /* its angles in words only: drawn, they would stay on the table
+           with nothing in his hand, and look like the guide */
+        const bounce = shownBounce(shot, f.button);
         const off = bounce ? ` ${bounceWords(bounce)}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
         if (shot.own) { void demo('Own goal! That one went into your own net.'); return; }
@@ -600,7 +607,7 @@ function build(kit: Kit) {
         }
         drag = { button: best, pointer: e.pointerId, from: p };
         try { board.setPointerCapture(e.pointerId); } catch { /* the drag still works inside the table */ }
-        /* the last shot's way and angles go as he aims the next */
+        /* the guide starts afresh with each aim */
         clearAim();
         board.classList.add('aiming');
       };

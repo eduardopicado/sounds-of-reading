@@ -137,7 +137,9 @@ test.describe('Futebol de Botão', () => {
     noProblems(watch);
   });
 
-  test('off the wall: the way shown bounces off the side into the goal, and the angles are drawn', async ({ page }) => {
+  /* after his shot its angles are said, not drawn: a line and angles left on
+     the table with no button in his hand look like the guide come on by itself */
+  test('off the wall: the ball bounces off the side into the goal, its angles in words, and nothing left on the table', async ({ page }) => {
     const watch = watchPage(page);
     await start(page, 3);
     await expect(page.locator('.bt-btn.them')).toHaveCount(1);
@@ -145,20 +147,12 @@ test.describe('Futebol de Botão', () => {
     const [shot] = await plan(page);
     await flick(page, shot);
     await expect(page.locator('.bt-stage')).toHaveAttribute('data-goal', 'scored', { timeout: 10000 });
-    /* where it came off the wall: the same angle each side, measured from the
-       wall, and the same numbers in words. No right angle in it, so no
-       right-angle mark: that is only for a ball sent straight at the wall */
-    const degrees = page.locator('.bt-marks .bt-deg');
-    await expect(degrees).toHaveCount(2);
-    const [into, out] = await degrees.allTextContents();
-    expect(into).toMatch(/^\d+°$/);
-    expect(out).toBe(into);
-    await expect(page.locator('.bt-marks .bt-arc')).toHaveCount(2);
-    await expect(page.locator('.bt-marks .bt-right')).toHaveCount(0);
-    await expect(page.locator('.mx-note')).toHaveText(`GOL! In one touch! It went into the wall at ${into} and came off at ${out}: the same angle.`);
-    /* and gone when the next attack starts */
-    await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 6000 });
+    /* the same angle each side, measured from the wall */
+    await expect(page.locator('.mx-note')).toHaveText(/^GOL! In one touch! It went into the wall at (\d+)° and came off at \1°: the same angle\.$/);
     await expect(page.locator('.bt-marks > *')).toHaveCount(0);
+    await expect(page.locator('.bt-path')).toHaveAttribute('points', '');
+    await expect(page.locator('.bt-arrow')).toHaveAttribute('points', '');
+    await expect(page.locator('.score')).toContainText('Attack 2 of 8', { timeout: 6000 });
     noProblems(watch);
   });
 
@@ -197,12 +191,16 @@ test.describe('Futebol de Botão', () => {
     await page.mouse.down();
     const there = pull(shot);
     await page.mouse.move(there.x, there.y, { steps: 6 });
-    /* held, not let go: where it would come off the wall, and the same angle each side */
+    /* held, not let go: where it would come off the wall, and the same angle
+       each side. No right angle in it, so no right-angle mark: that is only
+       for a ball sent straight at the wall */
     const degrees = page.locator('.bt-marks .bt-deg');
     await expect(degrees).toHaveCount(2);
     const [into, out] = await degrees.allTextContents();
     expect(into).toMatch(/^\d+°$/);
     expect(out).toBe(into);
+    await expect(page.locator('.bt-marks .bt-arc')).toHaveCount(2);
+    await expect(page.locator('.bt-marks .bt-right')).toHaveCount(0);
     const wall = await page.locator('.bt-marks .bt-wall-mark').getAttribute('d');
     /* turned a little: the ball meets the wall somewhere else, still at the same angle each side */
     const turn = 4 * Math.PI / 180;
