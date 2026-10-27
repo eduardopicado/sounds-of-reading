@@ -42,7 +42,9 @@ export default defineConfig({
   plugins: [
     contentSecurityPolicy,
     VitePWA({
-      registerType: 'autoUpdate',
+      /* the iPad keeps the old version until the app is reopened, sometimes
+         twice, so a new one says so and waits for a tap (src/lib/update.ts) */
+      registerType: 'prompt',
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'Sounds of Reading',

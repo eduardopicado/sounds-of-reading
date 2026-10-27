@@ -119,7 +119,8 @@ src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
                        kept on the device), colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),
                        strokes.ts (judging a traced stroke), recorder.ts (the
-                       microphone, for Be the Commentator), dom.ts, random.ts
+                       microphone, for Be the Commentator), dom.ts, random.ts,
+                       update.ts (the "new version, tap to update" button)
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/catalog.ts   every game, once: its address, tile, section, ladder and
