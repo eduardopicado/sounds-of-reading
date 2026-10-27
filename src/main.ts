@@ -5,6 +5,7 @@ import { startRouter, type Route } from './lib/router';
 import { unlockSpeech, watchVoices } from './lib/speech';
 import { loadClips, unlockClips } from './lib/audio';
 import { unlockSfx, wakeSfx } from './lib/sfx';
+import { watchForUpdates } from './lib/update';
 import * as home from './games/home';
 import { GAMES } from './games/catalog';
 
@@ -45,6 +46,7 @@ watchVoices();
 /* recorded words if this build shipped any; harmless and silent if not */
 void loadClips();
 unlockOnFirstTap();
+watchForUpdates();
 
 const app = document.querySelector<HTMLElement>('main#app');
 if (app) startRouter(app, routes);

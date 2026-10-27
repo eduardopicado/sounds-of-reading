@@ -196,8 +196,10 @@ with the school friends as it is.
 
 To add it to an iPad: open the URL in Safari, tap Share, then **Add to Home
 Screen**. It then runs full screen with no browser bar, and keeps working with
-no signal. A new version arrives the next time it is opened: close it from the
-app switcher and open it again.
+no signal. The iPad keeps running the old version of an app added this way
+until it is closed and opened again, sometimes twice, so when a new version is
+ready the app shows a **✨ New version! Tap to update** button; a tap swaps it
+in. Nothing changes mid-game without that tap.
 
 ## The content file
 
