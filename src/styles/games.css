@@ -1195,7 +1195,7 @@
 .td-team .td-inside { max-width: 132px; padding: 8px; border-radius: 14px; background: rgba(255, 246, 231, .16); }
 .td-ball { font-size: clamp(14px, 3.6vw, 20px); line-height: 1; }
 .td-fan { width: 18px; height: 18px; border-radius: 50% 50% 40% 40%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .3); }
-.td-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 420px; }
+.td-pile { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 4px; max-width: 420px; }
 .td-rows { display: grid; gap: 8px; }
 .td-row { display: flex; align-items: center; gap: 10px; }
 .td-row .td-inside { flex-wrap: nowrap; gap: 10px; }
@@ -1205,6 +1205,13 @@
 }
 .td-count { min-height: 1.3em; color: var(--paper); font: 800 18px var(--display); }
 .td-field.counting .td-count { color: var(--mustard); }
+/* Years 3–4: the first 5 teams of a worked-out fact, marked off from the rest */
+.td-team.td-first .td-inside { box-shadow: inset 0 0 0 3px var(--mustard); }
+/* up to 10 teams of 12 on a phone: smaller players, packed closer */
+.td-field.crowded .td-fan { width: 12px; height: 12px; }
+.td-field.crowded .td-inside { gap: 2px; }
+.td-field.crowded .td-team .td-inside { max-width: 84px; padding: 6px; }
+.td-field.crowded .td-groups { gap: 8px; }
 @media (max-width: 420px) {
   .td-cone { border-left-width: 10px; border-right-width: 10px; border-bottom-width: 20px; }
   .td-row .td-inside { gap: 6px; }

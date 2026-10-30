@@ -743,8 +743,11 @@ export interface DrillStep extends Step {
   groups: [number, number];
   /** how many in each group (or row): one of these */
   each: number[];
-  /** teams of players rather than hoops of balls */
+  /** teams of players rather than hoops of balls (with make-rows: a crowd
+      of players put into teams) */
   teams?: boolean;
+  /** Years 3–4: a miss is worked out from facts he knows (drillWorkOut) */
+  workOut?: boolean;
 }
 
 export const DRILL_STEPS: DrillStep[] = [
@@ -754,6 +757,13 @@ export const DRILL_STEPS: DrillStep[] = [
   { name: 'Rows of cones', task: 'rows', groups: [2, 5], each: [2, 3, 4, 5] },
   { name: 'Teams of 2, 5 and 10', task: 'groups', groups: [2, 6], each: [2, 5, 10], teams: true },
   { name: 'Cones into rows', task: 'make-rows', groups: [2, 5], each: [2, 3, 4, 5] },
+  /* Years 3–4: equal groups for the rest of the times tables, worked out
+     from facts he knows rather than remembered (Times Table Sprint is for
+     remembering them); a football team is 11, with a sub 12 */
+  { name: 'Teams of 3 and 4', task: 'groups', groups: [3, 10], each: [3, 4], teams: true, workOut: true },
+  { name: 'Teams of 6, 7, 8 and 9', task: 'groups', groups: [3, 10], each: [6, 7, 8, 9], teams: true, workOut: true },
+  { name: 'Teams of 11 and 12', task: 'groups', groups: [2, 10], each: [11, 12], teams: true, workOut: true },
+  { name: 'Players into teams', task: 'make-rows', groups: [3, 9], each: [3, 4, 6, 7, 8, 9], teams: true, workOut: true },
 ];
 
 export interface DrillQuestion { groups: number; each: number; total: number; answer: number }
@@ -769,6 +779,27 @@ export function drillQuestion(step: DrillStep, last?: DrillQuestion): DrillQuest
     const answer = step.task === 'share' ? each : step.task === 'make-rows' ? groups : total;
     return { groups, each, total, answer };
   }
+}
+
+const teams = (n: number): string => `${n} ${n === 1 ? 'team' : 'teams'}`;
+
+/**
+ * Years 3–4: how to work out so many teams from facts he knows, said after
+ * a wrong answer. Up to 5 teams he counts on in the table; 6 to 9 teams are
+ * 5 teams and the rest; 10 teams are that many tens. `split` is how many
+ * teams make the first part, 0 when there is none: the game marks them.
+ */
+export function drillWorkOut(step: DrillStep, q: DrillQuestion): { text: string; split: number } {
+  const [n, e, total] = [q.groups, q.each, q.total];
+  const counted = Array.from({ length: n }, (_, i) => (i + 1) * e).join(', ');
+  if (step.task === 'make-rows') {
+    if (n <= 5) return { text: `Count in ${e}s to ${total}: ${counted}. That is ${teams(n)}.`, split: 0 };
+    const rest = total - 5 * e;
+    return { text: `5 teams of ${e} use ${5 * e} players, and the ${rest} left make ${teams(n - 5)} more: ${teams(n)}.`, split: 5 };
+  }
+  if (n === 10) return { text: `10 teams of ${e} is ${e} tens: ${total}.`, split: 0 };
+  if (n <= 5) return { text: `Count in ${e}s: ${counted}.`, split: 0 };
+  return { text: `That is 5 teams and ${n - 5} more: ${5 * e} and ${(n - 5) * e} make ${total}.`, split: 5 };
 }
 
 /** the answer and the slips: adding the two numbers instead of grouping,
