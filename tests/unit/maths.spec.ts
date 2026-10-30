@@ -9,7 +9,7 @@ import {
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
   JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
-  DRILL_STEPS, drillChoices, drillQuestion,
+  DRILL_STEPS, drillChoices, drillQuestion, drillWorkOut, type DrillQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
   BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
@@ -569,7 +569,44 @@ describe('Training Drills', () => {
 
   it('keeps arrays and grouping for Year 2', () => {
     expect(DRILL_STEPS.slice(0, 2).map((s) => s.task)).toEqual(['groups', 'share']);
-    expect(DRILL_STEPS.slice(2).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
+    expect(DRILL_STEPS.slice(2, 5).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
+  });
+
+  /* Years 3–4 at the top of the ladder: the rest of the times tables, to 12 × 12 */
+  it('puts the Years 3–4 teams at the top, covering every table but 2, 5 and 10 up to 10 teams of 12', () => {
+    const top = DRILL_STEPS.slice(5);
+    expect(top.length).toBeGreaterThan(0);
+    expect(DRILL_STEPS.slice(0, 5).every((s) => !s.workOut)).toBe(true);
+    expect(top.every((s) => s.workOut && s.teams)).toBe(true);
+    const tables = new Set(top.flatMap((s) => s.each));
+    expect([...tables].sort((a, b) => a - b)).toEqual([3, 4, 6, 7, 8, 9, 11, 12]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = drillQuestion(step);
+        expect(q.groups).toBeLessThanOrEqual(10);
+        expect(q.total).toBeLessThanOrEqual(120);
+      }
+    }
+  });
+
+  it('works a miss out from facts he knows: counting on, 5 teams and the rest, or tens', () => {
+    const groups = DRILL_STEPS.find((s) => s.name === 'Teams of 6, 7, 8 and 9')!;
+    const into = DRILL_STEPS.find((s) => s.name === 'Players into teams')!;
+    const q = (g: number, e: number, answer = g * e): DrillQuestion => ({ groups: g, each: e, total: g * e, answer });
+    expect(drillWorkOut(groups, q(7, 8))).toEqual({ text: 'That is 5 teams and 2 more: 40 and 16 make 56.', split: 5 });
+    expect(drillWorkOut(groups, q(4, 7))).toEqual({ text: 'Count in 7s: 7, 14, 21, 28.', split: 0 });
+    expect(drillWorkOut(groups, q(10, 9))).toEqual({ text: '10 teams of 9 is 9 tens: 90.', split: 0 });
+    expect(drillWorkOut(into, q(6, 7, 6))).toEqual({ text: '5 teams of 7 use 35 players, and the 7 left make 1 team more: 6 teams.', split: 5 });
+    expect(drillWorkOut(into, q(3, 8, 3))).toEqual({ text: 'Count in 8s to 24: 8, 16, 24. That is 3 teams.', split: 0 });
+    /* whatever the question, it ends at the answer, and only 6 to 9 teams are split */
+    for (const step of DRILL_STEPS.filter((s) => s.workOut)) {
+      for (let i = 0; i < MANY; i += 1) {
+        const x = drillQuestion(step);
+        const { text, split } = drillWorkOut(step, x);
+        expect(text).toContain(step.task === 'make-rows' ? `${x.groups} team` : String(x.total));
+        expect(split === 0 || (split === 5 && x.groups > 5 && x.groups < 10)).toBe(true);
+      }
+    }
   });
 });
 

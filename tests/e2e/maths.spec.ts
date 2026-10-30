@@ -688,6 +688,60 @@ test.describe('maths games', () => {
     await expect(page.locator('.td-row')).toHaveCount(answer);
   });
 
+  /* Years 3–4: teams for the rest of the times tables, a miss worked out
+     from facts he knows: 5 teams and the rest, counting on, or tens */
+  test('Years 3–4: Training Drills works a miss out from 5 teams and the rest', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:training-drills': 6 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const teams = await page.locator('.td-team').count();
+    const each = await page.locator('.td-team').first().locator('.td-fan').count();
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    expect(answer).toBe(teams * each);
+    expect([6, 7, 8, 9]).toContain(each);
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`${teams} teams of ${each} make ${answer}.`);
+    if (teams > 5 && teams < 10) {
+      await expect(page.locator('.mx-note')).toContainText(`That is 5 teams and ${teams - 5} more: ${5 * each} and ${(teams - 5) * each} make ${answer}.`);
+      await expect(page.locator('.td-team.td-first')).toHaveCount(5);
+      await expect(page.locator('.td-team').nth(4).locator('.td-count')).toHaveText(String(5 * each));
+      await expect(page.locator('.td-team').last().locator('.td-count')).toHaveText(String((teams - 5) * each));
+    } else {
+      await expect(page.locator('.td-team.td-first')).toHaveCount(0);
+      await expect(page.locator('.td-team').last().locator('.td-count')).toHaveText(String(answer));
+    }
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Training Drills puts a crowd of players into teams', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:training-drills': 8 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const players = await page.locator('.td-pile .td-fan').count();
+    await expect(page.locator('.mx-ask')).toHaveText(new RegExp(`^${players} players, in teams of \\d+\\. How many teams\\?$`));
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.td-team')).toHaveCount(answer);
+    await expect(page.locator('.td-team .td-fan')).toHaveCount(players);
+    await expect(page.locator('.mx-note')).toContainText(`${players} players in teams of ${players / answer} make ${answer} teams.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: teams of 11 and 12 fit the screen, answers and all', async ({ page }) => {
+    await seed(page, { 'maths-step:training-drills': 7 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    expect([11, 12]).toContain(await page.locator('.td-team').first().locator('.td-fan').count());
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const field = (await page.locator('.td-field').boundingBox())!;
+    expect(field.x).toBeGreaterThanOrEqual(0);
+    expect(field.x + field.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+    await expectTapTargets(page, '.mx-choice');
+  });
+
   test('Half-Time Oranges: a whole round of halves', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'half-time-oranges');
