@@ -10,6 +10,7 @@ import {
   JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
   DRILL_STEPS, drillChoices, drillQuestion, drillWorkOut, type DrillQuestion,
+  LINEUP, LINEUP_STEPS, LINEUP_TABLE, LINEUP_TEAM, lineupAsk, lineupChoices, lineupQuestion, lineupWhy, type LineupQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
   BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
   BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
@@ -1146,5 +1147,55 @@ describe('Times Table Sprint', () => {
       expect(back.fact).toBe(q.fact);
       expect(back.answer).toBe(q.answer);
     }
+  });
+});
+
+describe('Foosball Line-Up', () => {
+  it('is a real table: a goalie, 2, 5 and 3, 11 a side, each side between the other', () => {
+    expect(LINEUP.map((r) => r.players)).toEqual([1, 2, 5, 3]);
+    expect(LINEUP.reduce((a, r) => a + r.players, 0)).toBe(LINEUP_TEAM);
+    expect(LINEUP_TABLE.map((r) => `${r.ours ? 'us' : 'them'} ${r.kind}`)).toEqual([
+      'us goalie', 'us defence', 'them attack', 'us midfield', 'them midfield', 'us attack', 'them defence', 'them goalie',
+    ]);
+  });
+
+  it('asks the right thing at every step, with four answers that include it', () => {
+    const players = (i: number): number => LINEUP.find((r) => r.kind === LINEUP_TABLE[i].kind)!.players;
+    for (const step of LINEUP_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = lineupQuestion(step);
+        expect(q.task).toBe(step.task);
+        const want = q.task === 'rod' ? players(q.lit[0])
+          : q.task === 'two' ? players(q.lit[0]) + players(q.lit[1])
+            : q.task === 'hiding' ? players(q.hidden!)
+              : q.task === 'spares' ? q.rods! * LINEUP.find((r) => r.kind === q.kind)!.players
+                : q.tables! * 2 * (q.kind === 'all' ? LINEUP_TEAM : LINEUP.find((r) => r.kind === q.kind)!.players);
+        expect(q.answer).toBe(want);
+        if (q.task === 'two' || q.task === 'hiding') expect(q.lit.every((r) => LINEUP_TABLE[r].ours)).toBe(true);
+        const c = lineupChoices(q);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) expect(x).toBeGreaterThanOrEqual(1);
+        expect(lineupAsk(q)).toMatch(/\?$/);
+        expect(lineupWhy(q)).toContain(String(q.answer));
+      }
+    }
+  });
+
+  it('works each one out the way he can: counting on, making 11, counting in steps, 22 as 20 and 2', () => {
+    const q = (x: Partial<LineupQuestion>): LineupQuestion => ({ task: 'rod', lit: [], answer: 0, ...x });
+    expect(lineupWhy(q({ task: 'two', lit: [1, 3], answer: 7 }))).toBe('Start at 5 and count on 2: 6, 7. 5 and 2 make 7.');
+    expect(lineupWhy(q({ task: 'hiding', lit: [0, 1, 3, 5], hidden: 5, answer: 3 })))
+      .toBe('You can see 1, 2 and 5: 8. 8 and 3 more make 11, so 3 are hiding.');
+    expect(lineupWhy(q({ task: 'spares', rods: 4, kind: 'midfield', answer: 20 }))).toBe('Count in 5s: 5, 10, 15, 20. 4 rods of 5 make 20.');
+    expect(lineupWhy(q({ task: 'tournament', tables: 4, kind: 'all', answer: 88 })))
+      .toBe('Each table has 2 teams of 11: 22 players. 4 tables of 22 is 4 lots of 20 and 4 lots of 2: 80 and 8 make 88.');
+    /* the telling slips: the whole team for hiding, one team a table for a tournament */
+    expect(lineupChoices(q({ task: 'hiding', lit: [0, 1, 3, 5], hidden: 5, answer: 3 }))).toContain(11);
+    expect(lineupChoices(q({ task: 'tournament', tables: 4, kind: 'all', answer: 88 }))).toContain(44);
+  });
+
+  it('keeps equal groups for Year 2 and the tournament for Years 3–4, at the top', () => {
+    expect(LINEUP_STEPS.map((s) => s.task)).toEqual(['rod', 'two', 'hiding', 'spares', 'tournament']);
   });
 });
