@@ -18,7 +18,7 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
-import { climb, type Climb, type Step } from '../content/maths';
+import { climb, signed, type Climb, type Step } from '../content/maths';
 import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { narrationSelect } from './narration';
 import { ourTeam, rivalFor, type Team } from './teams';
@@ -112,7 +112,8 @@ export function choiceRow(): ChoiceRow {
   };
   return {
     node,
-    ask: (options) => offer(options, false),
+    /* a number below zero shows with a true minus sign, −3 */
+    ask: (options) => offer(options, false, signed),
     reveal: (answer, picked) => mark(String(answer), String(picked)),
     askWords: (options, label) => offer(options, true, label),
     relabel: (label) => {
