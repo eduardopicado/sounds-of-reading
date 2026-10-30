@@ -138,6 +138,21 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
   });
 
+  /* he understands negative numbers: the line goes on past zero at the very top */
+  test('Below zero: Number Line Penalty from −10 to 10, kicking to a negative number', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 15 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-label').first()).toHaveText('−10');
+    await expect(page.locator('.mx-ask b')).toHaveText(/^−\d+$/);
+    await kickToNumber(page, false);
+    await expect(page.locator('.mx-note')).toContainText(/below zero\.$/);
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText('GOAL!');
+    noProblems(watch);
+  });
+
   test('Flash Count: the numbers only appear once the dots have gone', async ({ page }) => {
     const watch = watchPage(page);
     await startGame(page, 'flash-count');
@@ -588,6 +603,33 @@ test.describe('maths games', () => {
     await expect(page.locator('.ku-hop').first()).toHaveText('+2');
     await expect(page.locator('.mx-note')).toContainText('Up in 2s');
     await expect(page.locator('.ku-ball.filled')).toHaveText(String(answer));
+  });
+
+  test('Below zero: Keepy-Uppy counts back past zero, the gap below it', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:keepy-uppy': 13 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    expect(answer).toBeLessThan(0);
+    await expect(page.locator('.ku-ball', { hasText: /^0$/ })).toHaveCount(1);
+    /* written with a true minus sign, on the balls and the answers */
+    await expect(page.locator(`.mx-choice[data-n="${answer}"]`)).toHaveText(`−${-answer}`);
+    const wrong = Number(await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().getAttribute('data-n'));
+    await tapNumber(page, wrong);
+    await expect(page.locator('.ku-ball.filled')).toHaveText(`−${-answer}`);
+    await expect(page.locator('.mx-note')).toContainText(`−${-answer} is ${-answer} below zero.`);
+    noProblems(watch);
+  });
+
+  test('Below zero: Keepy-Uppy counts up from below zero', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 14 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ku-ball').first()).toHaveText(/^−\d+$/);
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`Keepy-uppy! −${-answer}!`);
   });
 
   test('Year 2: Keepy-Uppy counts back in 10s and 5s', async ({ page }) => {

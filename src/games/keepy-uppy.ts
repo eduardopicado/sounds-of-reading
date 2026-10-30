@@ -6,7 +6,9 @@
  * 1, the start of multiplying; Year 2 counts by 10s from any number (23, 33,
  * 43), the odd numbers, by 3s, and back in 10s and 5s. Years 3 and 4 count
  * by 4s, 6s, 8s, 7s and 9s, the counting side of the times tables, and back
- * down them, each gap with its fact: 28 is 4 × 7.
+ * down them, each gap with its fact: 28 is 4 × 7. At the very top the count
+ * goes past zero, back from 4 to −4 and up from −15, the gap always below
+ * zero, written with a true minus sign and said "negative 4".
  *
  * The numbers bounce in one at a time and are read out with the gap, so he
  * hears the rhythm before he answers. A wrong answer writes the step on every
@@ -15,7 +17,7 @@
 import { el, prefersReducedMotion } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
-import { SKIP_STEPS, skipChoices, skipFact, skipQuestion, type SkipQuestion, type SkipStep } from '../content/maths';
+import { SKIP_STEPS, belowZero, signed, skipChoices, skipFact, skipQuestion, spokenNumber, type SkipQuestion, type SkipStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { player } from './teams';
 
@@ -38,9 +40,9 @@ function build(kit: Kit) {
   const node = el('div', { class: 'mx-stage' }, ask, el('div', { class: 'ku-pitch' }, touches, juggler));
   let last: SkipQuestion | undefined;
 
-  /** the gap, or the number, as said aloud */
-  const spoken = (q: SkipQuestion, fill: boolean): string =>
-    q.seq.map((n, i) => (i === q.gap && !fill ? 'what?' : String(n))).join(', ');
+  /** the gap, or the number, as said aloud ("negative 4") or, with `signed`, as written (−4) */
+  const spoken = (q: SkipQuestion, fill: boolean, write: (n: number) => string = spokenNumber): string =>
+    q.seq.map((n, i) => (i === q.gap && !fill ? 'what?' : write(n))).join(', ');
   /** a sum the way it is said: "4 times 7 is 28" */
   const said = (text: string): string => text.replace(/×/g, 'times').replace(/=/g, 'is');
 
@@ -69,7 +71,7 @@ function build(kit: Kit) {
       const beat = prefersReducedMotion() ? 120 : 520;
       for (const [i, n] of q.seq.entries()) {
         if (i) touches.append(el('span', { class: 'ku-hop', 'aria-hidden': 'true' }));
-        const ball = el('span', { class: `ku-ball${i === q.gap ? ' gap' : ''}`, text: i === q.gap ? '?' : String(n) });
+        const ball = el('span', { class: `ku-ball${i === q.gap ? ' gap' : ''}`, text: i === q.gap ? '?' : signed(n) });
         touches.append(ball);
         balls.push(ball);
         touches.setAttribute('aria-label', spoken({ ...q, seq: q.seq.slice(0, i + 1) }, false));
@@ -83,18 +85,20 @@ function build(kit: Kit) {
       const answer = q.seq[q.gap];
       const picked = await kit.choices.ask(skipChoices(q));
       kit.choices.reveal(answer, picked);
-      balls[q.gap].textContent = String(answer);
+      balls[q.gap].textContent = signed(answer);
       balls[q.gap].classList.remove('gap');
       balls[q.gap].classList.add(picked === answer ? 'right' : 'filled');
       /* a times table's gap comes with its fact */
       const fact = step.facts ? skipFact(q) : '';
-      const how = step.by.length === 1 && step.by[0] === 1
-        ? `${step.dir === 1 ? 'Counting on' : 'Counting back'}: ${spoken(q, true)}.`
-        : `${step.dir === 1 ? 'Up' : 'Back'} in ${q.by}s: ${spoken(q, true)}.${fact ? ` The ${q.by} times table: ${fact}.` : ''}`;
+      /* past zero: where the gap is, below it */
+      const below = answer < 0 ? ` ${belowZero(answer)}` : '';
+      const how = (write: (n: number) => string): string => (q.by === 1
+        ? `${step.dir === 1 ? 'Counting on' : 'Counting back'}: ${spoken(q, true, write)}.`
+        : `${step.dir === 1 ? 'Up' : 'Back'} in ${q.by}s: ${spoken(q, true, write)}.${fact ? ` The ${q.by} times table: ${fact}.` : ''}`);
       if (picked === answer) {
         sfx.cheer();
         juggler.classList.add('trick');
-        kit.note(`Keepy-uppy! ${answer}!${fact ? ` ${fact}.` : ''}`, true);
+        kit.note(`Keepy-uppy! ${signed(answer)}!${fact ? ` ${fact}.` : ''}`, true);
         say(`Yes! ${spoken(q, true)}${fact ? `. ${said(fact)}.` : ''}`);
         await kit.wait(2400);
         juggler.classList.remove('trick');
@@ -102,8 +106,8 @@ function build(kit: Kit) {
       }
       sfx.wrong();
       steps(q, step);
-      kit.note(how);
-      say(said(how));
+      kit.note(`${how(signed)}${below}`);
+      say(said(`${how(spokenNumber)}${below.replace(/−(\d+)/, 'negative $1')}`));
       await kit.wait(3600);
       return false;
     },

@@ -32,6 +32,11 @@ import { pick, shuffle } from '../lib/random';
 
 export interface Step { name: string }
 
+/** a number as it is written: below zero with a true minus sign, −3 */
+export const signed = (n: number): string => (n < 0 ? `−${-n}` : String(n));
+/** and as it is said: negative 3 */
+export const spokenNumber = (n: number): string => (n < 0 ? `negative ${-n}` : String(n));
+
 /* ── climbing the ladder ─────────────────────────────────────────────── */
 
 /** up after this many right in a row */
@@ -335,6 +340,8 @@ export interface LineStep extends Step {
   /** rounding: the line is one ten (or hundred) long, the number is marked
       on it, and he kicks to the end it is nearer */
   round?: 10 | 100;
+  /** the line goes on past zero, and what is asked is always below it */
+  below?: boolean;
 }
 
 const every = (lo: number, hi: number, by: number): number[] => {
@@ -361,10 +368,15 @@ export const LINE_STEPS: LineStep[] = [
   { name: 'Nearest hundred', lo: 0, hi: 1000, tick: 10, labels: [0, 1000], ask: 'any', near: 0, round: 100 },
   { name: '0 to 1 in tenths', lo: 0, hi: 10, tick: 1, labels: [0, 5, 10], ask: 'any', near: 0, per: 10 },
   { name: '0 to 2 in tenths', lo: 0, hi: 20, tick: 1, labels: [0, 10, 20], ask: 'any', near: 0, per: 10 },
+  /* below zero: negative numbers, which NSW leaves to Stage 3 (Year 6) but
+     he already understands, so they sit at the very top */
+  { name: '−10 to 10', lo: -10, hi: 10, tick: 1, labels: [-10, -5, 0, 5, 10], ask: 'any', near: 0, below: true },
+  { name: '−20 to 20', lo: -20, hi: 20, tick: 1, labels: [-20, -10, 0, 10, 20], ask: 'any', near: 1, below: true },
 ];
 
 /** a number as it is written on the line: 7 tenths is 0.7, and 10 000 has a space */
 export function lineText(v: number, per = 1): string {
+  if (v < 0) return `−${lineText(-v, per)}`;
   if (per !== 1) return String(Math.round((v / per) * 1000) / 1000);
   return v >= 10000 ? `${Math.floor(v / 1000)} ${String(v % 1000).padStart(3, '0')}` : String(v);
 }
@@ -373,7 +385,7 @@ export function lineQuestion(step: LineStep, last?: number): number {
   const by = step.ask === 'thousands' ? 1000 : step.ask === 'hundreds' ? 100 : step.ask === 'tens' ? 10 : 1;
   const pool = every(step.lo, step.hi, by)
     /* a number written under the line is no question at all */
-    .filter((n) => !step.labels.includes(n) && n !== last);
+    .filter((n) => !step.labels.includes(n) && n !== last && (!step.below || n < 0));
   return pick(pool.length ? pool : every(step.lo, step.hi, step.tick));
 }
 
@@ -653,9 +665,10 @@ export function anotherChoices(ones: number): number[] {
 export interface SkipStep extends Step {
   /** the step each bounce goes up (or down) by; one is picked per question */
   by: number[];
-  /** where the counting starts: from 0 (and its multiples), any number, or
-      an odd number (counting the odd numbers) */
-  from: 'zero' | 'any' | 'odd';
+  /** where the counting starts: from 0 (and its multiples), any number, an
+      odd number (counting the odd numbers), or either side of zero so the
+      count goes past it (negative numbers) */
+  from: 'zero' | 'any' | 'odd' | 'past-zero';
   dir: 1 | -1;
   /** the biggest number said */
   max: number;
@@ -680,6 +693,11 @@ export const SKIP_STEPS: SkipStep[] = [
   { name: 'Count by 6s and 8s', by: [6, 8], from: 'zero', dir: 1, max: 96, facts: true },
   { name: 'Count by 7s and 9s', by: [7, 9], from: 'zero', dir: 1, max: 108, facts: true },
   { name: 'Back down a times table', by: [3, 4, 6, 7, 8, 9], from: 'zero', dir: -1, max: 108, facts: true },
+  /* past zero: negative numbers, which NSW leaves to Stage 3 (Year 6) but he
+     already understands, so they sit at the very top. The gap is always
+     below zero */
+  { name: 'Back past zero', by: [1, 2, 5, 10], from: 'past-zero', dir: -1, max: 50 },
+  { name: 'Up from below zero', by: [1, 2, 5, 10], from: 'past-zero', dir: 1, max: 50 },
 ];
 
 /** how many numbers each keepy-uppy shows */
@@ -692,6 +710,17 @@ export function skipQuestion(step: SkipStep, last?: SkipQuestion): SkipQuestion 
     const by = pick(step.by);
     const span = by * (BOUNCES - 1);
     let first: number;
+    if (step.from === 'past-zero') {
+      /* zero is one of the touches; going down it comes early so the gap
+         can fall after it, going up it comes late so the gap is before it */
+      const zero = step.dir === -1 ? rand(1, 3) : rand(3, BOUNCES - 2);
+      /* `|| 0` so zero is never −0 */
+      const seq = Array.from({ length: BOUNCES }, (_, i) => by * (i - zero) * step.dir || 0);
+      const below = seq.flatMap((n, i) => (n < 0 && i >= 2 ? [i] : []));
+      const gap = pick(below);
+      if (last && last.seq[0] === seq[0] && last.by === by) continue;
+      return { seq, gap, by };
+    }
     if (step.from === 'zero') {
       /* along the multiples of the step: up from one, or back down to one */
       const top = Math.floor((step.facts ? Math.min(step.max, 12 * by) : step.max) / by);
@@ -724,10 +753,14 @@ export function skipChoices(q: SkipQuestion): number[] {
   const out = [answer];
   for (const x of shuffle([answer + 1, answer - 1, answer + q.by, answer - q.by]).concat(answer + 2, answer - 2, answer + 2 * q.by)) {
     if (out.length >= 4) break;
-    if (x >= 0 && !out.includes(x)) out.push(x);
+    /* below zero only where the count goes there */
+    if ((x >= 0 || q.seq.some((n) => n < 0)) && !out.includes(x)) out.push(x);
   }
   return out.sort((a, b) => a - b);
 }
+
+/** where a number below zero is: −3 is 3 below zero */
+export const belowZero = (n: number): string => `${signed(n)} is ${-n} below zero.`;
 
 /* ── Training Drills: equal groups, sharing, rows ────────────────────── */
 
