@@ -2,6 +2,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { GAMES } from '../../src/games/catalog';
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {
@@ -742,6 +743,68 @@ test.describe('maths games', () => {
     await expectTapTargets(page, '.mx-choice');
   });
 
+  test('Foosball Line-Up: a whole round of counting the rods', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'foosball-line-up');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.lu-field').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Foosball Line-Up: a real table, 1, 2, 5 and 3 a side', async ({ page }) => {
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.lu-rod')).toHaveCount(8);
+    const counts = await page.locator('.lu-rod').evaluateAll((rods) => rods.map((r) => r.querySelectorAll('.lu-man').length));
+    expect(counts).toEqual([1, 2, 3, 5, 5, 3, 2, 1]);
+    await expect(page.locator('.lu-rod.ours')).toHaveCount(4);
+    /* the first step: the glowing rod's players are the answer */
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    expect(await page.locator('.lu-rod.lit .lu-man').count()).toBe(Number(await page.locator('.lu-field').getAttribute('data-answer')));
+  });
+
+  test('Foosball Line-Up: a miss on who is hiding lifts the towel and makes 11', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:foosball-line-up': 2 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.lu-towel')).toHaveCount(1);
+    const answer = Number(await page.locator('.lu-field').getAttribute('data-answer'));
+    await tapNumber(page, answer === 11 ? 1 : 11);
+    await expect(page.locator('.lu-towel')).toHaveCount(0);
+    await expect(page.locator('.lu-rod.lit .lu-man').filter({ hasText: String(answer) })).not.toHaveCount(0);
+    await expect(page.locator('.mx-note')).toContainText(`${11 - answer} and ${answer} more make 11, so ${answer}`);
+    noProblems(watch);
+  });
+
+  test('Year 2: Foosball Line-Up counts the spare rods in steps', async ({ page }) => {
+    await seed(page, { 'maths-step:foosball-line-up': 3 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const rods = await page.locator('.lu-rod.spare').count();
+    const each = await page.locator('.lu-rod.spare').first().locator('.lu-man').count();
+    await tapNumber(page, rods * each);
+    await expect(page.locator('.lu-count').last()).toHaveText(String(rods * each));
+    await expect(page.locator('.mx-note')).toContainText(`${rods} rods of ${each} make ${rods * each}`);
+  });
+
+  test('Years 3–4: Foosball Line-Up, a tournament: one table, then all of them', async ({ page }) => {
+    await seed(page, { 'maths-step:foosball-line-up': 4 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const tables = await page.locator('.lu-chip').count();
+    const perTable = await page.locator('.lu-rod.lit .lu-man').count();
+    const answer = Number(await page.locator('.lu-field').getAttribute('data-answer'));
+    expect(answer).toBe(tables * perTable);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`${tables} tables of ${perTable}`);
+    await expect(page.locator('.lu-rod.lit .lu-man').last()).toHaveText(String(perTable));
+  });
+
   test('Half-Time Oranges: a whole round of halves', async ({ page }) => {
     const watch = watchPage(page);
     await openGame(page, 'half-time-oranges');
@@ -1362,8 +1425,9 @@ test.describe('maths games', () => {
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(18);
+    /* one tile for every game in the section, from the catalog */
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'maths').length);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
+    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'bjj').length);
   });
 });
