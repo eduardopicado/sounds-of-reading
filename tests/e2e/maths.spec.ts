@@ -2,6 +2,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { GAMES } from '../../src/games/catalog';
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {
@@ -1424,8 +1425,9 @@ test.describe('maths games', () => {
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(18);
+    /* one tile for every game in the section, from the catalog */
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'maths').length);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
+    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'bjj').length);
   });
 });
