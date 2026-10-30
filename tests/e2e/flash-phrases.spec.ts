@@ -11,7 +11,8 @@ async function start(page: Page, step = 0): Promise<void> {
 
 /** wait for the phrase, then for the answers, and pick the right one or another */
 async function answer(page: Page, right: boolean): Promise<{ phrase: string; picked: string }> {
-  await expect(page.locator('.fp-word').first()).toBeVisible({ timeout: 6000 });
+  /* the new phrase is up: the last one stays on the card a moment after it is answered */
+  await expect(page.locator('.mx-ask')).toHaveText('Read it!', { timeout: 8000 });
   const phrase = (await page.locator('.fp-stage').getAttribute('data-answer'))!;
   await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
   const options = await page.locator('.mx-choice').allTextContents();
@@ -53,7 +54,6 @@ test.describe('Flash Phrases', () => {
     const [right, wrong] = [phrase.split(' ')[at], picked.split(' ')[at]];
     await expect(page.locator('.fp-word.misread')).toHaveText(right);
     await expect(page.locator('.mx-note')).toHaveText(`It said “${phrase}”: ${right}, not ${wrong}.`);
-    /* each right answer in a row shortens the look; a miss gives the long look back */
     noProblems(watch);
   });
 
