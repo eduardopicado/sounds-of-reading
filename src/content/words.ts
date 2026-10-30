@@ -668,6 +668,32 @@ export const STORIES: string[] = [
   'Draw with Me | I love to draw. I draw a bear and a chair. I draw my friend with long hair. Then I draw a hare. I saw a hare at the farm. Mother said, "That is good work!" I will draw again soon. @8',
 ];
 
+/*  Flash Phrases — a phrase shows for a moment, and he picks the one he read.
+ *
+ *  Reading faster is reading a phrase at a glance rather than a word at a
+ *  time. Each phrase is two to six words, every one he can read at its
+ *  @level, and the level is exactly the highest level of any word in it, as
+ *  for the stories: the content test checks both, and that every phrase has
+ *  lookalikes to stand beside it (one word changed by one letter).  */
+export const FLASH_PHRASES: string[] = [
+  'a tin @1', 'sit in it @1', 'a tin pan @1', 'in a tin @1', 'a pan and a tin @1', 'lots of pins @1',
+  'I tip it in @1', 'the ants nip me @1', 'a pan of ants @1', 'she sat on a pin @1',
+  'a big dog @2', 'a red cup @2', 'up on top @2', 'the sad cat @2', 'he can run @2', 'kick the rock @2',
+  'you can kick it @2', 'a pig in the mud @2', 'a sock and a cap @2', 'the dog got the sock @2',
+  'big hug @3', 'a black hat @3', 'my big box @3', 'we will win @3', 'the fox can jump @3', 'jump on the log @3',
+  'the van is fast @3', 'a frog on a log @3', 'they are in the hut @3',
+  'a long song @4', 'ring the bell @4', 'a thick shell @4', 'I think so @4', 'the king can sing @4',
+  'here is the ship @4', 'such a rich king @4', 'a fish in a dish @4',
+  'at night @5', 'by the train @5', 'a long tail @5', 'we play all day @5', 'a sail in the rain @5',
+  'play in the rain @5', 'the train is long @5', 'a nail in the wall @5', 'a light at night @5',
+  'shout out loud @6', 'a loud shout @6', 'the brown cow @6', 'round and round @6', 'come to my house @6',
+  'my mother and father @6', 'a brown owl in the town @6', 'the boy and his toy @6',
+  'ride home @7', 'save the game @7', 'ride a bike @7', 'a big cake @7', 'close the gate @7',
+  'a huge cake @7', 'I know that game @7', 'the snake can smile @7',
+  'a fair share @8', 'a hairy bear @8', 'fair and square @8', 'care and share @8', 'a cup of water @6', 'draw a bear @8',
+  'we drew a hare @8', 'a chair and a bear @8', 'the bear saw the deer @8',
+];
+
 /*  Coach Says — read an instruction, then do it.
  *
  *  The first game that checks he understood a sentence, not only that he

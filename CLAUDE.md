@@ -79,6 +79,9 @@ src/content/stories.ts Read and Point: the stories (STORIES in words.ts, every
                        tap, and the sight word to hunt for in each
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
+src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his levels
+                       (FLASH_PHRASES in words.ts), lookalikes one letter off, and
+                       how long a phrase shows
 src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
                        rod each, with the swaps that make other real words
 src/content/word-search.ts Word Search: the themed lists from words.ts, the grid

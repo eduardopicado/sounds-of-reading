@@ -6,7 +6,7 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, STORIES,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, STORIES, FLASH_PHRASES,
   type SoundSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
@@ -270,6 +270,15 @@ export const ALL_STORIES: Story[] = STORIES.map((raw) => {
   /* a sentence ends at . ! or ?, with any closing quote that goes with it */
   const sentences = text.split(/(?<=[.!?]["”]?)\s+/).filter(Boolean);
   return { title: m[1], text, sentences, level: Number(m[3]) as Level };
+});
+
+/** a phrase for Flash Phrases: its words, and the highest level of any of them */
+export interface FlashPhrase { text: string; level: Level }
+
+export const ALL_FLASH_PHRASES: FlashPhrase[] = FLASH_PHRASES.map((raw) => {
+  const m = /^([a-zA-Z ]*[a-zA-Z])\s+@([1-8])$/.exec(raw.trim());
+  if (!m) throw new ContentError(`flash phrase: "${raw}" needs only words and a level at the end, like @3`);
+  return { text: m[1], level: Number(m[2]) as Level };
 });
 
 /* every word mapped to the words it sounds exactly like */
