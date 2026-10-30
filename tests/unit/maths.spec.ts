@@ -12,7 +12,7 @@ import {
   DRILL_STEPS, drillChoices, drillQuestion, drillWorkOut, type DrillQuestion,
   LINEUP, LINEUP_STEPS, LINEUP_TABLE, LINEUP_TEAM, lineupAsk, lineupChoices, lineupQuestion, lineupWhy, type LineupQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
-  BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
+  BOUNCES, SKIP_STEPS, belowZero, signed, skipChoices, skipFact, skipQuestion, spokenNumber,
   BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
@@ -276,8 +276,9 @@ describe('Number Line Penalty', () => {
   });
 
   it('goes on to 1000 in Year 2, then to 10 000, rounding and tenths', () => {
-    expect(LINE_STEPS.map((s) => s.name).slice(-7)).toEqual([
+    expect(LINE_STEPS.map((s) => s.name).slice(-9)).toEqual([
       '0 to 1000', '0 to 10 000 in thousands', '0 to 10 000', 'Nearest ten', 'Nearest hundred', '0 to 1 in tenths', '0 to 2 in tenths',
+      '−10 to 10', '−20 to 20',
     ]);
     /* a near miss on 0 to 10 000 forgives what one on 0 to 1000 does, ten times over */
     const big = LINE_STEPS.find((s) => s.name === '0 to 10 000')!;
@@ -292,6 +293,19 @@ describe('Number Line Penalty', () => {
     expect(lineText(13, 10)).toBe('1.3');
     expect(lineText(10, 10)).toBe('1');
     expect(lineText(0, 10)).toBe('0');
+    expect(lineText(-7)).toBe('−7');
+  });
+
+  it('goes past zero at the very top, asking only numbers below it', () => {
+    for (const step of LINE_STEPS.filter((s) => s.below)) {
+      expect(step.lo).toBeLessThan(0);
+      expect(LINE_STEPS.indexOf(step)).toBeGreaterThan(LINE_STEPS.findIndex((s) => s.name === '0 to 2 in tenths'));
+      for (let i = 0; i < MANY; i += 1) {
+        const n = lineQuestion(step);
+        expect(n).toBeLessThan(0);
+        expect(n).toBeGreaterThanOrEqual(step.lo);
+      }
+    }
   });
 
   it('rounds: a number inside one ten (or hundred), never halfway, never already round', () => {
@@ -487,7 +501,8 @@ describe('Keepy-Uppy Count', () => {
         expect(q.seq).toHaveLength(BOUNCES);
         expect(step.by).toContain(q.by);
         for (let j = 1; j < q.seq.length; j += 1) expect(q.seq[j] - q.seq[j - 1]).toBe(step.dir * q.by);
-        for (const n of q.seq) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.max); }
+        /* only past zero does a count go below it */
+        for (const n of q.seq) { expect(n).toBeGreaterThanOrEqual(step.from === 'past-zero' ? -step.max : 0); expect(n).toBeLessThanOrEqual(step.max); }
         expect(q.gap).toBeGreaterThanOrEqual(2);
         expect(q.gap).toBeLessThan(BOUNCES);
         if (step.from === 'zero') expect(q.seq[0] % q.by).toBe(0);
@@ -505,9 +520,30 @@ describe('Keepy-Uppy Count', () => {
         const c = skipChoices(q);
         expect(c).toContain(q.seq[q.gap]);
         expect(new Set(c).size).toBe(4);
-        for (const x of c) expect(x).toBeGreaterThanOrEqual(0);
+        if (step.from !== 'past-zero') for (const x of c) expect(x).toBeGreaterThanOrEqual(0);
       }
     }
+  });
+
+  /* he understands negative numbers, so past zero is at the very top */
+  it('counts past zero, back and up, with zero in the count and the gap below it', () => {
+    const past = SKIP_STEPS.filter((s) => s.from === 'past-zero');
+    expect(past.map((s) => s.dir)).toEqual([-1, 1]);
+    expect(SKIP_STEPS.slice(-2)).toEqual(past);
+    for (const step of past) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = skipQuestion(step);
+        expect(q.seq).toContain(0);
+        expect(q.seq.some((n) => Object.is(n, -0))).toBe(false);
+        expect(q.seq[q.gap]).toBeLessThan(0);
+        expect(q.gap).toBeGreaterThanOrEqual(2);
+        expect(skipChoices(q)).toContain(q.seq[q.gap]);
+      }
+    }
+    expect(signed(-4)).toBe('−4');
+    expect(signed(4)).toBe('4');
+    expect(spokenNumber(-4)).toBe('negative 4');
+    expect(belowZero(-3)).toBe('−3 is 3 below zero.');
   });
 
   it('keeps 2s, 5s and 10s for Year 1, and 3s and any-number tens for Year 2', () => {
