@@ -47,8 +47,12 @@ function build(kit: Kit) {
   const said = (text: string): string => text.replace(/×/g, 'times').replace(/=/g, 'is');
 
   function steps(q: SkipQuestion, step: SkipStep): void {
-    const sign = step.dir === 1 ? '+' : '−';
-    for (const hop of touches.querySelectorAll('.ku-hop')) hop.textContent = `${sign}${q.by}`;
+    /* past zero, "−1" beside a ball that says −1 reads as the number, so
+       the jumps say which way instead */
+    const jump = step.from === 'past-zero'
+      ? `${step.dir === 1 ? 'on' : 'back'} ${q.by}`
+      : `${step.dir === 1 ? '+' : '−'}${q.by}`;
+    for (const hop of touches.querySelectorAll('.ku-hop')) hop.textContent = jump;
     touches.classList.add('show-hops');
   }
 

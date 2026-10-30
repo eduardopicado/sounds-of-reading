@@ -619,6 +619,8 @@ test.describe('maths games', () => {
     await tapNumber(page, wrong);
     await expect(page.locator('.ku-ball.filled')).toHaveText(`−${-answer}`);
     await expect(page.locator('.mx-note')).toContainText(`−${-answer} is ${-answer} below zero.`);
+    /* the jumps say which way, so they are not read as numbers below zero */
+    await expect(page.locator('.ku-hop').first()).toHaveText(/^back \d+$/);
     noProblems(watch);
   });
 
