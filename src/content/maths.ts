@@ -2371,3 +2371,179 @@ export function timesHelp(q: TimesQuestion, unit: 'lots' | 'rows' = 'lots'): { t
 /** how long an answer may take and still count as quick, by the grown-up's pace */
 export type SprintPace = 'relaxed' | 'steady' | 'quick';
 export const SPRINT_MS: Record<SprintPace, number> = { relaxed: 12000, steady: 8000, quick: 5000 };
+
+/* ── Foosball Line-Up: the players on a real table's rods ────────────── */
+
+/** a team on a real foosball table, from its own goal: a goalie, a defence
+    of 2, a midfield of 5 and an attack of 3, 11 players like a real side */
+export type LineupKind = 'goalie' | 'defence' | 'midfield' | 'attack';
+export const LINEUP: { kind: LineupKind; players: number }[] = [
+  { kind: 'goalie', players: 1 }, { kind: 'defence', players: 2 }, { kind: 'midfield', players: 5 }, { kind: 'attack', players: 3 },
+];
+export const LINEUP_TEAM = 11;
+/** what a rod's players are called */
+export const LINEUP_PEOPLE: Record<LineupKind, [string, string]> = {
+  goalie: ['goalie', 'goalies'], defence: ['defender', 'defenders'], midfield: ['midfielder', 'midfielders'], attack: ['attacker', 'attackers'],
+};
+const lineupPlayers = (kind: LineupKind): number => LINEUP.find((r) => r.kind === kind)!.players;
+
+/**
+ * The eight rods across the table, from his goal on the left to theirs on
+ * the right, as on every real table: each side's rods in between the
+ * other's, so his attack faces their defence.
+ */
+export const LINEUP_TABLE: { kind: LineupKind; ours: boolean }[] = [
+  { kind: 'goalie', ours: true }, { kind: 'defence', ours: true }, { kind: 'attack', ours: false }, { kind: 'midfield', ours: true },
+  { kind: 'midfield', ours: false }, { kind: 'attack', ours: true }, { kind: 'defence', ours: false }, { kind: 'goalie', ours: false },
+];
+
+export interface LineupStep extends Step {
+  /**
+   * rod: count the players on the rod that glows;
+   * two: the players on two of his rods together;
+   * hiding: his team of 11 with one rod under a towel, how many are hiding;
+   * spares: spare rods of the same kind in the club's cupboard (equal groups);
+   * tournament: so many tables, how many of one kind of player on them all.
+   */
+  task: 'rod' | 'two' | 'hiding' | 'spares' | 'tournament';
+}
+
+export const LINEUP_STEPS: LineupStep[] = [
+  { name: 'Count a rod', task: 'rod' },
+  { name: 'Two rods together', task: 'two' },
+  { name: 'Who is hiding?', task: 'hiding' },
+  /* Year 2: equal groups, rods of 2, 3 and 5 */
+  { name: 'Spare rods', task: 'spares' },
+  /* Years 3–4: two teams to a table, and a tournament of tables */
+  { name: 'A tournament', task: 'tournament' },
+];
+
+export interface LineupQuestion {
+  task: LineupStep['task'];
+  /** the rods that glow, by their place across the table (LINEUP_TABLE) */
+  lit: number[];
+  /** the rod under the towel, for hiding */
+  hidden?: number;
+  /** spares: how many rods, and of which kind */
+  rods?: number;
+  /** tournament: how many tables, and which players are counted ('all' for every one) */
+  tables?: number;
+  kind?: LineupKind | 'all';
+  answer: number;
+}
+
+const ourRods = (): number[] => LINEUP_TABLE.flatMap((r, i) => (r.ours ? [i] : []));
+
+export function lineupQuestion(step: LineupStep, last?: LineupQuestion): LineupQuestion {
+  for (;;) {
+    const q = makeLineup(step);
+    if (!last || JSON.stringify(q) !== JSON.stringify(last)) return q;
+  }
+}
+
+function makeLineup(step: LineupStep): LineupQuestion {
+  const players = (i: number): number => lineupPlayers(LINEUP_TABLE[i].kind);
+  switch (step.task) {
+    case 'rod': {
+      const at = rand(0, LINEUP_TABLE.length - 1);
+      return { task: 'rod', lit: [at], answer: players(at) };
+    }
+    case 'two': {
+      const [a, b] = shuffle(ourRods()).slice(0, 2).sort((x, y) => x - y);
+      return { task: 'two', lit: [a, b], answer: players(a) + players(b) };
+    }
+    case 'hiding': {
+      const hidden = pick(ourRods());
+      return { task: 'hiding', lit: ourRods(), hidden, answer: players(hidden) };
+    }
+    case 'spares': {
+      const kind = pick<LineupKind>(['defence', 'attack', 'midfield']);
+      const rods = rand(2, 5);
+      return { task: 'spares', lit: [], rods, kind, answer: rods * lineupPlayers(kind) };
+    }
+    case 'tournament': {
+      const kind = pick<LineupKind | 'all'>(['goalie', 'defence', 'midfield', 'attack', 'all']);
+      const tables = rand(2, 6);
+      const lit = LINEUP_TABLE.flatMap((r, i) => (kind === 'all' || r.kind === kind ? [i] : []));
+      return { task: 'tournament', lit, tables, kind, answer: tables * lineupPerTable(kind) };
+    }
+  }
+}
+
+/** how many of these players one table has: both teams' */
+export const lineupPerTable = (kind: LineupKind | 'all'): number => 2 * (kind === 'all' ? LINEUP_TEAM : lineupPlayers(kind));
+
+/** the answer and three slips: one off, a rod off, and the telling one for each task */
+export function lineupChoices(q: LineupQuestion): number[] {
+  const unit = q.task === 'spares' ? lineupPlayers(q.kind as LineupKind)
+    : q.task === 'tournament' ? lineupPerTable(q.kind!) : 1;
+  /* hiding: the whole team, or the players he can see; spares: adding the two
+     numbers; tournament: only one team counted at each table */
+  const telling = q.task === 'hiding' ? [LINEUP_TEAM, LINEUP_TEAM - q.answer]
+    : q.task === 'spares' ? [q.rods! + unit]
+      : q.task === 'tournament' ? [q.answer / 2] : [];
+  const out = [q.answer];
+  for (const x of [...telling, ...shuffle([q.answer + unit, q.answer - unit, q.answer + 1, q.answer - 1]), q.answer + 2, q.answer + 2 * unit, q.answer + 3]) {
+    if (out.length >= 4) break;
+    if (x >= 1 && Number.isInteger(x) && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+/** what he is asked */
+export function lineupAsk(q: LineupQuestion): string {
+  switch (q.task) {
+    case 'rod': return 'How many players are on the glowing rod?';
+    case 'two': return 'How many players are on the two glowing rods together?';
+    case 'hiding': return `Your team has ${LINEUP_TEAM} players. Some are hiding under the towel. How many?`;
+    case 'spares': {
+      const n = lineupPlayers(q.kind as LineupKind);
+      return `The club has ${q.rods} spare ${q.kind} rods, with ${n} players on each. How many players?`;
+    }
+    case 'tournament': {
+      const who = q.kind === 'all' ? 'players' : LINEUP_PEOPLE[q.kind as LineupKind][1];
+      return `A tournament on ${q.tables} tables. How many ${who} on all the tables?`;
+    }
+  }
+}
+
+/**
+ * The way to work it out, said after every answer (the working out is the
+ * lesson): counting the rod, counting on from the bigger rod, the team made
+ * up to 11, counting in the rod's players, and for a tournament one table
+ * first, then the tables (22 is 20 and 2).
+ */
+export function lineupWhy(q: LineupQuestion): string {
+  const players = (i: number): number => lineupPlayers(LINEUP_TABLE[i].kind);
+  const count = (n: number, by = 1): string => Array.from({ length: n }, (_, i) => (i + 1) * by).join(', ');
+  switch (q.task) {
+    case 'rod': return q.answer === 1 ? 'Just 1: the goalie.' : `Count them: ${count(q.answer)}. ${q.answer} players.`;
+    case 'two': {
+      const [big, small] = q.lit.map(players).sort((a, b) => b - a);
+      const on = Array.from({ length: small }, (_, i) => big + i + 1).join(', ');
+      return `Start at ${big} and count on ${small}: ${on}. ${big} and ${small} make ${q.answer}.`;
+    }
+    case 'hiding': {
+      const seen = q.lit.filter((i) => i !== q.hidden).map(players);
+      const sum = seen.reduce((a, b) => a + b, 0);
+      return `You can see ${seen.slice(0, -1).join(', ')} and ${seen.at(-1)}: ${sum}. ${sum} and ${q.answer} more make ${LINEUP_TEAM}, so ${q.answer} ${q.answer === 1 ? 'is' : 'are'} hiding.`;
+    }
+    case 'spares': {
+      const n = lineupPlayers(q.kind as LineupKind);
+      return `Count in ${n}s: ${count(q.rods!, n)}. ${q.rods} rods of ${n} make ${q.answer}.`;
+    }
+    case 'tournament': {
+      const t = q.tables!;
+      const per = lineupPerTable(q.kind!);
+      const table = q.kind === 'all'
+        ? `Each table has 2 teams of ${LINEUP_TEAM}: ${per} players.`
+        : `Each table has 2 ${q.kind} rods of ${lineupPlayers(q.kind as LineupKind)}: ${per} ${LINEUP_PEOPLE[q.kind as LineupKind][per === 1 ? 0 : 1]}.`;
+      /* 22 is 20 and 2 */
+      const [tens, ones] = [per - (per % 10), per % 10];
+      const tables = per > 10
+        ? `${t} tables of ${per} is ${t} lots of ${tens} and ${t} lots of ${ones}: ${t * tens} and ${t * ones} make ${q.answer}.`
+        : `${t} tables of ${per} make ${q.answer}.`;
+      return `${table} ${tables}`;
+    }
+  }
+}

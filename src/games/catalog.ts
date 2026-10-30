@@ -13,7 +13,7 @@
 
 import type { Mount } from '../lib/router';
 import {
-  BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS, HANDS_STEPS, JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, TIMES_STEPS, type Step,
+  BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS, HANDS_STEPS, JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, LINEUP_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, TIMES_STEPS, type Step,
 } from '../content/maths';
 import { MATCH_STEPS, REF_STEPS, SIGNAL_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
@@ -114,6 +114,8 @@ export const GAMES: Game[] = [
     load: () => import('./keepy-uppy') },
   { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths', ladder: DRILL_STEPS,
     load: () => import('./training-drills') },
+  { path: 'foosball-line-up', name: 'Foosball Line-Up', emoji: '🎛️', what: 'A goalie, 2, 5 and 3: how many?', tone: '#2E7D5B', section: 'maths', ladder: LINEUP_STEPS,
+    load: () => import('./foosball-line-up') },
   { path: 'times-table-sprint', name: 'Times Table Sprint', emoji: '⏱️', what: 'Times tables to 12 × 12, by heart', tone: '#C2543A', section: 'maths', ladder: TIMES_STEPS,
     load: () => import('./times-table-sprint') },
   { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths', ladder: FRACTION_STEPS,
