@@ -1048,3 +1048,90 @@ describe('word search', () => {
     }
   });
 });
+
+/* ── Word Parts ─────────────────────────────────────────────────────────── */
+
+import {
+  ENDINGS_OF, MEANINGS, PART_STEPS, PART_WORDS, edSays, misspellings, partQuestion, partSpan, ruleFor, withEnding,
+} from '../src/content/word-parts';
+
+describe('word parts', () => {
+  it('takes only words he can already read, each once', () => {
+    expect(PART_WORDS.filter((w) => w.level === undefined).map((w) => w.base)).toEqual([]);
+    expect(new Set(PART_WORDS.map((w) => w.base)).size).toBe(PART_WORDS.length);
+  });
+
+  it('puts every ending on by its rule and makes a real word', () => {
+    const made = PART_WORDS.flatMap((w) => ENDINGS_OF[w.kind].map((e) => withEnding(w.base, e)));
+    expect(made.filter((w) => !isRealWord(w))).toEqual([]);
+    expect(made.filter((w) => blocked(w))).toEqual([]);
+    /* the rules as the game says them */
+    expect(['hop', 'smile', 'cry', 'fish', 'jump'].map((b) => withEnding(b, 'ing'))).toEqual(['hopping', 'smiling', 'crying', 'fishing', 'jumping']);
+    expect(['hop', 'smile', 'cry', 'play', 'mix'].map((b) => withEnding(b, 'ed'))).toEqual(['hopped', 'smiled', 'cried', 'played', 'mixed']);
+    expect(['cry', 'fish', 'catch', 'race'].map((b) => withEnding(b, 's'))).toEqual(['cries', 'fishes', 'catches', 'races']);
+    expect(['big', 'late', 'happy', 'fast'].map((b) => withEnding(b, 'er'))).toEqual(['bigger', 'later', 'happier', 'faster']);
+  });
+
+  it('has words for every rule, at a range of levels', () => {
+    for (const rule of ['add', 'es', 'double', 'drop-e', 'y-to-i', 'keep-y'] as const) {
+      const pairs = PART_WORDS.flatMap((w) => ENDINGS_OF[w.kind].filter((e) => ruleFor(w.base, e) === rule));
+      /* only cry, try, dry and spy keep their y, before ing */
+      expect(pairs.length, rule).toBeGreaterThanOrEqual(rule === 'keep-y' ? 4 : 6);
+    }
+  });
+
+  /* checked against how the words are said, not against the rule that made them */
+  it('knows what the ed says at the end of every word', () => {
+    const wrong: string[] = [];
+    for (const w of PART_WORDS.filter((x) => x.kind === 'doing')) {
+      const said = (CMU as Record<string, string>)[withEnding(w.base, 'ed')];
+      expect(said, w.base).toBeTruthy();
+      const end = said.replace(/[0-9]/g, '').split(' ');
+      const really = end.at(-2) === 'IH' || end.at(-2) === 'AH' ? 'id' : end.at(-1) === 'T' ? 't' : 'd';
+      if (really !== edSays(w.base)) wrong.push(`${w.base}: ${edSays(w.base)}, said ${really}`);
+    }
+    expect(wrong).toEqual([]);
+    /* and every one of the three is asked about */
+    const says = new Set(PART_WORDS.filter((x) => x.kind === 'doing').map((w) => edSays(w.base)));
+    expect([...says].sort()).toEqual(['d', 'id', 't']);
+  });
+
+  it('offers two wrong spellings, never the right one or a blocked word', () => {
+    for (const w of PART_WORDS) {
+      for (const e of ENDINGS_OF[w.kind]) {
+        const wrong = misspellings(w.base, e);
+        expect(wrong.length, `${w.base}+${e}`).toBe(2);
+        expect(wrong, `${w.base}+${e}`).not.toContain(withEnding(w.base, e));
+        expect(wrong.filter((x) => blocked(x) || BLOCKLIST.some((b) => b.length > 3 && x.includes(b)))).toEqual([]);
+      }
+    }
+  });
+
+  it('builds every word with a front or an ending into a real word, its meaning in words he can read', () => {
+    expect(MEANINGS.filter((m) => !isRealWord(m.text)).map((m) => m.text)).toEqual([]);
+    expect(MEANINGS.filter((m) => m.level > 8).map((m) => `${m.text}: ${m.means}`)).toEqual([]);
+    expect(new Set(MEANINGS.map((m) => m.text)).size).toBe(MEANINGS.length);
+  });
+
+  it('marks the part in the word: hop|ping, cr|ied, un|happy', () => {
+    const at = (word: string, base: string, part: string, front = false) => {
+      const s = partSpan({ word, base, part, front });
+      return word.slice(s.at, s.at + s.len);
+    };
+    expect([at('hopping', 'hop', 'ing'), at('cried', 'cry', 'ed'), at('smiling', 'smile', 'ing'), at('unhappy', 'happy', 'un', true)])
+      .toEqual(['ping', 'ied', 'ing', 'un']);
+  });
+
+  it('asks every step with one right answer among different ones, at every level', () => {
+    for (const step of PART_STEPS) {
+      for (let level = 1; level <= 8; level += 1) {
+        for (let i = 0; i < 25; i += 1) {
+          const q = partQuestion(step, level);
+          expect(q.options.filter((o) => o === q.answer), `${step.name} ${q.word}`).toHaveLength(1);
+          expect(new Set(q.options).size, `${step.name} ${q.options}`).toBe(q.options.length);
+          expect(q.options.length, step.name).toBe(3);
+        }
+      }
+    }
+  });
+});
