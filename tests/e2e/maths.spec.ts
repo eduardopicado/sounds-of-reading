@@ -2,6 +2,7 @@
 
 import { expect, test, type Page } from '@playwright/test';
 import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { GAMES } from '../../src/games/catalog';
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {
@@ -136,6 +137,21 @@ test.describe('maths games', () => {
     await expect(page.locator('.mx-label').last()).toHaveText('120');
     await kickToNumber(page, true);
     await expect(page.locator('.mx-note')).toContainText('GOAL!');
+  });
+
+  /* he understands negative numbers: the line goes on past zero at the very top */
+  test('Below zero: Number Line Penalty from −10 to 10, kicking to a negative number', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:number-line-penalty': 15 });
+    await startGame(page, 'number-line-penalty');
+    await expect(page.locator('.mx-label').first()).toHaveText('−10');
+    await expect(page.locator('.mx-ask b')).toHaveText(/^−\d+$/);
+    await kickToNumber(page, false);
+    await expect(page.locator('.mx-note')).toContainText(/below zero\.$/);
+    await expect(page.locator('.score')).toContainText('Question 2', { timeout: 8000 });
+    await kickToNumber(page, true);
+    await expect(page.locator('.mx-note')).toContainText('GOAL!');
+    noProblems(watch);
   });
 
   test('Flash Count: the numbers only appear once the dots have gone', async ({ page }) => {
@@ -590,6 +606,35 @@ test.describe('maths games', () => {
     await expect(page.locator('.ku-ball.filled')).toHaveText(String(answer));
   });
 
+  test('Below zero: Keepy-Uppy counts back past zero, the gap below it', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:keepy-uppy': 13 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    expect(answer).toBeLessThan(0);
+    await expect(page.locator('.ku-ball', { hasText: /^0$/ })).toHaveCount(1);
+    /* written with a true minus sign, on the balls and the answers */
+    await expect(page.locator(`.mx-choice[data-n="${answer}"]`)).toHaveText(`−${-answer}`);
+    const wrong = Number(await page.locator(`.mx-choice:not([data-n="${answer}"])`).first().getAttribute('data-n'));
+    await tapNumber(page, wrong);
+    await expect(page.locator('.ku-ball.filled')).toHaveText(`−${-answer}`);
+    await expect(page.locator('.mx-note')).toContainText(`−${-answer} is ${-answer} below zero.`);
+    /* the jumps say which way, so they are not read as numbers below zero */
+    await expect(page.locator('.ku-hop').first()).toHaveText(/^back \d+$/);
+    noProblems(watch);
+  });
+
+  test('Below zero: Keepy-Uppy counts up from below zero', async ({ page }) => {
+    await seed(page, { 'maths-step:keepy-uppy': 14 });
+    await startGame(page, 'keepy-uppy');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.ku-ball').first()).toHaveText(/^−\d+$/);
+    const answer = Number(await page.locator('.ku-touches').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.mx-note')).toContainText(`Keepy-uppy! −${-answer}!`);
+  });
+
   test('Year 2: Keepy-Uppy counts back in 10s and 5s', async ({ page }) => {
     await seed(page, { 'maths-step:keepy-uppy': 8 });
     await startGame(page, 'keepy-uppy');
@@ -686,6 +731,122 @@ test.describe('maths games', () => {
     const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
     await tapNumber(page, answer);
     await expect(page.locator('.td-row')).toHaveCount(answer);
+  });
+
+  /* Years 3–4: teams for the rest of the times tables, a miss worked out
+     from facts he knows: 5 teams and the rest, counting on, or tens */
+  test('Years 3–4: Training Drills works a miss out from 5 teams and the rest', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:training-drills': 6 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const teams = await page.locator('.td-team').count();
+    const each = await page.locator('.td-team').first().locator('.td-fan').count();
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    expect(answer).toBe(teams * each);
+    expect([6, 7, 8, 9]).toContain(each);
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`${teams} teams of ${each} make ${answer}.`);
+    if (teams > 5 && teams < 10) {
+      await expect(page.locator('.mx-note')).toContainText(`That is 5 teams and ${teams - 5} more: ${5 * each} and ${(teams - 5) * each} make ${answer}.`);
+      await expect(page.locator('.td-team.td-first')).toHaveCount(5);
+      await expect(page.locator('.td-team').nth(4).locator('.td-count')).toHaveText(String(5 * each));
+      await expect(page.locator('.td-team').last().locator('.td-count')).toHaveText(String((teams - 5) * each));
+    } else {
+      await expect(page.locator('.td-team.td-first')).toHaveCount(0);
+      await expect(page.locator('.td-team').last().locator('.td-count')).toHaveText(String(answer));
+    }
+    noProblems(watch);
+  });
+
+  test('Years 3–4: Training Drills puts a crowd of players into teams', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:training-drills': 8 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const players = await page.locator('.td-pile .td-fan').count();
+    await expect(page.locator('.mx-ask')).toHaveText(new RegExp(`^${players} players, in teams of \\d+\\. How many teams\\?$`));
+    const answer = Number(await page.locator('.td-field').getAttribute('data-answer'));
+    await tapNumber(page, answer);
+    await expect(page.locator('.td-team')).toHaveCount(answer);
+    await expect(page.locator('.td-team .td-fan')).toHaveCount(players);
+    await expect(page.locator('.mx-note')).toContainText(`${players} players in teams of ${players / answer} make ${answer} teams.`);
+    noProblems(watch);
+  });
+
+  test('Years 3–4: teams of 11 and 12 fit the screen, answers and all', async ({ page }) => {
+    await seed(page, { 'maths-step:training-drills': 7 });
+    await startGame(page, 'training-drills');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    expect([11, 12]).toContain(await page.locator('.td-team').first().locator('.td-fan').count());
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const field = (await page.locator('.td-field').boundingBox())!;
+    expect(field.x).toBeGreaterThanOrEqual(0);
+    expect(field.x + field.width).toBeLessThanOrEqual(page.viewportSize()!.width);
+    await expectTapTargets(page, '.mx-choice');
+  });
+
+  test('Foosball Line-Up: a whole round of counting the rods', async ({ page }) => {
+    const watch = watchPage(page);
+    await openGame(page, 'foosball-line-up');
+    await playRound(page, async () => {
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      await tapNumber(page, Number(await page.locator('.lu-field').getAttribute('data-answer')));
+    });
+    await expect(page.locator('.results')).toContainText('8 of 8');
+    noProblems(watch);
+  });
+
+  test('Foosball Line-Up: a real table, 1, 2, 5 and 3 a side', async ({ page }) => {
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.lu-rod')).toHaveCount(8);
+    const counts = await page.locator('.lu-rod').evaluateAll((rods) => rods.map((r) => r.querySelectorAll('.lu-man').length));
+    expect(counts).toEqual([1, 2, 3, 5, 5, 3, 2, 1]);
+    await expect(page.locator('.lu-rod.ours')).toHaveCount(4);
+    /* the first step: the glowing rod's players are the answer */
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    expect(await page.locator('.lu-rod.lit .lu-man').count()).toBe(Number(await page.locator('.lu-field').getAttribute('data-answer')));
+  });
+
+  test('Foosball Line-Up: a miss on who is hiding lifts the towel and makes 11', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:foosball-line-up': 2 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    await expect(page.locator('.lu-towel')).toHaveCount(1);
+    const answer = Number(await page.locator('.lu-field').getAttribute('data-answer'));
+    await tapNumber(page, answer === 11 ? 1 : 11);
+    await expect(page.locator('.lu-towel')).toHaveCount(0);
+    await expect(page.locator('.lu-rod.lit .lu-man').filter({ hasText: String(answer) })).not.toHaveCount(0);
+    await expect(page.locator('.mx-note')).toContainText(`${11 - answer} and ${answer} more make 11, so ${answer}`);
+    noProblems(watch);
+  });
+
+  test('Year 2: Foosball Line-Up counts the spare rods in steps', async ({ page }) => {
+    await seed(page, { 'maths-step:foosball-line-up': 3 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const rods = await page.locator('.lu-rod.spare').count();
+    const each = await page.locator('.lu-rod.spare').first().locator('.lu-man').count();
+    await tapNumber(page, rods * each);
+    await expect(page.locator('.lu-count').last()).toHaveText(String(rods * each));
+    await expect(page.locator('.mx-note')).toContainText(`${rods} rods of ${each} make ${rods * each}`);
+  });
+
+  test('Years 3–4: Foosball Line-Up, a tournament: one table, then all of them', async ({ page }) => {
+    await seed(page, { 'maths-step:foosball-line-up': 4 });
+    await startGame(page, 'foosball-line-up');
+    await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+    const tables = await page.locator('.lu-chip').count();
+    const perTable = await page.locator('.lu-rod.lit .lu-man').count();
+    const answer = Number(await page.locator('.lu-field').getAttribute('data-answer'));
+    expect(answer).toBe(tables * perTable);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+    const wrong = (await page.locator('.mx-choice').allTextContents()).map(Number).find((x) => x !== answer)!;
+    await tapNumber(page, wrong);
+    await expect(page.locator('.mx-note')).toContainText(`${tables} tables of ${perTable}`);
+    await expect(page.locator('.lu-rod.lit .lu-man').last()).toHaveText(String(perTable));
   });
 
   test('Half-Time Oranges: a whole round of halves', async ({ page }) => {
@@ -1313,8 +1474,9 @@ test.describe('maths games', () => {
   test('the home screen has a maths section and a jiu-jitsu section', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('.tiles-head', { hasText: /^Maths$/ })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(18);
+    /* one tile for every game in the section, from the catalog */
+    await expect(page.locator('.tiles[data-section="maths"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'maths').length);
     await expect(page.locator('.tiles-head', { hasText: 'Jiu-jitsu' })).toBeVisible();
-    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(4);
+    await expect(page.locator('.tiles[data-section="bjj"] .tile-link')).toHaveCount(GAMES.filter((g) => g.section === 'bjj').length);
   });
 });

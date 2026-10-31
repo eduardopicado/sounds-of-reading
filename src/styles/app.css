@@ -147,6 +147,22 @@ h1 .swash::after {
 .chip .sub { font-size: 12px; opacity: .75; margin-left: 5px; font-weight: 400; }
 .chip[aria-pressed="true"] .sub { opacity: .8; }
 
+/* Phonics or sight words: one pill with two halves, at the top of a game
+   that can play either */
+.kind-switch {
+  display: flex; width: fit-content; max-width: 100%; margin: 4px auto 10px;
+  padding: 4px; border-radius: 99px; background: var(--deep-2); border: 2px solid rgba(255, 246, 231, .25);
+}
+.kind-btn {
+  font-family: var(--reading); font-weight: 700; font-size: 16px;
+  min-height: var(--tap); padding: 8px 18px; border: 0; border-radius: 99px; cursor: pointer;
+  background: transparent; color: var(--on-deep);
+}
+.kind-btn[aria-pressed="true"] { background: var(--mustard); color: var(--deep-2); }
+.kind-btn:active { transform: scale(.97); }
+@media (max-width: 380px) { .kind-btn { padding: 8px 12px; font-size: 15px; } }
+.setup-sight-row[hidden], .setup-sounds-row[hidden] { display: none; }
+
 select {
   font-family: var(--reading); font-size: 16px;
   min-height: var(--tap); padding: 8px 12px; border-radius: 14px;
@@ -329,3 +345,11 @@ select {
 
 /* a button that has been tapped once and is asking to be sure */
 .btn.asking, .btn.ghost.asking { background: #B93A12; border-color: #B93A12; color: #fff; }
+
+/* ── a new version ────────────────────────────────────────────────────── */
+
+.update {
+  position: fixed; z-index: 50; left: 50%; translate: -50% 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  box-shadow: 0 4px 0 var(--mustard-dark), 0 8px 24px rgba(0, 0, 0, .4);
+}

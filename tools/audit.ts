@@ -18,7 +18,7 @@ for (const s of SOUNDS) {
 for (const slot of Object.keys(PHRASES) as Slot[]) {
   for (const chunk of PHRASES[slot].split('|')) {
     const raw = chunk.trim();
-    const m = /^(.*?)\s*~(\S+)(?:\s*@([1-8]))?$/.exec(raw);
+    const m = /^(.*?)\s*~(\S+)(?:\s*@(10|[1-9]))?$/.exec(raw);
     if (!m) { problems.push(`phrase "${raw}" has no ~sound tag`); continue; }
     const s = SOUNDS.find((x) => x.id === m[2]);
     if (!s) { problems.push(`phrase "${raw}" tags unknown sound ${m[2]}`); continue; }

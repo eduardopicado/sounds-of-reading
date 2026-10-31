@@ -22,4 +22,18 @@ export const SORT_SETS: SortSet[] = [
   { id: 'er-ir-ur', label: 'er · ir · ur', sounds: ['er', 'ir', 'ur'] },
   { id: 'vowel-teams', label: 'ai · ay · ee · ea', sounds: ['ai', 'ay', 'ee', 'ea'] },
   { id: 'l8', label: 'air · are · ear · eer', sounds: ['air', 'are', 'ear', 'eer'] },
+  /* levels 9 and 10: the same letters saying another sound, and another
+     way to write a sound he knows */
+  { id: 'ea-ea', label: 'ea (beach) vs ea (head)', sounds: ['ea', 'ea-head'] },
+  { id: 'ie-ie', label: 'ie (pie) vs ie (field)', sounds: ['ie', 'ie-field'] },
+  { id: 'ue-ue', label: 'ue (cue) vs ue (blue)', sounds: ['ue-cue', 'ue-blue'] },
+  { id: 'long-e', label: 'ee · ea · ey', sounds: ['ee', 'ea', 'ey-key'] },
+  { id: 'long-a', label: 'ai · ay · eigh', sounds: ['ai', 'ay', 'eigh'] },
+  { id: 'aw-au', label: 'aw vs au', sounds: ['aw', 'au'] },
+  { id: 'oa-oe', label: 'oa · ow · oe', sounds: ['oa', 'ow-slow', 'oe'] },
+  { id: 'silent', label: 'kn · wr · mb', sounds: ['kn', 'wr', 'mb'] },
+  { id: 'ch-ch', label: 'ch (chip) vs ch (school)', sounds: ['ch', 'ch-school'] },
+  { id: 'y-vowel', label: 'y (funny) · y (sky) · y (gym)', sounds: ['y-funny', 'y-sky', 'y-gym'] },
+  { id: 'a-a', label: 'a (ant) vs a (wasp)', sounds: ['a', 'a-wasp'] },
+  { id: 'o-o', label: 'o (dog) vs o (son)', sounds: ['o', 'o-son'] },
 ];

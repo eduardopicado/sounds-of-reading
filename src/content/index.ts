@@ -6,14 +6,14 @@
  * into a failing build rather than a child seeing "in *the* bath". */
 
 import {
-  SOUNDS, FAMILIES, PHRASES, LEVELS, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, PHONEMES,
+  SOUNDS, FAMILIES, PHRASES, LEVELS, TOP_LEVEL, BLOCKLIST, SIGHT_WORDS, SOUNDS_ALIKE, COMMENTARY, STORIES, FLASH_PHRASES, PHONEMES,
   type SoundSpec, type PhonemeSpec, type FamilySpec, type Level, type Slot,
 } from './words';
 import { tonesFor, type Tones } from '../lib/colour';
 import { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export type { Level, Slot, SoundSpec, FamilySpec, PhonemeSpec };
-export { LEVELS, BLOCKLIST, SOUNDS_ALIKE, PHONEMES };
+export { LEVELS, TOP_LEVEL, BLOCKLIST, SOUNDS_ALIKE, PHONEMES };
 export { ContentError, resolveSpans, unmark, type Span } from './spans';
 
 export interface Sound extends SoundSpec {
@@ -55,7 +55,7 @@ export interface Phrase {
   spans: Span[];
 }
 
-const LEVEL_RE = /^@([1-8])$/;
+const LEVEL_RE = /^@(10|[1-9])$/;
 
 function parseWordList(raw: string, sound: SoundSpec, real: boolean): Word[] {
   if (!raw.trim()) return [];
@@ -196,7 +196,7 @@ export function familySpans(family: FamilySpec, part: string): Span[] {
 export const ALL_PHRASES: Phrase[] = (Object.keys(PHRASES) as Slot[]).flatMap((slot) =>
   PHRASES[slot].split('|').map((chunk) => {
     const raw = chunk.trim();
-    const m = /^(.*?)\s*~(\S+)(?:\s*@([1-8]))?$/.exec(raw);
+    const m = /^(.*?)\s*~(\S+)(?:\s*@(10|[1-9]))?$/.exec(raw);
     if (!m) throw new ContentError(`phrase "${raw}" needs a ~sound tag`);
     const [, marked, soundId, lvl] = m;
     const s = sound(soundId);
@@ -242,7 +242,7 @@ export interface CommentaryLine {
 }
 
 export const ALL_COMMENTARY: CommentaryLine[] = COMMENTARY.map((raw) => {
-  const m = /^(.*\S)\s+@([1-8])$/.exec(raw.trim());
+  const m = /^(.*\S)\s+@(10|[1-9])$/.exec(raw.trim());
   if (!m) throw new ContentError(`commentary: "${raw}" needs a level at the end, like @3`);
   const chunks = m[1].split('/').map((c) => c.trim()).filter(Boolean);
   const text = chunks.join(' ');
@@ -250,6 +250,35 @@ export const ALL_COMMENTARY: CommentaryLine[] = COMMENTARY.map((raw) => {
   if (!'!?.'.includes(last)) throw new ContentError(`commentary: "${text}" must end with ! ? or .`);
   const mood: Mood = last === '!' ? 'excited' : last === '?' ? 'asking' : 'calm';
   return { text, chunks, level: Number(m[2]) as Level, mood };
+});
+
+/** a little story for Read and Point */
+export interface Story {
+  title: string;
+  /** the whole story, as written */
+  text: string;
+  /** its sentences, for reading it aloud one at a time */
+  sentences: string[];
+  /** the highest level of any word in it */
+  level: Level;
+}
+
+export const ALL_STORIES: Story[] = STORIES.map((raw) => {
+  const m = /^(.*?)\s*\|\s*(.*\S)\s+@(10|[1-9])$/.exec(raw.trim());
+  if (!m) throw new ContentError(`story: "${raw}" needs a title, a | and a level at the end, like @3`);
+  const text = m[2];
+  /* a sentence ends at . ! or ?, with any closing quote that goes with it */
+  const sentences = text.split(/(?<=[.!?]["”]?)\s+/).filter(Boolean);
+  return { title: m[1], text, sentences, level: Number(m[3]) as Level };
+});
+
+/** a phrase for Flash Phrases: its words, and the highest level of any of them */
+export interface FlashPhrase { text: string; level: Level }
+
+export const ALL_FLASH_PHRASES: FlashPhrase[] = FLASH_PHRASES.map((raw) => {
+  const m = /^([a-zA-Z ]*[a-zA-Z])\s+@(10|[1-9])$/.exec(raw.trim());
+  if (!m) throw new ContentError(`flash phrase: "${raw}" needs only words and a level at the end, like @3`);
+  return { text: m[1], level: Number(m[2]) as Level };
 });
 
 /* every word mapped to the words it sounds exactly like */

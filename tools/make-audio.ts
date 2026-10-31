@@ -60,7 +60,7 @@ import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
 import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../src/content/commentary';
-import { TEAMS } from '../src/games/teams';
+import { TEAMS, real } from '../src/games/teams';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 const API = 'https://api.elevenlabs.io/v1';
@@ -148,7 +148,7 @@ export function clips(): Clip[] {
   /* the commentator, in English and in Portuguese, for every team */
   for (const line of EN_SAVES) add(line);
   add(enGoal());
-  for (const t of TEAMS) if (t.kind !== 'you') add(enGoal(t.name));
+  for (const t of TEAMS) if (real(t)) add(enGoal(t.name));
   for (const line of [...PT_SAVES, ...ptGoals()]) add(line, 'pt-commentator');
   for (const t of TEAMS) if (t.pt) for (const line of ptGoals(t.pt)) add(line, 'pt-commentator');
 

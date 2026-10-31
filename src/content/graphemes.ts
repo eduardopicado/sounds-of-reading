@@ -29,6 +29,11 @@ export interface Piece {
 
 const VOWEL = /[aeiou]/;
 
+/* ve says v, and only ever ends a word (no English word ends in v): have is
+   h · a · ve, but vet is v · e · t and oven keeps its e */
+const LAST_ONLY = new Set(['ve']);
+const CONSONANT = new Set(['qu', 've']);
+
 /** every plain spelling a child knows by this level, longest first */
 function spellingsUpTo(level: number): string[] {
   const all = new Set<string>();
@@ -40,11 +45,12 @@ function spellingsUpTo(level: number): string[] {
 }
 
 /** cut a stretch with no marked sound in it, longest known spelling first */
-function cutFree(text: string, from: number, known: string[]): Piece[] | null {
+function cutFree(text: string, from: number, known: string[], wordLength: number): Piece[] | null {
   const out: Piece[] = [];
   let i = 0;
   while (i < text.length) {
-    const sp = known.find((k) => text.startsWith(k, i));
+    const sp = known.find((k) =>
+      text.startsWith(k, i) && (!LAST_ONLY.has(k) || from + i + k.length === wordLength));
     if (!sp) return null;
     out.push({ text: sp, at: from + i, target: false });
     i += sp.length;
@@ -60,15 +66,15 @@ export function pieces(word: Word): Piece[] | null {
   if (!/^[a-z]+$/.test(text)) return null;
   const [span] = word.spans;
   const known = spellingsUpTo(word.level);
-  const before = cutFree(text.slice(0, span.at), 0, known);
-  const after = cutFree(text.slice(span.at + span.len), span.at + span.len, known);
+  const before = cutFree(text.slice(0, span.at), 0, known, text.length);
+  const after = cutFree(text.slice(span.at + span.len), span.at + span.len, known, text.length);
   if (!before || !after) return null;
   const cut = [...before, { text: text.slice(span.at, span.at + span.len), at: span.at, target: true }, ...after];
 
-  /* qu is a consonant for all its u; y is a vowel anywhere but the start
-     (yes against sky, and the second syllable of country) */
+  /* qu is a consonant for all its u, ve for its e; y is a vowel anywhere but
+     the start (yes against sky, and the second syllable of country) */
   const vowels = cut.filter((p) =>
-    (VOWEL.test(p.text) && p.text !== 'qu') || (p.text === 'y' && p.at > 0));
+    (VOWEL.test(p.text) && !CONSONANT.has(p.text)) || (p.text === 'y' && p.at > 0));
   if (vowels.length !== 1) return null;
   return cut;
 }

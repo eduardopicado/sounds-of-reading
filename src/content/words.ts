@@ -31,7 +31,7 @@
  *  the content test. Never set colour as text colour — dark ink always.
  */
 
-export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export interface SoundSpec {
   /** stable id, used in saved settings — renaming one resets a parent's picks */
@@ -59,7 +59,8 @@ export interface SoundSpec {
   silly?: string;
 }
 
-/** The school's eight levels. Each one includes everything before it. */
+/** The school's eight levels, then two more of other spellings for after
+    them. Each one includes everything before it. */
 export const LEVELS: { n: Level; name: string; blurb: string }[] = [
   { n: 1, name: 'Level 1', blurb: 's a t p i n' },
   { n: 2, name: 'Level 2', blurb: 'm d g o c k ck e u r' },
@@ -69,7 +70,12 @@ export const LEVELS: { n: Level; name: string; blurb: string }[] = [
   { n: 6, name: 'Level 6', blurb: 'oi oy oo ou ow er ir ur ar or' },
   { n: 7, name: 'Level 7', blurb: 'a_e e_e i_e o_e u_e' },
   { n: 8, name: 'Level 8', blurb: 'aw air are ear eer ore dge tch' },
+  { n: 9, name: 'Level 9', blurb: 'ey ue ie ea oe au eigh' },
+  { n: 10, name: 'Level 10', blurb: 'kn wr mb ch y a o' },
 ];
+
+/** the highest level there is */
+export const TOP_LEVEL: Level = 10;
 
 /*  ── The sounds ────────────────────────────────────────────────────────────
  *  Ordered by the level that introduces them. `practice: false` means the
@@ -169,6 +175,7 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'll', label: 'll', asIn: 'bell', spellings: ['ll'], level: 3, practice: false, phoneme: 'l' },
   { id: 'ff', label: 'ff', asIn: 'off', spellings: ['ff'], level: 3, practice: false, phoneme: 'f' },
   { id: 'zz', label: 'zz', asIn: 'buzz', spellings: ['zz'], level: 3, practice: false, phoneme: 'z' },
+  { id: 've', label: 've', asIn: 'have', spellings: ['ve'], level: 3, practice: false, phoneme: 'v' },
 
   /* ── Level 4 — the school sound sheet ──────────────────────────────────── */
   { id: 'sh', label: 'sh', asIn: 'ship', spellings: ['sh'], level: 4, practice: true, phoneme: 'sh', hue: 285,
@@ -212,22 +219,22 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'mm', label: 'mm', asIn: 'hammer', spellings: ['mm'], level: 4, practice: false, phoneme: 'm' },
 
   /* ── Level 5 — the first vowel teams ───────────────────────────────────── */
-  { id: 'ai', label: 'ai', asIn: 'rain', spellings: ['ai'], level: 5, practice: true, phoneme: 'ai', hue: 14, group: 'ai-ay',
+  { id: 'ai', label: 'ai', asIn: 'trail', spellings: ['ai'], level: 5, practice: true, phoneme: 'ai', hue: 14, group: 'ai-ay',
     words: 'rain 🌧 | train 🚂 | snail 🐌 | nail 🔩 | chain ⛓ | paint 🎨 | tail 🐕 | sail ⛵ | main | plain | trail 🥾 | brain 🧠 | drain | grain 🌾 | afraid 😨 | waiting ⏳ | wait',
     silly: 'prail | plaip | praik | vaid | vaig | plaim | smaid | vaif | plail | smaig' },
-  { id: 'ay', label: 'ay', asIn: 'day', spellings: ['ay'], level: 5, practice: true, phoneme: 'ai', hue: 40, group: 'ai-ay',
+  { id: 'ay', label: 'ay', asIn: 'play', spellings: ['ay'], level: 5, practice: true, phoneme: 'ai', hue: 40, group: 'ai-ay',
     words: 'day ☀️ | play ⚽ | tray 🍽 | hay 🌾 | crayon 🖍 | spray 💦 | clay 🏺 | stay 🛑 | away | today | always | may | say | way | pay 💰 | lay | birthday 🎂 @6',
     silly: 'shray | vay | snay | zay | skay | thay | glay | thray | klay | smay' },
   { id: 'ee', label: 'ee', asIn: 'tree', spellings: ['ee'], level: 5, practice: true, phoneme: 'ee', hue: 206, group: 'ee-ea',
     words: 'bee 🐝 | tree 🌳 | sheep 🐑 | feet 🦶 | queen 👑 | cheese 🧀 | three 3️⃣ | green 🟢 | sleep 😴 | street 🛣 | teeth 🦷 | week 📅 | keep | seed 🌱 | deep | speed 🏎 | sweet 🍬 | asleep 😴 | keeper 🧤 @6',
     silly: 'zeep | shreet | kleest | freend | zeet | pleest | greep | fleend | kleend | greel' },
-  { id: 'ea', label: 'ea', asIn: 'sea', spellings: ['ea'], level: 5, practice: true, phoneme: 'ee', hue: 158, group: 'ee-ea',
+  { id: 'ea', label: 'ea', asIn: 'beach', spellings: ['ea'], level: 5, practice: true, phoneme: 'ee', hue: 158, group: 'ee-ea',
     words: 'sea 🌊 | leaf 🍃 | peas 🫛 | meat 🥩 | beach 🏖 | seal 🦭 | bean 🫘 | dream 💭 | clean 🧼 | speak 🗣 | eating 🍽 | team | heat 🔥 | cream 🍦 | east | read 📖 | teacher 👩‍🏫 @6',
     silly: 'kleab | flean | sweag | fleal | sweaf | drean | fleak | swead | dreal | sweak' },
   { id: 'ie', label: 'ie', asIn: 'pie', spellings: ['ie'], level: 5, practice: true, phoneme: 'igh', hue: 330, group: 'long-i',
     words: 'pie 🥧 | tie 👔 | lie | cries 😢 | cried 😢 | tried | fried 🍳 | dried | flies 🪰 | tries | spies 🕵 | skies 🌌 | replies | magpie 🐦 | necktie 👔 | denies',
     silly: 'sniet | shriest | ziep | bliest | flien | sniep | fliem | fliel | ziet | fliek' },
-  { id: 'igh', label: 'igh', asIn: 'light', spellings: ['igh'], level: 5, practice: true, phoneme: 'igh', hue: 90, group: 'long-i',
+  { id: 'igh', label: 'igh', asIn: 'sight', spellings: ['igh'], level: 5, practice: true, phoneme: 'igh', hue: 90, group: 'long-i',
     words: 'light 💡 | night 🌙 | right ➡️ | sight 👀 | might | fight 🥊 | tight | high ⬆️ | sigh 😮‍💨 | bright ☀️ | flight ✈️ | fright 😱 | thigh 🦵 | knight 🤺 | slight | delight',
     silly: 'vight | clight | scright | thight | shight | tright | dright | stright | pright | klight' },
   { id: 'oa', label: 'oa', asIn: 'boat', spellings: ['oa'], level: 5, practice: true, phoneme: 'oa', hue: 270, group: 'long-o',
@@ -346,6 +353,57 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'tch', label: 'tch', asIn: 'match', spellings: ['tch'], level: 8, practice: true, phoneme: 'ch', hue: 110,
     words: 'match 🔥 | catch ⚾ | watch ⌚ | witch 🧙 | ditch | patch 🩹 | pitch ⚾ | switch 💡 | stitch 🧵 | scratch | kitchen 🍳 | butcher',
     silly: 'sputch | skatch | twotch | blatch | zutch | vitch | platch | strutch | tritch | snotch' },
+
+  /* ── Level 9 — other ways to write a vowel ──────────────────────────────
+     Past the school's eight levels: the vowel sounds he knows, in spellings
+     he has not met yet (ey in key, eigh in eight), and the letters he knows
+     saying another sound (ea in head, ie in field, ue in blue). */
+  { id: 'ey-key', label: 'ey (key)', asIn: 'key', spellings: ['ey'], level: 9, practice: true, phoneme: 'ee', hue: 28,
+    words: 'key 🔑 | donkey 🫏 | hockey 🏑 | jockey 🏇 | valley 🏞 | chimney | trolley 🛒 | turkey 🦃 | kidney | alley | parsley 🌿 | jersey 👕 | barley | pulley | monkey 🐒 @10 | money 💰 @10 | honey 🍯 @10',
+    silly: 'zanley | pimkey | dobney | glumpey | tibbey | mipley | frodkey | lansey | wogley | yuntey' },
+  { id: 'ue-blue', label: 'ue (blue)', asIn: 'blue', spellings: ['ue'], level: 9, practice: true, phoneme: 'oo', hue: 248,
+    words: 'blue 🔵 | glue | clue 🔍 | true ✅ | untrue | bluebell 🔔 | bluebird 🐦 | blueberry 🫐 | blueprint | blues | clues | Tuesday',
+    silly: 'frue | thrue | scrue | skue | snue | drue | splue | chue' },
+  { id: 'ie-field', label: 'ie (field)', asIn: 'field', spellings: ['ie'], level: 9, practice: true, phoneme: 'ee', hue: 320,
+    words: 'field 🏟 | chief | thief 🦹 | shield 🛡 | piece 🧩 | brief | priest | shriek 😱 | niece | yield | belief | goalie 🥅 | genie 🧞 | brownie 🍫 | hoodie | pixie | birdie',
+    silly: 'briet | chiep | briep | chiet | skiet | twiep | briel | scrief | briem | scrieg' },
+  { id: 'ea-head', label: 'ea (head)', asIn: 'head', spellings: ['ea'], level: 9, practice: true, phoneme: 'e', hue: 168,
+    words: 'head | bread 🍞 | spread | thread 🧵 | breath | feather 🪶 | heavy | ready | weather 🌦 | sweat 💦 | instead | breakfast 🥞 | meadow | leather | deaf | health | sweater 🧥 | steady | headache 🤕 @10',
+    silly: 'smead | glead | spead | treath | gleather | sneavy | pready | zeady | kleather | dreath' },
+  { id: 'oe', label: 'oe', asIn: 'toe', spellings: ['oe'], level: 9, practice: true, phoneme: 'oa', hue: 80,
+    words: 'toe 🦶 | toes | hoe | goes | doe 🦌 | tiptoe | tiptoes | oboe | mistletoe | potatoes 🥔 | tomatoes 🍅 | dominoes | echoes @10',
+    silly: 'droe | stroe | skoe | swoe | smoe | scroe | spoe | proe | gloe | choe' },
+  { id: 'au', label: 'au', asIn: 'haul', spellings: ['au'], level: 9, practice: true, phoneme: 'or', hue: 2,
+    words: 'haul | haunt | launch 🚀 | sauce | saucer 🛸 | pause ⏸ | cause | author ✍️ | fault | vault | astronaut 👩‍🚀 | dinosaur 🦖 | laundry 🧺 | applause 👏',
+    silly: 'smaust | swaund | klaut | swaust | klaup | smaund | draust | vaup | clauf | claug' },
+  { id: 'eigh', label: 'eigh', asIn: 'eight', spellings: ['eigh'], level: 9, practice: true, phoneme: 'ai', hue: 120,
+    words: 'eight 8️⃣ | eighty | eighteen | eighth | weigh ⚖️ | weighs | weight 🏋️ | sleigh 🛷 | sleighs | neigh 🐴 | neighbour 🏘 | freight 🚂 | lightweight | heavyweight',
+    silly: 'zeigh | breigh | pleigh | streigh | gleigh | sheigh | meight | dreight | kleight | treigh' },
+
+  /* ── Level 10 — letters that are silent, or say another sound ───────────
+     kn, wr and mb, where a letter says nothing; ch in school, y in gym; and
+     a after a w (wasp) and o in son, the a and o he knows saying o and u. */
+  { id: 'kn', label: 'kn', asIn: 'knee', spellings: ['kn'], level: 10, practice: true, phoneme: 'n', hue: 300,
+    words: 'knee 🦵 | knees | kneel | knelt | knock 🚪 | knot 🪢 | knit 🧶 | knife 🔪 | knight 🤺 | knuckle | knapsack 🎒 | kneecap | knew | known',
+    silly: 'knist | knint | knilt | knelp | knemp | knent | knul | knum | knun | knat' },
+  { id: 'wr', label: 'wr', asIn: 'write', spellings: ['wr'], level: 10, practice: true, phoneme: 'r', hue: 40,
+    words: 'write ✍️ | wrote | wrap 🎁 | wrist | wreck | wren 🐦 | wrong ❌ | wriggle 🪱 | wrestle 🤼 | wrinkle | wreath 🎄 | written | wrench 🔧',
+    silly: 'wrust | wreb | wruft | wrund | wrik | wril | wrel | wrim | wrem | wrop' },
+  { id: 'mb', label: 'mb', asIn: 'lamb', spellings: ['mb'], level: 10, practice: true, phoneme: 'm', hue: 180,
+    words: 'lamb 🐑 | lambs | comb | combs | thumb 👍 | thumbs | climb 🧗 | climber | crumb | crumbs | numb | limb | limbs | plumber 🔧',
+    silly: 'blomb | snumb | pramb | swemb | smomb | twomb | snimb | scrumb | gramb | snemb' },
+  { id: 'ch-school', label: 'ch (school)', asIn: 'school', spellings: ['ch'], level: 10, practice: true, phoneme: 'k', hue: 350,
+    words: 'school 🏫 | chemist 💊 | chorus | anchor ⚓ | echo | stomach | character | chaos | orchid 🌸 | ache | chrome | monarch 🦋 | mechanic 🔧 | orchestra 🎻 | scheme | headache 🤕 | Christmas 🎄',
+    silly: 'chrob | chrast | chrip | chrem | chrund | chrolt | schom | scheg | schib | chrup' },
+  { id: 'y-gym', label: 'y (gym)', asIn: 'gym', spellings: ['y'], level: 10, practice: true, phoneme: 'i', hue: 220,
+    words: 'gym 🏋️ | gymnast 🤸 | myth | pyramid 🔺 | crystal 💎 | system | symbol | lyric | m[y]stery | oxygen | syrup | typical | cylinder',
+    silly: 'zym | blym | glyp | flym | snym | thryp | dryn | plym | crym | slym' },
+  { id: 'a-wasp', label: 'a (wasp)', asIn: 'wasp', spellings: ['a'], level: 10, practice: true, phoneme: 'o', hue: 95,
+    words: 'wasp 🐝 | wash 🧼 | want | watch ⌚ | swan 🦢 | swap | wand 🪄 | wander | squash 🎾 | squad | squat | swamp | wallet 👛 | waffle 🧇 | swallow | w[a]llaby 🦘',
+    silly: 'wath | swaft | squaz | wamp | wanch | squan | swaz | wanf | squaft | squand' },
+  { id: 'o-son', label: 'o (son)', asIn: 'son', spellings: ['o'], level: 10, practice: true, phoneme: 'u', hue: 265,
+    words: 'son 👦 | ton | won | mother 👩 | brother 👦 | month 📅 | Monday | money 💰 | honey 🍯 | monkey 🐒 | front | wonder | nothing | other | oven | glove 🧤 | above | cover | sponge 🧽 | among',
+    silly: 'glother | smonth | plonday | flonkey | drother | smon | glon | blove | thronder | sponder' },
 ];
 
 /*  ── The sounds themselves ─────────────────────────────────────────────────
@@ -681,7 +739,7 @@ export interface SightSetSpec {
 export const SIGHT_WORDS: SightSetSpec[] = [
   { name: 'Level 1', level: 1, words: '[a] | th[e] | on | and | n[o] | i[s] | m[e] | sh[e] | with | had | a[s] | ha[s] | [of] | hi[s] | lots | int[o] | [I] | t[o]' },
   { name: 'Level 2', level: 2, words: 'd[o] | for | g[o] | h[e] | her | w[a]s | ont[o] | off | y[ou] | yes | from | went | that | this | wh[a]t' },
-  { name: 'Level 3', level: 3, words: 'b[e] | m[y] | p[u]t | when | then | or | them | th[ey] | [a]re | h[a]ve | y[our] | too | w[a]nt | w[e] | s[o]' },
+  { name: 'Level 3', level: 3, words: 'b[e] | m[y] | p[u]t | when | then | or | them | th[ey] | [a]re | h[a]ve | y[our] | too | w[a]nts | w[e] | s[o]' },
   { name: 'Level 4', level: 4, words: 'how | [a]ll | [wh]o | d[oe]s | th[ei]r | h[ere] | th[ere] | [o]ne | g[oe]s | m[o]st | like | d[o]ing | s[o]me | l[i]ve' },
   { name: 'Level 5', level: 5, words: 'b[y] | say | [ok] | w[e]re | out | [oh] | these | m[a]ny | b[e]ing | [o]ther | g[o]ing | wh[ere] | herself | p[eo]ple' },
   { name: 'Level 6', level: 6, words: 'c[o]me | make | g[i]ve | use | [a]ls[o] | [a]g[o] | c[oul]d | our | [a]ny | wh[y] | [a]bout | c[a]ll | [o]nly | more | t[o]day | sh[oul]d | s[ai]d | [Mr]' },
@@ -713,13 +771,71 @@ export const COMMENTARY: string[] = [
   'It is a big kick / from the back. @3',
   'The fans sing! @4', 'What a shot! @4', 'Top shot / from {us}! @4', 'Is it a shot / or a pass? @4',
   'Oh no, / it is not in. @5', 'What a goal! @5', 'Is it a goal? @5', 'That is a goal! @5',
-  'What a day / for {us}! @5', 'Wait, / wait, / GOAL! @5', 'The fans want a goal. @5',
+  'What a day / for {us}! @5', 'Wait, / wait, / GOAL! @5', 'The fans wait for a goal. @5',
   'Is this / the best goal / of the day? @5',
   'It is up to the keeper now. @6', 'One more kick / to win it! @6', 'Look at him go! @6',
   'Shoot! / Shoot! @6', 'Can the keeper / stop it? @6', '{them} will not stop now. @6',
   'What a save! @7', 'It hit the post! @7', 'The crowd goes wild! @7', 'Time is up. @7',
   'Not in, / not this time. @7', 'What a save / from the keeper! @7',
   'The ball is in the net! @8',
+];
+
+/*  Read and Point — little stories to read together and point out the sight
+ *  words in, the way his teacher suggests with a picture book.
+ *
+ *  Title | the story @level. Every word, the title's too, is one he can read
+ *  at the story's level, from the word lists or the school's sight words, and
+ *  the level is exactly the highest level of any word in it: the content
+ *  test checks both, as it does for the commentary. Each story says a few
+ *  sight words more than once, so there is something to hunt for.  */
+export const STORIES: string[] = [
+  'Ants | The ants sat in a tin. A tin of ants! The ants had lots of sap. The ants nip and the ants snap. Is it a tin of pins? No, it is a tin of ants! @1',
+  'I Spin | I spin and I spin. I spin as the ants spin. I tip, and I sit. I sit on the ants! No! The ants nip me. @1',
+  'The Big Kick | The kid can run. He can kick. He did a big kick, and it went up, up, up! It went in the net. Yes! The kid is top dog. @2',
+  'The Duck | A duck sat on a rock in the pond. A dog went to the pond. The dog can not get the duck. The duck went up! What a sad dog. The dog sat in the mud. @2',
+  'The Fox and the Frog | A fox and a frog sat on a log. The frog can jump and hop. The fox can run fast. They are off! Then the frog fell in the pond! The fox will help him. He got the frog back on the log. @3',
+  'My Big Box | I have a big box. What is in the box? A hat, a bat and a bell. I put the hat on. I hit the bell with the bat. It is fun! Then I put them back in the box. @3',
+  'Lunch at the Shop | We went to the shop for lunch. I had some fish. Which fish do you like? I like the thick one. There is a shell in my dish! It was so much fun. @4',
+  'The Long Shot | Who has it? He has it! He can run so fast. He is at the box. A long shot, and it is in! What a shot! I wish I had a shot like that. @4',
+  'The Goal | Today is a big day. We play at three. The rain is on the street. Can we play in the rain? Yes! I get it in the goal. What a goal! The team play in the rain all day. @5',
+  'The Night Train | At night we go on a train. The train is long. We sit by the window. I can not sleep. I have a dream of a boat on the sea. Then the train is at the end. We are here! @5',
+  'Football at the Park | My brother and I went to the park. We took a football. My brother said, "You start." I took a big kick. The football went up and down. Then a dog took it! We had to look all round the park for it. @6',
+  'The Storm | It was a dark night. There was a big storm. The wind was loud. The rain was on the roof. Mother said, "Come and sit by me." We sat and read a book. In the morning the sun was out. @6',
+  'The Bike Race | I have a white bike. Today is the bike race. Five of us line up at the gate. Go! I ride as fast as I can. I ride up the hill and down the side. I would like to win. I come home with a prize! @7',
+  'The Kite | My father and I have a kite. It is red and white. We go to the hill on a windy day. The kite flies up, up, up. It is so high! Then the kite fell in a tree. Father got it down with a long stick. What a funny day! @7',
+  'The Big Match | Once a week we have a big match. My friend and I play for the school team. Before the match, we catch the ball and kick the ball. I got a goal. Then I got another! My friend got one too. We love football. @8',
+  'Draw with Me | I love to draw. I draw a bear and a chair. I draw my friend with long hair. Then I draw a hare. I saw a hare at the farm. Mother said, "That is good work!" I will draw again soon. @8',
+];
+
+/*  Flash Phrases — a phrase shows for a moment, and he picks the one he read.
+ *
+ *  Reading faster is reading a phrase at a glance rather than a word at a
+ *  time. Each phrase is two to six words, every one he can read at its
+ *  @level, and the level is exactly the highest level of any word in it, as
+ *  for the stories: the content test checks both, and that every phrase has
+ *  lookalikes to stand beside it (one word changed by one letter).  */
+export const FLASH_PHRASES: string[] = [
+  'a tin @1', 'sit in it @1', 'a tin pan @1', 'in a tin @1', 'a pan and a tin @1', 'lots of pins @1',
+  'I tip it in @1', 'the ants nip me @1', 'a pan of ants @1', 'she sat on a pin @1',
+  'a big dog @2', 'a red cup @2', 'up on top @2', 'the sad cat @2', 'he can run @2', 'kick the rock @2',
+  'you can kick it @2', 'a pig in the mud @2', 'a sock and a cap @2', 'the dog got the sock @2',
+  'big hug @3', 'a black hat @3', 'my big box @3', 'we will win @3', 'the fox can jump @3', 'jump on the log @3',
+  'the van is fast @3', 'a frog on a log @3', 'they are in the hut @3',
+  'a long song @4', 'ring the bell @4', 'a thick shell @4', 'I think so @4', 'the king can sing @4',
+  'here is the ship @4', 'such a rich king @4', 'a fish in a dish @4',
+  'at night @5', 'by the train @5', 'a long tail @5', 'we play all day @5', 'a sail in the rain @5',
+  'play in the rain @5', 'the train is long @5', 'a nail in the wall @5', 'a light at night @5',
+  'shout out loud @6', 'a loud shout @6', 'the brown cow @6', 'round and round @6', 'come to my house @6',
+  'my mother and father @6', 'a brown owl in the town @6', 'the boy and his toy @6',
+  'ride home @7', 'save the game @7', 'ride a bike @7', 'a big cake @7', 'close the gate @7',
+  'a huge cake @7', 'I know that game @7', 'the snake can smile @7',
+  'a fair share @8', 'a hairy bear @8', 'fair and square @8', 'care and share @8', 'a cup of water @6', 'draw a bear @8',
+  'we drew a hare @8', 'a chair and a bear @8', 'the bear saw the deer @8',
+  'a blue key @9', 'a true clue @9', 'eight blue toes @9', 'the hockey field @9', 'a thread of blue @9',
+  'the chief has a clue @9', 'glue the feather on @9', 'a feather in the field @9', 'the jockey has a whip @9',
+  'knit a glove @10', 'wash your thumbs @10', 'a swan and a lamb @10', 'a wren on a limb @10', 'a wasp in the gym @10',
+  'a wasp on my knee @10', 'a knot in the rope @10', 'my son is at school @10', 'a lamb in the meadow @10',
+  'the knight wrote a note @10',
 ];
 
 /*  Coach Says — read an instruction, then do it.
@@ -822,19 +938,23 @@ export const SEARCH_LISTS: SearchListSpec[] = [
     'medal 🏅 | points 🔢 | coach 📋 | kimono 🥋 | gym 🏋️' },
 ];
 
-/*  Words that sound exactly like another word in these lists, said with an
- *  Australian accent. A game that says a word and asks him to find it written
- *  can never offer both halves of a pair: "pair" called, with pair and pear
- *  in the goal, has no right answer.
+/*  Words that sound exactly like another word in these lists, the sight
+ *  words included, said with an Australian accent. A game that says a word
+ *  and asks him to find it written can never offer both halves of a pair:
+ *  "pair" called, with pair and pear in the goal, has no right answer, and
+ *  nor has "there" on a Bingo card with their.
  *
  *  The content test works these out from a pronouncing dictionary, with the
  *  r after a vowel left silent the way it is here (so saw and sore would be
  *  a pair), and names any pair that is missing. Add words freely; it will say
  *  if one of them needs a line here.  */
 export const SOUNDS_ALIKE: string[] = [
-  'bare bear', 'be bee', 'dew due', 'hair hare', 'hew hue', 'knew new',
-  'knight night', 'pair pear', 'plain plane', 'read red', 'stair stare',
-  'wear where', 'which witch',
+  'bare bear', 'be bee', 'blew blue', 'dew due', 'hair hare', 'hew hue', 'knew new',
+  'knight night', 'knot not', 'pair pear', 'plain plane', 'read red', 'son sun',
+  'stair stare', 'wait weight', 'way weigh', 'wear where', 'which witch',
+  /* with the sight words */
+  'bin been', 'dew do', 'due do', 'he here', 'i eye', 'no know', 'one won', 'right write',
+  'their there', 'to too two', 'wood would',
 ];
 
 /*  Words never to show a six-year-old, whatever a word list says about them.
@@ -868,5 +988,6 @@ export const NOT_SOUNDED_OUT: string[] = [
   /* a after w */ 'wall', 'squash',
   /* ch as k, n as ng */ 'school', 'think', 'yank',
   /* s as z */ 'pins', 'tins', 'fans', 'jugs', 'peas', 'flies', 'tries', 'spies', 'skies',
+  'blues', 'toes', 'weighs', 'knees',
   /* two vowel sounds in one spelling */ 'quiet',
 ];

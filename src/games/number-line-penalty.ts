@@ -18,7 +18,7 @@ import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import {
-  LINE_STEPS, lineQuestion, lineText, onTarget, roundOnTarget, roundQuestion, roundWhy, valueAt,
+  LINE_STEPS, belowZero, lineQuestion, lineText, onTarget, roundOnTarget, roundQuestion, roundWhy, spokenNumber, valueAt,
   type LineStep, type RoundQuestion,
 } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
@@ -149,7 +149,7 @@ function build(kit: Kit) {
       keeper.style.translate = '';
       const shown = lineText(n, step.per);
       ask.replaceChildren('Kick it to ', el('b', { class: 'mx-big', text: shown }));
-      say(`Kick it to ${step.per ? shown : n}`);
+      say(`Kick it to ${step.per ? shown : spokenNumber(n)}`);
       line.dataset.ready = '1';
       line.dataset.asked = String(n / (step.per ?? 1));
       delete line.dataset.answer;
@@ -171,15 +171,16 @@ function build(kit: Kit) {
         if (ok) {
           sfx.cheer();
           kit.note(`GOAL! ${shown} is right there.`, true);
-          narrate('goal', kit.us(), () => say(step.per ? shown : String(n)), kit.life.later);
+          narrate('goal', kit.us(), () => say(step.per ? shown : spokenNumber(n)), kit.life.later);
           await kit.wait(3000);
           resolve(true);
           return;
         }
         sfx.wrong();
         mark(step, n, 'mx-answer', '🚩');
-        kit.note(`Saved! ${shown} lives here, by the flag.`);
-        narrate('save', kit.rival(), () => say(`${step.per ? shown : n} is here`), kit.life.later);
+        /* below zero: how far below it is */
+        kit.note(`Saved! ${shown} lives here, by the flag.${n < 0 ? ` ${belowZero(n)}` : ''}`);
+        narrate('save', kit.rival(), () => say(`${step.per ? shown : spokenNumber(n)} is here${n < 0 ? `, ${-n} below zero` : ''}`), kit.life.later);
         await kit.wait(3200);
         resolve(false);
       };

@@ -832,6 +832,45 @@
 @keyframes tr-write { to { stroke-dashoffset: 0; } }
 @keyframes tr-dot { to { opacity: 1; } }
 
+/* what he writes with: a chip each, with a swatch of the stuff */
+.tr-tools { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.tr-tool {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 6px 12px;
+  border-radius: 99px; border: 2px solid rgba(255, 246, 231, .45); background: transparent; color: var(--on-deep);
+  font: 700 15px var(--reading); cursor: pointer;
+}
+.tr-tool[aria-pressed="true"] { background: var(--mustard); border-color: var(--mustard); color: var(--deep-2); }
+.tr-swatch { width: 18px; height: 18px; border-radius: 50%; flex: none; box-shadow: 0 0 0 2px rgba(255, 255, 255, .7); }
+.tr-tool[data-tool="pencil"] .tr-swatch { background: #1D5FD1; }
+.tr-tool[data-tool="crayon"] .tr-swatch { background: #D9432F; }
+.tr-tool[data-tool="paint"] .tr-swatch { background: #7B3FC4; }
+.tr-tool[data-tool="chalk"] .tr-swatch { background: radial-gradient(circle, #fff 35%, #22382F 40%); }
+.tr-tool[data-tool="sand"] .tr-swatch { background: #E3C084; }
+
+/* crayon and paint on paper; chalk on a blackboard; a finger through sand.
+   The grain is a pattern made once (trace-it.ts), so strokes cost no more
+   to draw than pencil does */
+.tr-board[data-tool="crayon"] .tr-ink, .tr-board[data-tool="crayon"] .tr-inked { stroke: url(#tr-tex-crayon); stroke-width: 10; }
+.tr-board[data-tool="crayon"] .tr-inked.dot { fill: url(#tr-tex-crayon); stroke: none; }
+.tr-board[data-tool="paint"] .tr-ink, .tr-board[data-tool="paint"] .tr-inked { stroke: #7B3FC4; stroke-width: 14; }
+.tr-board[data-tool="paint"] .tr-inked.dot { fill: #7B3FC4; stroke: none; }
+.tr-board[data-tool="chalk"] .tr-pad { background: #22382F; }
+.tr-board[data-tool="chalk"] .wl { stroke: rgba(255, 255, 255, .32); }
+.tr-board[data-tool="chalk"] .wl.base { stroke: rgba(255, 255, 255, .6); }
+.tr-board[data-tool="chalk"] .tr-track.solid { stroke: rgba(255, 255, 255, .16); }
+.tr-board[data-tool="chalk"] .tr-track.dots { stroke: rgba(255, 255, 255, .6); }
+.tr-board[data-tool="chalk"] .tr-track.dot { fill: rgba(255, 255, 255, .35); }
+.tr-board[data-tool="chalk"] .tr-ink, .tr-board[data-tool="chalk"] .tr-inked { stroke: url(#tr-tex-chalk); stroke-width: 9; }
+.tr-board[data-tool="chalk"] .tr-inked.dot { fill: url(#tr-tex-chalk); stroke: none; }
+.tr-board[data-tool="sand"] .tr-pad { background: #E9CD95; }
+.tr-board[data-tool="sand"] .wl { stroke: rgba(110, 72, 30, .4); }
+.tr-board[data-tool="sand"] .wl.base { stroke: rgba(110, 72, 30, .7); }
+.tr-board[data-tool="sand"] .tr-track.solid { stroke: rgba(110, 72, 30, .16); }
+.tr-board[data-tool="sand"] .tr-ink, .tr-board[data-tool="sand"] .tr-inked { stroke: url(#tr-tex-sand); stroke-width: 12; }
+.tr-board[data-tool="sand"] .tr-inked.dot { fill: url(#tr-tex-sand); stroke: none; }
+/* a stroke that missed is red whatever it was written with */
+.tr-board[data-tool] .tr-ink.wrong { stroke: var(--tomato); }
+
 .tr-note { margin: 0; min-height: 1.5em; text-align: center; color: var(--on-deep); font-size: 18px; }
 .tr-note.oops { color: var(--mustard); font-weight: 700; }
 .tr-note.good { padding: 2px 14px; border-radius: 12px; background: var(--paper); color: var(--ink); font-weight: 700; }
@@ -1156,7 +1195,7 @@
 .td-team .td-inside { max-width: 132px; padding: 8px; border-radius: 14px; background: rgba(255, 246, 231, .16); }
 .td-ball { font-size: clamp(14px, 3.6vw, 20px); line-height: 1; }
 .td-fan { width: 18px; height: 18px; border-radius: 50% 50% 40% 40%; box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .3); }
-.td-pile { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; max-width: 420px; }
+.td-pile { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 4px; max-width: 420px; }
 .td-rows { display: grid; gap: 8px; }
 .td-row { display: flex; align-items: center; gap: 10px; }
 .td-row .td-inside { flex-wrap: nowrap; gap: 10px; }
@@ -1166,10 +1205,70 @@
 }
 .td-count { min-height: 1.3em; color: var(--paper); font: 800 18px var(--display); }
 .td-field.counting .td-count { color: var(--mustard); }
+/* Years 3–4: the first 5 teams of a worked-out fact, marked off from the rest */
+.td-team.td-first .td-inside { box-shadow: inset 0 0 0 3px var(--mustard); }
+/* up to 10 teams of 12 on a phone: smaller players, packed closer */
+.td-field.crowded .td-fan { width: 12px; height: 12px; }
+.td-field.crowded .td-inside { gap: 2px; }
+.td-field.crowded .td-team .td-inside { max-width: 84px; padding: 6px; }
+.td-field.crowded .td-groups { gap: 8px; }
 @media (max-width: 420px) {
   .td-cone { border-left-width: 10px; border-right-width: 10px; border-bottom-width: 20px; }
   .td-row .td-inside { gap: 6px; }
 }
+
+/* ── Flash Phrases ─────────────────────────────────────────────────────── */
+
+/* the phrase on a card, big, in the reading face (single-storey a and g) */
+.fp-card {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 0 .32em;
+  width: min(100%, 680px); min-height: 3.4em; padding: 18px 20px; border-radius: var(--radius);
+  background: var(--paper); color: var(--ink); box-shadow: 0 6px 14px rgba(0, 0, 0, .25);
+  font: 700 clamp(30px, 8vw, 54px) / 1.2 var(--reading);
+}
+.fp-card.gone { background: rgba(255, 246, 231, .16); color: var(--paper); }
+.fp-ready { font-size: .9em; }
+/* the word he misread: a wash behind the dark text and a line under it */
+.fp-word.misread { padding: 0 .12em; border-radius: 8px; background: #FFE08A; box-shadow: inset 0 -.12em 0 var(--mustard); }
+/* the answers are phrases: one to a line, in the reading face */
+.wrap[data-game="flash-phrases"] .mx-choices { flex-direction: column; align-items: stretch; width: min(100%, 560px); }
+.wrap[data-game="flash-phrases"] .mx-choice.word { font-family: var(--reading); font-size: clamp(22px, 5.6vw, 30px); text-transform: none; }
+/* ── Foosball Line-Up ──────────────────────────────────────────────────── */
+
+.lu-field { display: grid; gap: 10px; justify-items: center; width: min(100%, 680px); }
+/* the table from above: his goal on the left, the halfway line down the middle */
+.lu-table {
+  display: flex; align-items: stretch; width: 100%; height: clamp(220px, 48vw, 300px); padding: 6px 4px;
+  border: 8px solid #8B5A2B; border-radius: 14px; box-shadow: 0 6px 14px rgba(0, 0, 0, .3);
+  background: linear-gradient(90deg, transparent calc(50% - 1px), rgba(255, 255, 255, .55) calc(50% - 1px) calc(50% + 1px), transparent calc(50% + 1px)), #2E8F52;
+}
+.lu-goal { flex: 0 0 8px; align-self: center; height: 34%; border-radius: 3px; background: rgba(255, 255, 255, .85); }
+.lu-rod { position: relative; flex: 1; display: grid; place-items: center; min-width: 0; }
+.lu-bar { position: absolute; top: -6px; bottom: -6px; left: 50%; width: 4px; translate: -50% 0; border-radius: 2px; background: #C9CED6; }
+.lu-rod.lit .lu-bar { background: var(--mustard); box-shadow: 0 0 10px var(--mustard); }
+.lu-men { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; height: 100%; }
+.lu-man {
+  display: grid; place-items: center; width: clamp(20px, 5.2vw, 30px); aspect-ratio: 1; border-radius: 50% 50% 42% 42%;
+  background: var(--shirt); box-shadow: inset 0 0 0 2px rgba(0, 0, 0, .35), 0 2px 0 rgba(0, 0, 0, .3);
+  font: 800 clamp(12px, 3vw, 16px) var(--display); line-height: 1;
+}
+.lu-rod.lit .lu-man { outline: 3px solid var(--mustard); outline-offset: 1px; }
+/* numbered when he is shown the counting: dark on paper, in a ring of the shirt */
+.lu-field.counting .lu-man:not(:empty) { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 3px var(--shirt), 0 2px 0 rgba(0, 0, 0, .3); }
+.lu-rod.hidden .lu-man { visibility: hidden; }
+.lu-towel {
+  position: absolute; inset: 6% 4%; display: grid; place-items: center; border-radius: 10px;
+  background: repeating-linear-gradient(0deg, #F6EFE2 0 12px, #D9534F 12px 18px); box-shadow: 0 3px 8px rgba(0, 0, 0, .35);
+  font: 800 26px var(--display); color: var(--ink);
+}
+/* the club's spare rods, side by side, with the count under each */
+.lu-rack { display: flex; justify-content: center; gap: clamp(12px, 4vw, 28px); height: clamp(220px, 44vw, 280px); padding: 14px 18px 8px; border-radius: var(--radius); background: #2E8F52; }
+.lu-rod.spare { flex: 0 0 auto; width: 48px; grid-template-rows: 1fr auto; }
+.lu-rod.spare .lu-bar { top: 0; bottom: 1.8em; }
+.lu-count { min-height: 1.3em; color: var(--paper); font: 800 18px var(--display); }
+.lu-field.counting .lu-count { color: var(--mustard); }
+.lu-tables { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.lu-chip { padding: 4px 12px; border-radius: 999px; background: var(--paper); color: var(--ink); font: 700 15px var(--display); }
 
 /* word answers ("Yes", "a quarter") in the maths games */
 .mx-choice.word { min-width: 120px; font-size: 28px; padding: 6px 20px; }
@@ -1488,6 +1587,32 @@
   background: rgba(255, 246, 231, .07); border: 1px solid rgba(255, 246, 231, .16);
 }
 .grown-ups .gu-card h2 { font-family: var(--display); font-size: 17px; margin: 0 0 8px; }
+/* team crests: the one chosen as a circle, as the buttons show it */
+.grown-ups .gu-crest { width: 56px; height: 56px; border-radius: 50%; overflow: hidden; display: inline-grid; place-items: center; background: var(--deep-2); border: 2px solid var(--paper); flex: none; }
+.grown-ups .gu-crest img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.grown-ups .gu-crest .none { font-size: 11px; text-align: center; line-height: 1.1; padding: 4px; }
+.grown-ups .gu-crest-pick { position: relative; overflow: hidden; }
+/* the file input stays in the page, for the label and for a keyboard, but unseen */
+.grown-ups .gu-crest-file { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.grown-ups .gu-crest-said:empty { display: none; }
+.grown-ups .gu-crest-said { margin: 0; }
+/* one slot per side: the crest on the left, who it is for beside it, then its buttons */
+.grown-ups .gu-crest-slot {
+  display: grid; grid-template-columns: 56px 1fr; gap: 8px 12px; align-items: start;
+  padding: 12px 0; border-top: 1px solid rgba(255, 246, 231, .18);
+}
+.grown-ups .gu-crest-slot > .gu-crest { grid-row: span 2; }
+.grown-ups .gu-crest[hidden], .grown-ups .gu-crest-buttons[hidden] { display: none; }
+.grown-ups .gu-crest-slot > .gu-crest[hidden] + .gu-crest-who { grid-column: 1 / -1; }
+.grown-ups .gu-crest-who { display: grid; gap: 4px; }
+.grown-ups .gu-crest-who select { justify-self: start; max-width: 100%; }
+.grown-ups .gu-crest-about { font-size: 14px; opacity: .85; }
+.grown-ups .gu-crest-buttons { display: flex; flex-wrap: wrap; gap: 8px; grid-column: 2; }
+.grown-ups .gu-crest-slot > .gu-crest-said { grid-column: 1 / -1; }
+.grown-ups .gu-crest-list { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 4px; }
+.grown-ups .gu-crest-list:empty { display: none; }
+.grown-ups .gu-crest-kept { padding: 0; border: 0; background: none; border-radius: 50%; cursor: pointer; min-width: 44px; min-height: 44px; display: grid; place-items: center; }
+.grown-ups .gu-crest-kept img { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--paper); display: block; }
 .grown-ups .gu-card .row + .row, .grown-ups .gu-card .row + .sound-groups, .grown-ups .sound-groups + .row { margin-top: 12px; }
 .sound-groups .row + .row { margin-top: 8px; }
 .sound-group .group-name {
@@ -1632,6 +1757,12 @@
   font-family: var(--reading); font-weight: 700; font-size: 30px;
 }
 .bw-tile:disabled { opacity: .45; cursor: default; }
+/* sight words in Build the Word: letters like fridge magnets, each in its
+   own bright plastic on a paper tile */
+.bw-tile.magnet {
+  background: var(--paper); color: var(--magnet); font-size: clamp(30px, 8vw, 42px);
+  box-shadow: 0 5px 0 rgba(0, 0, 0, .28); text-shadow: 0 2px 0 rgba(0, 0, 0, .16);
+}
 .bw-split { display: inline-flex; align-items: stretch; }
 .bw-letter { padding: 0 1px; }
 .bw-gap {
@@ -1972,6 +2103,29 @@
 .ht-fig figcaption { color: var(--paper); font: 700 20px var(--display); }
 
 /* Futebol de Botão: the table is an SVG in table units, sized to fit the screen's height */
+/* the attack, the goals and the step on one bar, a part each */
+.wrap[data-game="futebol-de-botao"] .score {
+  display: grid; grid-template-columns: auto auto minmax(0, auto); align-items: center;
+  width: fit-content; max-width: 100%; margin: 4px auto 10px; padding: 3px 0;
+  border: 1px solid rgba(255, 246, 231, .22); border-radius: 16px; background: rgba(255, 246, 231, .07);
+}
+.wrap[data-game="futebol-de-botao"] .score > * { padding: 0 14px; text-align: center; }
+.wrap[data-game="futebol-de-botao"] .score > * + * { border-left: 1px solid rgba(255, 246, 231, .22); }
+.wrap[data-game="futebol-de-botao"] .score[hidden] { display: none; }
+@media (max-width: 400px) {
+  .wrap[data-game="futebol-de-botao"] .score > * { padding: 0 9px; }
+}
+/* the note (what happened, and the angles in words) goes above the table,
+   in the instruction's place, once there is something to say, so it is on
+   the screen with the table; the instruction comes back with the next attack */
+.wrap[data-game="futebol-de-botao"] .mx-note { order: -1; font-family: var(--reading); font-size: clamp(18px, 4.4vw, 24px); line-height: 1.3; }
+.wrap[data-game="futebol-de-botao"] .mx-note:empty { display: none; }
+.wrap[data-game="futebol-de-botao"] .mx-board:has(.mx-note:not(:empty)) .bt-tell { display: none; }
+/* Pro, as the handoff has it: a gold pill under the title */
+.wrap[data-game="futebol-de-botao"] .pro-badge {
+  display: block; width: fit-content; margin: 4px auto 0; padding: 2px 15px; border-radius: 30px;
+  font-size: 12px; font-weight: 800; letter-spacing: 2px;
+}
 .bt-stage { gap: 8px; }
 .bt-tell { margin: 0; }
 .bt-touches { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--paper); font: 700 18px var(--display); }
@@ -1979,28 +2133,82 @@
 .bt-pip { width: 18px; height: 18px; border: 3px solid var(--paper); border-radius: 50%; }
 .bt-pip.used { border-color: var(--mustard); background: var(--mustard); }
 /* svh where there is one, so an iPhone's toolbar is counted */
-.bt-wrap { width: min(100%, 600px, calc((100vh - 230px) * .7)); width: min(100%, 600px, calc((100svh - 230px) * .7)); }
-.bt-table { display: block; width: 100%; height: auto; aspect-ratio: 70 / 100; touch-action: none; user-select: none; -webkit-user-select: none; }
-.bt-wood { fill: #8A5A2B; }
-.bt-felt { fill: #2E8B4F; }
-.bt-line { fill: none; stroke: rgba(255, 255, 255, .75); stroke-width: .4; }
-.bt-spot { fill: rgba(255, 255, 255, .8); }
-.bt-net rect { fill: rgba(255, 255, 255, .12); stroke: #fff; stroke-width: .5; }
-.bt-net line { stroke: rgba(255, 255, 255, .45); stroke-width: .2; }
-.bt-post { fill: #fff; stroke: #333; stroke-width: .2; }
-.bt-keeper { stroke: #111; stroke-width: .4; }
+/* the table's shape (--bt-shape, width over height) is VIEW in
+   src/content/botao.ts, set on .bt-wrap where it is made */
+.bt-wrap {
+  width: min(100%, 600px, calc((100vh - 260px) * var(--bt-shape))); width: min(100%, 600px, calc((100svh - 260px) * var(--bt-shape)));
+  /* the tray's own corners, from its picture (38 of 699 across, of 987 down), and its shadow on the page */
+  border-radius: 5.4% / 3.9%;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .35);
+}
+.bt-table { display: block; width: 100%; height: auto; aspect-ratio: var(--bt-shape); touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+/* a picture, so a long press on it must not offer to save it */
+.bt-tray { pointer-events: none; }
+/* the table: the tray (the handoff's picture of it), the felt mown in
+   squares, lit in the middle, the rim's shadow along the top and the left
+   (the gradients are in shading(), futebol-de-botao.ts), and the lines;
+   the colours are the handoff's pitch.svg */
+.bt-felt { fill: #369658; }
+.bt-stripe { fill: rgba(0, 0, 0, .12); }
+.bt-stripe.down { fill: rgba(0, 0, 0, .08); }
+.bt-line { fill: none; stroke: #E8EEE2; stroke-width: .43; }
+.bt-spot { fill: #E8EEE2; }
+/* the goal: the inside of the net darker towards the back, the frame
+   standing up from the line, its shadow on the felt; the net shakes on a goal */
+.bt-net-turf { fill: #2A7F48; }
+.bt-net-floor { fill: url(#bt-netdepth); }
+.bt-net-side { fill: rgba(255, 255, 255, .28); }
+.bt-net-edge { fill: none; stroke: rgba(255, 255, 255, .85); stroke-width: .3; stroke-linejoin: round; }
+.bt-net line { stroke: rgba(255, 255, 255, .55); stroke-width: .18; }
+.bt-net .bt-backbar { stroke: #BDBDBD; stroke-width: .6; stroke-linecap: round; }
+.bt-net { transform-box: fill-box; transform-origin: 50% 100%; }
+.bt-net.bulge { animation: bt-bulge .8s ease-out; }
+@keyframes bt-bulge {
+  0% { transform: scale(1, 1); }
+  20% { transform: scale(1.08, 1.4); }
+  45% { transform: scale(.98, .88); }
+  70% { transform: scale(1.02, 1.1); }
+  100% { transform: scale(1, 1); }
+}
+.bt-goal { pointer-events: none; }
+.bt-goal-shadow { stroke: rgba(0, 0, 0, .3); stroke-width: 1; stroke-linecap: round; }
+/* the uprights' width is the posts' (POST), set where they are drawn */
+.bt-upright { stroke: #E2E2E2; stroke-linecap: round; }
+.bt-crossbar { stroke: #CFCFCF; stroke-width: 1.15; stroke-linecap: round; }
+.bt-crossbar-shine { stroke: #fff; stroke-width: .45; stroke-linecap: round; }
+/* raised things: a shadow under each, a bevelled rim, a shine on the face */
+.bt-shadow { fill: rgba(0, 0, 0, .32); }
+.bt-keeper-block { stroke: #111; stroke-width: .4; }
+.bt-keeper-shine { fill: url(#bt-blockshade); }
 .bt-keeper.moving { transition: transform .4s ease; }
 .bt-btn .bt-rim { stroke: rgba(0, 0, 0, .55); stroke-width: .5; }
+/* a button's side, in its rim's colour in shade */
+.bt-side { stroke: rgba(0, 0, 0, .6); stroke-width: .4; }
+.bt-side-shade { fill: rgba(0, 0, 0, .45); }
+.bt-bevel { fill: url(#bt-bevel); }
+.bt-face { stroke: rgba(0, 0, 0, .35); stroke-width: .3; }
+.bt-shine { fill: url(#bt-shine); }
 .bt-btn.us { cursor: grab; }
 .bt-btn.tired { opacity: .4; }
 .bt-flag { pointer-events: none; }
-.bt-ball circle { fill: #fff; stroke: #222; stroke-width: .35; }
+.bt-ball-face { fill: url(#bt-ballshade); stroke: #222; stroke-width: .3; }
+@media (prefers-reduced-motion: reduce) {
+  .bt-net.bulge { animation: none; }
+}
 .bt-path { fill: none; stroke: #fff; stroke-width: .7; stroke-dasharray: 1.6 1.2; stroke-linecap: round; }
 .bt-trail { fill: none; stroke: rgba(255, 255, 255, .4); stroke-width: .5; stroke-dasharray: .6 1; }
 .bt-band { stroke: rgba(255, 255, 255, .55); stroke-width: .5; stroke-dasharray: 1 1; }
 .bt-arrow { fill: var(--mustard); stroke: var(--deep); stroke-width: .35; stroke-linejoin: round; }
 .bt-ghost { fill: rgba(255, 255, 255, .18); stroke: #fff; stroke-width: .5; stroke-dasharray: 1.2 .8; }
 .bt-ghost[hidden], .bt-keeper[hidden] { display: none; }
+/* the angles off the rim: the wall, each angle's wedge and degrees (the
+   numbers on a dark halo), and the right-angle mark for a ball sent
+   straight at the wall */
+.bt-marks { pointer-events: none; }
+.bt-wall-mark { stroke: var(--paper); stroke-width: .6; stroke-linecap: round; }
+.bt-right { fill: var(--deep-3); stroke: var(--paper); stroke-width: .5; stroke-linejoin: miter; }
+.bt-arc { fill: rgba(243, 178, 41, .55); stroke: var(--paper); stroke-width: .35; }
+.bt-deg { fill: var(--paper); font-family: var(--reading); font-weight: 700; paint-order: stroke; stroke: var(--deep-3); stroke-width: .9; stroke-linejoin: round; }
 
 /* ── World Map ─────────────────────────────────────────────────────────── */
 
@@ -2116,3 +2324,34 @@
 @media (prefers-reduced-motion: reduce) {
   .au-state.glow { animation: none; }
 }
+
+/* ── Read and Point ─────────────────────────────────────────────────────── */
+
+.rp-ask {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px;
+  margin: 6px 0 12px; color: var(--on-deep); font: 700 clamp(20px, 4.4vw, 26px) var(--display);
+}
+.rp-find-word {
+  display: inline-block; margin-left: 4px; padding: 0 12px; border-radius: 12px;
+  background: var(--paper); color: var(--ink); font: 700 1.15em var(--reading);
+}
+.rp-tally { font-size: .8em; color: var(--on-deep-soft); }
+.rp-book {
+  background: var(--paper); color: var(--ink); border-radius: var(--radius);
+  padding: clamp(16px, 4vw, 28px); box-shadow: 0 6px 0 rgba(0, 0, 0, .18);
+}
+.rp-title { margin: 0 0 10px; font: 700 clamp(22px, 5vw, 30px) var(--reading); color: var(--ink); }
+.rp-story { margin: 0; font: 400 clamp(22px, 4.8vw, 32px) var(--reading); line-height: 1.95; color: var(--ink); }
+/* every word a thing to tap, and still reading like a page of a book */
+.rp-word {
+  font: inherit; color: inherit; background: none; border: 0; cursor: pointer;
+  padding: 2px 3px; margin: 0 -1px; border-radius: 8px; line-height: 1.3;
+}
+.rp-chunk { white-space: nowrap; }
+.rp-word.reading { background: rgba(243, 178, 41, .38); }
+.rp-word.found { background: var(--found); box-shadow: inset 0 -4px 0 var(--found-deep); }
+.rp-word.nope { animation: shake .35s; }
+.rp-note { margin: 10px 0 0; min-height: 1.4em; text-align: center; color: var(--on-deep); font-size: 18px; }
+.rp-actions { justify-content: center; margin-top: 10px; }
+.rp-ask[hidden], .rp-book[hidden], .rp-note[hidden], .rp-actions[hidden] { display: none; }
+@media (prefers-reduced-motion: reduce) { .rp-word.nope { animation: none; } }

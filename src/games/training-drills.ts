@@ -9,13 +9,20 @@
  * counts teams of 2, 5 and 10 players, and puts a pile of cones into rows of
  * so many to find how many rows: grouping, the other half of dividing.
  *
+ * Years 3–4 carry the teams on into the rest of the times tables, up to
+ * 10 teams of 12, and put a crowd of players into teams of so many. These
+ * are for working a fact out rather than knowing it (Times Table Sprint is
+ * for knowing them): 7 teams of 8 is 5 teams and 2 more, 40 and 16.
+ *
  * A wrong answer counts the groups in steps, 4, 8, 12, the skip counting
- * from Keepy-Uppy, with the running count written under each group. */
+ * from Keepy-Uppy, with the running count written under each group; in
+ * Years 3–4, from 6 teams on, the first 5 teams are marked off from the
+ * rest, with what each part makes written under it (drillWorkOut). */
 
 import { el, prefersReducedMotion } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
-import { DRILL_STEPS, drillChoices, drillQuestion, type DrillQuestion, type DrillStep } from '../content/maths';
+import { DRILL_STEPS, drillChoices, drillQuestion, drillWorkOut, type DrillQuestion, type DrillStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 
 export function mount(root: HTMLElement): () => void {
@@ -59,6 +66,15 @@ function build(kit: Kit) {
     return out;
   }
 
+  /** the first `split` teams marked off from the rest, with what each part makes */
+  function splitUp(boxes: HTMLElement[], q: DrillQuestion, split: number): void {
+    boxes.forEach((b, i) => b.classList.toggle('td-first', i < split));
+    const label = (i: number, n: number): void => { const c = boxes[i]?.querySelector('.td-count'); if (c) c.textContent = String(n); };
+    label(split - 1, split * q.each);
+    label(boxes.length - 1, (boxes.length - split) * q.each);
+    field.classList.add('counting');
+  }
+
   /** cones in rows; or loose in a pile, before they are set out */
   function rows(q: DrillQuestion, loose: boolean): HTMLElement[] {
     if (loose) {
@@ -96,6 +112,8 @@ function build(kit: Kit) {
       const q = drillQuestion(step, last);
       last = q;
       field.classList.remove('counting');
+      /* up to 10 teams of 12: smaller players, so they still fit a phone */
+      field.classList.toggle('crowded', q.total > 40);
       field.dataset.answer = String(q.answer);
       let boxes: HTMLElement[] = [];
       let text: string;
@@ -111,6 +129,9 @@ function build(kit: Kit) {
       } else if (step.task === 'rows') {
         boxes = rows(q, false);
         text = `${q.groups} rows of ${q.each} cones. How many cones?`;
+      } else if (step.teams) {
+        field.replaceChildren(el('div', { class: 'td-pile' }, ...Array.from({ length: q.total }, fan)));
+        text = `${q.total} players, in teams of ${q.each}. How many teams?`;
       } else {
         rows(q, true);
         text = `Put ${q.total} cones out in rows of ${q.each}. How many rows?`;
@@ -123,7 +144,19 @@ function build(kit: Kit) {
       kit.choices.reveal(q.answer, picked);
       const ok = picked === q.answer;
       let how: string;
-      if (step.task === 'share') {
+      /* what a right answer is told: the working out is for a miss */
+      let yes: string | undefined;
+      if (step.workOut) {
+        /* worked out from facts he knows, the teams marked as it says */
+        if (step.task === 'make-rows') boxes = groups(q, step, true);
+        const out = drillWorkOut(step, q);
+        if (out.split) splitUp(boxes, q, out.split);
+        else countUp(boxes, q);
+        yes = step.task === 'make-rows'
+          ? `${q.total} players in teams of ${q.each} make ${plural(q.groups, 'team', 'teams')}.`
+          : `${q.groups} teams of ${q.each} make ${q.total}.`;
+        how = `${yes} ${out.text}`;
+      } else if (step.task === 'share') {
         await deal(boxes, q);
         how = `${q.total} shared between ${q.groups} is ${q.each} each.`;
       } else if (step.task === 'make-rows') {
@@ -135,8 +168,8 @@ function build(kit: Kit) {
       }
       if (ok) {
         sfx.cheer();
-        kit.note(`Yes! ${how}`, true);
-        say(`Yes! ${how}`);
+        kit.note(`Yes! ${yes ?? how}`, true);
+        say(`Yes! ${yes ?? how}`);
         await kit.wait(2800);
         return true;
       }

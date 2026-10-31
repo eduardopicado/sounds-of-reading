@@ -163,7 +163,7 @@ test.describe('the grown-ups corner', () => {
 
   test('groups the settings into cards', async ({ page }) => {
     await openGame(page, 'grown-ups');
-    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Stickers']);
+    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Team crests', 'Stickers']);
     /* the sounds of the two default levels, one line each */
     await expect(page.locator('.sound-group .group-name')).toHaveText(['Level 4', 'Level 5']);
   });
@@ -178,7 +178,9 @@ test.describe('the grown-ups corner', () => {
     await expect(rows).toHaveCount(2);
     await expect(rows.first()).toHaveAttribute('data-game', 'team-buses');
     await expect(rows.first().locator('.mp-step')).toContainText('step 3 of');
-    await expect(page.locator('.maths-progress')).toContainText('Not tried yet: Coach Says, Big Words, Word Search, Foosball Words, Flash Count');
+    /* the first of the games with a ladder he has not tried, in the catalog's order */
+    const untried = GAMES.filter((g) => g.ladder && g.path !== 'team-buses' && g.path !== 'refs-call').slice(0, 5).map((g) => g.name);
+    await expect(page.locator('.maths-progress')).toContainText(`Not tried yet: ${untried.join(', ')}`);
   });
 
   test('every maths and jiu-jitsu game has its ladder in the progress card', async ({ page }) => {

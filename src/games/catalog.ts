@@ -13,13 +13,14 @@
 
 import type { Mount } from '../lib/router';
 import {
-  BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS, HANDS_STEPS, JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, TIMES_STEPS, type Step,
+  BENCH_STEPS, BOARD_STEPS, BUS_STEPS, CLOCK_STEPS, DRILL_STEPS, FACT_STEPS, FLASH_STEPS, FRACTION_STEPS, HANDS_STEPS, JUMP_STEPS, KIOSK_STEPS, LINE_STEPS, LINEUP_STEPS, SHAPE_STEPS, SKIP_STEPS, SUM_STEPS, SURVEY_STEPS, TIMES_STEPS, type Step,
 } from '../content/maths';
 import { MATCH_STEPS, REF_STEPS, SIGNAL_STEPS, WEIGH_STEPS } from '../content/bjj';
 import { SAYS_STEPS } from '../content/coach-says';
 import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
+import { PHRASE_STEPS } from '../content/flash-phrases';
 import { BOTAO_STEPS } from '../content/botao';
 import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
 import { MAP_STEPS } from '../content/world';
@@ -73,6 +74,8 @@ export const GAMES: Game[] = [
     load: () => import('./same-sound') },
   { path: 'tricky-words', name: 'Tricky Words', emoji: '🧠', what: 'Look, then find it again', tone: '#E8705A', section: 'reading',
     load: () => import('./tricky-words') },
+  { path: 'read-and-point', name: 'Read and Point', emoji: '👉', what: 'Find the sight words in a story', tone: '#5E8FD6', section: 'reading',
+    load: () => import('./read-and-point') },
   { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF', section: 'reading',
     load: () => import('./sound-rocket') },
   { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E', section: 'reading',
@@ -91,6 +94,8 @@ export const GAMES: Game[] = [
     load: () => import('./word-search') },
   { path: 'foosball-words', name: 'Foosball Words', emoji: '🕹️', what: 'Slide the rods, spell the word', tone: '#2E8F52', section: 'reading', ladder: FOOS_STEPS,
     load: () => import('./foosball-words') },
+  { path: 'flash-phrases', name: 'Flash Phrases', emoji: '📸', what: 'Read it at a glance', tone: '#5E7FC0', section: 'reading', ladder: PHRASE_STEPS,
+    load: () => import('./flash-phrases') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',
@@ -109,6 +114,8 @@ export const GAMES: Game[] = [
     load: () => import('./keepy-uppy') },
   { path: 'training-drills', name: 'Training Drills', emoji: '🏋️', what: 'Equal groups and rows', tone: '#D9822B', section: 'maths', ladder: DRILL_STEPS,
     load: () => import('./training-drills') },
+  { path: 'foosball-line-up', name: 'Foosball Line-Up', emoji: '🎛️', what: 'A goalie, 2, 5 and 3: how many?', tone: '#2E7D5B', section: 'maths', ladder: LINEUP_STEPS,
+    load: () => import('./foosball-line-up') },
   { path: 'times-table-sprint', name: 'Times Table Sprint', emoji: '⏱️', what: 'Times tables to 12 × 12, by heart', tone: '#C2543A', section: 'maths', ladder: TIMES_STEPS,
     load: () => import('./times-table-sprint') },
   { path: 'half-time-oranges', name: 'Half-Time Oranges', emoji: '🍊', what: 'Halves, quarters, eighths', tone: '#F28C28', section: 'maths', ladder: FRACTION_STEPS,

@@ -15,7 +15,9 @@ import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
 import { settings, updateSettings } from '../lib/settings';
 import { strongSounds, weakSounds } from '../lib/coach';
+import { clearCrest, crestFromFile, crestOf, setCrest } from '../lib/crests';
 import { GAMES } from './catalog';
+import { TEAMS } from './teams';
 
 const card = (title: string, cls: string, ...children: (Node | null)[]): HTMLElement =>
   el('section', { class: `gu-card ${cls}` }, el('h2', { text: title }), ...children);
@@ -72,7 +74,7 @@ export function mount(root: HTMLElement): () => void {
     for (const lv of LEVELS) {
       levelRow.append(chip(String(lv.n), settings().levels.includes(lv.n), () => {
         const levels = settings().levels;
-        const next = (levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort()) as Level[];
+        const next = (levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort((a, b) => a - b)) as Level[];
         const stillThere = next.length ? PRACTICE_SOUNDS.filter((s) => next.includes(s.level)) : PRACTICE_SOUNDS;
         updateSettings({
           levels: next,
@@ -225,11 +227,90 @@ export function mount(root: HTMLElement): () => void {
     }
   }
 
+  /* ── team crests ────────────────────────────────────────────────────── */
+
+  /* His own side and the Rivals each have a crest slot of their own; a real
+     team's crest is a separate thing, picked from the countries and clubs. */
+  const teamName = (id: string): string => {
+    const t = TEAMS.find((x) => x.id === id) ?? TEAMS[0];
+    return t.kind === 'you' ? 'his own team' : t.kind === 'rivals' ? 'the Rivals' : t.name;
+  };
+
+  /** a crest, and the buttons to choose or remove it, for the team `which`
+      names; `which` gives '' while no team is picked */
+  function crestSlot(cls: string, which: () => string, ...lead: Node[]): { node: HTMLElement; draw: (said?: string) => void } {
+    const shown = el('span', { class: 'gu-crest' });
+    /* the picker opens from the label round it, which is what a finger taps */
+    const file = el('input', { type: 'file', accept: 'image/*', class: 'gu-crest-file' });
+    const pick = el('label', { class: 'btn ghost small gu-crest-pick' }, '🖼️ Choose a picture', file);
+    const remove = el('button', { class: 'btn ghost small', type: 'button', text: 'Remove' });
+    const said = el('p', { class: 'gu-crest-said', 'aria-live': 'polite' });
+    const buttons = el('div', { class: 'gu-crest-buttons' }, pick, remove);
+
+    function draw(text = ''): void {
+      const id = which();
+      const crest = id ? crestOf(id) : null;
+      shown.hidden = !id;
+      buttons.hidden = !id;
+      shown.replaceChildren(crest ? el('img', { src: crest, alt: `The crest for ${teamName(id)}` }) : el('span', { class: 'none', text: 'No crest' }));
+      file.setAttribute('aria-label', `Choose a picture for ${teamName(id)}`);
+      remove.setAttribute('aria-label', `Remove the crest for ${teamName(id)}`);
+      remove.hidden = !crest;
+      said.textContent = text;
+    }
+    file.addEventListener('change', () => {
+      const chosen = file.files?.[0];
+      file.value = '';
+      const id = which();
+      if (!chosen || !id) return;
+      crestFromFile(chosen).then(
+        (crest) => { draw(setCrest(id, crest) ? `Saved for ${teamName(id)}, on this iPad.` : 'This iPad would not keep the picture. Try removing another crest first.'); drawOthers(); },
+        () => draw('That picture would not open. Try a photo, or a PNG or JPEG file.'),
+      );
+    });
+    remove.addEventListener('click', () => { clearCrest(which()); draw('Removed.'); drawOthers(); });
+    return { node: el('div', { class: `gu-crest-slot ${cls}` }, shown, el('div', { class: 'gu-crest-who' }, ...lead), buttons, said), draw };
+  }
+
+  const who = (title: string, about: string): Node[] =>
+    [el('strong', { text: title }), el('span', { class: 'gu-crest-about', text: about })];
+  const ownSlot = crestSlot('you', () => 'you',
+    ...who('⭐ His own team', 'The side called You, until he picks a real team to play for.'));
+  const rivalSlot = crestSlot('rivals', () => 'rivals',
+    ...who('🛡️ The Rivals', 'His favourite opponent: a friend’s team, or the club across town. To play them, pick 🛡️ Rivals under Play against in Penalty Shootout; every football game then plays them.'));
+
+  const real = TEAMS.filter((t) => t.kind === 'country' || t.kind === 'club');
+  const otherTeam = el('select', { 'aria-label': 'A real team' },
+    el('option', { value: '', text: 'Choose a country or club' }),
+    el('optgroup', { label: 'Countries' }, ...real.filter((t) => t.kind === 'country').map((t) => el('option', { value: t.id, text: `${t.flag} ${t.name}` }))),
+    el('optgroup', { label: 'Clubs' }, ...real.filter((t) => t.kind === 'club').map((t) => el('option', { value: t.id, text: t.name }))));
+  const otherSlot = crestSlot('other', () => otherTeam.value,
+    el('strong', { text: 'A real team' }), otherTeam);
+  /* the real teams that have one, each a tap away from being picked */
+  const otherList = el('div', { class: 'gu-crest-list' });
+  function drawOthers(): void {
+    const kept = real.filter((t) => crestOf(t.id));
+    otherList.replaceChildren(...(kept.length ? [el('span', { class: 'lbl', text: 'With a crest' })] : []),
+      ...kept.map((t) => el('button', {
+        type: 'button', class: 'gu-crest-kept', 'aria-label': t.name, title: t.name,
+        on: { click: () => { otherTeam.value = t.id; otherSlot.draw(); } },
+      }, el('img', { src: crestOf(t.id)!, alt: '' }))));
+  }
+  otherTeam.addEventListener('change', () => otherSlot.draw());
+
+  function drawCrests(): void {
+    ownSlot.draw();
+    rivalSlot.draw();
+    otherSlot.draw();
+    drawOthers();
+  }
+
   function draw(): void {
     drawWeek();
     drawReport();
     drawChallenge();
     drawSound();
+    drawCrests();
   }
 
   drawVoices();
@@ -246,6 +327,9 @@ export function mount(root: HTMLElement): () => void {
     card('Challenge', 'challenge', challengeRow,
       el('p', { class: 'tag', text: 'Pro mode makes every game a notch harder. The coach gives more practice to the sounds that need it, and moves the week up a level when one is mastered.' })),
     card('Sound', 'sound', soundRow, voiceRow),
+    card('Team crests', 'crests',
+      el('p', { class: 'tag', text: 'A crest from this iPad’s pictures goes on that team’s shirts in the football games, and on its buttons in Futebol de Botão, cut to a circle: a square picture works best. It stays on this iPad. The app itself never comes with club crests, which belong to the clubs.' }),
+      ownSlot.node, rivalSlot.node, el('div', { class: 'gu-crest-real' }, otherSlot.node, otherList)),
     card('Stickers', 'stickers',
       el('div', { class: 'row' },
         confirmButton('Start a new sticker book', 'Tap again to clear every sticker', () => { clearStickers(); }))),

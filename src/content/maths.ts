@@ -32,6 +32,11 @@ import { pick, shuffle } from '../lib/random';
 
 export interface Step { name: string }
 
+/** a number as it is written: below zero with a true minus sign, −3 */
+export const signed = (n: number): string => (n < 0 ? `−${-n}` : String(n));
+/** and as it is said: negative 3 */
+export const spokenNumber = (n: number): string => (n < 0 ? `negative ${-n}` : String(n));
+
 /* ── climbing the ladder ─────────────────────────────────────────────── */
 
 /** up after this many right in a row */
@@ -335,6 +340,8 @@ export interface LineStep extends Step {
   /** rounding: the line is one ten (or hundred) long, the number is marked
       on it, and he kicks to the end it is nearer */
   round?: 10 | 100;
+  /** the line goes on past zero, and what is asked is always below it */
+  below?: boolean;
 }
 
 const every = (lo: number, hi: number, by: number): number[] => {
@@ -361,10 +368,15 @@ export const LINE_STEPS: LineStep[] = [
   { name: 'Nearest hundred', lo: 0, hi: 1000, tick: 10, labels: [0, 1000], ask: 'any', near: 0, round: 100 },
   { name: '0 to 1 in tenths', lo: 0, hi: 10, tick: 1, labels: [0, 5, 10], ask: 'any', near: 0, per: 10 },
   { name: '0 to 2 in tenths', lo: 0, hi: 20, tick: 1, labels: [0, 10, 20], ask: 'any', near: 0, per: 10 },
+  /* below zero: negative numbers, which NSW leaves to Stage 3 (Year 6) but
+     he already understands, so they sit at the very top */
+  { name: '−10 to 10', lo: -10, hi: 10, tick: 1, labels: [-10, -5, 0, 5, 10], ask: 'any', near: 0, below: true },
+  { name: '−20 to 20', lo: -20, hi: 20, tick: 1, labels: [-20, -10, 0, 10, 20], ask: 'any', near: 1, below: true },
 ];
 
 /** a number as it is written on the line: 7 tenths is 0.7, and 10 000 has a space */
 export function lineText(v: number, per = 1): string {
+  if (v < 0) return `−${lineText(-v, per)}`;
   if (per !== 1) return String(Math.round((v / per) * 1000) / 1000);
   return v >= 10000 ? `${Math.floor(v / 1000)} ${String(v % 1000).padStart(3, '0')}` : String(v);
 }
@@ -373,7 +385,7 @@ export function lineQuestion(step: LineStep, last?: number): number {
   const by = step.ask === 'thousands' ? 1000 : step.ask === 'hundreds' ? 100 : step.ask === 'tens' ? 10 : 1;
   const pool = every(step.lo, step.hi, by)
     /* a number written under the line is no question at all */
-    .filter((n) => !step.labels.includes(n) && n !== last);
+    .filter((n) => !step.labels.includes(n) && n !== last && (!step.below || n < 0));
   return pick(pool.length ? pool : every(step.lo, step.hi, step.tick));
 }
 
@@ -653,9 +665,10 @@ export function anotherChoices(ones: number): number[] {
 export interface SkipStep extends Step {
   /** the step each bounce goes up (or down) by; one is picked per question */
   by: number[];
-  /** where the counting starts: from 0 (and its multiples), any number, or
-      an odd number (counting the odd numbers) */
-  from: 'zero' | 'any' | 'odd';
+  /** where the counting starts: from 0 (and its multiples), any number, an
+      odd number (counting the odd numbers), or either side of zero so the
+      count goes past it (negative numbers) */
+  from: 'zero' | 'any' | 'odd' | 'past-zero';
   dir: 1 | -1;
   /** the biggest number said */
   max: number;
@@ -680,6 +693,11 @@ export const SKIP_STEPS: SkipStep[] = [
   { name: 'Count by 6s and 8s', by: [6, 8], from: 'zero', dir: 1, max: 96, facts: true },
   { name: 'Count by 7s and 9s', by: [7, 9], from: 'zero', dir: 1, max: 108, facts: true },
   { name: 'Back down a times table', by: [3, 4, 6, 7, 8, 9], from: 'zero', dir: -1, max: 108, facts: true },
+  /* past zero: negative numbers, which NSW leaves to Stage 3 (Year 6) but he
+     already understands, so they sit at the very top. The gap is always
+     below zero */
+  { name: 'Back past zero', by: [1, 2, 5, 10], from: 'past-zero', dir: -1, max: 50 },
+  { name: 'Up from below zero', by: [1, 2, 5, 10], from: 'past-zero', dir: 1, max: 50 },
 ];
 
 /** how many numbers each keepy-uppy shows */
@@ -692,6 +710,17 @@ export function skipQuestion(step: SkipStep, last?: SkipQuestion): SkipQuestion 
     const by = pick(step.by);
     const span = by * (BOUNCES - 1);
     let first: number;
+    if (step.from === 'past-zero') {
+      /* zero is one of the touches; going down it comes early so the gap
+         can fall after it, going up it comes late so the gap is before it */
+      const zero = step.dir === -1 ? rand(1, 3) : rand(3, BOUNCES - 2);
+      /* `|| 0` so zero is never −0 */
+      const seq = Array.from({ length: BOUNCES }, (_, i) => by * (i - zero) * step.dir || 0);
+      const below = seq.flatMap((n, i) => (n < 0 && i >= 2 ? [i] : []));
+      const gap = pick(below);
+      if (last && last.seq[0] === seq[0] && last.by === by) continue;
+      return { seq, gap, by };
+    }
     if (step.from === 'zero') {
       /* along the multiples of the step: up from one, or back down to one */
       const top = Math.floor((step.facts ? Math.min(step.max, 12 * by) : step.max) / by);
@@ -724,10 +753,14 @@ export function skipChoices(q: SkipQuestion): number[] {
   const out = [answer];
   for (const x of shuffle([answer + 1, answer - 1, answer + q.by, answer - q.by]).concat(answer + 2, answer - 2, answer + 2 * q.by)) {
     if (out.length >= 4) break;
-    if (x >= 0 && !out.includes(x)) out.push(x);
+    /* below zero only where the count goes there */
+    if ((x >= 0 || q.seq.some((n) => n < 0)) && !out.includes(x)) out.push(x);
   }
   return out.sort((a, b) => a - b);
 }
+
+/** where a number below zero is: −3 is 3 below zero */
+export const belowZero = (n: number): string => `${signed(n)} is ${-n} below zero.`;
 
 /* ── Training Drills: equal groups, sharing, rows ────────────────────── */
 
@@ -743,8 +776,11 @@ export interface DrillStep extends Step {
   groups: [number, number];
   /** how many in each group (or row): one of these */
   each: number[];
-  /** teams of players rather than hoops of balls */
+  /** teams of players rather than hoops of balls (with make-rows: a crowd
+      of players put into teams) */
   teams?: boolean;
+  /** Years 3–4: a miss is worked out from facts he knows (drillWorkOut) */
+  workOut?: boolean;
 }
 
 export const DRILL_STEPS: DrillStep[] = [
@@ -754,6 +790,13 @@ export const DRILL_STEPS: DrillStep[] = [
   { name: 'Rows of cones', task: 'rows', groups: [2, 5], each: [2, 3, 4, 5] },
   { name: 'Teams of 2, 5 and 10', task: 'groups', groups: [2, 6], each: [2, 5, 10], teams: true },
   { name: 'Cones into rows', task: 'make-rows', groups: [2, 5], each: [2, 3, 4, 5] },
+  /* Years 3–4: equal groups for the rest of the times tables, worked out
+     from facts he knows rather than remembered (Times Table Sprint is for
+     remembering them); a football team is 11, with a sub 12 */
+  { name: 'Teams of 3 and 4', task: 'groups', groups: [3, 10], each: [3, 4], teams: true, workOut: true },
+  { name: 'Teams of 6, 7, 8 and 9', task: 'groups', groups: [3, 10], each: [6, 7, 8, 9], teams: true, workOut: true },
+  { name: 'Teams of 11 and 12', task: 'groups', groups: [2, 10], each: [11, 12], teams: true, workOut: true },
+  { name: 'Players into teams', task: 'make-rows', groups: [3, 9], each: [3, 4, 6, 7, 8, 9], teams: true, workOut: true },
 ];
 
 export interface DrillQuestion { groups: number; each: number; total: number; answer: number }
@@ -769,6 +812,27 @@ export function drillQuestion(step: DrillStep, last?: DrillQuestion): DrillQuest
     const answer = step.task === 'share' ? each : step.task === 'make-rows' ? groups : total;
     return { groups, each, total, answer };
   }
+}
+
+const teams = (n: number): string => `${n} ${n === 1 ? 'team' : 'teams'}`;
+
+/**
+ * Years 3–4: how to work out so many teams from facts he knows, said after
+ * a wrong answer. Up to 5 teams he counts on in the table; 6 to 9 teams are
+ * 5 teams and the rest; 10 teams are that many tens. `split` is how many
+ * teams make the first part, 0 when there is none: the game marks them.
+ */
+export function drillWorkOut(step: DrillStep, q: DrillQuestion): { text: string; split: number } {
+  const [n, e, total] = [q.groups, q.each, q.total];
+  const counted = Array.from({ length: n }, (_, i) => (i + 1) * e).join(', ');
+  if (step.task === 'make-rows') {
+    if (n <= 5) return { text: `Count in ${e}s to ${total}: ${counted}. That is ${teams(n)}.`, split: 0 };
+    const rest = total - 5 * e;
+    return { text: `5 teams of ${e} use ${5 * e} players, and the ${rest} left make ${teams(n - 5)} more: ${teams(n)}.`, split: 5 };
+  }
+  if (n === 10) return { text: `10 teams of ${e} is ${e} tens: ${total}.`, split: 0 };
+  if (n <= 5) return { text: `Count in ${e}s: ${counted}.`, split: 0 };
+  return { text: `That is 5 teams and ${n - 5} more: ${5 * e} and ${(n - 5) * e} make ${total}.`, split: 5 };
 }
 
 /** the answer and the slips: adding the two numbers instead of grouping,
@@ -979,8 +1043,10 @@ export function jumpQuestion(step: JumpStep, last?: JumpQuestion): JumpQuestion 
       /* the second number goes past the ten (or hundred), with something of
          its own place left after it: that is what makes the jump worth making */
       if (b % step.bridge <= to) continue;
-      /* and the first jump is a short one: 38 → 40, 63 → 60 */
-      if (to > step.bridge / 2) continue;
+      /* and the first jump is a short one, shorter than the other part of the
+         ten, which is the slip offered beside it: 38 → 40 (not 8), 63 → 60
+         (not 7). A jump of 5 (or 50) would be its own slip. */
+      if (to >= step.bridge / 2) continue;
     }
     if (last && last.a === a && last.b === b) continue;
     return { a, b, op: step.op, answer };
@@ -2338,3 +2404,179 @@ export function timesHelp(q: TimesQuestion, unit: 'lots' | 'rows' = 'lots'): { t
 /** how long an answer may take and still count as quick, by the grown-up's pace */
 export type SprintPace = 'relaxed' | 'steady' | 'quick';
 export const SPRINT_MS: Record<SprintPace, number> = { relaxed: 12000, steady: 8000, quick: 5000 };
+
+/* ── Foosball Line-Up: the players on a real table's rods ────────────── */
+
+/** a team on a real foosball table, from its own goal: a goalie, a defence
+    of 2, a midfield of 5 and an attack of 3, 11 players like a real side */
+export type LineupKind = 'goalie' | 'defence' | 'midfield' | 'attack';
+export const LINEUP: { kind: LineupKind; players: number }[] = [
+  { kind: 'goalie', players: 1 }, { kind: 'defence', players: 2 }, { kind: 'midfield', players: 5 }, { kind: 'attack', players: 3 },
+];
+export const LINEUP_TEAM = 11;
+/** what a rod's players are called */
+export const LINEUP_PEOPLE: Record<LineupKind, [string, string]> = {
+  goalie: ['goalie', 'goalies'], defence: ['defender', 'defenders'], midfield: ['midfielder', 'midfielders'], attack: ['attacker', 'attackers'],
+};
+const lineupPlayers = (kind: LineupKind): number => LINEUP.find((r) => r.kind === kind)!.players;
+
+/**
+ * The eight rods across the table, from his goal on the left to theirs on
+ * the right, as on every real table: each side's rods in between the
+ * other's, so his attack faces their defence.
+ */
+export const LINEUP_TABLE: { kind: LineupKind; ours: boolean }[] = [
+  { kind: 'goalie', ours: true }, { kind: 'defence', ours: true }, { kind: 'attack', ours: false }, { kind: 'midfield', ours: true },
+  { kind: 'midfield', ours: false }, { kind: 'attack', ours: true }, { kind: 'defence', ours: false }, { kind: 'goalie', ours: false },
+];
+
+export interface LineupStep extends Step {
+  /**
+   * rod: count the players on the rod that glows;
+   * two: the players on two of his rods together;
+   * hiding: his team of 11 with one rod under a towel, how many are hiding;
+   * spares: spare rods of the same kind in the club's cupboard (equal groups);
+   * tournament: so many tables, how many of one kind of player on them all.
+   */
+  task: 'rod' | 'two' | 'hiding' | 'spares' | 'tournament';
+}
+
+export const LINEUP_STEPS: LineupStep[] = [
+  { name: 'Count a rod', task: 'rod' },
+  { name: 'Two rods together', task: 'two' },
+  { name: 'Who is hiding?', task: 'hiding' },
+  /* Year 2: equal groups, rods of 2, 3 and 5 */
+  { name: 'Spare rods', task: 'spares' },
+  /* Years 3–4: two teams to a table, and a tournament of tables */
+  { name: 'A tournament', task: 'tournament' },
+];
+
+export interface LineupQuestion {
+  task: LineupStep['task'];
+  /** the rods that glow, by their place across the table (LINEUP_TABLE) */
+  lit: number[];
+  /** the rod under the towel, for hiding */
+  hidden?: number;
+  /** spares: how many rods, and of which kind */
+  rods?: number;
+  /** tournament: how many tables, and which players are counted ('all' for every one) */
+  tables?: number;
+  kind?: LineupKind | 'all';
+  answer: number;
+}
+
+const ourRods = (): number[] => LINEUP_TABLE.flatMap((r, i) => (r.ours ? [i] : []));
+
+export function lineupQuestion(step: LineupStep, last?: LineupQuestion): LineupQuestion {
+  for (;;) {
+    const q = makeLineup(step);
+    if (!last || JSON.stringify(q) !== JSON.stringify(last)) return q;
+  }
+}
+
+function makeLineup(step: LineupStep): LineupQuestion {
+  const players = (i: number): number => lineupPlayers(LINEUP_TABLE[i].kind);
+  switch (step.task) {
+    case 'rod': {
+      const at = rand(0, LINEUP_TABLE.length - 1);
+      return { task: 'rod', lit: [at], answer: players(at) };
+    }
+    case 'two': {
+      const [a, b] = shuffle(ourRods()).slice(0, 2).sort((x, y) => x - y);
+      return { task: 'two', lit: [a, b], answer: players(a) + players(b) };
+    }
+    case 'hiding': {
+      const hidden = pick(ourRods());
+      return { task: 'hiding', lit: ourRods(), hidden, answer: players(hidden) };
+    }
+    case 'spares': {
+      const kind = pick<LineupKind>(['defence', 'attack', 'midfield']);
+      const rods = rand(2, 5);
+      return { task: 'spares', lit: [], rods, kind, answer: rods * lineupPlayers(kind) };
+    }
+    case 'tournament': {
+      const kind = pick<LineupKind | 'all'>(['goalie', 'defence', 'midfield', 'attack', 'all']);
+      const tables = rand(2, 6);
+      const lit = LINEUP_TABLE.flatMap((r, i) => (kind === 'all' || r.kind === kind ? [i] : []));
+      return { task: 'tournament', lit, tables, kind, answer: tables * lineupPerTable(kind) };
+    }
+  }
+}
+
+/** how many of these players one table has: both teams' */
+export const lineupPerTable = (kind: LineupKind | 'all'): number => 2 * (kind === 'all' ? LINEUP_TEAM : lineupPlayers(kind));
+
+/** the answer and three slips: one off, a rod off, and the telling one for each task */
+export function lineupChoices(q: LineupQuestion): number[] {
+  const unit = q.task === 'spares' ? lineupPlayers(q.kind as LineupKind)
+    : q.task === 'tournament' ? lineupPerTable(q.kind!) : 1;
+  /* hiding: the whole team, or the players he can see; spares: adding the two
+     numbers; tournament: only one team counted at each table */
+  const telling = q.task === 'hiding' ? [LINEUP_TEAM, LINEUP_TEAM - q.answer]
+    : q.task === 'spares' ? [q.rods! + unit]
+      : q.task === 'tournament' ? [q.answer / 2] : [];
+  const out = [q.answer];
+  for (const x of [...telling, ...shuffle([q.answer + unit, q.answer - unit, q.answer + 1, q.answer - 1]), q.answer + 2, q.answer + 2 * unit, q.answer + 3]) {
+    if (out.length >= 4) break;
+    if (x >= 1 && Number.isInteger(x) && !out.includes(x)) out.push(x);
+  }
+  return out.sort((a, b) => a - b);
+}
+
+/** what he is asked */
+export function lineupAsk(q: LineupQuestion): string {
+  switch (q.task) {
+    case 'rod': return 'How many players are on the glowing rod?';
+    case 'two': return 'How many players are on the two glowing rods together?';
+    case 'hiding': return `Your team has ${LINEUP_TEAM} players. Some are hiding under the towel. How many?`;
+    case 'spares': {
+      const n = lineupPlayers(q.kind as LineupKind);
+      return `The club has ${q.rods} spare ${q.kind} rods, with ${n} players on each. How many players?`;
+    }
+    case 'tournament': {
+      const who = q.kind === 'all' ? 'players' : LINEUP_PEOPLE[q.kind as LineupKind][1];
+      return `A tournament on ${q.tables} tables. How many ${who} on all the tables?`;
+    }
+  }
+}
+
+/**
+ * The way to work it out, said after every answer (the working out is the
+ * lesson): counting the rod, counting on from the bigger rod, the team made
+ * up to 11, counting in the rod's players, and for a tournament one table
+ * first, then the tables (22 is 20 and 2).
+ */
+export function lineupWhy(q: LineupQuestion): string {
+  const players = (i: number): number => lineupPlayers(LINEUP_TABLE[i].kind);
+  const count = (n: number, by = 1): string => Array.from({ length: n }, (_, i) => (i + 1) * by).join(', ');
+  switch (q.task) {
+    case 'rod': return q.answer === 1 ? 'Just 1: the goalie.' : `Count them: ${count(q.answer)}. ${q.answer} players.`;
+    case 'two': {
+      const [big, small] = q.lit.map(players).sort((a, b) => b - a);
+      const on = Array.from({ length: small }, (_, i) => big + i + 1).join(', ');
+      return `Start at ${big} and count on ${small}: ${on}. ${big} and ${small} make ${q.answer}.`;
+    }
+    case 'hiding': {
+      const seen = q.lit.filter((i) => i !== q.hidden).map(players);
+      const sum = seen.reduce((a, b) => a + b, 0);
+      return `You can see ${seen.slice(0, -1).join(', ')} and ${seen.at(-1)}: ${sum}. ${sum} and ${q.answer} more make ${LINEUP_TEAM}, so ${q.answer} ${q.answer === 1 ? 'is' : 'are'} hiding.`;
+    }
+    case 'spares': {
+      const n = lineupPlayers(q.kind as LineupKind);
+      return `Count in ${n}s: ${count(q.rods!, n)}. ${q.rods} rods of ${n} make ${q.answer}.`;
+    }
+    case 'tournament': {
+      const t = q.tables!;
+      const per = lineupPerTable(q.kind!);
+      const table = q.kind === 'all'
+        ? `Each table has 2 teams of ${LINEUP_TEAM}: ${per} players.`
+        : `Each table has 2 ${q.kind} rods of ${lineupPlayers(q.kind as LineupKind)}: ${per} ${LINEUP_PEOPLE[q.kind as LineupKind][per === 1 ? 0 : 1]}.`;
+      /* 22 is 20 and 2 */
+      const [tens, ones] = [per - (per % 10), per % 10];
+      const tables = per > 10
+        ? `${t} tables of ${per} is ${t} lots of ${tens} and ${t} lots of ${ones}: ${t * tens} and ${t * ones} make ${q.answer}.`
+        : `${t} tables of ${per} make ${q.answer}.`;
+      return `${table} ${tables}`;
+    }
+  }
+}

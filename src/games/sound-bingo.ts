@@ -3,7 +3,12 @@
  * The caller speaks the word and shows its picture but hides the spelling, so
  * finding it is real reading rather than matching shapes. Every word called is
  * drawn from the child's own card, so the game is always winnable — the queue
- * is the card, shuffled. */
+ * is the card, shuffled.
+ *
+ * Or the school's sight words, the way his teacher plays it: a sight word has
+ * no picture, so the caller only says it. The card is dealt in little groups
+ * of lookalikes (there, where, here), and never with two words that sound the
+ * same, since "there" would then have two right answers. */
 
 import { el, replay } from '../lib/dom';
 import { lifetime } from '../lib/life';
@@ -11,18 +16,25 @@ import { shuffle } from '../lib/random';
 import { say } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { setMarked } from '../lib/highlight';
-import { picturable, realWords, sound, type Word } from '../content/index';
+import { picturable, realWords, sound, type Span, type Word } from '../content/index';
+import { TRICKY, sightBoard } from '../content/sight';
+import type { Tones } from '../lib/colour';
 import { createSetup, topbar, winOverlay } from '../ui/components';
-import { award } from '../lib/stickers';
+import { award, awardFace } from '../lib/stickers';
 import { pro } from '../lib/settings';
 import { mark } from '../lib/coach';
 
+/** a word on the card: a phonics word, with its sound, or a sight word */
+interface Entry { text: string; spans: Span[]; tones: Tones; picture?: string; word?: Word }
+
 interface Cell {
-  word?: Word;
+  entry?: Entry;
   free: boolean;
   marked: boolean;
   node: HTMLButtonElement;
 }
+
+const phonics = (w: Word): Entry => ({ text: w.text, spans: w.spans, tones: sound(w.sound).tones, picture: w.picture, word: w });
 
 export function mount(root: HTMLElement): () => void {
   const life = lifetime();
@@ -43,7 +55,7 @@ export function mount(root: HTMLElement): () => void {
   sizeSel.addEventListener('change', () => deal());
   goalSel.addEventListener('change', () => deal());
 
-  const setup = createSetup({ extra: [extra], onChange: () => deal() });
+  const setup = createSetup({ extra: [extra], onChange: () => deal(), sight: 'bingo' });
 
   const hint = el('div', { class: 'hint', text: 'Ready when you are' });
   const pic = el('div', { class: 'pic', text: '🎲' });
@@ -64,7 +76,7 @@ export function mount(root: HTMLElement): () => void {
       tagline: 'Listen to the word. Find it on your card. Tap it.',
       onSetup: (open) => setup.open(open),
     }),
-    setup.node, caller, grid,
+    setup.switchNode, setup.node, caller, grid,
     el('div', { class: 'tray no-print' }, el('h2', { text: 'Words called' }), calledList),
     win.node,
   );
@@ -83,27 +95,33 @@ export function mount(root: HTMLElement): () => void {
     const freeIndex = size === 3 ? 4 : -1;
     const need = size * size - (size === 3 ? 1 : 0);
 
-    /* pictures matter here: the caller shows one instead of the spelling */
-    let pool = shuffle(picturable(realWords(setup.filter())));
-    if (pool.length < need) {
-      /* top up from words without a picture rather than leave the card short */
-      const extra = shuffle(realWords(setup.filter())).filter((w) => !pool.includes(w));
-      pool = [...pool, ...extra];
-    }
-    const chosen: Word[] = [];
-    const usedText = new Set<string>();
-    for (const w of pool) {
-      if (chosen.length >= need) break;
-      if (usedText.has(w.text)) continue;
-      usedText.add(w.text);
-      chosen.push(w);
+    const chosen: Entry[] = [];
+    if (setup.kind() === 'sight') {
+      for (const w of sightBoard(setup.sightWords(), need)) chosen.push({ text: w.text, spans: w.spans, tones: TRICKY });
+    } else {
+      /* pictures matter here: the caller shows one instead of the spelling */
+      let pool = shuffle(picturable(realWords(setup.filter())));
+      if (pool.length < need) {
+        /* top up from words without a picture rather than leave the card short */
+        const extra = shuffle(realWords(setup.filter())).filter((w) => !pool.includes(w));
+        pool = [...pool, ...extra];
+      }
+      const usedText = new Set<string>();
+      for (const w of pool) {
+        if (chosen.length >= need) break;
+        if (usedText.has(w.text)) continue;
+        usedText.add(w.text);
+        chosen.push(phonics(w));
+      }
     }
 
     cells = [];
     grid.replaceChildren();
     grid.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     if (chosen.length < need) {
-      grid.append(el('p', { class: 'tag', style: { textAlign: 'center' }, text: 'Not enough words for a card yet — try adding a level or another sound.' }));
+      grid.append(el('p', { class: 'tag', style: { textAlign: 'center' }, text: setup.kind() === 'sight'
+        ? 'Not enough sight words for a card yet — try adding another set.'
+        : 'Not enough words for a card yet — try adding a level or another sound.' }));
       callBtn.disabled = true;
       return;
     }
@@ -116,12 +134,13 @@ export function mount(root: HTMLElement): () => void {
         grid.append(node);
         continue;
       }
-      const word = chosen[next];
+      const entry = chosen[next];
       next += 1;
-      const s = sound(word.sound);
-      const node = el('button', { class: 'cell', type: 'button', 'aria-label': word.text, vars: { '--tone': s.tones.deep } });
-      setMarked(node, word.text, word.spans, { tones: s.tones });
-      const cell: Cell = { word, free: false, marked: false, node };
+      const node = el('button', { class: 'cell', type: 'button', 'aria-label': entry.text, vars: { '--tone': entry.tones.deep } });
+      /* a sight word's tricky bit lights up once he has found it, not before */
+      if (entry.word) setMarked(node, entry.text, entry.spans, { tones: entry.tones });
+      else node.textContent = entry.text;
+      const cell: Cell = { entry, free: false, marked: false, node };
       node.addEventListener('click', () => tap(cell));
       cells.push(cell);
       grid.append(node);
@@ -145,41 +164,44 @@ export function mount(root: HTMLElement): () => void {
   function call(): void {
     if (won) return;
     const next = queue.pop();
-    if (!next?.word) { callBtn.disabled = true; return; }
+    if (!next?.entry) { callBtn.disabled = true; return; }
     current = next;
     calls += 1;
-    const s = sound(next.word.sound);
-    caller.style.setProperty('--tone', s.tones.deep);
+    const entry = next.entry;
+    caller.style.setProperty('--tone', entry.tones.deep);
     hint.textContent = 'Find this word on your card';
-    pic.textContent = next.word.picture ?? '🔊';
+    /* a sight word has no picture: the caller only says it */
+    pic.textContent = entry.picture ?? '🔊';
     replay(pic, 'pop');
-    setMarked(reveal, next.word.text, next.word.spans, { tones: s.tones });
+    setMarked(reveal, entry.text, entry.spans, { tones: entry.tones });
     reveal.classList.add('hidden');
     showBtn.textContent = 'Show the word';
     againBtn.disabled = false;
     showBtn.disabled = false;
-    called.add(next.word.text);
-    say(next.word.text);
+    called.add(entry.text);
+    say(entry.text);
 
     calledList.querySelector('.empty')?.remove();
-    calledList.append(el('span', { class: 'tokn', text: next.word.text, vars: { '--tone': s.tones.light } }));
+    calledList.append(el('span', { class: 'tokn', text: entry.text, vars: { '--tone': entry.tones.light } }));
     if (!queue.length) callBtn.disabled = true;
   }
 
   function tap(cell: Cell): void {
-    if (won || cell.marked || !cell.word) return;
-    if (!called.has(cell.word.text)) {
+    const entry = cell.entry;
+    if (won || cell.marked || !entry) return;
+    if (!called.has(entry.text)) {
       sfx.wrong();
       replay(cell.node, 'nope');
       /* the word he was listening for is the one he missed */
-      if (current?.word) mark(current.word, false);
+      if (current?.entry?.word) mark(current.entry.word, false);
       return;
     }
-    mark(cell.word, true);
+    if (entry.word) mark(entry.word, true);
+    else setMarked(cell.node, entry.text, entry.spans, { tones: entry.tones });
     cell.marked = true;
     cell.node.classList.add('marked');
     sfx.land();
-    say(cell.word.text);
+    say(entry.text);
     checkWin();
   }
 
@@ -213,13 +235,14 @@ export function mount(root: HTMLElement): () => void {
     won = true;
     callBtn.disabled = true;
     say('Bingo! Well done!');
-    const practised = cells.filter((c) => c.marked && c.word).map((c) => c.word!.sound);
-    const prize = award(practised)?.face;
+    const practised = cells.flatMap((c) => (c.marked && c.entry?.word ? [c.entry.word.sound] : []));
+    /* sight words practise no sound, so their sticker is the game's own */
+    const prize = practised.length ? award(practised)?.face : awardFace('bingo', '🎯').face;
     life.later(() => win.show(`You filled ${what} in ${calls} words.`, prize), 450);
   }
 
   callBtn.addEventListener('click', call);
-  againBtn.addEventListener('click', () => { if (current?.word) say(current.word.text); });
+  againBtn.addEventListener('click', () => { if (current?.entry) say(current.entry.text); });
   showBtn.addEventListener('click', () => {
     const hidden = reveal.classList.toggle('hidden');
     showBtn.textContent = hidden ? 'Show the word' : 'Hide the word';

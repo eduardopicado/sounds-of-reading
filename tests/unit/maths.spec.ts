@@ -9,9 +9,10 @@ import {
   CLOCK_STEPS, DAYS, MONTHS, clockQuestion, seasonOf, timeWords, digital, time24, duration, ampm, countOn,
   JUMP_STEPS, bridgeOf, jumpQuestion, jumpsFor, sizesOf,
   FRACTION_STEPS, fractionQuestion,
-  DRILL_STEPS, drillChoices, drillQuestion,
+  DRILL_STEPS, drillChoices, drillQuestion, drillWorkOut, type DrillQuestion,
+  LINEUP, LINEUP_STEPS, LINEUP_TABLE, LINEUP_TEAM, lineupAsk, lineupChoices, lineupQuestion, lineupWhy, type LineupQuestion,
   bigSumChoices, crosses, sumWhy, type SumQuestion,
-  BOUNCES, SKIP_STEPS, skipChoices, skipFact, skipQuestion,
+  BOUNCES, SKIP_STEPS, belowZero, signed, skipChoices, skipFact, skipQuestion, spokenNumber,
   BUS_STEPS, regroupChoices, anotherChoices, busQuestion, placeChoices, places, valueOf,
   TIMES_STEPS, TIMES_TOP, KNOWN_BOX, askAgain, factKey, knowsStep, nextBox, timesFacts, timesHelp, timesQuestion,
   factChoices,
@@ -275,8 +276,9 @@ describe('Number Line Penalty', () => {
   });
 
   it('goes on to 1000 in Year 2, then to 10 000, rounding and tenths', () => {
-    expect(LINE_STEPS.map((s) => s.name).slice(-7)).toEqual([
+    expect(LINE_STEPS.map((s) => s.name).slice(-9)).toEqual([
       '0 to 1000', '0 to 10 000 in thousands', '0 to 10 000', 'Nearest ten', 'Nearest hundred', '0 to 1 in tenths', '0 to 2 in tenths',
+      '−10 to 10', '−20 to 20',
     ]);
     /* a near miss on 0 to 10 000 forgives what one on 0 to 1000 does, ten times over */
     const big = LINE_STEPS.find((s) => s.name === '0 to 10 000')!;
@@ -291,6 +293,19 @@ describe('Number Line Penalty', () => {
     expect(lineText(13, 10)).toBe('1.3');
     expect(lineText(10, 10)).toBe('1');
     expect(lineText(0, 10)).toBe('0');
+    expect(lineText(-7)).toBe('−7');
+  });
+
+  it('goes past zero at the very top, asking only numbers below it', () => {
+    for (const step of LINE_STEPS.filter((s) => s.below)) {
+      expect(step.lo).toBeLessThan(0);
+      expect(LINE_STEPS.indexOf(step)).toBeGreaterThan(LINE_STEPS.findIndex((s) => s.name === '0 to 2 in tenths'));
+      for (let i = 0; i < MANY; i += 1) {
+        const n = lineQuestion(step);
+        expect(n).toBeLessThan(0);
+        expect(n).toBeGreaterThanOrEqual(step.lo);
+      }
+    }
   });
 
   it('rounds: a number inside one ten (or hundred), never halfway, never already round', () => {
@@ -486,7 +501,8 @@ describe('Keepy-Uppy Count', () => {
         expect(q.seq).toHaveLength(BOUNCES);
         expect(step.by).toContain(q.by);
         for (let j = 1; j < q.seq.length; j += 1) expect(q.seq[j] - q.seq[j - 1]).toBe(step.dir * q.by);
-        for (const n of q.seq) { expect(n).toBeGreaterThanOrEqual(0); expect(n).toBeLessThanOrEqual(step.max); }
+        /* only past zero does a count go below it */
+        for (const n of q.seq) { expect(n).toBeGreaterThanOrEqual(step.from === 'past-zero' ? -step.max : 0); expect(n).toBeLessThanOrEqual(step.max); }
         expect(q.gap).toBeGreaterThanOrEqual(2);
         expect(q.gap).toBeLessThan(BOUNCES);
         if (step.from === 'zero') expect(q.seq[0] % q.by).toBe(0);
@@ -504,9 +520,30 @@ describe('Keepy-Uppy Count', () => {
         const c = skipChoices(q);
         expect(c).toContain(q.seq[q.gap]);
         expect(new Set(c).size).toBe(4);
-        for (const x of c) expect(x).toBeGreaterThanOrEqual(0);
+        if (step.from !== 'past-zero') for (const x of c) expect(x).toBeGreaterThanOrEqual(0);
       }
     }
+  });
+
+  /* he understands negative numbers, so past zero is at the very top */
+  it('counts past zero, back and up, with zero in the count and the gap below it', () => {
+    const past = SKIP_STEPS.filter((s) => s.from === 'past-zero');
+    expect(past.map((s) => s.dir)).toEqual([-1, 1]);
+    expect(SKIP_STEPS.slice(-2)).toEqual(past);
+    for (const step of past) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = skipQuestion(step);
+        expect(q.seq).toContain(0);
+        expect(q.seq.some((n) => Object.is(n, -0))).toBe(false);
+        expect(q.seq[q.gap]).toBeLessThan(0);
+        expect(q.gap).toBeGreaterThanOrEqual(2);
+        expect(skipChoices(q)).toContain(q.seq[q.gap]);
+      }
+    }
+    expect(signed(-4)).toBe('−4');
+    expect(signed(4)).toBe('4');
+    expect(spokenNumber(-4)).toBe('negative 4');
+    expect(belowZero(-3)).toBe('−3 is 3 below zero.');
   });
 
   it('keeps 2s, 5s and 10s for Year 1, and 3s and any-number tens for Year 2', () => {
@@ -569,7 +606,44 @@ describe('Training Drills', () => {
 
   it('keeps arrays and grouping for Year 2', () => {
     expect(DRILL_STEPS.slice(0, 2).map((s) => s.task)).toEqual(['groups', 'share']);
-    expect(DRILL_STEPS.slice(2).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
+    expect(DRILL_STEPS.slice(2, 5).map((s) => s.task)).toEqual(expect.arrayContaining(['rows', 'make-rows']));
+  });
+
+  /* Years 3–4 at the top of the ladder: the rest of the times tables, to 12 × 12 */
+  it('puts the Years 3–4 teams at the top, covering every table but 2, 5 and 10 up to 10 teams of 12', () => {
+    const top = DRILL_STEPS.slice(5);
+    expect(top.length).toBeGreaterThan(0);
+    expect(DRILL_STEPS.slice(0, 5).every((s) => !s.workOut)).toBe(true);
+    expect(top.every((s) => s.workOut && s.teams)).toBe(true);
+    const tables = new Set(top.flatMap((s) => s.each));
+    expect([...tables].sort((a, b) => a - b)).toEqual([3, 4, 6, 7, 8, 9, 11, 12]);
+    for (const step of top) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = drillQuestion(step);
+        expect(q.groups).toBeLessThanOrEqual(10);
+        expect(q.total).toBeLessThanOrEqual(120);
+      }
+    }
+  });
+
+  it('works a miss out from facts he knows: counting on, 5 teams and the rest, or tens', () => {
+    const groups = DRILL_STEPS.find((s) => s.name === 'Teams of 6, 7, 8 and 9')!;
+    const into = DRILL_STEPS.find((s) => s.name === 'Players into teams')!;
+    const q = (g: number, e: number, answer = g * e): DrillQuestion => ({ groups: g, each: e, total: g * e, answer });
+    expect(drillWorkOut(groups, q(7, 8))).toEqual({ text: 'That is 5 teams and 2 more: 40 and 16 make 56.', split: 5 });
+    expect(drillWorkOut(groups, q(4, 7))).toEqual({ text: 'Count in 7s: 7, 14, 21, 28.', split: 0 });
+    expect(drillWorkOut(groups, q(10, 9))).toEqual({ text: '10 teams of 9 is 9 tens: 90.', split: 0 });
+    expect(drillWorkOut(into, q(6, 7, 6))).toEqual({ text: '5 teams of 7 use 35 players, and the 7 left make 1 team more: 6 teams.', split: 5 });
+    expect(drillWorkOut(into, q(3, 8, 3))).toEqual({ text: 'Count in 8s to 24: 8, 16, 24. That is 3 teams.', split: 0 });
+    /* whatever the question, it ends at the answer, and only 6 to 9 teams are split */
+    for (const step of DRILL_STEPS.filter((s) => s.workOut)) {
+      for (let i = 0; i < MANY; i += 1) {
+        const x = drillQuestion(step);
+        const { text, split } = drillWorkOut(step, x);
+        expect(text).toContain(step.task === 'make-rows' ? `${x.groups} team` : String(x.total));
+        expect(split === 0 || (split === 5 && x.groups > 5 && x.groups < 10)).toBe(true);
+      }
+    }
   });
 });
 
@@ -669,9 +743,10 @@ describe('Jump Line', () => {
         if (step.bridge) {
           const first = bridgeOf(q, step.bridge);
           const to = q.a + (q.op === '+' ? first : -first);
-          /* the first jump lands on a ten (or a hundred), is a short one, and the sum goes past it */
+          /* the first jump lands on a ten (or a hundred), is shorter than the
+             other part (so that part can be the slip), and the sum goes past it */
           expect(to % step.bridge, what).toBe(0);
-          expect(first).toBeLessThanOrEqual(step.bridge / 2);
+          expect(first, what).toBeLessThan(step.bridge - first);
           expect(q.b % step.bridge, what).toBeGreaterThan(first);
         }
       }
@@ -1108,5 +1183,55 @@ describe('Times Table Sprint', () => {
       expect(back.fact).toBe(q.fact);
       expect(back.answer).toBe(q.answer);
     }
+  });
+});
+
+describe('Foosball Line-Up', () => {
+  it('is a real table: a goalie, 2, 5 and 3, 11 a side, each side between the other', () => {
+    expect(LINEUP.map((r) => r.players)).toEqual([1, 2, 5, 3]);
+    expect(LINEUP.reduce((a, r) => a + r.players, 0)).toBe(LINEUP_TEAM);
+    expect(LINEUP_TABLE.map((r) => `${r.ours ? 'us' : 'them'} ${r.kind}`)).toEqual([
+      'us goalie', 'us defence', 'them attack', 'us midfield', 'them midfield', 'us attack', 'them defence', 'them goalie',
+    ]);
+  });
+
+  it('asks the right thing at every step, with four answers that include it', () => {
+    const players = (i: number): number => LINEUP.find((r) => r.kind === LINEUP_TABLE[i].kind)!.players;
+    for (const step of LINEUP_STEPS) {
+      for (let i = 0; i < MANY; i += 1) {
+        const q = lineupQuestion(step);
+        expect(q.task).toBe(step.task);
+        const want = q.task === 'rod' ? players(q.lit[0])
+          : q.task === 'two' ? players(q.lit[0]) + players(q.lit[1])
+            : q.task === 'hiding' ? players(q.hidden!)
+              : q.task === 'spares' ? q.rods! * LINEUP.find((r) => r.kind === q.kind)!.players
+                : q.tables! * 2 * (q.kind === 'all' ? LINEUP_TEAM : LINEUP.find((r) => r.kind === q.kind)!.players);
+        expect(q.answer).toBe(want);
+        if (q.task === 'two' || q.task === 'hiding') expect(q.lit.every((r) => LINEUP_TABLE[r].ours)).toBe(true);
+        const c = lineupChoices(q);
+        expect(c).toContain(q.answer);
+        expect(new Set(c).size).toBe(4);
+        for (const x of c) expect(x).toBeGreaterThanOrEqual(1);
+        expect(lineupAsk(q)).toMatch(/\?$/);
+        expect(lineupWhy(q)).toContain(String(q.answer));
+      }
+    }
+  });
+
+  it('works each one out the way he can: counting on, making 11, counting in steps, 22 as 20 and 2', () => {
+    const q = (x: Partial<LineupQuestion>): LineupQuestion => ({ task: 'rod', lit: [], answer: 0, ...x });
+    expect(lineupWhy(q({ task: 'two', lit: [1, 3], answer: 7 }))).toBe('Start at 5 and count on 2: 6, 7. 5 and 2 make 7.');
+    expect(lineupWhy(q({ task: 'hiding', lit: [0, 1, 3, 5], hidden: 5, answer: 3 })))
+      .toBe('You can see 1, 2 and 5: 8. 8 and 3 more make 11, so 3 are hiding.');
+    expect(lineupWhy(q({ task: 'spares', rods: 4, kind: 'midfield', answer: 20 }))).toBe('Count in 5s: 5, 10, 15, 20. 4 rods of 5 make 20.');
+    expect(lineupWhy(q({ task: 'tournament', tables: 4, kind: 'all', answer: 88 })))
+      .toBe('Each table has 2 teams of 11: 22 players. 4 tables of 22 is 4 lots of 20 and 4 lots of 2: 80 and 8 make 88.');
+    /* the telling slips: the whole team for hiding, one team a table for a tournament */
+    expect(lineupChoices(q({ task: 'hiding', lit: [0, 1, 3, 5], hidden: 5, answer: 3 }))).toContain(11);
+    expect(lineupChoices(q({ task: 'tournament', tables: 4, kind: 'all', answer: 88 }))).toContain(44);
+  });
+
+  it('keeps equal groups for Year 2 and the tournament for Years 3–4, at the top', () => {
+    expect(LINEUP_STEPS.map((s) => s.task)).toEqual(['rod', 'two', 'hiding', 'spares', 'tournament']);
   });
 });

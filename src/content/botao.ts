@@ -12,12 +12,15 @@
  * the table, the posts, the goleiro and each other.
  *
  * The table is W wide and L long, and he always attacks the goal at the
- * top, y = 0. */
+ * top, y = 0. There is a goal at each end, and both are open: a button can
+ * go into the mouth as well as the ball, and the net stops what goes in. */
 
 import type { Step } from './maths';
 
+/* shaped like a real table (a Klopf is 1.86 m by 1.21 m), about half as
+   long again as it is wide */
 export const W = 64;
-export const L = 90;
+export const L = 98;
 /** a button's radius, and the ball's */
 export const R = 5;
 export const BALL = 1.6;
@@ -27,6 +30,12 @@ export const NET = 5;
 export const POST = 0.8;
 /** the goleiro: a block this wide, just in front of the line */
 export const KEEPER_W = 6;
+/** the markings at each end, across and deep: the small area (the goal
+    area), the penalty area, the spot, and the radius of the arc on the
+    penalty area's edge. As on a real table the goal is clearly narrower
+    than the small area; the areas are drawn larger than on a real pitch so
+    the goal can stay big enough to score in */
+export const MARKS = { box: [32, 7], penalty: [50, 18], spot: 12, arc: 8.5 } as const;
 export const KEEPER_Y: readonly [number, number] = [0.6, 3.4];
 const MID = (MOUTH[0] + MOUTH[1]) / 2;
 
@@ -46,14 +55,23 @@ export interface Flick { button: number; vx: number; vy: number }
 
 export type Bump = 'touch' | 'block' | 'keeper' | 'post' | 'wall';
 
+/** the ball coming off the rim: when (a frame number), where its middle was,
+    the way into the table from that wall, and the ball's way just before and
+    just after */
+export interface Bounce { frame: number; at: Point; normal: Point; into: Point; out: Point }
+
 export interface Shot {
   /** every disc's place, sixty times a second: the ball, then his, then theirs */
   frames: Point[][];
   /** where everything stopped */
   end: Table;
   goal: boolean;
+  /** the ball went into his own net, at the far end */
+  own: boolean;
   /** what the ball hit, in order, and when (a frame number); who is which button */
   bumps: { what: Bump; frame: number; who?: number }[];
+  /** every time the ball came off the rim, for showing its angles */
+  bounces: Bounce[];
   /** did the flicked button reach the ball itself */
   touched: boolean;
 }
@@ -67,8 +85,10 @@ const MAX_STEPS = 240 * 8;
 /* slowing down: a steady drag of the felt, and a little more the faster it goes */
 const SLOW = { button: [40, 0.9], ball: [18, 0.6] } as const;
 const MASS = { button: 1, ball: 0.3 };
-/* the ball comes off the rim at nearly the slant it went in; a button, heavier, thuds */
-const BOUNCE = { disc: 0.9, ball: 0.95, button: 0.5, net: 0.1 };
+/* the ball comes off the rim at exactly the angle it went in, which the game
+   shows in degrees; off a post or the goleiro it loses a little. A button,
+   heavier, thuds */
+const BOUNCE = { disc: 0.9, rim: 1, ball: 0.95, button: 0.5, net: 0.1 };
 
 interface Disc { x: number; y: number; vx: number; vy: number; r: number; m: number; ball: boolean }
 
@@ -91,20 +111,23 @@ function offPoint(d: Disc, cx: number, cy: number, pad = 0): boolean {
   return true;
 }
 
-/** the rim of the table, and the net once the ball is in it */
-function offRim(d: Disc): boolean {
-  let hit = false;
-  const e = d.ball ? BOUNCE.ball : BOUNCE.button;
-  const inMouth = d.ball && d.x > MOUTH[0] && d.x < MOUTH[1];
-  const inNet = inMouth && d.y < 0;
-  /* in the net, its sides keep the ball in */
+/** the rim of the table, and the nets: the way into the table from the
+    wall it came off, or null. Across a goal mouth there is no wall, for a
+    button any more than for the ball: what goes in stops against the net */
+function offRim(d: Disc): Point | null {
+  let hit: Point | null = null;
+  const e = d.ball ? BOUNCE.rim : BOUNCE.button;
+  const inMouth = d.x > MOUTH[0] && d.x < MOUTH[1];
+  const inNet = inMouth && (d.y < 0 || d.y > L);
+  /* in a net, its sides keep it in */
   const lo = inNet ? MOUTH[0] + d.r : d.r;
   const hi = inNet ? MOUTH[1] - d.r : W - d.r;
-  if (d.x < lo) { d.x = lo; if (d.vx < 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); hit = !inNet; }
-  if (d.x > hi) { d.x = hi; if (d.vx > 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); hit = !inNet; }
-  if (d.y > L - d.r) { d.y = L - d.r; if (d.vy > 0) d.vy = -d.vy * e; hit = true; }
+  if (d.x < lo) { d.x = lo; if (d.vx < 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: 1, y: 0 }; }
+  if (d.x > hi) { d.x = hi; if (d.vx > 0) d.vx = -d.vx * (inNet ? BOUNCE.net : e); if (!inNet) hit = { x: -1, y: 0 }; }
+  const bottom = inMouth ? L + NET - d.r : L - d.r;
+  if (d.y > bottom) { d.y = bottom; if (d.vy > 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); if (!inMouth) hit = { x: 0, y: -1 }; }
   const top = inMouth ? -NET + d.r : d.r;
-  if (d.y < top) { d.y = top; if (d.vy < 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); hit = !inMouth; }
+  if (d.y < top) { d.y = top; if (d.vy < 0) d.vy = -d.vy * (inMouth ? BOUNCE.net : e); if (!inMouth) hit = { x: 0, y: 1 }; }
   return hit;
 }
 
@@ -118,8 +141,8 @@ function slow(d: Disc): void {
   const s = len(d.vx, d.vy);
   if (s === 0) return;
   const [steady, more] = d.ball ? SLOW.ball : SLOW.button;
-  /* the net stops a ball quickly */
-  const net = d.ball && d.y < 0 ? 8 : 1;
+  /* a net stops a ball quickly */
+  const net = d.ball && (d.y < 0 || d.y > L) ? 8 : 1;
   const next = s - (steady + more * s) * net * DT;
   if (next <= 0) { d.vx = 0; d.vy = 0; return; }
   d.vx *= next / s;
@@ -141,7 +164,9 @@ export function simulate(table: Table, flick: Flick): Shot {
   const snap = (): Point[] => discs.map((d) => ({ x: d.x, y: d.y }));
   const frames: Point[][] = [snap()];
   const bumps: Shot['bumps'] = [];
+  const bounces: Bounce[] = [];
   let goal = false;
+  let own = false;
   let touched = false;
   let after = 0;
   /* a ball resting against something is one bump, not one every step */
@@ -182,14 +207,24 @@ export function simulate(table: Table, flick: Flick): Shot {
       }
     }
     for (const d of discs) {
-      if (offRim(d) && d === ball) bump('wall', step);
-      for (const px of MOUTH) if (offPoint(d, px, 0, POST) && d === ball) bump('post', step);
+      const into = { x: d.vx, y: d.vy };
+      const wall = offRim(d);
+      if (wall && d === ball) {
+        bump('wall', step);
+        /* a real bounce, not a ball resting against the rim or crawling into it */
+        if (into.x * wall.x + into.y * wall.y < -3) {
+          bounces.push({ frame: Math.ceil(step / PER_FRAME), at: { x: d.x, y: d.y }, normal: wall, into, out: { x: d.vx, y: d.vy } });
+        }
+      }
+      for (const py of [0, L]) for (const px of MOUTH) if (offPoint(d, px, py, POST) && d === ball) bump('post', step);
       if (table.keeper !== null && offKeeper(d, table.keeper) && d === ball) bump('keeper', step);
       slow(d);
     }
-    /* over the line: a goal, and a moment more for it to hit the net */
+    /* over the line: a goal, or one in his own net, and a moment more for
+       it to hit the net */
     if (ball.y + BALL < 0) goal = true;
-    if (goal) after += 1;
+    if (ball.y - BALL > L) own = true;
+    if (goal || own) after += 1;
     const done = after > 90 || discs.every((d) => d.vx === 0 && d.vy === 0);
     if (step % PER_FRAME === 0 || done) frames.push(snap());
     if (done) break;
@@ -199,9 +234,47 @@ export function simulate(table: Table, flick: Flick): Shot {
     frames,
     end: { ball: at(ball), us: discs.slice(1, 1 + ours).map(at), them: discs.slice(1 + ours).map(at), keeper: table.keeper },
     goal,
+    own,
     bumps,
+    bounces,
     touched,
   };
+}
+
+/**
+ * How steeply the ball met the wall: the angle between its way and the
+ * wall, in whole degrees, 90 when it went straight at it. Only for showing
+ * him; the physics never needs an angle.
+ */
+export function slant(way: Point, normal: Point): number {
+  const across = Math.abs(way.x * normal.x + way.y * normal.y);
+  const along = Math.abs(way.x * normal.y - way.y * normal.x);
+  return Math.round(Math.atan2(across, along) * 180 / Math.PI);
+}
+
+/** the angle the ball went into the wall at, and the angle it came off at */
+export const angles = (b: Bounce): [number, number] => [slant(b.into, b.normal), slant(b.out, b.normal)];
+
+/**
+ * The one bounce whose angles he is shown: the ball's first off the rim, when
+ * the button he flicked sent it there with nothing else touching it on the
+ * way. A ball that glances off another button, a post or the goleiro first
+ * still comes off the wall at the angle it went in, but its way has a corner
+ * he did not make and cannot see the reason for, so its angles would only
+ * puzzle him. A second bounce adds clutter and nothing new.
+ */
+export function shownBounce(shot: Shot, button: number): Bounce | null {
+  const first = shot.bounces[0];
+  if (!first) return null;
+  const before = shot.bumps.filter((b) => b.frame <= first.frame && b.what !== 'wall');
+  return before.length > 0 && before.every((b) => b.what === 'touch' && b.who === button) ? first : null;
+}
+
+/** what he is told about a bounce */
+export function bounceWords(b: Bounce): string {
+  const [into, out] = angles(b);
+  if (into === 90 && out === 90) return 'It went straight at the wall, at a right angle, 90°, and came straight back.';
+  return `It went into the wall at ${into}° and came off at ${out}°${into === out ? ': the same angle' : ''}.`;
 }
 
 /* ── the rules ─────────────────────────────────────────────────────────── */
@@ -404,8 +477,19 @@ export const HOW: Record<PlanKind, string> = {
 
 /** a pull back of one table unit sets a button off at this speed */
 export const PULL = 5;
-/** the table as drawn: the rim round it and the nets, in table units */
-export const VIEW = { x: -3, y: -NET - 2, w: W + 6, h: L + NET + 5 } as const;
+/**
+ * The wooden tray the table sits in: the design handoff's picture of it
+ * (src/assets/botao/tray.webp), 699 × 987, with its felt at 47 across and
+ * 58 down, 609 by 838. The tray's front shows below its rim, so it is deeper
+ * at the bottom than at the top.
+ */
+export const TRAY = { w: 699, h: 987, felt: { x: 47, y: 58, w: 609, h: 838 } } as const;
+/** the table as drawn, in table units: the tray laid so its felt is exactly
+    ours, with a goal at each end on its rim */
+export const VIEW = (() => {
+  const [kx, ky] = [W / TRAY.felt.w, L / TRAY.felt.h];
+  return { x: -TRAY.felt.x * kx, y: -TRAY.felt.y * ky, w: TRAY.w * kx, h: TRAY.h * ky } as const;
+})();
 
 /** the flick a pull back gives: the other way, harder the further he pulls */
 export function flickFor(button: number, pullX: number, pullY: number): Flick {

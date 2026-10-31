@@ -14,32 +14,40 @@ coach's picks for today at the top.
 
 ### Reading and spelling
 
+Bingo, Memory Match, Build the Word and Roll & Read have a switch at the
+top: **🔤 Phonics**, this week's sounds as before, or **👀 Sight words**, the
+school's sight words up to his level, as his teacher's sight word games use
+them. Each game remembers which it was on this iPad; the ⚙ panel picks the
+sight word sets.
+
 | Game | What the child does |
 |---|---|
-| **Memory Match** | Flips cards to find pairs — a word with its picture, or two words that share a sound. |
-| **Bingo** | The app says a word and shows its picture; he finds it written on his card. |
+| **Memory Match** | Flips cards to find pairs — a word with its picture, or two words that share a sound. With sight words, the same word twice, dealt among its lookalikes (there, their, where), and said only once it is matched. |
+| **Bingo** | The app says a word and shows its picture; he finds it written on his card. With sight words there is no picture, only the voice, and the card never holds two words that sound the same. |
 | **Sound Sort** | A word appears with nothing marked. He drags it (or taps a bin) into the right bin, and the sound lights up. |
 | **Word Builder** | One part of the word stays put, he swaps the other. Each build is spoken and judged real or silly. |
-| **Roll & Read** | Taps a die, reads the words it lands on aloud. A parent taps ✅ or 🔁, and a bar chart builds up. |
+| **Roll & Read** | Taps a die, reads the words it lands on aloud. A parent taps ✅ or 🔁, and a bar chart builds up. With sight words, each face is one of the school's sets, and the chart is kept word by word, the ones missed most first. |
 | **Real or Silly?** | Reads a word with no help, then decides whether it is a word at all. |
 | **Sentence Smash** | Picks a phrase from each of four rows and hears the silly sentence read back. |
 | **Same Sound, Two Ways** | Hears a word with its vowel missing and chooses the spelling: ai or ay, oi or oy. |
 | **Tricky Words** | Sees a sight word for a moment, then finds it among four lookalikes. |
+| **Read and Point** | Reads a little story at his level with a grown-up and taps the sight words in it, as his teacher suggests with a picture book: every copy of one word ("Find every the", with a count), or every sight word up to his level. A wrong tap says the word he tapped; "Read it to me" reads the story a sentence at a time, the sentence lit. |
 | **Sound Rocket** | Steers a rocket to catch falling words with the sound and dodge the rest. |
 | **Penalty Shootout** | Reads the word to score past the keeper, then hears one and dives to save it. |
 | **Pass and Shoot** | Passes along a line of players, one sound each, then shoots at the word he blended. |
 | **Be the Commentator** | Reads a football commentary line with expression, records it and hears it back. |
-| **Build the Word** | Hears a word and builds it from sound or letter tiles. |
+| **Build the Word** | Hears a word and builds it from sound or letter tiles. With sight words, from letters like fridge magnets, among the letters he would write if he trusted the sound, and never ones that could spell its twin (no i for there, which would make their). |
 | **Coach Says** | Reads the coach's written instruction — "Put the frog in the box, then tap the hen" — and does it. The pictures carry no words, so reading is the only way to know what to do. |
 | **Big Words** | Reads two-syllable words a part at a time (sun·set, rab·bit), then whole, then (Year 2) taps where a word splits. |
 | **Foosball Words** | Hears a word and sees its picture, then slides the rods of a foosball table, one rod per sound, until the players in the shooting lane spell it (sh · i · p), and shoots. The other players on a rod mostly make another real word (chip, shop, shin), so a wrong shot is named: "That says chop. Listen: ship." A second miss slides the rods to the answer. Three sounds, then more players, then words of four sounds on four rods. A second way to play, chosen in setup: make any word you can on the same rods. Every new real word scores and joins the list ("3 of 9 words found"); a word made already, a made-up word, or one not on the word list bounces off. No setting of the rods ever spells a blocked word. |
+| **Flash Phrases** | Reading faster: a phrase at his level ("a big dog") flashes up and goes, too quickly to sound out, and he picks the one he read from three that look alike ("a big dot", "a bag dog"), so only reading every word tells them apart. Two and three words, then four, then five and six, then quicker; each step starts with a long look and closes in as he gets them right, and a miss shows the phrase again with the misread word marked. |
 | **Word Search** | Finds hidden words in a grid of letters by dragging across them or tapping both ends; each one is said aloud as it is found, and its tricky letters or its sound light up. His tricky words, this week's sounds, or a theme (countries, cities, space, animals, colours, football, jiu-jitsu) with a picture or a flag beside every word, and the word said when he taps it. The grids grow from 6 × 6 with every word across, to down as well, then (Years 3–4) slants and backwards. A grid found with no help moves him up. It prints as a sheet. |
 
 ### Handwriting
 
 | Game | What the child does |
 |---|---|
-| **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. |
+| **Trace It** | Traces letters in NSW Foundation style: start dot, direction, then on his own. A switch at the top turns to whole sight words at his level, traced letter after letter, and he can write in pencil, crayon, paint, chalk on a blackboard, or sand. |
 | **Tall, Small, Tail** | Sorts letters by where they sit on the lines, then finds every b among b d p q. |
 
 ### Maths
@@ -49,10 +57,11 @@ coach's picks for today at the top.
 | **Flash Count** | Sees dots for a moment (dice, a ten frame) and says how many; then (Year 2) rows and columns; then (Years 3–4) arrays that are times-table facts, up to 12 rows of 12, drawn in blocks of five so 7 rows reads as 5 and 2. A miss splits the array into those two easier parts. |
 | **Off the Bench** | Some players are on the pitch: how many more make 5, 10 or 20? Then (Years 3–4) a stadium of 1000, ten stands of 100: whole stands, then whole rows, then any number, counted by filling up the row, then the stand, then the empty stands. |
 | **Scoreboard Sums** | Adds goals scored and takes away goals ruled offside, within 20; then (Year 2) a season of goals to 100, in racks of ten. Years 3–4: the crowd at the ground, to 1000 and then 10 000 (fans through the gates, fans going home at half-time), in crates of a hundred at first and then in his head. A miss splits the second number into hundreds, tens and ones (368 and 200 is 568, and 50 more is 618, and 7 more is 625), and the wrong choices are the slips made with big numbers: forgetting to carry, taking the smaller digit from the bigger, a ten or a hundred out. |
-| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000; then (Years 3–4) to 10 000. Rounding is a kick too: the line is one ten (or hundred), 40 to 50, with the number marked and halfway dashed, and he kicks to the end it is nearer. Then lines from 0 to 1 and 0 to 2 in tenths. |
+| **Number Line Penalty** | Kicks the ball to where a number sits on a line from 0–10 up to 0–120, and on to 1000; then (Years 3–4) to 10 000. Rounding is a kick too: the line is one ten (or hundred), 40 to 50, with the number marked and halfway dashed, and he kicks to the end it is nearer. Then lines from 0 to 1 and 0 to 2 in tenths. Below zero, at the very top: lines from −10 to 10 and −20 to 20, kicking to a negative number, and a miss says how far below zero it is. |
 | **Team Buses** | Reads crowds as full buses of ten and loose fans, loads buses, then (Year 2) trains of 100, builds numbers to 999, and sees 34 as 2 tens and 14. Years 3–4: planes of 1000, to read and to build crowds to 10 000; then the same crowd another way: with the trains cancelled, 180 fans need 18 buses, and with the plane grounded, 1250 fans need 12 trains and 5 buses (1250 is 12 hundreds and 5 tens). Reading only one digit (8 buses, 2 trains) is the slip offered. |
-| **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. Years 3–4: by 4s, 6s, 8s, 7s and 9s, the counting side of the times tables, and back down them, never past 12 of each; the gap comes with its fact (28 is 4 × 7). |
-| **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. |
+| **Keepy-Uppy Count** | Fills the gap in a run of touches: counting on and back, by 2s, 5s and 10s, then (Year 2) by 10s from any number, odd numbers, 3s, and back in 10s and 5s. Years 3–4: by 4s, 6s, 8s, 7s and 9s, the counting side of the times tables, and back down them, never past 12 of each; the gap comes with its fact (28 is 4 × 7). Below zero, at the very top: back past zero (4, 2, 0, −2) and up from below it, the gap always a negative number, written −4 and said "negative 4". |
+| **Training Drills** | Equal groups of balls in hoops and sharing them fairly, then (Year 2) cones in rows and columns, teams of 2, 5 and 10, and how many rows a pile of cones makes. Years 3–4: teams of 3, 4, 6, 7, 8, 9, 11 and 12, up to 10 teams, and a crowd of players put into teams, for working a fact out rather than remembering it: a miss marks off 5 teams and the rest (7 teams of 8 is 40 and 16), counts on up to 5 teams, and makes 10 teams tens. |
+| **Foosball Line-Up** | A real foosball table from above: a goalie, a defence of 2, a midfield of 5 and an attack of 3 a side, 11 like a real team. Counts the players on a rod, adds two rods by counting on from the bigger one, and finds how many of his 11 are hiding under a towel; then (Year 2) the club's spare rods, equal groups of 2, 3 and 5. Years 3–4: a tournament, two teams to a table and so many tables (4 tables of 22 is 80 and 8). Every answer is worked out on the table: the players numbered, the towel lifted. |
 | **Times Table Sprint** | The times tables to 12 × 12, by heart (Years 3–4): types the answer on a number pad before the bar runs out. A table at a time (×2 and ×10, ×5, ×3, ×4, ×6, ×8, ×7, ×9, ×11, ×12), the earlier ones coming back as review, then all of them mixed, then the same facts as division. Every fact is remembered on its own: the slow and missed ones come back most, and he moves up a table only when he knows every fact in it. A miss shows the fact built from easier ones (7 lots of 6 is 5 lots and 2 more) on rows of dots. |
 | **Half-Time Oranges** | Is the orange (or the pitch) cut into halves, and half of the bibs for each team; then (Year 2) quarters and eighths, of a shape and of a group; then (Years 3–4) thirds and fifths, two thirds or three quarters of the squad, and whether two fractions cover the same amount. |
 | **Jump Line** | Makes the jumps himself along a number line to add and take away within 10 and 20, then (Year 2) within 100 with jumps of ten. Years 3–4: to 1000 in jumps of a hundred and ten; to the next ten or hundred first (38 + 25: how far to 40? Then 23 more), with the other part of the ten offered as the slip; and to 10 000 in jumps of a thousand and a hundred. |
@@ -62,7 +71,7 @@ coach's picks for today at the top.
 | **Fact Family Formation** | Three players are one family (3, 5, 8): turns a fact around and takes it back within 10 and 20; then (Year 2) finds a missing number, and does it with tens to 100. |
 | **Kit and Ball Shapes** | Names flat shapes, counts sides and corners, and names the solid objects of football (the ball is a sphere, the cone a cone); then (Year 2) pentagons and hexagons, and whether a kit is the same on both sides. |
 | **Coach's Whiteboard** | Left or right of the keeper, then follows moves on a grid (2 squares up, then 3 left); then (Year 2) quarter and half turns, and tells a flip from a slide from a turn. Years 3–4: grid references like a street directory (finds C3, then names the square the ball is on), moves by the compass with north up the board, right angles held against the corner of a page, three-quarter turns in compass points, and north-east and the other points between. |
-| **Futebol de Botão** | The Brazilian table game. Pulls back one of his buttons and lets go: it slides, and the ball goes off along the line through the middle of the button and the middle of the ball, so to shoot at the goal he hits the ball on its far side. Three touches, as in the regra carioca, and the third has to be another button. Open goal, then the side of the ball, then past the goleiro, off the wall round a defender, a pass first, and a whole team; the ball's way shows while he aims at first, then only a little, then not at all. Out of touches, or stuck, the table is set back and a way to score is played for him. |
+| **Futebol de Botão** | The Brazilian table game. Pulls back one of his buttons and lets go: it slides, and the ball goes off along the line through the middle of the button and the middle of the ball, so to shoot at the goal he hits the ball on its far side. Three touches, as in the regra carioca, and the third has to be another button. Open goal, then the side of the ball, then past the goleiro, off the wall round a defender, a pass first, and a whole team; the ball's way shows while he aims at first, then only a little, then not at all. Out of touches, or stuck, the table is set back and a way to score is played for him. While he aims, on the steps with a guide, the angles are drawn where the ball would come off the side of the table, in degrees, measured from the wall: in at 40°, out at 40°. A ball sent straight at the wall comes straight back, and that right angle gets the square mark for 90°. After his shot the angles are in the sentence above the table, and nothing is left drawn on it; Show me a way draws them before each flick and after it. |
 | **Ice Cream Van** | Which Australian coin is worth more (the $2 is smaller than the 50c), which coin pays exactly; then (Year 2) a handful of mixed coins, paying the exact price from his purse, and change from a note. Years 3–4: which price tag says "3 dollars and 5 cents" ($3.05, not $3.50), paying to the 5 cents, which of two treats is cheaper ($3.45 or $3.54), the total of two treats, and the change from a $5, $10 or $20 note, counted up the way a shopkeeper does. |
 
 ### Geography 🌏
@@ -129,14 +138,30 @@ his week: hold **⚙ Grown-ups** at the bottom of the home screen for three
 seconds. It has this week's sounds and levels, how it is going (the sounds
 that are going well and the ones that need practice, and the step reached in
 each maths and jiu-jitsu game), Pro mode, the coach, speech and sound effects,
-the reading voice, and a fresh sticker book.
+the reading voice, team crests, and a fresh sticker book.
+
+A team crest is a picture a grown-up chooses from the iPad for one of the
+teams. It is cut to a square from its middle, made small and kept on the
+iPad, and shown cut to a circle: on that team's shirts in the football
+games, and on its buttons in Futebol de Botão. The app itself never comes
+with club crests, which belong to the clubs.
+
+Besides his own team there is a second made-up side, the Rivals, for a
+favourite opponent the list doesn't have, such as a friend's team or the
+club across town. Give them a crest, then pick them under Play against in
+Penalty Shootout. Every football game then plays them, just as every game
+plays as the team he picks there.
 
 ## The sounds
 
 The school's eight-level program, from `s a t p i n` up to `aw air are ear eer
-ore dge tch`, plus `ph` from the class sound sheet. 78 sounds a child can
-practise, about 1,000 real words, 700 silly ones, 50 word families, 170
-sentence phrases, 135 tricky words and 60 two-syllable words.
+ore dge tch`, plus `ph` from the class sound sheet. Then two levels for after
+it: level 9, other ways to write a vowel (`ey` in key, `ue` in blue, `ie` in
+field, `ea` in head, `oe`, `au`, `eigh`), and level 10, the letters that say
+nothing (`kn`, `wr`, `mb`) or another sound (`ch` in school, `y` in gym, `a` in
+wasp, `o` in son). 92 sounds a child can practise, about 1,200 real words, 900
+silly ones, 50 word families, 170 sentence phrases, 135 tricky words, 60
+two-syllable words and 16 short stories.
 
 Levels are cumulative, so every word carries the level a child needs to decode
 it — not just the level of the sound it practises. "phone" practises `ph` from
@@ -177,8 +202,10 @@ with the school friends as it is.
 
 To add it to an iPad: open the URL in Safari, tap Share, then **Add to Home
 Screen**. It then runs full screen with no browser bar, and keeps working with
-no signal. A new version arrives the next time it is opened: close it from the
-app switcher and open it again.
+no signal. The iPad keeps running the old version of an app added this way
+until it is closed and opened again, sometimes twice, so when a new version is
+ready the app shows a **✨ New version! Tap to update** button; a tap swaps it
+in. Nothing changes mid-game without that tap.
 
 ## The content file
 

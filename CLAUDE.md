@@ -73,8 +73,17 @@ src/content/contrasts.ts two spellings of one sound and the rule between them
                        (Same Sound, Two Ways)
 src/content/big-words.ts two-syllable words from words.ts, each level worked out
                        from the spellings in its parts
+src/content/sight.ts   sight words for the games with the Phonics / Sight words
+                       switch: the sets for his level, lookalikes, a board with
+                       no sound-alike twins, letter tiles that cannot spell one
+src/content/stories.ts Read and Point: the stories (STORIES in words.ts, every
+                       word readable at the story's level) cut into words to
+                       tap, and the sight word to hunt for in each
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
+src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his levels
+                       (FLASH_PHRASES in words.ts), lookalikes one letter off, and
+                       how long a phrase shows
 src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
                        rod each, with the swaps that make other real words
 src/content/word-search.ts Word Search: the themed lists from words.ts, the grid
@@ -114,10 +123,12 @@ src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
                        clip-id.ts (recorded words, and which voice says
                        them: public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
-                       going), stickers.ts, colour.ts, highlight.ts (a word with
+                       going), stickers.ts, crests.ts (team crests a grown-up adds,
+                       kept on the device), colour.ts, highlight.ts (a word with
                        its sound marked), router.ts, life.ts (a game's timers),
                        strokes.ts (judging a traced stroke), recorder.ts (the
-                       microphone, for Be the Commentator), dom.ts, random.ts
+                       microphone, for Be the Commentator), dom.ts, random.ts,
+                       update.ts (the "new version, tap to update" button)
 src/ui/components.ts   header, setup panel, chips, win overlay
 src/ui/writing.ts      letters on writing lines, for the screen and the printed sheet
 src/games/catalog.ts   every game, once: its address, tile, section, ladder and
@@ -141,7 +152,10 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        the belt
                        world-kit.ts is the world map the geography games
                        share, with its taps (a little off a coast counts)
-                       teams.ts: the football teams, their flags and kits;
+                       teams.ts: the football teams, their flags and kits,
+                       and the side he plays and the opponent, the same in
+                       every football game (rivalFor; never his own made-up
+                       sides at random);
                        narration.ts: the commentator ("Goooool do Brasil!")
                        voices.ts: #/voices, the voice diagnostics, linked
                        from nowhere

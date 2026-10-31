@@ -18,11 +18,10 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
-import { climb, type Climb, type Step } from '../content/maths';
+import { climb, signed, type Climb, type Step } from '../content/maths';
 import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { narrationSelect } from './narration';
-import { pick } from '../lib/random';
-import { TEAMS, YOU, teamById, type Team } from './teams';
+import { ourTeam, rivalFor, type Team } from './teams';
 
 export interface Kit {
   life: Life;
@@ -113,7 +112,8 @@ export function choiceRow(): ChoiceRow {
   };
   return {
     node,
-    ask: (options) => offer(options, false),
+    /* a number below zero shows with a true minus sign, −3 */
+    ask: (options) => offer(options, false, signed),
     reveal: (answer, picked) => mark(String(answer), String(picked)),
     askWords: (options, label) => offer(options, true, label),
     relabel: (label) => {
@@ -152,8 +152,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   const noteEl = el('p', { class: 'mx-note', 'aria-live': 'polite' });
   const choices = choiceRow();
 
-  const ourTeam = (): Team => teamById(read<string>('shootout-team', YOU.id)) ?? YOU;
-  let rivalTeam: Team = pick(TEAMS.filter((t) => t !== YOU));
+  let rivalTeam: Team = rivalFor(ourTeam());
 
   const kit: Kit = {
     life,
@@ -187,7 +186,8 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
 
   const score = scoreLine(el('span', {}, pos.node, ' of ', totalEl), firsts.node, stepEl);
 
-  const node = el('div', { class: 'wrap' },
+  /* which game, so one can be styled on its own (Futebol de Botão's status bar) */
+  const node = el('div', { class: 'wrap', 'data-game': game.id },
     topbar({ title: game.title, swash: game.swash, tagline: game.tagline, onSetup: (open) => { panel.hidden = !open; } }),
     panel,
     score,
@@ -230,7 +230,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   function start(): void {
     life.clear();
     round += 1;
-    rivalTeam = pick(TEAMS.filter((t) => t !== YOU && t !== ourTeam()));
+    rivalTeam = rivalFor(ourTeam());
     totalEl.textContent = lenSel.value;
     firsts.set(0);
     readyEl.hidden = true;
