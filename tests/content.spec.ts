@@ -11,7 +11,7 @@ import {
   SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
-import { pieces } from '../src/content/graphemes';
+import { pieces, soundsOf } from '../src/content/graphemes';
 import { confusions, tilesFor } from '../src/content/spelling';
 import { FAMILIES, GLYPHS, HEIGHTS, exampleFor, glyph, heightOf } from '../src/content/handwriting';
 import { SORT_SETS } from '../src/content/sort-sets';
@@ -23,7 +23,7 @@ import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
-import { NOT_BY_CHANCE, PHONEMES } from '../src/content/words';
+import { NOT_BY_CHANCE, NOT_SOUNDED_OUT, PHONEMES } from '../src/content/words';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
 
@@ -389,7 +389,18 @@ const ARPA_VOWEL = /^(AA|AE|AH|AO|AW|AY|EH|ER|EY|IH|IY|OW|OY|UH|UW)$/;
  */
 function sayAustralian(word: string): string | null {
   const us = (CMU as Record<string, string>)[word.toLowerCase()];
-  if (!us) return null;
+  return us ? australian(us) : null;
+}
+
+/** every way the dictionary lists a word, Australian as above: wind the
+    air and wind the clock */
+function everyAustralian(word: string): string[] {
+  const d = CMU as Record<string, string>;
+  const w = word.toLowerCase();
+  return [w, `${w}(2)`, `${w}(3)`].map((k) => d[k]).filter(Boolean).map(australian);
+}
+
+function australian(us: string): string {
   const ph = us.replace(/[0-9]/g, '').split(' ');
   const out: string[] = [];
   for (let i = 0; i < ph.length; i += 1) {
@@ -959,5 +970,39 @@ describe('word search', () => {
         }
       }
     }
+  });
+});
+
+describe('sounding a word out', () => {
+  /* each sound in the dictionary's spelling, as sayAustralian writes it: the
+     r after a vowel is gone, so "car" is K AR and "fork" F AO K */
+  const AUS: Record<string, string[]> = {
+    ar: ['AR'], or: ['AO'], air: ['EH'], eer: ['IH'], ur: ['ER', 'AH'],
+  };
+  /* and "new" is nyoo here, where the American dictionary says noo */
+  const heard = (p: string): string[] => AUS[p] ?? (p === 'yoo' ? ['Y UW', 'UW'] : PHONEMES[p].arpabet);
+
+  it('says each word sound by sound the way the dictionary says it', () => {
+    const wrong: string[] = [];
+    for (const w of uniqueWords(REAL_WORDS)) {
+      const ours = soundsOf(w);
+      const aus = everyAustralian(w.text);
+      if (!ours || !aus.length) continue;
+      const pattern = new RegExp(`^${ours.map((p) => `(?:${heard(p).join('|')})`).join(' ')}$`);
+      if (!aus.some((a) => pattern.test(a))) wrong.push(`${w.text}: ${ours.join(' · ')} but ${aus.join(' or ')}`);
+    }
+    /* a word here goes in NOT_SOUNDED_OUT in words.ts */
+    expect(wrong).toEqual([]);
+  });
+
+  it('lists in NOT_SOUNDED_OUT only real words a game could cut', () => {
+    const cut = new Set(uniqueWords(REAL_WORDS).filter((w) => pieces(w)).map((w) => w.text));
+    expect(NOT_SOUNDED_OUT.filter((w) => !cut.has(w))).toEqual([]);
+  });
+
+  it('can sound out most of the words a game sounds out', () => {
+    const cut = uniqueWords(REAL_WORDS).filter((w) => pieces(w));
+    const told = cut.filter((w) => soundsOf(w));
+    expect(told.length / cut.length).toBeGreaterThan(0.6);
   });
 });

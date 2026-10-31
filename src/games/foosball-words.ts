@@ -23,7 +23,8 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, soundOut } from '../lib/speech';
+import { soundsOf } from '../content/graphemes';
 import { settings } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import {
@@ -213,7 +214,9 @@ function build(kit: Kit) {
       slideTo(target.parts);
       cols.forEach((c) => c.classList.remove('wrong'));
       kit.note(`Here it is: ${target.parts.join(' · ')}, ${word}.`);
-      say(`${target.parts.join(', ')}. ${word}.`);
+      /* sound by sound in the recorded sounds; the device voice would read
+         the letters' names, so without them it is just the word */
+      if (!soundOut(soundsOf(target.word), word)) say(word);
       await kit.wait(3600);
       resolve(false);
     };

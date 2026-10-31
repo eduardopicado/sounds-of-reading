@@ -50,8 +50,9 @@ export interface SoundSpec {
   /** sounds that share a group are two spellings of one sound (ai/ay, ee/ea) */
   group?: string;
   /** the sound itself, a key of PHONEMES: what a teacher says for it, and the
-      one recording of it that every spelling of it shares. Only needed when
-      `practice` is true */
+      one recording of it that every spelling of it shares. Needed when
+      `practice` is true; the doubled letters (ss, ll) carry one too, so a
+      word with them can be sounded out */
   phoneme?: string;
   words?: string;
   /** pronounceable non-words that DO contain the target spelling */
@@ -99,7 +100,7 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'n', label: 'n', asIn: 'nap', spellings: ['n'], level: 1, practice: true, phoneme: 'n', hue: 339,
     words: 'an | in | nap 😴 | nip | pan 🍳 | pin 📌 | tan | tin 🥫 | snap 🫰 | snip ✂️ | spin 🌀 | ants 🐜',
     silly: '[n]in | [n]inn | [n]int | nist | nast | [n]ant | [n]ann' },
-  { id: 'nn', label: 'nn', asIn: 'inn', spellings: ['nn'], level: 1, practice: false },
+  { id: 'nn', label: 'nn', asIn: 'inn', spellings: ['nn'], level: 1, practice: false, phoneme: 'n' },
 
   /* ── Level 2 ───────────────────────────────────────────────────────────── */
   { id: 'm', label: 'm', asIn: 'map', spellings: ['m'], level: 2, practice: true, phoneme: 'm', hue: 76,
@@ -132,7 +133,7 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'r', label: 'r', asIn: 'run', spellings: ['r'], level: 2, practice: true, phoneme: 'r', hue: 227,
     words: 'red 🟥 | run 🏃 | rug 🧶 | rock 🪨 | rat 🐀 | rip | rest 😴 | grin 😁 | grass 🌿 | drum 🥁 | crust | trip ✈️',
     silly: 'rup | rak | rik | rus | ris | ros | ruk | rop | ron | rann' },
-  { id: 'ss', label: 'ss', asIn: 'mess', spellings: ['ss'], level: 2, practice: false },
+  { id: 'ss', label: 'ss', asIn: 'mess', spellings: ['ss'], level: 2, practice: false, phoneme: 's' },
 
   /* ── Level 3 ───────────────────────────────────────────────────────────── */
   { id: 'b', label: 'b', asIn: 'bat', spellings: ['b'], level: 3, practice: true, phoneme: 'b', hue: 3,
@@ -165,9 +166,9 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'z', label: 'z', asIn: 'zip', spellings: ['z'], level: 3, practice: true, phoneme: 'z', hue: 154,
     words: 'zip 🤐 | zap ⚡ | zig | zest | bu[z]z 🐝 | fi[z]z 🫧 | ja[z]z 🎷 | fu[z]z | [z]igzag | zips 🤐 | zaps ⚡ | zoo 🦁 @6',
     silly: 'zeff | zeck | zelt | zeft | zemp | [z]ezz | zess | zent | zinn | zesk' },
-  { id: 'll', label: 'll', asIn: 'bell', spellings: ['ll'], level: 3, practice: false },
-  { id: 'ff', label: 'ff', asIn: 'off', spellings: ['ff'], level: 3, practice: false },
-  { id: 'zz', label: 'zz', asIn: 'buzz', spellings: ['zz'], level: 3, practice: false },
+  { id: 'll', label: 'll', asIn: 'bell', spellings: ['ll'], level: 3, practice: false, phoneme: 'l' },
+  { id: 'ff', label: 'ff', asIn: 'off', spellings: ['ff'], level: 3, practice: false, phoneme: 'f' },
+  { id: 'zz', label: 'zz', asIn: 'buzz', spellings: ['zz'], level: 3, practice: false, phoneme: 'z' },
 
   /* ── Level 4 — the school sound sheet ──────────────────────────────────── */
   { id: 'sh', label: 'sh', asIn: 'ship', spellings: ['sh'], level: 4, practice: true, phoneme: 'sh', hue: 285,
@@ -202,13 +203,13 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'soft-c', label: 'c (circle)', asIn: 'circle', spellings: ['c'], level: 4, practice: true, phoneme: 's', hue: 186,
     words: 'cent 🪙 | pencil ✏️ | dance 💃 | prince 👑 | since | fence 🚧 | mince | cinema 🎬 | [c]ircle ⭕ @6 | [c]ircus 🎪 @6 | city 🏙 @7 | ice 🧊 @7 | mice 🐭 @7 | race 🏁 @7 | face 😊 @7 | celery 🥬 @7',
     silly: 'fucit | fucet | zacit | zacet | tecet | kucet | pacit | docil | docel | docin' },
-  { id: 'gg', label: 'gg', asIn: 'egg', spellings: ['gg'], level: 4, practice: false },
-  { id: 'bb', label: 'bb', asIn: 'rabbit', spellings: ['bb'], level: 4, practice: false },
-  { id: 'tt', label: 'tt', asIn: 'butter', spellings: ['tt'], level: 4, practice: false },
-  { id: 'rr', label: 'rr', asIn: 'carrot', spellings: ['rr'], level: 4, practice: false },
-  { id: 'pp', label: 'pp', asIn: 'apple', spellings: ['pp'], level: 4, practice: false },
-  { id: 'dd', label: 'dd', asIn: 'ladder', spellings: ['dd'], level: 4, practice: false },
-  { id: 'mm', label: 'mm', asIn: 'hammer', spellings: ['mm'], level: 4, practice: false },
+  { id: 'gg', label: 'gg', asIn: 'egg', spellings: ['gg'], level: 4, practice: false, phoneme: 'g' },
+  { id: 'bb', label: 'bb', asIn: 'rabbit', spellings: ['bb'], level: 4, practice: false, phoneme: 'b' },
+  { id: 'tt', label: 'tt', asIn: 'butter', spellings: ['tt'], level: 4, practice: false, phoneme: 't' },
+  { id: 'rr', label: 'rr', asIn: 'carrot', spellings: ['rr'], level: 4, practice: false, phoneme: 'r' },
+  { id: 'pp', label: 'pp', asIn: 'apple', spellings: ['pp'], level: 4, practice: false, phoneme: 'p' },
+  { id: 'dd', label: 'dd', asIn: 'ladder', spellings: ['dd'], level: 4, practice: false, phoneme: 'd' },
+  { id: 'mm', label: 'mm', asIn: 'hammer', spellings: ['mm'], level: 4, practice: false, phoneme: 'm' },
 
   /* ── Level 5 — the first vowel teams ───────────────────────────────────── */
   { id: 'ai', label: 'ai', asIn: 'rain', spellings: ['ai'], level: 5, practice: true, phoneme: 'ai', hue: 14, group: 'ai-ay',
@@ -854,3 +855,18 @@ export const BLOCKLIST: string[] = [
 /*  Fine inside a word he reads (pea·cock in Big Words), but not to be spelt
  *  on its own by the random letters of a Word Search grid.  */
 export const NOT_BY_CHANCE: string[] = ['cock'];
+
+/*  Words never sounded out with the recorded sounds, because a letter in them
+ *  does not make its usual sound: a silent letter (knight, thumb), a after w
+ *  (wall), ch said as k (school), n said as ng before k (think), an s said as
+ *  z (pins). They are still said whole. The content test names any word that
+ *  needs adding here: it sounds every word out and checks it against the
+ *  dictionary.
+ */
+export const NOT_SOUNDED_OUT: string[] = [
+  /* a silent letter */ 'thumb', 'knight', 'knew',
+  /* a after w */ 'wall', 'squash',
+  /* ch as k, n as ng */ 'school', 'think', 'yank',
+  /* s as z */ 'pins', 'tins', 'fans', 'jugs', 'peas', 'flies', 'tries', 'spies', 'skies',
+  /* two vowel sounds in one spelling */ 'quiet',
+];

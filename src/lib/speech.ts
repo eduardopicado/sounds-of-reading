@@ -360,6 +360,33 @@ export function saySound(phoneme: string, options: { onEnd?: () => void } = {}):
   void playSound(phoneme, { onEnd: options.onEnd }).then((played) => { if (!played) options.onEnd?.(); });
 }
 
+/**
+ * A sound, then a word it is in: "sh … ship". With no recording of the sound
+ * (or no sound given), just the word, as before there were any.
+ */
+export function saySoundThen(phoneme: string | undefined, text: string, options: SayOptions = {}): void {
+  if (!enabled || !phoneme || !hasSound(phoneme)) { say(text, options); return; }
+  saySound(phoneme, { onEnd: () => say(text, options) });
+}
+
+/**
+ * A word sound by sound, then whole: sh · i · p, ship. Each sound waits for
+ * the one before it, so nothing needs a timer, and leaving the game stops
+ * the rest (cancelSpeech drops the onEnd that would say the next one).
+ *
+ * False, and nothing said, unless every sound is recorded: half a word
+ * sounded out and half spelt in letter names would be worse than the word.
+ */
+export function soundOut(phonemes: readonly string[] | null, word: string, options: SayOptions = {}): boolean {
+  if (!enabled || !phonemes?.length || !phonemes.every(hasSound)) return false;
+  const step = (i: number): void => {
+    if (i === phonemes.length) { say(word, options); return; }
+    saySound(phonemes[i], { onEnd: () => step(i + 1) });
+  };
+  step(0);
+  return true;
+}
+
 function speakAloud(text: string, options: SayOptions): void {
   /* a recording still playing would talk over the device voice */
   stopClips();

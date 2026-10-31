@@ -16,7 +16,8 @@
  * spelling cannot stand on one player. Anything else comes back null and
  * the game leaves it out, rather than guess. */
 
-import { ALL_SOUNDS, type Word } from './index';
+import { ALL_SOUNDS, sound, type Word } from './index';
+import { NOT_SOUNDED_OUT } from './words';
 
 export interface Piece {
   /** the letters, exactly as written in the word */
@@ -70,4 +71,38 @@ export function pieces(word: Word): Piece[] | null {
     (VOWEL.test(p.text) && p.text !== 'qu') || (p.text === 'y' && p.at > 0));
   if (vowels.length !== 1) return null;
   return cut;
+}
+
+/**
+ * The sound of each piece of a word (keys of PHONEMES), for sounding it out
+ * with the recorded sounds: sh · i · p.
+ *
+ * The piece the word practises has the word's own sound. Any other piece has
+ * the sound of every spelling it could be by the word's level, and only if
+ * they all agree: "i" in a level 4 word can only be the i in pin, but "th"
+ * could be them or thin, and then the word is not sounded out at all (null)
+ * rather than guessed. The content test checks every word this answers for
+ * against the pronunciation dictionary.
+ */
+export function soundsOf(word: Word): string[] | null {
+  if (NOT_SOUNDED_OUT.includes(word.text)) return null;
+  const cut = pieces(word);
+  if (!cut) return null;
+  const out: string[] = [];
+  for (const piece of cut) {
+    if (piece.target) {
+      const own = sound(word.sound).phoneme;
+      if (!own) return null;
+      out.push(own);
+      continue;
+    }
+    const could = new Set(ALL_SOUNDS
+      .filter((s) => s.level <= word.level && s.spellings.includes(piece.text))
+      .map((s) => s.phoneme));
+    const [only] = could;
+    if (could.size !== 1 || !only) return null;
+    out.push(only);
+  }
+  /* a doubled letter split in two is still one sound: e · gg, not e · g · g */
+  return out.filter((p, i) => p !== out[i - 1]);
 }

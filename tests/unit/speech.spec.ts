@@ -300,3 +300,72 @@ describe('a sound on its own', () => {
     expect(onEnd).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('a sound, then a word', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** recordings of these sounds; the player ends each one at once */
+  async function withSounds(ids: string[]): Promise<string[]> {
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> {
+        this.paused = false; played.push(this.src);
+        queueMicrotask(() => { this.paused = true; this.onended?.(); });
+        return Promise.resolve();
+      }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async (url: string) => ({ ok: true, json: async () => (url.includes('sounds.json') ? ids : []) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    await audio.loadSounds('./audio/sounds/sounds.json');
+    return played;
+  }
+
+  it('says the sound, then the word it is in', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh']);
+    speech.saySoundThen('sh', 'ship');
+    await settle(); await settle();
+    expect(played).toEqual(['./audio/sounds/sh.mp3']);
+    expect(engine.said.map((u) => u.text)).toEqual(['ship']);
+  });
+
+  it('says only the word when the sound is not recorded', async () => {
+    const speech = await load();
+    const played = await withSounds([]);
+    speech.saySoundThen('o', 'dog');
+    await settle();
+    expect(played).toEqual([]);
+    expect(engine.said.map((u) => u.text)).toEqual(['dog']);
+  });
+
+  it('sounds a word out one sound after another, then says it whole', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh', 'i', 'p']);
+    expect(speech.soundOut(['sh', 'i', 'p'], 'ship')).toBe(true);
+    for (let i = 0; i < 8; i += 1) await settle();
+    expect(played).toEqual(['sh', 'i', 'p'].map((p) => `./audio/sounds/${p}.mp3`));
+    expect(engine.said.map((u) => u.text)).toEqual(['ship']);
+  });
+
+  it('sounds out nothing when one sound is missing, rather than spell it in letter names', async () => {
+    const speech = await load();
+    const played = await withSounds(['d', 'g']);
+    expect(speech.soundOut(['d', 'o', 'g'], 'dog')).toBe(false);
+    await settle();
+    expect(played).toEqual([]);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('stops sounding out when he leaves the game', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh', 'i', 'p']);
+    speech.soundOut(['sh', 'i', 'p'], 'ship');
+    speech.cancelSpeech();
+    for (let i = 0; i < 8; i += 1) await settle();
+    expect(played.length).toBeLessThanOrEqual(1);
+    expect(engine.said).toEqual([]);
+  });
+});
