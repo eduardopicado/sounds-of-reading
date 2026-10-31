@@ -16,6 +16,7 @@ import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { settings } from '../lib/settings';
+import { TOP_LEVEL } from '../content/index';
 import { marked } from '../lib/highlight';
 import { tonesFor } from '../lib/colour';
 import { PART_STEPS, partQuestion, partSpan, type PartQuestion, type PartStep } from '../content/word-parts';
@@ -34,7 +35,7 @@ export function mount(root: HTMLElement): () => void {
   }, root);
 }
 
-const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : 8);
+const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : TOP_LEVEL);
 
 /* an ending and a front in colours of their own, an underline and a wash behind dark letters */
 const ENDING_TONES = tonesFor(28);
