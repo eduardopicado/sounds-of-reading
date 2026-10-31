@@ -139,7 +139,8 @@ function mergedSounds(pool: Sound[]): Sound[] {
     if (s.group === 'th') {
       if (seenTh) continue;
       seenTh = true;
-      out.push({ ...s, label: 'th', asIn: 'them / thin' });
+      /* two sounds under one chip: neither one may be said for it */
+      out.push({ ...s, label: 'th', asIn: 'them / thin', phoneme: undefined });
       continue;
     }
     out.push(s);

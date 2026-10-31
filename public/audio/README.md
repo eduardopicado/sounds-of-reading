@@ -4,8 +4,9 @@ Made by `npm run make:audio` and `npm run make:sfx` with ElevenLabs, never
 edited by hand. The files are committed, so a deploy needs neither the key
 nor the credits to make them again.
 
-None ship yet: both lists below are empty until the key is in place and the
-tools have been run, and until then the app sounds exactly as it always has.
+The words ship: everything in English, and the Portuguese the football
+commentator, the jiu-jitsu referee and the geography games say. Anything
+not listed is spoken by the device voice, as before.
 
 ## Words: `*.mp3` and `clips.json`
 
@@ -26,6 +27,19 @@ from tones in `src/lib/sfx.ts`, as before. `tools/make-sfx.ts` has the
 prompt for each one; takes are made into `audition/sfx/` to listen to, and
 the best is kept with `--keep`.
 
+## The voices
+
+All on Eleven v4, chosen by ear in October 2026:
+
+| Who | Voice | `ELEVENLABS_VOICE_…` |
+|---|---|---|
+| Everything in English | Stuart – Energetic and enthusiastic (Australian) | `EN=HDA9tsk27wYi3uq0fPcK` |
+| The referee and the teacher | Roberto Valença – Calm Narrator (Brazilian) | `PT=bZztR6P62TDbe6sgaZgz` |
+| The football commentator | Nassif – Sports Commentary & Hype (Brazilian) | `PT_COMMENTATOR=Fjiik8aKXNDjmxd1Q2jF` |
+
+A clip added later should be made with the same voice and model, or it
+will sound like someone else said it.
+
 ## Making them
 
 1. The key goes in the environment as `ELEVENLABS_API_KEY`: in a Claude
@@ -35,10 +49,25 @@ the best is kept with `--keep`.
 2. `api.elevenlabs.io` has to be allowed in the environment's network
    access.
 3. `npm run make:audio -- --voices` lists the voices, and `--audition ID,ID`
-   makes ten test words in each into `audition/` to choose from. The chosen
-   ones go in `ELEVENLABS_VOICE_EN` and `ELEVENLABS_VOICE_PT`.
+   makes ten test words in each into `audition/` to choose from;
+   `--audition-pt ID,ID` does the same for the Portuguese voices, with
+   the referee's and teacher's lines, and `--audition-commentator ID,ID`
+   with the football commentator's. The chosen ones go in
+   `ELEVENLABS_VOICE_EN`, `ELEVENLABS_VOICE_PT` (the referee and the
+   teacher) and `ELEVENLABS_VOICE_PT_COMMENTATOR` (who shouts the goals).
+   Portuguese is always Brazilian: the tool looks each Portuguese voice up
+   first and will not record with one ElevenLabs does not mark as Brazilian.
 4. `npm run make:audio` records everything missing. For the sound effects,
    `npm run make:sfx -- --takes 3`, then `--keep <sound> <take>` for each.
+
+The sounds on their own ("sss", "sh", the ai in rain) are one clip per
+phoneme (`PHONEMES` in `src/content/words.ts`), in `sounds/` with their own
+`sounds.json`, never shared with a word. `npm run make:sounds -- --takes 2`
+tries each three ways (IPA in v4, a spelt-out sound, an SSML phoneme tag in
+Flash v2) into `audition/sounds/`, and `--keep <sound> <way>-<take>` keeps
+the one that sounds right. The app plays them with `saySound()`, never the
+device voice, which would read a letter's name; a sound with no clip is
+simply not said, and a game that needs it checks `hasSound()`.
 
 The offline worker caches `clips.json`, `sfx.json` and every `.mp3` beside
 them, so once made they play with no signal like everything else.

@@ -18,7 +18,9 @@
  * even reaching for the object is inside a try. On iOS nothing is spoken until
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
-import { hasClip, playClip, stopClips } from './audio';
+import { hasClip, hasSound, playClip, playSound, stopClips } from './audio';
+
+export { hasSound };
 
 let cached: SpeechSynthesisVoice | null = null;
 /**
@@ -311,9 +313,15 @@ export function voicesFor(lang: string): SpeechSynthesisVoice[] {
   const norm = (l: string) => l.replace('_', '-').toLowerCase();
   const want = norm(lang);
   const base = want.split('-')[0];
+  /* Portuguese is Brazilian or nothing: a pt-PT voice reading the
+     commentator or the referee is a different accent from the one he hears
+     at the academy. English keeps its cousins (en-AU, then en-GB) */
+  const fits = base === 'pt'
+    ? (v: SpeechSynthesisVoice) => norm(v.lang) === 'pt-br'
+    : (v: SpeechSynthesisVoice) => norm(v.lang).split('-')[0] === base;
   try {
     return synth.getVoices()
-      .filter((v) => norm(v.lang).split('-')[0] === base)
+      .filter(fits)
       .sort((a, b) => Number(norm(b.lang) === want) - Number(norm(a.lang) === want)
         || QUALITY_RANK[qualityOf(a)] - QUALITY_RANK[qualityOf(b)]);
   } catch {
@@ -337,6 +345,46 @@ export function say(text: string, options: SayOptions = {}): void {
     return;
   }
   speakAloud(text, options);
+}
+
+/**
+ * Says a sound on its own ("sss", "sh", the ai in rain), a key of PHONEMES
+ * in src/content/words.ts. Only ever its recording: the device voice reads
+ * "sh" or "a" as letter names, which in a phonics game is worse than
+ * nothing, so with no recording nothing is said, and a game that needs bare
+ * sounds checks hasSound() before it offers itself.
+ */
+export function saySound(phoneme: string, options: { onEnd?: () => void } = {}): void {
+  if (!enabled || !hasSound(phoneme)) { options.onEnd?.(); return; }
+  cancelSpeech();
+  void playSound(phoneme, { onEnd: options.onEnd }).then((played) => { if (!played) options.onEnd?.(); });
+}
+
+/**
+ * A sound, then a word it is in: "sh … ship". With no recording of the sound
+ * (or no sound given), just the word, as before there were any.
+ */
+export function saySoundThen(phoneme: string | undefined, text: string, options: SayOptions = {}): void {
+  if (!enabled || !phoneme || !hasSound(phoneme)) { say(text, options); return; }
+  saySound(phoneme, { onEnd: () => say(text, options) });
+}
+
+/**
+ * A word sound by sound, then whole: sh · i · p, ship. Each sound waits for
+ * the one before it, so nothing needs a timer, and leaving the game stops
+ * the rest (cancelSpeech drops the onEnd that would say the next one).
+ *
+ * False, and nothing said, unless every sound is recorded: half a word
+ * sounded out and half spelt in letter names would be worse than the word.
+ */
+export function soundOut(phonemes: readonly string[] | null, word: string, options: SayOptions = {}): boolean {
+  if (!enabled || !phonemes?.length || !phonemes.every(hasSound)) return false;
+  const step = (i: number): void => {
+    if (i === phonemes.length) { say(word, options); return; }
+    saySound(phonemes[i], { onEnd: () => step(i + 1) });
+  };
+  step(0);
+  return true;
 }
 
 function speakAloud(text: string, options: SayOptions): void {

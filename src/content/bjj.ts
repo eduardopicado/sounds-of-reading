@@ -17,11 +17,9 @@
 
 import { pick, shuffle } from '../lib/random';
 import { choices, type Step } from './maths';
+import type { Both, Lang } from './pt';
 
-export type Lang = 'en' | 'pt';
-
-/** one thing said both ways */
-export interface Both { en: string; pt: string }
+export type { Lang, Both } from './pt';
 
 export interface Move {
   id: 'takedown' | 'sweep' | 'knee-on-belly' | 'guard-pass' | 'mount' | 'back';

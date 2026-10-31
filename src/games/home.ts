@@ -8,7 +8,7 @@
 import { el } from '../lib/dom';
 import { pick } from '../lib/random';
 import { go } from '../lib/router';
-import { say } from '../lib/speech';
+import { saySoundThen } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { PRACTICE_SOUNDS, sound, type Sound } from '../content/index';
 import { confetti } from '../ui/components';
@@ -142,7 +142,8 @@ export function mount(root: HTMLElement): () => void {
     vars: { '--mustard': star.tones.light, '--mustard-dark': star.tones.deep },
   }, `Today's sound: ${star.label} · ${star.asIn}`);
   starBtn.addEventListener('click', () => {
-    say(star.asIn);
+    /* the sound itself where it is recorded, then a word with it: sh … ship */
+    saySoundThen(star.phoneme, star.asIn);
     sfx.right();
     confetti(14);
   });

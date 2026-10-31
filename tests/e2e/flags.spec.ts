@@ -128,4 +128,20 @@ test.describe('Flags of the World', () => {
     await page.locator(`.mx-choice[data-n="${want}"]`).click();
     await expect(page.locator('.mx-note')).toHaveText(`Yes! ${country(want).looks}`);
   });
+
+  test('in Portuguese: whose flag, with the names to read in Portuguese', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:flags': 1, 'geo-lang': 'pt' });
+    await openGame(page, 'flags');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await expect(page.locator('.mx-ask')).toHaveText('De que país é esta bandeira?', { timeout: 8000 });
+    const id = (await page.locator('.fl-stage').getAttribute('data-answer'))!;
+    await expect(page.locator(`.mx-choice[data-n="${id}"]`)).toHaveText(country(id).pt.name);
+    /* and back to English mid-question, the same buttons relabelled */
+    await page.getByRole('button', { name: 'English' }).click();
+    await expect(page.locator('.mx-ask')).toHaveText('Whose flag is this?');
+    await page.locator(`.mx-choice[data-n="${id}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText('Yes!');
+    noProblems(watch);
+  });
 });

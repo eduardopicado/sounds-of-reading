@@ -1,14 +1,22 @@
 /* The football commentator: "Goooool do Brasil!", "Defendeu o goleiro!" */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, onlyRecordings, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
+import { clips } from '../../tools/make-audio';
+import { clipId } from '../../src/lib/clip-id';
+
+/** the recordings in English, which the commentator's recording test leaves
+    out so the word he is asked for is still spoken where a test can hear it */
+const ENGLISH = new Set(clips().filter((c) => c.voice === 'en').map((c) => clipId(c.text)));
 
 type Said = { text: string; lang: string };
 
-/** a speech engine with an Australian voice, and a Brazilian one if asked.
+/** a speech engine with an Australian voice, and a Brazilian one if asked,
+ *  and (unless `recorded`) nothing recorded, so everything is spoken by it.
  *  `talk` is how long each line takes to say; a stopped line reports its end
  *  a moment later, the way real engines do */
-async function voices(page: Page, portuguese: boolean, talk = 0): Promise<void> {
+async function voices(page: Page, portuguese: boolean, talk = 0, recorded = false): Promise<void> {
+  if (!recorded) await noRecordings(page);
   await page.addInitScript(([pt, ms]) => {
     const spoken: Said[] = [];
     (window as unknown as { __said: Said[] }).__said = spoken;
@@ -72,6 +80,21 @@ test.describe('the commentator', () => {
     expect(all[call].lang).toBe('pt-BR');
     /* and the word straight after, in English */
     await expect.poll(async () => (await said(page)).slice(call + 1)[0]).toEqual({ text: word, lang: 'en-AU' });
+    noProblems(watch);
+  });
+
+  test('plays the commentator\'s recording of the goal where one was made', async ({ page }) => {
+    const watch = watchPage(page);
+    await voices(page, true, 0, true);
+    await onlyRecordings(page, (id) => !ENGLISH.has(id));
+    await recordPlays(page);
+    await seed(page, { 'shootout-team': 'brazil', 'shootout-rival': 'argentina' });
+    await kickOff(page);
+    await kick(page, true);
+    /* the empty plays are the silent unlock iOS needs; the goal is a recording */
+    await expect.poll(async () => (await plays(page)).filter((src) => /\/audio\/[0-9a-f]{8}\.mp3$/.test(src)).length, { timeout: 10_000 })
+      .toBeGreaterThan(0);
+    expect((await said(page)).some((s) => / do Brasil!$/.test(s.text))).toBe(false);
     noProblems(watch);
   });
 

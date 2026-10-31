@@ -1,12 +1,14 @@
 /* The jiu-jitsu games, in English and in Portuguese. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
 
 type Said = { text: string; lang: string };
 
-/** a speech engine with an Australian voice and a Brazilian one */
+/** a speech engine with an Australian voice and a Brazilian one, and
+    nothing recorded, so everything is spoken by it */
 async function voices(page: Page, portuguese = true): Promise<void> {
+  await noRecordings(page);
   await page.addInitScript((pt) => {
     const spoken: Said[] = [];
     (window as unknown as { __said: Said[] }).__said = spoken;
@@ -100,6 +102,18 @@ test.describe("Ref's Call", () => {
     await start(page, 'refs-call');
     await expect(page.locator('.mx-ask')).toHaveText('Quantos pontos?');
     await expect.poll(async () => (await said(page)).at(-1)?.text ?? '').toMatch(/How many points\?$/);
+  });
+
+  test('in Portuguese, plays the recording where one was made, not the device voice', async ({ page }) => {
+    const watch = watchPage(page);
+    await recordPlays(page);
+    await seed(page, { 'bjj-lang': 'pt' });
+    await start(page, 'refs-call');
+    await expect(page.locator('.mx-ask')).toHaveText('Quantos pontos?');
+    /* the empty plays are the silent unlock iOS needs; the question is a recording */
+    await expect.poll(async () => (await plays(page)).filter((src) => /\/audio\/[0-9a-f]{8}\.mp3$/.test(src)).length, { timeout: 10_000 })
+      .toBeGreaterThan(0);
+    noProblems(watch);
   });
 
   test('Year 2: points, an advantage or a penalty', async ({ page }) => {

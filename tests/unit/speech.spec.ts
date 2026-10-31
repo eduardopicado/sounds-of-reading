@@ -157,6 +157,32 @@ describe('choosing a voice', () => {
     expect(speech.canSpeak('fr-FR')).toBe(false);
   });
 
+  it('never says Portuguese in a European voice, so with no Brazilian one it cannot speak it', async () => {
+    const speech = await load([
+      voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),
+      voice('Joana', 'pt-PT', 'com.apple.voice.premium.pt-PT.Joana'),
+      voice('Catarina', 'pt_PT', 'com.apple.voice.enhanced.pt-PT.Catarina'),
+    ]);
+    expect(speech.voicesFor('pt-BR')).toEqual([]);
+    expect(speech.voicesFor('pt')).toEqual([]);
+    expect(speech.canSpeak('pt-BR')).toBe(false);
+    speech.say('Que defesa!', { lang: 'pt-BR' });
+    expect(engine.said).toEqual([]);
+  });
+
+  it('finds a Brazilian voice however the engine writes it', async () => {
+    const speech = await load([voice('Luciana', 'pt_BR', 'com.apple.voice.compact.pt-BR.Luciana')]);
+    expect(speech.voicesFor('pt-BR').map((v) => v.voiceURI)).toEqual(['com.apple.voice.compact.pt-BR.Luciana']);
+  });
+
+  it('keeps English cousins: en-AU first, then en-GB', async () => {
+    const speech = await load([
+      voice('Daniel', 'en-GB', 'com.apple.voice.compact.en-GB.Daniel'),
+      voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),
+    ]);
+    expect(speech.voicesFor('en-AU').map((v) => v.lang)).toEqual(['en-AU', 'en-GB']);
+  });
+
   it('says there is nothing better installed only when no voice is enhanced or premium', async () => {
     const plain = await load([
       voice('Karen', 'en-AU', 'com.apple.voice.compact.en-AU.Karen'),
@@ -232,5 +258,114 @@ describe('the first tap', () => {
     speech.unlockSpeech();
     speech.unlockSpeech();
     expect(engine.said).toHaveLength(1);
+  });
+});
+
+describe('a sound on its own', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build with recordings of these sounds, and no recorded words */
+  async function withSounds(ids: string[]): Promise<string[]> {
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async (url: string) => ({ ok: true, json: async () => (url.includes('sounds.json') ? ids : []) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    await audio.loadSounds('./audio/sounds/sounds.json');
+    return played;
+  }
+
+  it('plays its own recording, from the sounds folder, never the word spelt the same', async () => {
+    const speech = await load();
+    const played = await withSounds(['a', 'sh']);
+    expect(speech.hasSound('a')).toBe(true);
+    speech.saySound('a');
+    await settle();
+    expect(played).toEqual(['./audio/sounds/a.mp3']);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says nothing with no recording, rather than let the device voice read a letter name', async () => {
+    const speech = await load();
+    await withSounds([]);
+    const onEnd = vi.fn();
+    expect(speech.hasSound('sh')).toBe(false);
+    speech.saySound('sh', { onEnd });
+    await settle();
+    expect(engine.said).toEqual([]);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('a sound, then a word', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** recordings of these sounds; the player ends each one at once */
+  async function withSounds(ids: string[]): Promise<string[]> {
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> {
+        this.paused = false; played.push(this.src);
+        queueMicrotask(() => { this.paused = true; this.onended?.(); });
+        return Promise.resolve();
+      }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async (url: string) => ({ ok: true, json: async () => (url.includes('sounds.json') ? ids : []) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    await audio.loadSounds('./audio/sounds/sounds.json');
+    return played;
+  }
+
+  it('says the sound, then the word it is in', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh']);
+    speech.saySoundThen('sh', 'ship');
+    await settle(); await settle();
+    expect(played).toEqual(['./audio/sounds/sh.mp3']);
+    expect(engine.said.map((u) => u.text)).toEqual(['ship']);
+  });
+
+  it('says only the word when the sound is not recorded', async () => {
+    const speech = await load();
+    const played = await withSounds([]);
+    speech.saySoundThen('o', 'dog');
+    await settle();
+    expect(played).toEqual([]);
+    expect(engine.said.map((u) => u.text)).toEqual(['dog']);
+  });
+
+  it('sounds a word out one sound after another, then says it whole', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh', 'i', 'p']);
+    expect(speech.soundOut(['sh', 'i', 'p'], 'ship')).toBe(true);
+    for (let i = 0; i < 8; i += 1) await settle();
+    expect(played).toEqual(['sh', 'i', 'p'].map((p) => `./audio/sounds/${p}.mp3`));
+    expect(engine.said.map((u) => u.text)).toEqual(['ship']);
+  });
+
+  it('sounds out nothing when one sound is missing, rather than spell it in letter names', async () => {
+    const speech = await load();
+    const played = await withSounds(['d', 'g']);
+    expect(speech.soundOut(['d', 'o', 'g'], 'dog')).toBe(false);
+    await settle();
+    expect(played).toEqual([]);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('stops sounding out when he leaves the game', async () => {
+    const speech = await load();
+    const played = await withSounds(['sh', 'i', 'p']);
+    speech.soundOut(['sh', 'i', 'p'], 'ship');
+    speech.cancelSpeech();
+    for (let i = 0; i < 8; i += 1) await settle();
+    expect(played.length).toBeLessThanOrEqual(1);
+    expect(engine.said).toEqual([]);
   });
 });

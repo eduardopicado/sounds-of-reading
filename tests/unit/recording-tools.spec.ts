@@ -6,15 +6,18 @@
  *   npm run test:unit */
 
 import { describe, expect, it } from 'vitest';
-import { clips, fetchRetrying, ttsRequest, wanted } from '../../tools/make-audio';
+import { LANGUAGE_CODE_MODELS, voiceSettings, brazilianProblem, clips, commentatorAudition, fetchRetrying, ptAudition, ttsRequest, wanted } from '../../tools/make-audio';
 import { EFFECTS, sfxRequest } from '../../tools/make-sfx';
+import { WAYS, soundRequest, textFor } from '../../tools/make-sounds';
+import { PHONEMES } from '../../src/content/words';
 import { ALL_PHRASES, ALL_SIGHT_WORDS, PRACTICE_SOUNDS, REAL_WORDS } from '../../src/content/index';
 import { refereeLines, weighLines } from '../../src/content/bjj';
+import { PT_SAVES, ptGoals } from '../../src/content/commentary';
 import { speakable } from '../../src/lib/clip-id';
 import { callFor } from '../../src/games/narration';
 import { TEAMS } from '../../src/games/teams';
 
-const ENV = { ELEVENLABS_API_KEY: 'test-key', ELEVENLABS_VOICE_EN: 'aussie', ELEVENLABS_VOICE_PT: 'carioca' };
+const ENV = { ELEVENLABS_API_KEY: 'test-key', ELEVENLABS_VOICE_EN: 'aussie', ELEVENLABS_VOICE_PT: 'carioca', ELEVENLABS_VOICE_PT_COMMENTATOR: 'narrador' };
 const body = (init: RequestInit): Record<string, unknown> => JSON.parse(String(init.body));
 
 describe('asking for a word', () => {
@@ -23,7 +26,7 @@ describe('asking for a word', () => {
     expect(url).toBe('https://api.elevenlabs.io/v1/text-to-speech/aussie?output_format=mp3_44100_64');
     expect(init.method).toBe('POST');
     expect((init.headers as Record<string, string>)['xi-api-key']).toBe('test-key');
-    expect(body(init).model_id).toBe('eleven_multilingual_v2');
+    expect(body(init).model_id).toBe('eleven_v4');
   });
 
   it('says a single word as a statement, and leaves a sentence alone', () => {
@@ -31,13 +34,62 @@ describe('asking for a word', () => {
     expect(body(ttsRequest({ text: 'Well done!', voice: 'en' }, ENV).init).text).toBe('Well done!');
   });
 
-  it('gives the Portuguese lines to the Portuguese voice', () => {
-    expect(ttsRequest({ text: 'Que defesa!', voice: 'pt' }, ENV).url).toContain('/text-to-speech/carioca?');
+  it('gives the Portuguese lines to the Portuguese voice, and the shouting to the commentator', () => {
+    expect(ttsRequest({ text: 'Queda. Quantos pontos?', voice: 'pt' }, ENV).url).toContain('/text-to-speech/carioca?');
+    expect(ttsRequest({ text: 'Que defesa!', voice: 'pt-commentator' }, ENV).url).toContain('/text-to-speech/narrador?');
   });
 
   it('stops before asking with no key, or no voice chosen', () => {
     expect(() => ttsRequest({ text: 'rain', voice: 'en' }, {})).toThrow(/ELEVENLABS_API_KEY/);
-    expect(() => ttsRequest({ text: 'Que defesa!', voice: 'pt' }, { ELEVENLABS_API_KEY: 'k' })).toThrow(/ELEVENLABS_VOICE_PT/);
+    expect(() => ttsRequest({ text: 'Queda.', voice: 'pt' }, { ELEVENLABS_API_KEY: 'k' })).toThrow(/ELEVENLABS_VOICE_PT /);
+    expect(() => ttsRequest({ text: 'Que defesa!', voice: 'pt-commentator' }, { ELEVENLABS_API_KEY: 'k', ELEVENLABS_VOICE_PT: 'carioca' }))
+      .toThrow(/ELEVENLABS_VOICE_PT_COMMENTATOR/);
+  });
+});
+
+describe('Portuguese is always Brazilian', () => {
+  it('gives every Portuguese line a Portuguese voice, none taken by an English twin', () => {
+    const voiceOf = new Map(clips().map((c) => [speakable(c.text), c.voice]));
+    const shouted = [...PT_SAVES, ...ptGoals(), ...TEAMS.flatMap((t) => (t.pt ? ptGoals(t.pt) : []))];
+    const said = [...refereeLines().map((l) => l.pt), ...weighLines().map((l) => l.pt)];
+    expect(shouted.length + said.length).toBeGreaterThan(100);
+    for (const line of shouted) expect(voiceOf.get(speakable(line)), line).toBe('pt-commentator');
+    for (const line of said) expect(voiceOf.get(speakable(line)), line).toBe('pt');
+  });
+
+  it('auditions the Portuguese voices with lines the games give them', () => {
+    const voiceOf = new Map(clips().map((c) => [speakable(c.text), c.voice]));
+    for (const line of ptAudition()) expect(voiceOf.get(speakable(line)), line).toBe('pt');
+    for (const line of commentatorAudition()) expect(voiceOf.get(speakable(line)), line).toBe('pt-commentator');
+  });
+
+  it('takes a voice whose verified language is pt-BR, or that is labelled Brazilian', () => {
+    expect(brazilianProblem({ name: 'A', verified_languages: [{ language: 'pt', locale: 'pt-BR', accent: 'brazilian' }] })).toBeNull();
+    expect(brazilianProblem({ name: 'B', labels: { accent: 'brazilian', language: 'pt' } })).toBeNull();
+  });
+
+  it('refuses a European Portuguese voice, or one that says nothing, and says what it found', () => {
+    expect(brazilianProblem({ name: 'Joana', verified_languages: [{ language: 'pt', locale: 'pt-PT', accent: 'european' }] }))
+      .toMatch(/Joana.*pt european pt-PT/);
+    expect(brazilianProblem({ name: 'Matilda', labels: { accent: 'australian' } })).toMatch(/accent: australian/);
+    expect(brazilianProblem({ name: 'Blank' })).toMatch(/nothing about its language/);
+  });
+
+  it('sends the language code to a model that takes one, and only there', () => {
+    const pt = { text: 'Que defesa!', voice: 'pt' as const };
+    const v2 = { ...ENV, ELEVENLABS_MODEL: 'eleven_multilingual_v2' };
+    expect(body(ttsRequest(pt, v2).init).language_code).toBeUndefined();
+    for (const model of LANGUAGE_CODE_MODELS) {
+      expect(body(ttsRequest(pt, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('pt');
+      expect(body(ttsRequest({ ...pt, voice: 'pt-commentator' }, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('pt');
+      expect(body(ttsRequest({ text: 'rain', voice: 'en' }, { ...ENV, ELEVENLABS_MODEL: model }).init).language_code).toBe('en');
+    }
+  });
+
+  it('sends v4 only the two settings it takes, and v2 its slower pace', () => {
+    expect(Object.keys(body(ttsRequest({ text: 'rain', voice: 'en' }, ENV).init).voice_settings as object).sort())
+      .toEqual(['similarity_boost', 'stability']);
+    expect(voiceSettings('eleven_multilingual_v2').speed).toBe(0.9);
   });
 });
 
@@ -97,7 +149,7 @@ describe('the list of clips', () => {
     for (const team of TEAMS) {
       for (let i = 0; i < 30; i += 1) {
         for (const moment of ['goal', 'save'] as const) {
-          expect(list.get(speakable(callFor(moment, team, 'pt'))), callFor(moment, team, 'pt')).toBe('pt');
+          expect(list.get(speakable(callFor(moment, team, 'pt'))), callFor(moment, team, 'pt')).toBe('pt-commentator');
           expect(list.get(speakable(callFor(moment, team, 'en'))), callFor(moment, team, 'en')).toBe('en');
         }
       }
@@ -129,5 +181,29 @@ describe('the list of clips', () => {
 
   it('lists each clip once', () => {
     expect(new Set(wanted()).size).toBe(wanted().length);
+  });
+});
+
+describe('asking for a sound on its own', () => {
+  it('reads the IPA between slashes in v4, in English', () => {
+    const { url, init } = soundRequest(PHONEMES.sh, 'ipa', ENV);
+    expect(url).toContain('/text-to-speech/aussie?');
+    expect(body(init)).toMatchObject({ text: '/ʃ/', model_id: 'eleven_v4', language_code: 'en' });
+  });
+
+  it('puts the phoneme tag only to Flash v2, the model that reads it', () => {
+    expect(body(soundRequest(PHONEMES.sh, 'tag', ENV).init)).toMatchObject({
+      text: '<phoneme alphabet="ipa" ph="ʃ">shhh</phoneme>', model_id: 'eleven_flash_v2',
+    });
+    expect(body(soundRequest(PHONEMES.sh, 'tag', ENV).init).language_code).toBeUndefined();
+  });
+
+  it('has no spelt-out way for a stop, which cannot be held', () => {
+    expect(textFor(PHONEMES.b, 'say')).toBeNull();
+    for (const p of Object.values(PHONEMES)) if (p.stop) expect(p.say, p.ipa).toBeUndefined();
+  });
+
+  it('records every sound for the app under its own name, apart from the words', () => {
+    for (const id of Object.keys(PHONEMES)) expect(WAYS.some((w) => textFor(PHONEMES[id], w))).toBe(true);
   });
 });

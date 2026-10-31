@@ -30,7 +30,7 @@
 import { el, prefersReducedMotion, replay } from '../lib/dom';
 import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
-import { say } from '../lib/speech';
+import { say, saySoundThen } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { read, write } from '../lib/storage';
 import { setMarked } from '../lib/highlight';
@@ -267,7 +267,7 @@ export function mount(root: HTMLElement): () => void {
     pauseBtn.disabled = false;
     pauseBtn.textContent = '⏸';
     spawnIn = 0.4;
-    say(target.asIn);
+    saySoundThen(target.phoneme, target.asIn);
     sfx.tap();
     run();
   }

@@ -51,8 +51,11 @@ export async function expectTapTargets(page: Page, selector: string): Promise<vo
   expect(small, 'tap targets under 40px').toEqual([]);
 }
 
-/** a speech engine that writes down what it says, so a test can hear it too */
+/** a speech engine that writes down what it says, so a test can hear it
+    too; and nothing recorded, so everything goes to it (recordPlays below
+    is how a test hears a recording) */
 export async function recordSpeech(page: Page): Promise<void> {
+  await noRecordings(page);
   await page.addInitScript(() => {
     const spoken: string[] = [];
     (window as unknown as { __said: string[] }).__said = spoken;
@@ -80,6 +83,42 @@ export async function recordSpeech(page: Page): Promise<void> {
     });
   });
 }
+
+/** the app as if nothing were recorded, for a test about the device's own
+    voice: with no clips listed, everything is spoken. The sounds on their own
+    go too: with any of them listed, every tap tries the clip player to
+    unlock it, and a test counting what plays would count those */
+export async function noRecordings(page: Page): Promise<void> {
+  await page.context().route('**/audio/clips.json', (route) => route.fulfill({ json: [] }));
+  await page.context().route('**/audio/sounds/sounds.json', (route) => route.fulfill({ json: [] }));
+}
+
+/** the app with only the recordings `keep` says yes to */
+export async function onlyRecordings(page: Page, keep: (id: string) => boolean): Promise<void> {
+  await page.context().route('**/audio/clips.json', async (route) => {
+    const ids = (await (await route.fetch()).json()) as string[];
+    await route.fulfill({ json: ids.filter(keep) });
+  });
+}
+
+/** a player that writes down each recording it plays, and ends it at once */
+export async function recordPlays(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const plays: string[] = [];
+    (window as unknown as { __plays: string[] }).__plays = plays;
+    HTMLMediaElement.prototype.play = function play(this: HTMLMediaElement) {
+      /* src, which is the file just asked for: currentSrc still names the
+         last one until the new one loads */
+      plays.push(this.src || this.currentSrc);
+      window.setTimeout(() => this.dispatchEvent(new Event('ended')), 20);
+      return Promise.resolve();
+    };
+  });
+}
+
+/** the recordings played so far */
+export const plays = (page: Page): Promise<string[]> =>
+  page.evaluate(() => [...(window as unknown as { __plays: string[] }).__plays]);
 
 /** everything said so far */
 export const said = (page: Page): Promise<string[]> =>

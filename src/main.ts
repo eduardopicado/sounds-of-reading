@@ -3,7 +3,7 @@ import './styles/games.css';
 
 import { startRouter, type Route } from './lib/router';
 import { unlockSpeech, watchVoices } from './lib/speech';
-import { loadClips, unlockClips } from './lib/audio';
+import { loadClips, loadSounds, unlockClips } from './lib/audio';
 import { unlockSfx, wakeSfx } from './lib/sfx';
 import { watchForUpdates } from './lib/update';
 import * as home from './games/home';
@@ -45,6 +45,7 @@ function unlockOnFirstTap(): void {
 watchVoices();
 /* recorded words if this build shipped any; harmless and silent if not */
 void loadClips();
+void loadSounds();
 unlockOnFirstTap();
 watchForUpdates();
 
