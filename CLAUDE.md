@@ -84,6 +84,9 @@ src/content/coach-says.ts Coach Says: the things, places and instructions from
 src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his levels
                        (FLASH_PHRASES in words.ts), lookalikes one letter off, and
                        how long a phrase shows
+src/content/word-parts.ts Word Parts: the spelling rules that put an ending on
+                       (hop → hopping, smile → smiling, cry → cried), what -ed
+                       says, and the fronts and endings that change a meaning
 src/content/foosball.ts Foosball Words: words cut into sounds (graphemes.ts), one
                        rod each, with the swaps that make other real words
 src/content/word-search.ts Word Search: the themed lists from words.ts, the grid

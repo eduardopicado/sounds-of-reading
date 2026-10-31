@@ -838,6 +838,42 @@ export const FLASH_PHRASES: string[] = [
   'the knight wrote a note @10',
 ];
 
+/*  Word Parts — endings and fronts.
+ *
+ *  Words he can already read, that take an ending. The endings are never
+ *  written out here: src/content/word-parts.ts puts them on by the spelling
+ *  rules (hop → hopping, smile → smiling, cry → cried), which are what the
+ *  game teaches, and the content test checks every word they make against
+ *  the dictionary, and what -ed says at the end against how it is said.
+ *  No word that changes inside instead (run → ran, swim → swam).
+ */
+export const DOING_WORDS =
+  'jump | kick | help | fish | pack | cook | push | wish | mix | fix | crash | splash | ' +
+  'play | yell | rain | snow | clean | land | rest | paint | shout | float | count | wait | ' +
+  'hop | stop | skip | jog | hug | tap | nap | chop | shop | trip | wag | mop | zip | ' +
+  'smile | race | joke | share | care | name | cry | try | dry | spy';
+export const DESCRIBING_WORDS =
+  'fast | long | short | cold | quick | dark | loud | high | kind | deep | slow | ' +
+  'big | hot | wet | sad | thin | flat | late | wide | cute | ' +
+  'happy | funny | silly | lucky | sunny | windy';
+
+/*  A front or an ending that changes what a word means, and what it means
+ *  then: "un+happy = not happy". The word is put together by the same rules
+ *  (run+er is runner), and the meaning is written in words he can read. */
+export const WORD_MEANINGS: string[] = [
+  'care+ful = full of care', 'play+ful = full of play', 'joy+ful = full of joy', 'cheer+ful = full of cheer',
+  'care+less = with no care', 'help+less = with no help', 'home+less = with no home', 'end+less = with no end', 'use+less = with no use',
+  'slow+ly = in a slow way', 'quick+ly = in a quick way', 'sad+ly = in a sad way', 'kind+ly = in a kind way', 'loud+ly = in a loud way',
+  'play+er = someone who plays', 'help+er = someone who helps', 'farm+er = someone who farms', 'paint+er = someone who paints',
+  'run+er = someone who runs', 'swim+er = someone who swims', 'shop+er = someone who shops',
+  'un+happy = not happy', 'un+kind = not kind', 'un+fair = not fair', 'un+lucky = not lucky', 'un+zip = open the zip',
+  'dis+like = not like',
+  're+play = play it again', 're+paint = paint it again', 're+heat = heat it again', 're+start = start it again',
+  're+count = count it again', 're+read = read it again',
+  'mis+count = count it and not get it right', 'mis+read = read it and not get it right',
+  'pre+heat = heat it before', 'pre+pay = pay before', 'pre+view = look at it before', 'pre+school = the school before big school',
+];
+
 /*  Coach Says — read an instruction, then do it.
  *
  *  The first game that checks he understood a sentence, not only that he

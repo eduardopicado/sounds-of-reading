@@ -21,6 +21,7 @@ import { BIG_STEPS } from '../content/big-words';
 import { SEARCH_STEPS } from '../content/word-search';
 import { FOOS_STEPS } from '../content/foosball';
 import { PHRASE_STEPS } from '../content/flash-phrases';
+import { PART_STEPS } from '../content/word-parts';
 import { BOTAO_STEPS } from '../content/botao';
 import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_STEPS, SETUP_STEPS, SQUARE_STEPS } from '../content/chess';
 import { MAP_STEPS } from '../content/world';
@@ -96,6 +97,8 @@ export const GAMES: Game[] = [
     load: () => import('./foosball-words') },
   { path: 'flash-phrases', name: 'Flash Phrases', emoji: '📸', what: 'Read it at a glance', tone: '#5E7FC0', section: 'reading', ladder: PHRASE_STEPS,
     load: () => import('./flash-phrases') },
+  { path: 'word-parts', name: 'Word Parts', emoji: '🧩', what: 'Endings and fronts: jump·ing, un·happy', tone: '#C0679A', section: 'reading', ladder: PART_STEPS,
+    load: () => import('./word-parts') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',
