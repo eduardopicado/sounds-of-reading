@@ -15,6 +15,7 @@ import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { settings } from '../lib/settings';
+import { TOP_LEVEL } from '../content/index';
 import { BIG_STEPS, bigQuestion, type BigQuestion, type BigStep } from '../content/big-words';
 import { mountMaths, type Kit } from './maths-kit';
 
@@ -31,7 +32,7 @@ export function mount(root: HTMLElement): () => void {
   }, root);
 }
 
-const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : 8);
+const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : TOP_LEVEL);
 
 function build(kit: Kit) {
   const ask = el('p', { class: 'mx-ask' });

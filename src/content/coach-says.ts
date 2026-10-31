@@ -40,7 +40,7 @@ export type Task = 'tap' | 'both' | 'big' | 'put' | 'then' | 'notBig' | 'putBoth
 export interface Template { task: Task; text: string; level: Level }
 
 export const TEMPLATES: Record<Task, Template> = Object.fromEntries(Object.entries(COACH_SAYS).map(([task, raw]) => {
-  const m = raw.match(/^(.*) @([1-8])$/);
+  const m = raw.match(/^(.*) @(10|[1-9])$/);
   if (!m) throw new Error(`Coach Says: "${raw}" needs an @level`);
   return [task, { task: task as Task, text: m[1], level: Number(m[2]) as Level }];
 })) as Record<Task, Template>;

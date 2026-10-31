@@ -74,7 +74,7 @@ export function mount(root: HTMLElement): () => void {
     for (const lv of LEVELS) {
       levelRow.append(chip(String(lv.n), settings().levels.includes(lv.n), () => {
         const levels = settings().levels;
-        const next = (levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort()) as Level[];
+        const next = (levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort((a, b) => a - b)) as Level[];
         const stillThere = next.length ? PRACTICE_SOUNDS.filter((s) => next.includes(s.level)) : PRACTICE_SOUNDS;
         updateSettings({
           levels: next,

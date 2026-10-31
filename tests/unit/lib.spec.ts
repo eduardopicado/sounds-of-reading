@@ -206,6 +206,11 @@ describe('saved settings', () => {
     expect(got.levels).toEqual([4, 5]);
   });
 
+  it('keeps levels 9 and 10, in number order, and nothing past them', async () => {
+    const { cleanSettings } = await import('../../src/lib/settings');
+    expect(cleanSettings({ levels: [10, 9, 8, 11] }).levels).toEqual([8, 9, 10]);
+  });
+
   it('ignores values of the wrong type and keeps the default instead', async () => {
     const { cleanSettings } = await import('../../src/lib/settings');
     expect(cleanSettings({ pro: 'yes', coach: false, voiceURI: 3 })).toEqual({ coach: false });
