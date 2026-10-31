@@ -44,9 +44,11 @@ export function mount(root: HTMLElement): () => void {
     el('option', { value: 'all', text: 'Every sight word' }),
   );
   modeSel.value = read<string>('point-mode', 'one') === 'all' ? 'all' : 'one';
+  /* the levels that have stories; past the last of them, all of them */
+  const storyTop = Math.max(...ALL_STORIES.map((s) => s.level));
   const levelSel = el('select', { 'aria-label': 'Stories up to' },
-    ...LEVELS.map((l) => el('option', { value: String(l.n), text: `Stories up to level ${l.n}` })));
-  levelSel.value = String(week.length ? Math.max(...week) : 8);
+    ...LEVELS.filter((l) => l.n <= storyTop).map((l) => el('option', { value: String(l.n), text: `Stories up to level ${l.n}` })));
+  levelSel.value = String(Math.min(week.length ? Math.max(...week) : storyTop, storyTop));
   const lenSel = el('select', { 'aria-label': 'How many stories' },
     el('option', { value: '3', text: '3 stories', selected: 'selected' }),
     el('option', { value: '5', text: '5 stories' }),

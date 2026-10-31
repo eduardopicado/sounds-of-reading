@@ -64,6 +64,17 @@ describe('the coach', () => {
     expect(maybeLevelUp()).toBeNull();
   });
 
+  it('moves on from the school\'s level 8 to 9, and stops at the top level', async () => {
+    const eight = await load({ settings: { levels: [8] } });
+    for (let i = 0; i < 25; i += 1) eight.mark(word('aw', 8), true);
+    expect(eight.maybeLevelUp()).toMatchObject({ from: [8], to: [8, 9] });
+
+    const nine = await load({ settings: { levels: [9, 10] } });
+    for (let i = 0; i < 25; i += 1) nine.mark(word('kn', 10), true);
+    expect(nine.maybeLevelUp()).toBeNull();
+    expect(nine.settings().levels).toEqual([9, 10]);
+  });
+
   it('does not move while the top level has three slips in its last twenty-five, or when switched off', async () => {
     const shaky = await load({ settings: { levels: [5] } });
     for (let i = 0; i < 25; i += 1) shaky.mark(word('ai', 5), i >= 3);

@@ -9,7 +9,10 @@ import {
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
   SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY, ALL_STORIES, ALL_FLASH_PHRASES, type Story,
+  LEVELS as EVERY_LEVEL, TOP_LEVEL,
 } from '../src/content/index';
+
+const ALL_LEVELS: Level[] = EVERY_LEVEL.map((l) => l.n);
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
 import { confusions, tilesFor } from '../src/content/spelling';
@@ -48,8 +51,8 @@ describe('sounds', () => {
     expect(thin.map((s) => s.id)).toEqual([]);
   });
 
-  it('every level from 1 to 8 has something to practise', () => {
-    for (let level = 1; level <= 8; level += 1) {
+  it('every level has something to practise', () => {
+    for (const level of ALL_LEVELS) {
       const here = PRACTICE_SOUNDS.filter((s) => s.level === level);
       expect(here.length, `level ${level} has no practice sounds`).toBeGreaterThan(0);
     }
@@ -195,7 +198,7 @@ describe('sentence phrases', () => {
 });
 
 describe('spelling contrasts', () => {
-  const LEVELS = [1, 2, 3, 4, 5, 6, 7, 8] as Level[];
+  const LEVELS = ALL_LEVELS;
 
   it('every pair has enough words on both sides to play with', () => {
     for (const c of CONTRASTS) {
@@ -294,7 +297,7 @@ describe('tricky words', () => {
   it('leaves a word unmarked only while its sounds are still to come', () => {
     const readable = ALL_SIGHT_WORDS
       .filter((w) => !w.spans.length)
-      .filter((w) => w.level === null || !ALL_SOUNDS.some((s) => s.level >= (w.level ?? 9) && mightContain(w.text, s)));
+      .filter((w) => w.level === null || !ALL_SOUNDS.some((s) => s.level >= (w.level ?? 99) && mightContain(w.text, s)));
     expect(readable.map((w) => `${w.text} (${w.set})`)).toEqual([]);
   });
 
@@ -341,7 +344,7 @@ describe('dodge words', () => {
      sound the game can offer must still leave plenty to dodge, or the round
      would be nothing but targets. */
   it('leaves enough dodge words for every sound the game can offer', () => {
-    const all = [1, 2, 3, 4, 5, 6, 7, 8] as Level[];
+    const all = ALL_LEVELS;
     const thin: string[] = [];
     for (const target of ALL_PRACTICE) {
       if (realWords({ sounds: [target.id], levels: all }).length < 6) continue;
@@ -428,7 +431,7 @@ describe('penalty shootout', () => {
   /* Every word is tried as the answer, with only the words at or below its
      own level to choose lookalikes from: the smallest pool the game can ever
      be working with. */
-  const upTo = (level: Level): Level[] => ([1, 2, 3, 4, 5, 6, 7, 8] as Level[]).filter((n) => n <= level);
+  const upTo = (level: Level): Level[] => ALL_LEVELS.filter((n) => n <= level);
 
   it('counts letter changes the way a reader would', () => {
     expect(editDistance('fish', 'dish')).toBe(1);
@@ -527,7 +530,7 @@ describe('pass and shoot', () => {
   });
 
   it('has words with pictures to play at every level', () => {
-    for (const level of [1, 2, 3, 4, 5, 6, 7, 8] as Level[]) {
+    for (const level of ALL_LEVELS) {
       const usable = REAL_WORDS.filter((w) => w.level === level && w.picture && pieces(w));
       expect(usable.length, `level ${level}`).toBeGreaterThanOrEqual(8);
     }
@@ -542,11 +545,11 @@ describe('commentary', () => {
   const readableAt = new Map<string, number>();
   for (const w of REAL_WORDS) {
     const t = w.text.toLowerCase();
-    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level));
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 99, w.level));
   }
   for (const w of ALL_SIGHT_WORDS) {
     const t = w.text.toLowerCase();
-    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level ?? 8));
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 99, w.level ?? 8));
   }
   const wordsOf = (text: string) => text.replace(/\{us\}|\{them\}/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
 
@@ -558,7 +561,7 @@ describe('commentary', () => {
   });
 
   it('puts each line at the level of its hardest word, no earlier and no later', () => {
-    const wrong = ALL_COMMENTARY.filter((l) => Math.max(1, ...wordsOf(l.text).map((w) => readableAt.get(w) ?? 9)) !== l.level)
+    const wrong = ALL_COMMENTARY.filter((l) => Math.max(1, ...wordsOf(l.text).map((w) => readableAt.get(w) ?? 99)) !== l.level)
       .map((l) => `${l.text} @${l.level}`);
     expect(wrong).toEqual([]);
   });
@@ -570,7 +573,7 @@ describe('commentary', () => {
   });
 
   it('has a match worth of lines from level 2 up', () => {
-    for (let level = 2; level <= 8; level += 1) {
+    for (let level = 2; level <= TOP_LEVEL; level += 1) {
       expect(ALL_COMMENTARY.filter((l) => l.level <= level).length, `level ${level}`).toBeGreaterThanOrEqual(6);
     }
   });
@@ -584,15 +587,15 @@ describe('commentary', () => {
 
 describe('flash phrases', () => {
   const readableAt = new Map<string, number>();
-  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level));
-  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level ?? 8));
+  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 99, w.level));
+  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 99, w.level ?? 8));
   const wordsOf = (text: string) => text.toLowerCase().match(/[a-z]+/g) ?? [];
 
   /* read at a glance means read without decoding: every word one he knows */
   it('use only words he can read, at the level of their hardest word', () => {
     const unknown = ALL_FLASH_PHRASES.flatMap((p) => wordsOf(p.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${p.text}"`));
     expect(unknown).toEqual([]);
-    const wrong = ALL_FLASH_PHRASES.filter((p) => Math.max(1, ...wordsOf(p.text).map((w) => readableAt.get(w) ?? 9)) !== p.level)
+    const wrong = ALL_FLASH_PHRASES.filter((p) => Math.max(1, ...wordsOf(p.text).map((w) => readableAt.get(w) ?? 99)) !== p.level)
       .map((p) => `${p.text} @${p.level}`);
     expect(wrong).toEqual([]);
   });
@@ -603,7 +606,7 @@ describe('flash phrases', () => {
       expect(p.text.split(' ').length, p.text).toBeLessThanOrEqual(6);
     }
     expect(new Set(ALL_FLASH_PHRASES.map((p) => p.text)).size).toBe(ALL_FLASH_PHRASES.length);
-    for (let level = 1; level <= 8; level += 1) {
+    for (let level = 1; level <= TOP_LEVEL; level += 1) {
       expect(ALL_FLASH_PHRASES.filter((p) => p.level === level).length, `level ${level}`).toBeGreaterThanOrEqual(8);
     }
   });
@@ -617,7 +620,7 @@ describe('flash phrases', () => {
         expect(l, p.text).not.toBe(p.text);
         const d = difference(p.text, l)!;
         expect(d.wrong.length, `${p.text} / ${l}`).toBe(d.right.length);
-        expect(readableAt.get(d.wrong) ?? 9, `${d.wrong} in ${l}`).toBeLessThanOrEqual(p.level);
+        expect(readableAt.get(d.wrong) ?? 99, `${d.wrong} in ${l}`).toBeLessThanOrEqual(p.level);
         expect(blocked(d.wrong), l).toBeUndefined();
       }
       for (let n = 0; n < 5; n += 1) expect(new Set(lookalikePhrases(p, 2)).size, p.text).toBe(2);
@@ -633,8 +636,8 @@ describe('flash phrases', () => {
 
 describe('read and point stories', () => {
   const readableAt = new Map<string, number>();
-  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level));
-  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level ?? 8));
+  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 99, w.level));
+  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 99, w.level ?? 8));
   const wordsOf = (s: Story) => `${s.title} ${s.text}`.toLowerCase().match(/[a-z]+/g) ?? [];
 
   /* the point is to read it together; a word he cannot read yet turns it
@@ -645,12 +648,12 @@ describe('read and point stories', () => {
   });
 
   it('are each at the level of their hardest word, no earlier and no later', () => {
-    const wrong = ALL_STORIES.filter((s) => Math.max(1, ...wordsOf(s).map((w) => readableAt.get(w) ?? 9)) !== s.level)
+    const wrong = ALL_STORIES.filter((s) => Math.max(1, ...wordsOf(s).map((w) => readableAt.get(w) ?? 99)) !== s.level)
       .map((s) => `${s.title} @${s.level}`);
     expect(wrong).toEqual([]);
   });
 
-  it('come two to a level at least, from 1 to 8', () => {
+  it('come two to a level at least, through the school\'s eight levels', () => {
     for (let level = 1; level <= 8; level += 1) {
       expect(ALL_STORIES.filter((s) => s.level === level).length, `level ${level}`).toBeGreaterThanOrEqual(2);
     }
@@ -887,11 +890,11 @@ describe('coach says', () => {
   const readableAt = new Map<string, number>();
   for (const w of REAL_WORDS) {
     const t = w.text.toLowerCase();
-    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level));
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 99, w.level));
   }
   for (const w of ALL_SIGHT_WORDS) {
     const t = w.text.toLowerCase();
-    readableAt.set(t, Math.min(readableAt.get(t) ?? 9, w.level ?? 8));
+    readableAt.set(t, Math.min(readableAt.get(t) ?? 99, w.level ?? 8));
   }
   const wordsOf = (text: string) => text.replace(/\{\w+\}/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
 
@@ -905,14 +908,14 @@ describe('coach says', () => {
   it('writes the instructions in words he can read at their level, and puts each at its hardest word', () => {
     const unknown = Object.values(TEMPLATES).flatMap((t) => wordsOf(t.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${t.text}"`));
     expect(unknown).toEqual([]);
-    const wrong = Object.values(TEMPLATES).filter((t) => Math.max(1, ...wordsOf(t.text).map((w) => readableAt.get(w) ?? 9)) !== t.level)
+    const wrong = Object.values(TEMPLATES).filter((t) => Math.max(1, ...wordsOf(t.text).map((w) => readableAt.get(w) ?? 99)) !== t.level)
       .map((t) => `${t.text} @${t.level}`);
     expect(wrong).toEqual([]);
   });
 
   it('has every step a template, and enough to play with at every level', () => {
     for (const step of SAYS_STEPS) expect(TEMPLATES[step.task], step.name).toBeTruthy();
-    for (let level = 2; level <= 8; level += 1) {
+    for (let level = 2; level <= TOP_LEVEL; level += 1) {
       expect(THINGS.filter((t) => t.level <= level).length, `things at ${level}`).toBeGreaterThanOrEqual(6);
       expect(PLACES.filter((t) => t.level <= level).length, `places at ${level}`).toBeGreaterThanOrEqual(3);
     }
@@ -920,7 +923,7 @@ describe('coach says', () => {
 
   it('asks every question with exactly one answer, naming what it means', () => {
     for (const step of SAYS_STEPS) {
-      for (let level = 1; level <= 8; level += 1) {
+      for (let level = 1; level <= TOP_LEVEL; level += 1) {
         for (let i = 0; i < 40; i += 1) {
           const q = saysQuestion(step, level);
           const said = q.text.toLowerCase().match(/[a-z]+/g)!;
@@ -976,7 +979,7 @@ describe('big words', () => {
   });
 
   it('has enough words, pictures and plain splits to play from level 2', () => {
-    for (let level = 2; level <= 8; level += 1) {
+    for (let level = 2; level <= TOP_LEVEL; level += 1) {
       const ok = ALL_BIG_WORDS.filter((w) => w.level <= level);
       expect(ok.length, `words at ${level}`).toBeGreaterThanOrEqual(8);
       expect(ok.filter((w) => w.picture).length, `pictures at ${level}`).toBeGreaterThanOrEqual(3);
@@ -989,7 +992,7 @@ describe('big words', () => {
     expect(plainSplit(ALL_BIG_WORDS.find((w) => w.text === 'chicken')!)).toBe(false);
     expect(plainSplit(ALL_BIG_WORDS.find((w) => w.text === 'pumpkin')!)).toBe(false);
     for (const step of BIG_STEPS) {
-      for (let level = 1; level <= 8; level += 1) {
+      for (let level = 1; level <= TOP_LEVEL; level += 1) {
         for (let i = 0; i < 30; i += 1) {
           const q = bigQuestion(step, level);
           if (q.task === 'parts' || q.task === 'whole') {
