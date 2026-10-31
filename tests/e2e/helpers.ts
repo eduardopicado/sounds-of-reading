@@ -85,9 +85,12 @@ export async function recordSpeech(page: Page): Promise<void> {
 }
 
 /** the app as if nothing were recorded, for a test about the device's own
-    voice: with no clips listed, everything is spoken */
+    voice: with no clips listed, everything is spoken. The sounds on their own
+    go too: with any of them listed, every tap tries the clip player to
+    unlock it, and a test counting what plays would count those */
 export async function noRecordings(page: Page): Promise<void> {
   await page.context().route('**/audio/clips.json', (route) => route.fulfill({ json: [] }));
+  await page.context().route('**/audio/sounds/sounds.json', (route) => route.fulfill({ json: [] }));
 }
 
 /** the app with only the recordings `keep` says yes to */
