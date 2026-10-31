@@ -107,7 +107,9 @@ export async function recordPlays(page: Page): Promise<void> {
     const plays: string[] = [];
     (window as unknown as { __plays: string[] }).__plays = plays;
     HTMLMediaElement.prototype.play = function play(this: HTMLMediaElement) {
-      plays.push(this.currentSrc || this.src);
+      /* src, which is the file just asked for: currentSrc still names the
+         last one until the new one loads */
+      plays.push(this.src || this.currentSrc);
       window.setTimeout(() => this.dispatchEvent(new Event('ended')), 20);
       return Promise.resolve();
     };
