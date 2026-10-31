@@ -27,7 +27,7 @@ import { read, write } from '../lib/storage';
 import { settings } from '../lib/settings';
 import { ALL_STORIES, LEVELS, type Level, type SightWord, type Story } from '../content/index';
 import { TRICKY, sightSetsUpTo, sightWordsIn } from '../content/sight';
-import { huntFor, pieces } from '../content/stories';
+import { findLine, huntFor, pieces } from '../content/stories';
 import { celebrate, counter, resultsTray, scoreLine, topbar } from '../ui/components';
 
 type Mode = 'one' | 'all';
@@ -158,7 +158,7 @@ export function mount(root: HTMLElement): () => void {
       : ['Find every sight word']));
     hear.hidden = !target;
     drawTally();
-    say(target ? `Find every ${target}.` : 'Find every sight word.');
+    say(findLine(target));
   }
 
   function drawTally(): void {

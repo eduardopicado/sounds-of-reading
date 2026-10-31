@@ -23,7 +23,7 @@ import { settings } from '../lib/settings';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import type { FlashPhrase } from '../content/index';
-import { PHRASE_STEPS, difference, lookalikePhrases, phrasePool, phraseMs, type PhraseStep } from '../content/flash-phrases';
+import { PHRASE_STEPS, difference, lookalikePhrases, phrasePool, itSaid, phraseMs, type PhraseStep } from '../content/flash-phrases';
 import { mountMaths, type Kit } from './maths-kit';
 
 export function mount(root: HTMLElement): () => void {
@@ -108,7 +108,7 @@ function build(kit: Kit) {
       const d = difference(phrase.text, picked);
       show(phrase.text, d ? phrase.text.split(' ').indexOf(d.right) : -1);
       kit.note(d ? `It said “${phrase.text}”: ${d.right}, not ${d.wrong}.` : `It said “${phrase.text}”.`);
-      say(`It said: ${phrase.text}.`);
+      say(itSaid(phrase.text));
       await kit.wait(3400);
       return false;
     },
