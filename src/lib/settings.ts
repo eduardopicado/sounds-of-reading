@@ -5,7 +5,7 @@
  * every game starts from it; a game may still override it for one session
  * without touching what the parent chose. */
 
-import { PRACTICE_SOUNDS, type Level } from '../content/index';
+import { PRACTICE_SOUNDS, TOP_LEVEL, type Level } from '../content/index';
 import { read, write } from './storage';
 import { setPreferredVoice, setSpeechEnabled } from './speech';
 import { setSfxEnabled } from './sfx';
@@ -58,8 +58,8 @@ export function cleanSettings(raw: unknown): Partial<Settings> {
   const known = new Set(PRACTICE_SOUNDS.map((s) => s.id));
   if (Array.isArray(r.levels)) {
     out.levels = [...new Set(r.levels)]
-      .filter((n): n is Level => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= 8)
-      .sort();
+      .filter((n): n is Level => Number.isInteger(n) && (n as number) >= 1 && (n as number) <= TOP_LEVEL)
+      .sort((a, b) => a - b);
   }
   if (Array.isArray(r.sounds)) {
     out.sounds = [...new Set(r.sounds)].filter((id): id is string => typeof id === 'string' && known.has(id));

@@ -156,9 +156,13 @@ plays as the team he picks there.
 ## The sounds
 
 The school's eight-level program, from `s a t p i n` up to `aw air are ear eer
-ore dge tch`, plus `ph` from the class sound sheet. 78 sounds a child can
-practise, about 1,000 real words, 700 silly ones, 50 word families, 170
-sentence phrases, 135 tricky words, 60 two-syllable words and 16 short stories.
+ore dge tch`, plus `ph` from the class sound sheet. Then two levels for after
+it: level 9, other ways to write a vowel (`ey` in key, `ue` in blue, `ie` in
+field, `ea` in head, `oe`, `au`, `eigh`), and level 10, the letters that say
+nothing (`kn`, `wr`, `mb`) or another sound (`ch` in school, `y` in gym, `a` in
+wasp, `o` in son). 92 sounds a child can practise, about 1,200 real words, 900
+silly ones, 50 word families, 170 sentence phrases, 135 tricky words, 60
+two-syllable words and 16 short stories.
 
 Levels are cumulative, so every word carries the level a child needs to decode
 it — not just the level of the sound it practises. "phone" practises `ph` from

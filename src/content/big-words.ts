@@ -30,7 +30,7 @@ const SPELLINGS: [string, number][] = (() => {
   for (const s of ALL_SOUNDS) {
     for (const sp of s.spellings) {
       if (sp.includes('_')) continue;
-      lowest.set(sp, Math.min(lowest.get(sp) ?? 9, s.level));
+      lowest.set(sp, Math.min(lowest.get(sp) ?? Infinity, s.level));
     }
   }
   return [...lowest].sort((a, b) => b[0].length - a[0].length);

@@ -31,7 +31,7 @@
  *  the content test. Never set colour as text colour — dark ink always.
  */
 
-export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type Level = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export interface SoundSpec {
   /** stable id, used in saved settings — renaming one resets a parent's picks */
@@ -54,7 +54,8 @@ export interface SoundSpec {
   silly?: string;
 }
 
-/** The school's eight levels. Each one includes everything before it. */
+/** The school's eight levels, then two more of other spellings for after
+    them. Each one includes everything before it. */
 export const LEVELS: { n: Level; name: string; blurb: string }[] = [
   { n: 1, name: 'Level 1', blurb: 's a t p i n' },
   { n: 2, name: 'Level 2', blurb: 'm d g o c k ck e u r' },
@@ -64,7 +65,12 @@ export const LEVELS: { n: Level; name: string; blurb: string }[] = [
   { n: 6, name: 'Level 6', blurb: 'oi oy oo ou ow er ir ur ar or' },
   { n: 7, name: 'Level 7', blurb: 'a_e e_e i_e o_e u_e' },
   { n: 8, name: 'Level 8', blurb: 'aw air are ear eer ore dge tch' },
+  { n: 9, name: 'Level 9', blurb: 'ey ue ie ea oe au eigh' },
+  { n: 10, name: 'Level 10', blurb: 'kn wr mb ch y a o' },
 ];
+
+/** the highest level there is */
+export const TOP_LEVEL: Level = 10;
 
 /*  ── The sounds ────────────────────────────────────────────────────────────
  *  Ordered by the level that introduces them. `practice: false` means the
@@ -342,6 +348,57 @@ export const SOUNDS: SoundSpec[] = [
   { id: 'tch', label: 'tch', asIn: 'match', spellings: ['tch'], level: 8, practice: true, hue: 110,
     words: 'match 🔥 | catch ⚾ | watch ⌚ | witch 🧙 | ditch | patch 🩹 | pitch ⚾ | switch 💡 | stitch 🧵 | scratch | kitchen 🍳 | butcher',
     silly: 'sputch | skatch | twotch | blatch | zutch | vitch | platch | strutch | tritch | snotch' },
+
+  /* ── Level 9 — other ways to write a vowel ──────────────────────────────
+     Past the school's eight levels: the vowel sounds he knows, in spellings
+     he has not met yet (ey in key, eigh in eight), and the letters he knows
+     saying another sound (ea in head, ie in field, ue in blue). */
+  { id: 'ey-key', label: 'ey (key)', asIn: 'key', spellings: ['ey'], level: 9, practice: true, hue: 28,
+    words: 'key 🔑 | donkey 🫏 | hockey 🏑 | jockey 🏇 | valley 🏞 | chimney | trolley 🛒 | turkey 🦃 | kidney | alley | parsley 🌿 | jersey 👕 | barley | pulley | monkey 🐒 @10 | money 💰 @10 | honey 🍯 @10',
+    silly: 'zanley | pimkey | dobney | glumpey | tibbey | mipley | frodkey | lansey | wogley | yuntey' },
+  { id: 'ue-blue', label: 'ue (blue)', asIn: 'blue', spellings: ['ue'], level: 9, practice: true, hue: 248,
+    words: 'blue 🔵 | glue | clue 🔍 | true ✅ | untrue | bluebell 🔔 | bluebird 🐦 | blueberry 🫐 | blueprint | blues | clues | Tuesday',
+    silly: 'frue | thrue | scrue | skue | snue | drue | splue | chue' },
+  { id: 'ie-field', label: 'ie (field)', asIn: 'field', spellings: ['ie'], level: 9, practice: true, hue: 320,
+    words: 'field 🏟 | chief | thief 🦹 | shield 🛡 | piece 🧩 | brief | priest | shriek 😱 | niece | yield | belief | goalie 🥅 | genie 🧞 | brownie 🍫 | hoodie | pixie | birdie',
+    silly: 'briet | chiep | briep | chiet | skiet | twiep | briel | scrief | briem | scrieg' },
+  { id: 'ea-head', label: 'ea (head)', asIn: 'head', spellings: ['ea'], level: 9, practice: true, hue: 168,
+    words: 'head | bread 🍞 | spread | thread 🧵 | breath | feather 🪶 | heavy | ready | weather 🌦 | sweat 💦 | instead | breakfast 🥞 | meadow | leather | deaf | health | sweater 🧥 | steady | headache 🤕 @10',
+    silly: 'smead | glead | spead | treath | gleather | sneavy | pready | zeady | kleather | dreath' },
+  { id: 'oe', label: 'oe', asIn: 'toe', spellings: ['oe'], level: 9, practice: true, hue: 80,
+    words: 'toe 🦶 | toes | hoe | goes | doe 🦌 | tiptoe | tiptoes | oboe | mistletoe | potatoes 🥔 | tomatoes 🍅 | dominoes | echoes @10',
+    silly: 'droe | stroe | skoe | swoe | smoe | scroe | spoe | proe | gloe | choe' },
+  { id: 'au', label: 'au', asIn: 'haul', spellings: ['au'], level: 9, practice: true, hue: 2,
+    words: 'haul | haunt | launch 🚀 | sauce | saucer 🛸 | pause ⏸ | cause | author ✍️ | fault | vault | astronaut 👩‍🚀 | dinosaur 🦖 | laundry 🧺 | applause 👏',
+    silly: 'smaust | swaund | klaut | swaust | klaup | smaund | draust | vaup | clauf | claug' },
+  { id: 'eigh', label: 'eigh', asIn: 'eight', spellings: ['eigh'], level: 9, practice: true, hue: 120,
+    words: 'eight 8️⃣ | eighty | eighteen | eighth | weigh ⚖️ | weighs | weight 🏋️ | sleigh 🛷 | sleighs | neigh 🐴 | neighbour 🏘 | freight 🚂 | lightweight | heavyweight',
+    silly: 'zeigh | breigh | pleigh | streigh | gleigh | sheigh | meight | dreight | kleight | treigh' },
+
+  /* ── Level 10 — letters that are silent, or say another sound ───────────
+     kn, wr and mb, where a letter says nothing; ch in school, y in gym; and
+     a after a w (wasp) and o in son, the a and o he knows saying o and u. */
+  { id: 'kn', label: 'kn', asIn: 'knee', spellings: ['kn'], level: 10, practice: true, hue: 300,
+    words: 'knee 🦵 | knees | kneel | knelt | knock 🚪 | knot 🪢 | knit 🧶 | knife 🔪 | knight 🤺 | knuckle | knapsack 🎒 | kneecap | knew | known',
+    silly: 'knist | knint | knilt | knelp | knemp | knent | knul | knum | knun | knat' },
+  { id: 'wr', label: 'wr', asIn: 'write', spellings: ['wr'], level: 10, practice: true, hue: 40,
+    words: 'write ✍️ | wrote | wrap 🎁 | wrist | wreck | wren 🐦 | wrong ❌ | wriggle 🪱 | wrestle 🤼 | wrinkle | wreath 🎄 | written | wrench 🔧',
+    silly: 'wrust | wreb | wruft | wrund | wrik | wril | wrel | wrim | wrem | wrop' },
+  { id: 'mb', label: 'mb', asIn: 'lamb', spellings: ['mb'], level: 10, practice: true, hue: 180,
+    words: 'lamb 🐑 | lambs | comb | combs | thumb 👍 | thumbs | climb 🧗 | climber | crumb | crumbs | numb | limb | limbs | plumber 🔧',
+    silly: 'blomb | snumb | pramb | swemb | smomb | twomb | snimb | scrumb | gramb | snemb' },
+  { id: 'ch-school', label: 'ch (school)', asIn: 'school', spellings: ['ch'], level: 10, practice: true, hue: 350,
+    words: 'school 🏫 | chemist 💊 | chorus | anchor ⚓ | echo | stomach | character | chaos | orchid 🌸 | ache | chrome | monarch 🦋 | mechanic 🔧 | orchestra 🎻 | scheme | headache 🤕 | Christmas 🎄',
+    silly: 'chrob | chrast | chrip | chrem | chrund | chrolt | schom | scheg | schib | chrup' },
+  { id: 'y-gym', label: 'y (gym)', asIn: 'gym', spellings: ['y'], level: 10, practice: true, hue: 220,
+    words: 'gym 🏋️ | gymnast 🤸 | myth | pyramid 🔺 | crystal 💎 | system | symbol | lyric | m[y]stery | oxygen | syrup | typical | cylinder',
+    silly: 'zym | blym | glyp | flym | snym | thryp | dryn | plym | crym | slym' },
+  { id: 'a-wasp', label: 'a (wasp)', asIn: 'wasp', spellings: ['a'], level: 10, practice: true, hue: 95,
+    words: 'wasp 🐝 | wash 🧼 | want | watch ⌚ | swan 🦢 | swap | wand 🪄 | wander | squash 🎾 | squad | squat | swamp | wallet 👛 | waffle 🧇 | swallow | w[a]llaby 🦘',
+    silly: 'wath | swaft | squaz | wamp | wanch | squan | swaz | wanf | squaft | squand' },
+  { id: 'o-son', label: 'o (son)', asIn: 'son', spellings: ['o'], level: 10, practice: true, hue: 265,
+    words: 'son 👦 | ton | won | mother 👩 | brother 👦 | month 📅 | Monday | money 💰 | honey 🍯 | monkey 🐒 | front | wonder | nothing | other | oven | glove 🧤 | above | cover | sponge 🧽 | among',
+    silly: 'glother | smonth | plonday | flonkey | drother | smon | glon | blove | thronder | sponder' },
 ];
 
 /*  ── Word families (Word Builder) ──────────────────────────────────────────
@@ -692,6 +749,11 @@ export const FLASH_PHRASES: string[] = [
   'a huge cake @7', 'I know that game @7', 'the snake can smile @7',
   'a fair share @8', 'a hairy bear @8', 'fair and square @8', 'care and share @8', 'a cup of water @6', 'draw a bear @8',
   'we drew a hare @8', 'a chair and a bear @8', 'the bear saw the deer @8',
+  'a blue key @9', 'a true clue @9', 'eight blue toes @9', 'the hockey field @9', 'a thread of blue @9',
+  'the chief has a clue @9', 'glue the feather on @9', 'a feather in the field @9', 'the jockey has a whip @9',
+  'knit a glove @10', 'wash your thumbs @10', 'a swan and a lamb @10', 'a wren on a limb @10', 'a wasp in the gym @10',
+  'a wasp on my knee @10', 'a knot in the rope @10', 'my son is at school @10', 'a lamb in the meadow @10',
+  'the knight wrote a note @10',
 ];
 
 /*  Word Parts — endings and fronts.
@@ -841,11 +903,11 @@ export const SEARCH_LISTS: SearchListSpec[] = [
  *  a pair), and names any pair that is missing. Add words freely; it will say
  *  if one of them needs a line here.  */
 export const SOUNDS_ALIKE: string[] = [
-  'bare bear', 'be bee', 'dew due', 'hair hare', 'hew hue', 'knew new',
-  'knight night', 'pair pear', 'plain plane', 'read red', 'stair stare',
-  'wear where', 'which witch',
+  'bare bear', 'be bee', 'blew blue', 'dew due', 'hair hare', 'hew hue', 'knew new',
+  'knight night', 'knot not', 'pair pear', 'plain plane', 'read red', 'son sun',
+  'stair stare', 'wait weight', 'way weigh', 'wear where', 'which witch',
   /* with the sight words */
-  'bin been', 'dew do', 'due do', 'he here', 'i eye', 'no know', 'right write',
+  'bin been', 'dew do', 'due do', 'he here', 'i eye', 'no know', 'one won', 'right write',
   'their there', 'to too two', 'wood would',
 ];
 
