@@ -7,7 +7,7 @@
  * "start." on one line, and each word knows the sentence it is in, for
  * reading the story aloud a sentence at a time. */
 
-import type { SightWord, Story } from './index';
+import { ALL_SIGHT_WORDS, ALL_STORIES, type SightWord, type Story } from './index';
 
 export interface Piece {
   /** the word as written, "The"; or, for a piece with no word, its marks */
@@ -57,4 +57,22 @@ export function huntFor(story: Story, sight: readonly SightWord[], rand: () => n
   const pool = good.length ? good : counts.filter(([, n]) => n >= 2).length ? counts.filter(([, n]) => n >= 2) : counts;
   if (!pool.length) return null;
   return pool[Math.floor(rand() * pool.length)][0];
+}
+
+/** what he is asked to find: one sight word, or all of them */
+export const findLine = (target: string | null): string => (target ? `Find every ${target}.` : 'Find every sight word.');
+
+/**
+ * Everything Read and Point says, so each can be recorded: every sentence of
+ * every story (read aloud a sentence at a time), every word he can tap, and
+ * what he is asked to find, for every sight word a story has.
+ */
+export function storyLines(): string[] {
+  const out = new Set<string>([findLine(null)]);
+  for (const story of ALL_STORIES) {
+    for (const sentence of story.sentences) out.add(sentence);
+    for (const p of pieces(story)) if (p.word) out.add(p.text);
+    for (const w of sightCounts(story, ALL_SIGHT_WORDS).keys()) out.add(findLine(w));
+  }
+  return [...out];
 }

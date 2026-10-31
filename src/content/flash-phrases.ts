@@ -110,3 +110,12 @@ export function phraseMs(step: PhraseStep, rightInARow: number, reduced = false)
   const lead = Math.max(1, FIRST_LOOK - QUICKER_BY * rightInARow);
   return Math.round(step.ms * lead * (reduced ? 1.5 : 1));
 }
+
+/** what is said after a phrase misread */
+export const itSaid = (text: string): string => `It said: ${text}.`;
+
+/** everything Flash Phrases says, so each can be recorded: each phrase, and
+    the same after a miss */
+export function phraseLines(): string[] {
+  return ALL_FLASH_PHRASES.flatMap((p) => [p.text, itSaid(p.text)]);
+}
