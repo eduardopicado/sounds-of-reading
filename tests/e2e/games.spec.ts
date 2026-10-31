@@ -653,12 +653,27 @@ test.describe('Sound Rocket', () => {
     await page.waitForTimeout(600);
     expect((await first.boundingBox())!.y).toBeGreaterThan(y1);
 
+    /* a caught word is gone 450ms after it is caught, sooner than a slow
+       browser may look for it, so the first one is noted as it is caught */
+    await page.evaluate(() => {
+      const w = window as unknown as { firstCatch?: { target: string; marks: number } };
+      new MutationObserver((changes, watcher) => {
+        for (const c of changes) {
+          const node = c.target as HTMLElement;
+          if (!node.classList.contains('caught')) continue;
+          w.firstCatch = { target: node.dataset.target ?? '', marks: node.querySelectorAll('.gr').length };
+          watcher.disconnect();
+          return;
+        }
+      }).observe(document.querySelector('.rk-sky')!, { subtree: true, attributeFilter: ['class'] });
+    });
     await catchOne(page);
     /* what was caught is a word with the sound, and the letters that make the
        sound are marked from their real positions. No shield count here: on
        the way across, the rocket can rightly clip a dodge word that is just
        as low, and the round-ending test covers what shields do. */
-    await expect(page.locator('.rk-drop.caught[data-target="true"] .gr')).toHaveCount(1);
+    expect(await page.evaluate(() => (window as unknown as { firstCatch?: unknown }).firstCatch))
+      .toEqual({ target: 'true', marks: 1 });
     noProblems(watch);
   });
 
