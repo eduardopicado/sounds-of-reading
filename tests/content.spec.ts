@@ -8,7 +8,7 @@ import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
   ALL_SIGHT_WORDS, SIGHT_SETS, PRACTICE_SOUNDS as ALL_PRACTICE, mightContain,
-  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY, ALL_STORIES, type Story,
+  SOUNDS_ALIKE, soundsAlike, ALL_COMMENTARY, ALL_STORIES, ALL_FLASH_PHRASES, type Story,
 } from '../src/content/index';
 import { editDistance, nearWords } from '../src/content/near-words';
 import { pieces } from '../src/content/graphemes';
@@ -26,6 +26,7 @@ import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/co
 import { NOT_BY_CHANCE } from '../src/content/words';
 import { huntFor, pieces as storyPieces, sightCounts } from '../src/content/stories';
 import { sightSetsUpTo, sightWordsIn } from '../src/content/sight';
+import { allLookalikes, difference, lookalikePhrases } from '../src/content/flash-phrases';
 
 import ENGLISH from 'an-array-of-english-words/index.json';
 
@@ -576,6 +577,55 @@ describe('commentary', () => {
 
   it('shows no blocked word', () => {
     expect(ALL_COMMENTARY.filter((l) => wordsOf(l.text).some((w) => blocked(w))).map((l) => l.text)).toEqual([]);
+  });
+});
+
+/* ── Flash Phrases ──────────────────────────────────────────────────────── */
+
+describe('flash phrases', () => {
+  const readableAt = new Map<string, number>();
+  for (const w of REAL_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level));
+  for (const w of ALL_SIGHT_WORDS) readableAt.set(w.text.toLowerCase(), Math.min(readableAt.get(w.text.toLowerCase()) ?? 9, w.level ?? 8));
+  const wordsOf = (text: string) => text.toLowerCase().match(/[a-z]+/g) ?? [];
+
+  /* read at a glance means read without decoding: every word one he knows */
+  it('use only words he can read, at the level of their hardest word', () => {
+    const unknown = ALL_FLASH_PHRASES.flatMap((p) => wordsOf(p.text).filter((w) => !readableAt.has(w)).map((w) => `${w} in "${p.text}"`));
+    expect(unknown).toEqual([]);
+    const wrong = ALL_FLASH_PHRASES.filter((p) => Math.max(1, ...wordsOf(p.text).map((w) => readableAt.get(w) ?? 9)) !== p.level)
+      .map((p) => `${p.text} @${p.level}`);
+    expect(wrong).toEqual([]);
+  });
+
+  it('are two to six words, all different, eight to a level', () => {
+    for (const p of ALL_FLASH_PHRASES) {
+      expect(p.text.split(' ').length, p.text).toBeGreaterThanOrEqual(2);
+      expect(p.text.split(' ').length, p.text).toBeLessThanOrEqual(6);
+    }
+    expect(new Set(ALL_FLASH_PHRASES.map((p) => p.text)).size).toBe(ALL_FLASH_PHRASES.length);
+    for (let level = 1; level <= 8; level += 1) {
+      expect(ALL_FLASH_PHRASES.filter((p) => p.level === level).length, `level ${level}`).toBeGreaterThanOrEqual(8);
+    }
+  });
+
+  /* two lookalikes beside it, or the answer is the only thing to pick */
+  it('each have two lookalikes, one letter of one word changed into another word at its level', () => {
+    for (const p of ALL_FLASH_PHRASES) {
+      const all = allLookalikes(p);
+      expect(new Set(all).size, p.text).toBeGreaterThanOrEqual(2);
+      for (const l of all) {
+        expect(l, p.text).not.toBe(p.text);
+        const d = difference(p.text, l)!;
+        expect(d.wrong.length, `${p.text} / ${l}`).toBe(d.right.length);
+        expect(readableAt.get(d.wrong) ?? 9, `${d.wrong} in ${l}`).toBeLessThanOrEqual(p.level);
+        expect(blocked(d.wrong), l).toBeUndefined();
+      }
+      for (let n = 0; n < 5; n += 1) expect(new Set(lookalikePhrases(p, 2)).size, p.text).toBe(2);
+    }
+  });
+
+  it('show no blocked word', () => {
+    expect(ALL_FLASH_PHRASES.filter((p) => wordsOf(p.text).some((w) => blocked(w))).map((p) => p.text)).toEqual([]);
   });
 });
 
