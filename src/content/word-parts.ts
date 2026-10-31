@@ -243,7 +243,7 @@ export function partQuestion(step: PartStep, top: number, avoid: string[] = []):
     ].map((o) => o.text).filter((t, i, all) => t !== m.text && all.indexOf(t) === i).slice(0, 2);
     return {
       task: 'mean', base: m.base, word: m.text, part: m.part, front: m.front, means: m.means,
-      options: shuffle([m.text, ...others]), answer: m.text, why: `${m.text}: ${m.means}.`,
+      options: shuffle([m.text, ...others]), answer: m.text, why: meanWhy(m),
     };
   }
   if (step.task === 'spell') {
@@ -275,6 +275,35 @@ export function partQuestion(step: PartStep, top: number, avoid: string[] = []):
   return {
     task: 'find', base: w.base, word, part: ending, front: false,
     options: shuffle(ENDINGS_OF.doing.map((e) => withEnding(w.base, e))), answer: word,
-    why: `${w.base} and ${ending === 's' && word.endsWith('es') ? 'es' : ending}: ${word}.`,
+    why: findWhy(w.base, ending),
   };
+}
+
+/** what is said after "which one did I say?" */
+export function findWhy(base: string, ending: Ending): string {
+  const word = withEnding(base, ending);
+  return `${base} and ${ending === 's' && word.endsWith('es') ? 'es' : ending}: ${word}.`;
+}
+
+/** what is said after "which word means…?" */
+export const meanWhy = (m: Meaning): string => `${m.text}: ${m.means}.`;
+
+/**
+ * Everything Word Parts says out loud, so each can be recorded: every word
+ * with its ending, and the sentence after each answer. The ed question says
+ * only its word ("a letter on its own is said as its name"), so its sentence
+ * is not here.
+ */
+export function partLines(): string[] {
+  const out = new Set<string>();
+  for (const w of PART_WORDS) {
+    for (const e of ENDINGS_OF[w.kind]) {
+      out.add(withEnding(w.base, e));
+      out.add(spellWhy(w.base, e));
+      /* only the words that just take their endings are asked that way */
+      if (w.kind === 'doing' && ruleFor(w.base, 'ing') === 'add') out.add(findWhy(w.base, e));
+    }
+  }
+  for (const m of MEANINGS) out.add(meanWhy(m));
+  return [...out];
 }
