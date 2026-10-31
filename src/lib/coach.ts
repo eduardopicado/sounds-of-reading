@@ -18,7 +18,7 @@
  * last 25 at that level: high enough that a lucky run does not count, low
  * enough that one slip of the finger does not hold him back. */
 
-import { uniqueWords, type Level } from '../content/index';
+import { TOP_LEVEL, uniqueWords, type Level } from '../content/index';
 import { read, write } from './storage';
 import { settings, updateSettings } from './settings';
 import { shuffle } from './random';
@@ -61,7 +61,7 @@ function runs(x: unknown): Record<string, string> {
 }
 
 const levelList = (x: unknown): x is Level[] =>
-  Array.isArray(x) && x.every((n) => Number.isInteger(n) && n >= 1 && n <= 8);
+  Array.isArray(x) && x.every((n) => Number.isInteger(n) && n >= 1 && n <= TOP_LEVEL);
 
 /** the last move, if what was saved still describes one */
 function move(x: unknown): Move | undefined {
@@ -135,7 +135,7 @@ export function maybeLevelUp(): Move | null {
   const s = settings();
   if (!s.coach || !s.levels.length) return null;
   const top = Math.max(...s.levels);
-  if (top >= 8) return null;
+  if (top >= TOP_LEVEL) return null;
   const rec = load();
   const run = rec.levels[top] ?? '';
   if (run.length < LEVEL_RUN || rights(run) < LEVEL_UP_AT) return null;

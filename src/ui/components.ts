@@ -179,7 +179,7 @@ export function createSetup(o: SetupOptions): Setup {
     }));
     for (const lv of LEVELS) {
       levelRow.append(chip(String(lv.n), levels.includes(lv.n), () => {
-        levels = levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort();
+        levels = levels.includes(lv.n) ? levels.filter((x) => x !== lv.n) : [...levels, lv.n].sort((a, b) => a - b);
         /* a pick that leaves no sounds is no pick at all */
         if (!soundsInLevels().length) levels = levels.filter((x) => x !== lv.n);
         sounds = sounds.filter((id) => soundsInLevels().some((s) => s.id === id));

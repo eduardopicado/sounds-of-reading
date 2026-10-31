@@ -22,6 +22,7 @@ import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { pro, settings } from '../lib/settings';
+import { TOP_LEVEL } from '../content/index';
 import {
   SAYS_STEPS, fits, nextKind, saysQuestion, type Action, type SaysQuestion, type SaysStep,
 } from '../content/coach-says';
@@ -41,7 +42,7 @@ export function mount(root: HTMLElement): () => void {
 }
 
 /** the top level of the week's sounds: the words on the pitch go up to it */
-const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : 8);
+const topLevel = (): number => (settings().levels.length ? Math.max(...settings().levels) : TOP_LEVEL);
 
 function build(kit: Kit) {
   const say1 = el('p', { class: 'cs-say', 'aria-live': 'polite' });
