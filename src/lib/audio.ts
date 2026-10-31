@@ -22,6 +22,13 @@ let have: Set<string> | null = null;
 let loading: Promise<void> | null = null;
 let base = '';
 
+/* The sounds on their own ("sss", "sh", "ai" as in rain), one per phoneme
+   (PHONEMES in src/content/words.ts), in a folder and a manifest of their
+   own: the sound "a" and the word "a" are never the same clip. */
+let sounds: Set<string> | null = null;
+let soundsLoading: Promise<void> | null = null;
+let soundBase = '';
+
 /** where the clips live, relative to the page, so any deploy path works */
 export function setClipBase(url: string): void {
   base = url.replace(/\/+$/, '');
@@ -47,6 +54,32 @@ export async function loadClips(url = './audio/clips.json'): Promise<void> {
     }
   })();
   return loading;
+}
+
+/**
+ * Loads the list of sounds we shipped. Missing means none, and every game
+ * that needs a bare sound stays hidden: the device voice would say a letter's
+ * name instead.
+ */
+export async function loadSounds(url = './audio/sounds/sounds.json'): Promise<void> {
+  if (soundsLoading) return soundsLoading;
+  soundsLoading = (async () => {
+    try {
+      const res = await fetch(url, { cache: 'force-cache' });
+      if (!res.ok) { sounds = new Set(); return; }
+      const list: unknown = await res.json();
+      sounds = new Set(Array.isArray(list) ? list.filter((x): x is string => typeof x === 'string') : []);
+      soundBase = url.replace(/\/[^/]*$/, '');
+    } catch {
+      sounds = new Set();
+    }
+  })();
+  return soundsLoading;
+}
+
+/** is there a recording of this sound (a key of PHONEMES)? */
+export function hasSound(phoneme: string): boolean {
+  return !!sounds?.has(phoneme);
 }
 
 /** is there a recording of this, or does it need the device voice? */
@@ -85,7 +118,7 @@ const element = (): HTMLAudioElement => {
  * Safari has marked the element as started by a tap.
  */
 export function unlockClips(): void {
-  if (unlocked || !have?.size) return;
+  if (unlocked || (!have?.size && !sounds?.size)) return;
   try {
     const audio = element();
     /* saying a word already, so already allowed */
@@ -111,6 +144,20 @@ export async function playClip(
 ): Promise<boolean> {
   if (!hasClip(text)) return false;
   const id = clipId(speakable(text));
+  return playFile(id, `${base}/${id}.mp3`, options);
+}
+
+/** plays the recording of a sound, as playClip; false when there is none,
+    and then nothing is to be said instead */
+export async function playSound(phoneme: string, options: { onEnd?: () => void } = {}): Promise<boolean> {
+  if (!hasSound(phoneme)) return false;
+  return playFile(`sound:${phoneme}`, `${soundBase}/${phoneme}.mp3`, options);
+}
+
+async function playFile(
+  id: string, src: string,
+  options: { slow?: boolean; onEnd?: () => void },
+): Promise<boolean> {
   const mine = (turn += 1);
   try {
     const audio = element();
@@ -121,7 +168,7 @@ export async function playClip(
     audio.onended = null;
     audio.pause();
     if (holding !== id) {
-      audio.src = `${base}/${id}.mp3`;
+      audio.src = src;
       holding = id;
     }
     audio.currentTime = 0;

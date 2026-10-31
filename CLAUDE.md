@@ -54,12 +54,14 @@ environment (`public/audio/README.md`):
 ```
 npm run make:audio       # the words
 npm run make:sfx         # the sound effects
+npm run make:sounds      # the sounds on their own ("sss", "sh"), one per phoneme
 ```
 
 ## Layout
 
 ```
-src/content/words.ts   the content file — sounds, words, families, phrases
+src/content/words.ts   the content file — sounds, words, families, phrases, and
+                       PHONEMES: the sound each spelling makes, one recording each
 src/content/index.ts   loads it into typed data with explicit positions
 src/content/spans.ts   works out which letters carry a sound; refuses to guess
 src/content/graphemes.ts  cuts a one-syllable word into its sounds (Pass and Shoot)
@@ -113,10 +115,13 @@ src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJ
                        games ask and say (Weigh-In's things and weight classes
                        too), every word in English and Portuguese
 src/content/commentary.ts what the football commentator shouts, both languages
+src/content/pt.ts      Portuguese names in sentences: each name's article, joined
+                       to "de" ("da Austrália", "de Portugal", "dos Estados
+                       Unidos"); the geography games speak Portuguese through it
 src/lib/               speech.ts (voices, and saying things), sfx.ts (sound
                        effects, made from tones or recorded), audio.ts and
-                       clip-id.ts (recorded words; none ship yet, see
-                       public/audio/README.md), storage.ts,
+                       clip-id.ts (recorded words, and which voice says
+                       them: public/audio/README.md), storage.ts,
                        settings.ts, coach.ts (the record of how each sound is
                        going), stickers.ts, crests.ts (team crests a grown-up adds,
                        kept on the device), colour.ts, highlight.ts (a word with
@@ -142,8 +147,9 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        chess-kit.ts draws the board and the pieces the chess
                        games share (src/content/chess.ts has the rules);
                        bjj-art.ts draws the moves and the referee's signals;
-                       bjj-kit.ts is the 🇦🇺/🇧🇷 language switch, speech and
-                       belt the BJJ games share
+                       lang-kit.ts is the 🇦🇺/🇧🇷 language switch and speech
+                       the BJJ and geography games share; bjj-kit.ts adds
+                       the belt
                        world-kit.ts is the world map the geography games
                        share, with its taps (a little off a coast counts)
                        teams.ts: the football teams, their flags and kits,

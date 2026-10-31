@@ -10,6 +10,7 @@
 import { el } from '../lib/dom';
 import { read } from '../lib/storage';
 import { describeVoice, englishVoices, onVoicesChanged, onlyCompactVoices, say } from '../lib/speech';
+import { hasClip } from '../lib/audio';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
@@ -219,8 +220,13 @@ export function mount(root: HTMLElement): () => void {
        standard version: an iPad with three Karens installed offers this page
        exactly one, the super-compact build, so downloading an Enhanced or
        Premium voice just costs several hundred megabytes. Say what is true
-       instead. (This used to add that the words are recorded in advance;
-       none are shipped yet — see public/audio/README.md.) */
+       instead. */
+    /* and with the recordings shipped, this voice is only the fallback: a
+       line that has a recording plays it whatever is picked here */
+    if (hasClip('rain')) {
+      voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
+        text: 'Most of what the app says is recorded, in an Australian voice (and a Brazilian one for the Portuguese), and those recordings play whatever is picked here. This voice reads only the rest: made-up words, and sentences with a number or a name in them. Try it uses this voice.' }));
+    }
     if (onlyCompactVoices()) {
       voiceRow.append(el('p', { class: 'tag', style: { width: '100%', margin: '6px 0 0' },
         text: 'Safari offers a web page only the standard version of each voice. A new voice downloaded in Settings shows up here, but its Enhanced and Premium versions never do.' }));

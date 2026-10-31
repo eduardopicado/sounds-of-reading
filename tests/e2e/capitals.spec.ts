@@ -3,7 +3,8 @@
 import { expect, test, type Page } from '@playwright/test';
 import { noProblems, openGame, seed, watchPage } from './helpers';
 import { AUS_H, AUS_W, projectAus } from '../../src/content/australia-projection';
-import { CAPITALS, STATES, type StateId } from '../../src/content/capitals';
+import { CAPITALS, STATES, cityIn, type StateId } from '../../src/content/capitals';
+import { of } from '../../src/content/pt';
 import { country } from '../../src/content/flags';
 
 const state = (id: string) => STATES.find((s) => s.id === (id as StateId))!;
@@ -107,5 +108,19 @@ test.describe('Capital Cities', () => {
     await expect(page.locator('.mx-note')).toHaveText(
       `${want} is the capital of ${name}. ${c.bigger!.join(' and ')} ${c.bigger!.length > 1 ? 'are' : 'is'} bigger.`,
     );
+  });
+
+  test("in Portuguese: the world's capitals by their Portuguese names", async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:capitals': 4, 'geo-lang': 'pt' });
+    await openGame(page, 'capitals');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    const city = await wanted(page, 1);
+    const c = CAPITALS.find((x) => x.capital === city)!;
+    await expect(page.locator('.mx-ask')).toContainText('Qual é a capital');
+    await expect(page.locator(`.mx-choice[data-n="${city}"]`)).toHaveText(cityIn(city, 'pt'));
+    await page.locator(`.mx-choice[data-n="${city}"]`).click();
+    await expect(page.locator('.mx-note')).toContainText(`a capital ${of(country(c.country).pt)}.`);
+    noProblems(watch);
   });
 });

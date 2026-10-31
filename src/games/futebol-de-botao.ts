@@ -39,7 +39,7 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import {
-  BALL, BOTAO_STEPS, HOW, KEEPER_W, KEEPER_Y, L, MARKS, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
+  BALL, BOTAO_STEPS, HOW, OWN_GOAL, SHOT_SAYS, STUCK, outOfTouches, watch, KEEPER_W, KEEPER_Y, L, MARKS, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
   angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, shownBounce, simulate,
   type Bounce, type BotaoStep, type Flick, type Point, type Shot, type Table,
 } from '../content/botao';
@@ -510,7 +510,7 @@ function build(kit: Kit) {
         busy = true;
         showMe.disabled = true;
         kit.note(`${why} Watch: here is one way.`);
-        say(`${why} Watch.`);
+        say(watch(why));
         await kit.wait(1400);
         let t: Table = q.table;
         draw(t);
@@ -546,7 +546,7 @@ function build(kit: Kit) {
         await kit.wait(3200);
         void end(false);
       };
-      showMe.onclick = () => { if (!busy && !finished) void demo('Stuck?'); };
+      showMe.onclick = () => { if (!busy && !finished) void demo(STUCK); };
 
       const flick = async (f: Flick): Promise<void> => {
         busy = true;
@@ -560,7 +560,7 @@ function build(kit: Kit) {
         const bounce = shownBounce(shot, f.button);
         const off = bounce ? ` ${bounceWords(bounce)}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
-        if (shot.own) { void demo('Own goal! That one went into your own net.'); return; }
+        if (shot.own) { void demo(OWN_GOAL); return; }
         if (shot.goal) {
           node.dataset.goal = 'scored';
           sfx.cheer();
@@ -570,12 +570,12 @@ function build(kit: Kit) {
           return;
         }
         const bumped = shot.bumps.map((b) => b.what);
-        const what = !shot.touched ? 'You missed the ball.'
-          : bumped.includes('keeper') ? 'The goleiro saved it!'
-            : bumped.includes('post') ? 'Off the post!'
-              : bumped.includes('block') ? 'A defender blocked it.' : 'Good touch.';
+        const what = !shot.touched ? SHOT_SAYS.missed
+          : bumped.includes('keeper') ? SHOT_SAYS.keeper
+            : bumped.includes('post') ? SHOT_SAYS.post
+              : bumped.includes('block') ? SHOT_SAYS.block : SHOT_SAYS.touch;
         if (bumped.includes('keeper')) narrate('save', kit.rival(), () => undefined, kit.life.later);
-        if (touches.length >= TOUCHES) { void demo(`${what} No touches left.`); return; }
+        if (touches.length >= TOUCHES) { void demo(outOfTouches(what)); return; }
         /* the goleiro gets ready for where the ball is now */
         keeperEl.classList.add('moving');
         draw(table);

@@ -3,12 +3,14 @@
  * played without anything being recorded. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, openSetup, watchPage } from './helpers';
 
 type Mic = 'yes' | 'refused' | 'none';
 
 /** a pretend microphone and recorder, and a player that counts what it plays */
 async function fakeMic(page: Page, mic: Mic): Promise<void> {
+  /* nothing recorded, so the player counts only his own takes */
+  await noRecordings(page);
   await page.addInitScript((mode) => {
     const w = window as unknown as Record<string, unknown>;
     w.__played = 0;

@@ -12,7 +12,8 @@ import { el } from '../lib/dom';
 import { svg } from '../ui/writing';
 import { MAP_H, MAP_W, project } from '../content/projection';
 import { COUNTRY_SHAPES, OCEAN_SHAPES, OUTLINE, SEA_SHAPES } from '../content/world-shapes';
-import { PLACES, SEAS, place, type MapStep, type PlaceId, type SeaId } from '../content/world';
+import { PLACES, SEAS, nameIn, place, type MapStep, type PlaceId, type SeaId } from '../content/world';
+import type { Lang } from '../content/pt';
 
 export const isPlace = (id: string): id is PlaceId => PLACES.some((p) => p.id === id);
 export const isSea = (id: string): id is SeaId => SEAS.some((s) => s.id === id);
@@ -114,6 +115,10 @@ export function worldMap() {
 
   return {
     node,
+    /** the names on the map in English or Portuguese */
+    language: (lang: Lang) => {
+      for (const n of labels.querySelectorAll<HTMLElement>('[data-place]')) n.textContent = nameIn(place(n.dataset.place as PlaceId), lang);
+    },
     /** the names of the continents, or the oceans, or both, on the map; or none */
     names: (of: MapStep['of'] | null) => {
       if (of) node.dataset.names = of;

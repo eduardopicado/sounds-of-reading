@@ -1,7 +1,7 @@
 /* The app-ness: installable, offline, and quiet on the network. */
 
 import { expect, test } from '@playwright/test';
-import { noProblems, openGame, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, watchPage } from './helpers';
 import { GAMES } from '../../src/games/catalog';
 
 test.describe('progressive web app', () => {
@@ -104,6 +104,9 @@ test.describe('tapping', () => {
 });
 
 test.describe('speech', () => {
+  /* these choose among the device's voices, so nothing is recorded */
+  test.beforeEach(async ({ page }) => { await noRecordings(page); });
+
   test('never inherits the device language and prefers an Australian voice', async ({ page }) => {
     await page.addInitScript(() => {
       /* a device set to Portuguese, with an Australian English voice available */

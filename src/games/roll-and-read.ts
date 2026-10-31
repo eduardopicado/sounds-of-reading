@@ -14,7 +14,7 @@
 import { el } from '../lib/dom';
 import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
-import { say } from '../lib/speech';
+import { say, saySoundThen } from '../lib/speech';
 import { sfx } from '../lib/sfx';
 import { marked } from '../lib/highlight';
 import { read, write } from '../lib/storage';
@@ -158,7 +158,9 @@ export function mount(root: HTMLElement): () => void {
       if (face.sound) {
         diceHint.textContent = `Read these ${face.label} words out loud`;
         showWords(face);
-        say(face.label);
+        /* the sound, never its spelling: the device voice reads "sh" as letter
+           names. Then a word with it, which it can say */
+        saySoundThen(face.sound.phoneme, face.sound.asIn);
       } else {
         diceHint.textContent = `Read these ${face.id} sight words out loud`;
         showWords(face);

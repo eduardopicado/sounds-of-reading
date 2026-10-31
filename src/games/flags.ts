@@ -7,18 +7,22 @@
  * Indonesia's and Poland's), says which flag has a maple leaf or the
  * Southern Cross, and finds the neighbours and the smaller countries on the
  * map. A miss always says what the right flag looks like, in words he can
- * check against the picture (src/content/flags.ts). */
+ * check against the picture (src/content/flags.ts).
+ *
+ * In English or Portuguese, switched with the flags at the top, mid-question
+ * too, like World Map. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
 import {
-  COUNTRIES, FLAG_STEPS, Named, country, flagQuestion, flagSays,
+  COUNTRIES, FLAG_STEPS, country, flagQuestion, flagSays, namedIn,
   type FlagQuestion, type FlagStep,
 } from '../content/flags';
 import { findSays, place, seaSays } from '../content/world';
+import { of, type Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isPlace, isSea, worldMap } from './world-kit';
+import { GEO_LANG, langSwitch, speak } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<FlagStep>({
@@ -33,46 +37,59 @@ export function mount(root: HTMLElement): () => void {
   }, root);
 }
 
+/** one of the things flagSays says, both ways */
+const says = (id: string, what: keyof ReturnType<typeof flagSays>): Both =>
+  ({ en: flagSays(country(id))[what], pt: flagSays(country(id), 'pt')[what] });
+
 function build(kit: Kit) {
+  const langs = langSwitch(GEO_LANG);
+  const lang = () => langs.lang();
   const map = worldMap();
   const ask = el('p', { class: 'mx-ask' });
   const flag = el('div', { class: 'fl-flag', role: 'img' });
-  const node = el('div', { class: 'mx-stage fl-stage' }, ask, flag, map.node);
+  const node = el('div', { class: 'mx-stage fl-stage' }, langs.node, ask, flag, map.node);
   let recent: string[] = [];
+  /** redraws the words on screen in the chosen language */
+  let retext: () => void = () => undefined;
+  langs.onChange(() => { map.language(lang()); retext(); });
+  map.language(lang());
 
   /** what he tapped on the map, said and written: "That is Argentina." */
-  const that = (id: string, answer: string): string => {
-    if (isSea(id)) return seaSays(id).that;
-    if (isPlace(id)) return findSays(place(id)).that;
-    if (COUNTRIES.some((c) => c.id === id)) return flagSays(country(id)).there;
-    return flagSays(country(answer)).not;
+  const that = (id: string, answer: string): Both => {
+    if (isSea(id)) return { en: seaSays(id).that, pt: seaSays(id, 'pt').that };
+    if (isPlace(id)) return { en: findSays(place(id)).that, pt: findSays(place(id), 'pt').that };
+    if (COUNTRIES.some((c) => c.id === id)) return says(id, 'there');
+    return says(answer, 'not');
   };
 
   async function finish(ok: boolean, q: FlagQuestion, picked: string): Promise<boolean> {
-    const c = country(q.answer);
     if (q.task === 'map') map.mark(q.answer, 'right');
+    const why: Both = { en: q.why, pt: q.pt.why };
     if (ok) {
       sfx.cheer();
-      const good = q.task === 'map' ? flagSays(c).there : q.why;
-      kit.note(`Yes! ${good}`, true);
-      say(good);
+      const good = q.task === 'map' ? says(q.answer, 'there') : why;
+      retext = () => kit.note(`${lang() === 'pt' ? 'Isso!' : 'Yes!'} ${good[lang()]}`, true);
+      retext();
+      speak(good, lang());
       await kit.wait(2600);
       return true;
     }
     sfx.wrong();
-    let first: string;
-    let then = q.why;
+    let first: Both;
+    let then = why;
     if (q.task === 'map') {
       if (!isPlace(picked) && !isSea(picked)) map.mark(picked, 'wrong');
       first = that(picked, q.answer);
-      then = flagSays(c).here;
+      then = says(q.answer, 'here');
     } else if (q.task === 'whose') {
-      first = flagSays(c).this;
+      first = says(q.answer, 'this');
     } else {
-      first = flagSays(country(picked)).that;
+      first = says(picked, 'that');
     }
-    kit.note(`${first} ${then}`);
-    say(first, { onEnd: () => say(then) });
+    retext = () => kit.note(`${first[lang()]} ${then[lang()]}`);
+    retext();
+    const now = lang();
+    speak(first, now, () => speak(then, now));
     await kit.wait(q.task === 'map' ? 4200 : 5200);
     return false;
   }
@@ -92,17 +109,27 @@ function build(kit: Kit) {
       /* the flag on its own for "whose flag is this?", and beside the name on the map */
       flag.hidden = q.task !== 'whose' && q.task !== 'map';
       flag.textContent = c.flag;
-      flag.setAttribute('aria-label', q.task === 'whose' ? 'A flag' : `The flag of ${c.name}`);
-      ask.textContent = q.ask;
-      say(q.ask);
+      const question: Both = { en: q.ask, pt: q.pt.ask };
+      /* the flags, big, to choose from; or the names, to read */
+      const flags = q.task !== 'whose';
+      const label = (id: string): string => (flags ? country(id).flag : namedIn(country(id), lang()));
+      const words = (): void => {
+        ask.textContent = question[lang()];
+        const named: Both = q.task === 'whose' ? { en: 'A flag', pt: 'Uma bandeira' } : { en: `The flag of ${c.name}`, pt: `A bandeira ${of(c.pt)}` };
+        flag.setAttribute('aria-label', named[lang()]);
+      };
+      retext = () => {
+        words();
+        if (q.task === 'whose') kit.choices.relabel(label);
+      };
+      words();
+      speak(question, lang());
       if (q.task === 'map') {
         const picked = await map.tap(q.answer);
         return finish(picked === q.answer, q, picked);
       }
-      /* the flags, big, to choose from; or the names, to read */
-      const flags = q.task !== 'whose';
       kit.choices.node.classList.toggle('fl-flags', flags);
-      const picked = await kit.choices.askWords(q.options, (id) => (flags ? country(id).flag : Named(country(id))));
+      const picked = await kit.choices.askWords(q.options, label);
       kit.choices.revealWord(q.answer, picked);
       return finish(picked === q.answer, q, picked);
     },
