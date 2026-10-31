@@ -473,6 +473,28 @@ export const HOW: Record<PlanKind, string> = {
   pass: 'Pass it to your other button first, then shoot.',
 };
 
+/** what happened to a shot that did not score */
+export const SHOT_SAYS = {
+  missed: 'You missed the ball.',
+  keeper: 'The goleiro saved it!',
+  post: 'Off the post!',
+  block: 'A defender blocked it.',
+  touch: 'Good touch.',
+} as const;
+
+/** why he is shown a way to score: he asked, scored for the other side, or ran out of touches */
+export const STUCK = 'Stuck?';
+export const OWN_GOAL = 'Own goal! That one went into your own net.';
+export const outOfTouches = (what: string): string => `${what} No touches left.`;
+
+/** what is said before the way to score is shown */
+export const watch = (why: string): string => `${why} Watch.`;
+
+/** every one of those, so each can be recorded */
+export function watchLines(): string[] {
+  return [STUCK, OWN_GOAL, ...Object.values(SHOT_SAYS).map(outOfTouches)].map(watch);
+}
+
 /* ── his finger ────────────────────────────────────────────────────────── */
 
 /** a pull back of one table unit sets a button off at this speed */

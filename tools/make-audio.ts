@@ -54,7 +54,7 @@ import {
 } from '../src/content/index';
 import { clipId, speakable } from '../src/lib/clip-id';
 import { THEMES } from '../src/content/word-search';
-import { BOTAO_STEPS, HOW } from '../src/content/botao';
+import { BOTAO_STEPS, HOW, watchLines } from '../src/content/botao';
 import { refereeLines, weighLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
@@ -143,7 +143,7 @@ export function clips(): Clip[] {
   for (const line of capitalLines((code) => country(code).name)) add(line);
   /* and the three in Portuguese, said by the teacher */
   for (const line of [...mapLines('pt'), ...flagLines('pt'), ...capitalLines((code) => country(code).name, (code) => country(code).pt)]) add(line, 'pt');
-  for (const line of Object.values(HOW)) add(line);
+  for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */
   for (const line of EN_SAVES) add(line);
