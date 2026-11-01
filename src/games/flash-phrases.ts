@@ -95,7 +95,7 @@ function build(kit: Kit) {
       kit.choices.revealWord(phrase.text, picked);
       if (picked === phrase.text) {
         show(phrase.text);
-        sfx.right();
+        sfx.cheer();
         kit.note(`Yes! “${phrase.text}”, read in a flash.`, true);
         say(phrase.text);
         streak += 1;

@@ -53,6 +53,9 @@ export const EFFECTS: Record<Recordable, Effect> = {
   move: { prompt: 'A wooden chess piece set down on a wooden chessboard: one soft knock', seconds: 0.5, gain: 0.8 },
   take: { prompt: 'A wooden chess piece knocking another off a wooden chessboard: a knock and a little clatter', seconds: 0.8, gain: 0.7 },
   roll: { prompt: 'A wooden die rolled on a wooden table: it tumbles and stops', seconds: 1.2, gain: 0.7 },
+  /* the football games' own right and wrong: a goal, and a near miss */
+  goal: { prompt: 'A football stadium crowd roaring and cheering as a goal is scored, a big happy roar that rises and fades, no words', seconds: 2, gain: 0.5 },
+  groan: { prompt: 'A football stadium crowd groaning together, a disappointed "ooooh" as a shot just misses, no words', seconds: 1.5, gain: 0.45 },
 };
 
 type Env = Record<string, string | undefined>;

@@ -200,12 +200,14 @@ export function mount(root: HTMLElement): () => void {
     if (busy || button.classList.contains('flipped') || button.classList.contains('done')) return;
     button.classList.add('flipped');
     button.setAttribute('aria-label', card.asPicture ? `picture of ${card.word.text}` : card.word.text);
-    sfx.tap();
+    sfx.flip();
     /* a sight word is said once it is matched: there and their would sound
        like a pair before he had read them */
-    if (card.soundId) say(card.word.text);
-
-    if (!first) { first = { card, node: button }; return; }
+    if (!first) {
+      first = { card, node: button };
+      if (card.soundId) say(card.word.text);
+      return;
+    }
 
     moves += 1;
     flips.set(moves);
@@ -216,9 +218,11 @@ export function mount(root: HTMLElement): () => void {
     const pair = !sightMode() && modeSel.value === 'sound'
       ? first.card.soundId === second.card.soundId
       : first.card.pairId === second.card.pairId;
+    /* the word, and for a pair the cheer once the word is said, not over it.
+       Leaving the game cancels the speech, so then the cheer never comes */
+    if (card.soundId || pair) say(card.word.text, pair ? { onEnd: () => sfx.cheer() } : {});
     if (pair) {
       busy = true;
-      if (!card.soundId) say(card.word.text);
       life.later(() => {
         first?.node.classList.add('done');
         second.node.classList.add('done');
@@ -233,7 +237,6 @@ export function mount(root: HTMLElement): () => void {
         if (card.soundId) practised.push(card.soundId);
         matched += 1;
         found.set(matched);
-        sfx.right();
         first = null; busy = false;
         if (matched === target) {
           life.later(() => {

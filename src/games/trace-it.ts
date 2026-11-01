@@ -301,7 +301,7 @@ export function mount(root: HTMLElement): () => void {
     }
     /* the whole letter */
     busy = true;
-    sfx.right();
+    sfx.cheer();
     pad.classList.add('good');
     note.className = 'tr-note good';
     note.textContent = go === goes().length - 1 ? 'Beautiful!' : 'Yes! Again, a bit harder.';

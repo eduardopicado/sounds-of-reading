@@ -129,7 +129,7 @@ export function mount(root: HTMLElement): () => void {
       right += 1;
       streak += 1;
       rightEl.set(right);
-      sfx.right();
+      sfx.cheer();
       verdict.className = 'verdict good';
       verdict.textContent = word.real ? `Yes — ${word.text} is a real word!` : `Right — ${word.text} isn't a word!`;
     } else {
