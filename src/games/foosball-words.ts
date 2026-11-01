@@ -189,14 +189,14 @@ function build(kit: Kit) {
       const right = parts.join('') === word;
       await kick(right);
       if (right) {
-        sfx.cheer();
+        sfx.goal();
         kit.note(`GOAL! ${target.parts.join(' · ')}: ${word}.`, true);
         say(word);
         await kit.wait(2400);
         resolve(misses === 0);
         return;
       }
-      sfx.wrong();
+      sfx.groan();
       misses += 1;
       /* the rods that are wrong give a shake */
       parts.forEach((p, i) => cols[i].classList.toggle('wrong', p !== target.parts[i]));
@@ -269,7 +269,7 @@ function build(kit: Kit) {
       if (made && fresh) {
         board.found.set(made.word.text, 'made');
         drawFound();
-        sfx.cheer();
+        sfx.goal();
         const all = !notFound();
         kit.note(`GOAL! ${made.parts.join(' · ')}: ${made.word.text}.${all ? ' You found every word on this table!' : ''}`, true);
         say(made.word.text);
@@ -277,7 +277,7 @@ function build(kit: Kit) {
         resolve(misses === 0);
         return;
       }
-      sfx.wrong();
+      sfx.groan();
       /* one he has made already is no miss: just another go */
       if (made) {
         kit.note(`You made ${made.word.text} already. Make a new word!`);

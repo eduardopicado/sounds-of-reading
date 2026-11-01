@@ -121,14 +121,14 @@ function build(kit: Kit) {
       keeper.style.translate = `${toward}px 0`;
       await kit.wait(450);
       if (ok) {
-        sfx.cheer();
+        sfx.goal();
         kit.note(`GOAL! ${q.n} is nearer ${q.answer}.`, true);
         narrate('goal', kit.us(), () => say(`${q.n} is nearer ${q.answer}`), kit.life.later);
         await kit.wait(3000);
         resolve(true);
         return;
       }
-      sfx.wrong();
+      sfx.groan();
       mark(view, q.answer, 'mx-answer', '🚩');
       const why = roundWhy(q);
       kit.note(`Saved! ${why}`);
@@ -169,14 +169,14 @@ function build(kit: Kit) {
         keeper.style.translate = `${toward}px 0`;
         await kit.wait(450);
         if (ok) {
-          sfx.cheer();
+          sfx.goal();
           kit.note(`GOAL! ${shown} is right there.`, true);
           narrate('goal', kit.us(), () => say(step.per ? shown : spokenNumber(n)), kit.life.later);
           await kit.wait(3000);
           resolve(true);
           return;
         }
-        sfx.wrong();
+        sfx.groan();
         mark(step, n, 'mx-answer', '🚩');
         /* below zero: how far below it is */
         kit.note(`Saved! ${shown} lives here, by the flag.${n < 0 ? ` ${belowZero(n)}` : ''}`);

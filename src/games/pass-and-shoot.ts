@@ -278,8 +278,8 @@ export function mount(root: HTMLElement): () => void {
       banner.hidden = false;
       /* the sounds pushed together: the word, whole, under the line */
       made.replaceChildren(marked(word.text, word.spans, { tones: sound(word.sound).tones }));
-      if (right) sfx.cheer();
-      else sfx.wrong();
+      if (right) sfx.goal();
+      else sfx.groan();
       /* the commentator calls it, then the word he made is said */
       narrate(right ? 'goal' : 'save', us, () => say(word.text), later);
     }, 450);

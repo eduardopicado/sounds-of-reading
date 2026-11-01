@@ -114,7 +114,7 @@ function build(kit: Kit) {
       await kit.wait(1900);
       return true;
     }
-    sfx.wrong();
+    sfx.groan();
     /* count the empty seats the way it is done in your head */
     const how = toThousand(q.on);
     for (const seat of empty.ones) seat.classList.add('counted', 'ones');
@@ -198,7 +198,7 @@ function build(kit: Kit) {
         await kit.wait(1700);
         return true;
       }
-      sfx.wrong();
+      sfx.groan();
       if (stadium(q)) {
         const how = countSeats(q, gaps);
         say(`${how} ${q.on} and ${q.need} make 100.`);

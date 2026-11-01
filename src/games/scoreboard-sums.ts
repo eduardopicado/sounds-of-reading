@@ -139,14 +139,14 @@ function build(kit: Kit) {
       /* to 100 and beyond, the way to get there: the second number a place at a time */
       const split = season ? sumWhy(q) : sentence;
       if (picked === q.answer) {
-        sfx.cheer();
+        sfx.goal();
         kit.note(`Yes! ${sentence}`, true);
         /* his goal, called by the commentator, then the sum said */
         narrate('goal', us, () => say(sentence), kit.life.later);
         await kit.wait(3200);
         return true;
       }
-      sfx.wrong();
+      sfx.groan();
       /* every ball back on the board, to count together; to 10 000 there are too many */
       drawBalls(q, step.max === 10000 ? 'none' : crowd ? 'blocks' : season ? 'bundles' : 'all');
       kit.note(split);

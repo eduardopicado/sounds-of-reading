@@ -142,7 +142,7 @@ function build(kit: Kit) {
       kit.choices.reveal(q.n, picked);
       show(q, step);
       if (picked === q.n) {
-        sfx.right();
+        sfx.cheer();
         const yes = facts ? `Yes! ${rows} rows of ${cols} make ${q.n}.` : `Yes, ${q.n}!`;
         kit.note(yes, true);
         say(facts ? yes : String(q.n));

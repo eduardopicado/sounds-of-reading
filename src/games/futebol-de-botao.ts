@@ -563,7 +563,7 @@ function build(kit: Kit) {
         if (shot.own) { void demo(OWN_GOAL); return; }
         if (shot.goal) {
           node.dataset.goal = 'scored';
-          sfx.cheer();
+          sfx.goal();
           kit.note(`GOL! ${touches.length === 1 ? 'In one touch!' : `In ${touches.length} touches.`}${off}`, true);
           narrate('goal', kit.us(), () => undefined, kit.life.later);
           void end(true);

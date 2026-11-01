@@ -100,7 +100,7 @@ function build(kit: Kit) {
         ? `${step.dir === 1 ? 'Counting on' : 'Counting back'}: ${spoken(q, true, write)}.`
         : `${step.dir === 1 ? 'Up' : 'Back'} in ${q.by}s: ${spoken(q, true, write)}.${fact ? ` The ${q.by} times table: ${fact}.` : ''}`);
       if (picked === answer) {
-        sfx.cheer();
+        sfx.goal();
         juggler.classList.add('trick');
         kit.note(`Keepy-uppy! ${signed(answer)}!${fact ? ` ${fact}.` : ''}`, true);
         say(`Yes! ${spoken(q, true)}${fact ? `. ${said(fact)}.` : ''}`);
@@ -108,7 +108,7 @@ function build(kit: Kit) {
         juggler.classList.remove('trick');
         return true;
       }
-      sfx.wrong();
+      sfx.groan();
       steps(q, step);
       kit.note(`${how(signed)}${below}`);
       say(said(`${how(spokenNumber)}${below.replace(/−(\d+)/, 'negative $1')}`));
