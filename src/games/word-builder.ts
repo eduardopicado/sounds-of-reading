@@ -143,7 +143,8 @@ export function mount(root: HTMLElement): () => void {
       const button = el('button', {
         class: 'tile' + (found.has(tile.part) ? ' used' : '') + (current === tile.part ? ' current' : ''),
         type: 'button',
-        'aria-label': buildWord(family, tile.part),
+        /* the tile's own letters, then the word they make */
+        'aria-label': `${tile.part}, ${buildWord(family, tile.part)}`,
       }, tile.part);
       button.addEventListener('click', () => choose(tile));
       rack.append(button);
