@@ -325,7 +325,8 @@ export function mount(root: HTMLElement): () => void {
   /* ── the hours and minutes buttons ─────────────────────────────────── */
 
   const stepBtn = (text: string, label: string, cls: string, fn: () => void): HTMLButtonElement => {
-    const b = el('button', { class: `ct-step ${cls}`, type: 'button', text, 'aria-label': label }) as HTMLButtonElement;
+    /* the name starts with what the button shows, so "−1" said aloud finds it */
+    const b = el('button', { class: `ct-step ${cls}`, type: 'button', text, 'aria-label': `${text}, ${label.toLowerCase()}` }) as HTMLButtonElement;
     b.addEventListener('click', () => {
       if (locked) return;
       sfx.tap();
