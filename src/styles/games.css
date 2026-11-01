@@ -14,6 +14,10 @@
   transition: transform .45s cubic-bezier(.3, 1.4, .5, 1);
 }
 .card.flipped .inner, .card.done .inner { transform: rotateY(180deg); }
+/* a face-down card's word is not there to be read, by eye or by a screen
+   reader's "name it by what it says": it goes once the card has turned back
+   over, and comes the moment it starts to turn up */
+.card:not(.flipped):not(.done) .front { visibility: hidden; transition: visibility 0s linear .45s; }
 .card.done .inner { transform: rotateY(180deg) scale(.94); }
 .card .face {
   position: absolute; inset: 0; border-radius: 14px;

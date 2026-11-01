@@ -70,7 +70,9 @@ export function mount(root: HTMLElement): () => void {
   const setup = createSetup({ extra: [extra], onChange: () => setDie(), sight: 'roll-and-read' });
   const sightMode = (): boolean => setup.kind() === 'sight';
 
-  const cube = el('div', { class: 'cube', role: 'button', tabindex: '0', 'aria-label': 'Roll the sound die' });
+  /* the die is a picture he taps; "Roll the die" below is the button for a
+     keyboard or a screen reader, which would otherwise hear all six faces */
+  const cube = el('div', { class: 'cube', 'aria-hidden': 'true' });
   for (const pos of POSITIONS) cube.append(el('div', { class: `face f-${pos}` }));
   const diceArea = el('div', { class: 'dice-area' }, cube);
   const diceHint = el('div', { class: 'dice-hint', text: 'Tap the die to roll' });
@@ -113,7 +115,6 @@ export function mount(root: HTMLElement): () => void {
     tally = read(tallyKey(), {});
     barsTitle.textContent = sight ? 'How the sight words are going' : 'How the sounds are going';
     hintOn.textContent = sight ? 'Mark the tricky bit' : 'Underline the sound';
-    cube.setAttribute('aria-label', sight ? 'Roll the sight word die' : 'Roll the sound die');
     let picked: Face[];
     if (sight) {
       picked = setup.sightSets().map((set) => ({ id: set, label: faceLabel(set), tones: TRICKY }));
@@ -247,9 +248,6 @@ export function mount(root: HTMLElement): () => void {
 
   rollBtn.addEventListener('click', roll);
   cube.addEventListener('click', roll);
-  cube.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); roll(); }
-  });
   countSel.addEventListener('change', () => { if (shown.length) redrawWords(); });
 
   root.append(node);
