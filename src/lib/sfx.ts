@@ -45,7 +45,7 @@ export function unlockSfx(): void {
 }
 
 /** the sounds that can be recorded; tools/make-sfx.ts says what each one is */
-export type Recordable = 'cheer' | 'win' | 'whistle' | 'crowd' | 'kick' | 'clack' | 'post' | 'move' | 'take' | 'roll';
+export type Recordable = 'cheer' | 'win' | 'whistle' | 'crowd' | 'kick' | 'clack' | 'post' | 'move' | 'take' | 'roll' | 'goal' | 'groan';
 
 /** the recordings that have loaded, with how loud each one plays */
 const recorded = new Map<string, { buffer: AudioBuffer; gain: number }>();
@@ -255,8 +255,14 @@ const CRACK: Note[] = [
 export const sfx = {
   /** a bright rising third */
   right: () => play([{ hz: 660, at: 0, for: 0.12 }, { hz: 880, at: 0.09, for: 0.18 }]),
-  /** low and short — a nudge, not a buzzer */
-  wrong: () => play([{ hz: 180, at: 0, for: 0.16, type: 'triangle', gain: 0.12 }]),
+  /** a soft step down — a nudge, not a buzzer. Two notes high enough for an
+      iPad's speaker, which barely plays the single 180 Hz note this once was */
+  wrong: () => play([
+    { hz: 392, at: 0, for: 0.12, type: 'triangle', gain: 0.14 },
+    { hz: 294, at: 0.1, for: 0.18, type: 'triangle', gain: 0.14 },
+  ]),
+  /** a card turning over: a quick flick up, louder than a tap */
+  flip: () => play([{ hz: 620, at: 0, for: 0.06, gain: 0.12 }, { hz: 930, at: 0.045, for: 0.08, gain: 0.1 }]),
   /** the little click of a card or tile */
   tap: () => play(TAP),
   /** something landed in the right place */
@@ -305,6 +311,20 @@ export const sfx = {
   cheer: () => sound('cheer', () => {
     noise(1.3, 0.22);
     play([{ hz: 660, at: 0.05, for: 0.12 }, { hz: 880, at: 0.14, for: 0.2 }]);
+  }),
+  /** the football games' right answer: a stadium roaring for a goal */
+  goal: () => sound('goal', () => {
+    noise(1.8, 0.3);
+    play([{ hz: 523, at: 0.05, for: 0.12 }, { hz: 659, at: 0.15, for: 0.12 }, { hz: 784, at: 0.25, for: 0.3 }]);
+  }),
+  /** the football games' miss: the crowd's "oooh" as it goes wide */
+  groan: () => sound('groan', () => {
+    noise(1.1, 0.12);
+    play([
+      { hz: 392, at: 0, for: 0.2, type: 'triangle', gain: 0.13 },
+      { hz: 330, at: 0.18, for: 0.2, type: 'triangle', gain: 0.13 },
+      { hz: 262, at: 0.36, for: 0.36, type: 'triangle', gain: 0.13 },
+    ]);
   }),
   /** the tumble of the die */
   roll: () => sound('roll', () => play([

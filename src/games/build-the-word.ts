@@ -230,7 +230,7 @@ export function mount(root: HTMLElement): () => void {
       if (ok) { firsts += 1; firstTry.set(firsts); }
       if (item.word) mark(item.word, ok);
       log.push({ item, ok });
-      sfx.right();
+      sfx.cheer();
       note.className = 'bw-note good';
       /* for a sight word, this is where the part that lies lights up */
       note.replaceChildren(marked(item.text, item.spans, { tones: item.tones }), ' ✓');

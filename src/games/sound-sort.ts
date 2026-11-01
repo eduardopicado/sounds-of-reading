@@ -158,7 +158,7 @@ export function mount(root: HTMLElement): () => void {
 
     if (soundId === word.sound) {
       busy = true;
-      sfx.right();
+      sfx.cheer();
       hand.classList.add('right');
       hand.style.setProperty('--tone', s.tones.deep);
       /* the reveal: now the letters light up */

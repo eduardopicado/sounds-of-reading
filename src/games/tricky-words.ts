@@ -192,7 +192,7 @@ export function mount(root: HTMLElement): () => void {
     if (picked.text === word.text) {
       busy = true;
       keepWord();
-      sfx.right();
+      sfx.cheer();
       hand.classList.add('right');
       askEl.hidden = true;
       /* now the letters that lie light up: the lesson is which bit to

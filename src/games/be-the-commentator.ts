@@ -210,7 +210,7 @@ export function mount(root: HTMLElement): () => void {
     sfx.crowd(take.seconds + 0.6);
     await play(take);
     if (!life.alive()) return;
-    if (lines[index]?.mood === 'excited') sfx.cheer();
+    if (lines[index]?.mood === 'excited') sfx.goal();
     playBtn.disabled = false;
     busy = false;
   }
@@ -294,7 +294,7 @@ export function mount(root: HTMLElement): () => void {
       await play(take);
       /* leaving stops the take, which ends this wait: no roar after that */
       if (!life.alive()) return;
-      if (lines[i].mood === 'excited') sfx.cheer();
+      if (lines[i].mood === 'excited') sfx.goal();
       reel.children[i]?.classList.remove('playing');
       await new Promise<void>((r) => { life.later(r, 450); });
     }

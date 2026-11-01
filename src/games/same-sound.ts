@@ -199,7 +199,7 @@ export function mount(root: HTMLElement): () => void {
 
     if (id === word.sound) {
       busy = true;
-      sfx.right();
+      sfx.cheer();
       hand.classList.add('right');
       reveal(word);
       if (tries === 1) { firstTry += 1; rightFirst.set(firstTry); }
