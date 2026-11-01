@@ -346,6 +346,8 @@
 }
 .tile-link:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0, 0, 0, .3); }
 .tile-link .emoji { font-size: 40px; line-height: 1; }
+/* a drawn picture the size of an emoji beside it */
+.tile-link .emoji.art { width: 40px; height: 40px; }
 .tile-link .name { font-family: var(--display); font-weight: 800; font-size: 18px; }
 .tile-link .what { font-size: 13px; color: rgba(20, 49, 47, .78); line-height: 1.25; }
 
@@ -1572,6 +1574,7 @@
 }
 .pick-link:active { transform: scale(.97); }
 .pick-link .emoji { font-size: 34px; line-height: 1; }
+.pick-link .emoji.art { width: 34px; height: 34px; }
 .pick-link .name { font-family: var(--display); font-weight: 700; font-size: 15px; }
 .pick-link .why { font-size: 12px; color: var(--ink-soft, #45605D); }
 

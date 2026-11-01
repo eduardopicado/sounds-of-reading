@@ -103,13 +103,18 @@ function holdButton(label: string, onDone: () => void): { node: HTMLButtonElemen
   return { node, stop };
 }
 
+/** the game's picture where it has one, and its emoji otherwise */
+export const tileArt = (tile: Game): HTMLElement => (tile.art
+  ? el('img', { class: 'emoji art', src: tile.art, alt: '', 'aria-hidden': 'true' })
+  : el('span', { class: 'emoji', text: tile.emoji, 'aria-hidden': 'true' }));
+
 export function mount(root: HTMLElement): () => void {
   const tileLink = (tile: Game): HTMLElement => el('a', {
     class: 'tile-link', href: '#/' + tile.path, vars: { '--tone': tile.tone },
     dataset: { game: tile.path },
     on: { click: () => sfx.tap() },
   },
-    el('span', { class: 'emoji', text: tile.emoji, 'aria-hidden': 'true' }),
+    tileArt(tile),
     el('span', { class: 'name', text: tile.name }),
     el('span', { class: 'what', text: tile.what }),
   );
@@ -128,7 +133,7 @@ export function mount(root: HTMLElement): () => void {
       dataset: { game: tile.path },
       on: { click: () => sfx.tap() },
     },
-      el('span', { class: 'emoji', text: tile.emoji, 'aria-hidden': 'true' }),
+      tileArt(tile),
       el('span', { class: 'name', text: tile.name }),
       el('span', { class: 'why', text: why }),
     )));
