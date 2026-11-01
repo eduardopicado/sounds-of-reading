@@ -33,6 +33,11 @@
   <!-- the ball, ahead of it on the way to goal -->
   <ellipse cx="71" cy="37" rx="11" ry="8" fill="#0B302F" opacity=".35"/>
   <circle cx="67" cy="31" r="11" fill="url(#ball)"/>
-  <path d="M67 26.4l4.4 3.2-1.7 5.2h-5.4l-1.7-5.2z" fill="#1E2A2A"/>
+  <clipPath id="ballEdge"><circle cx="67" cy="31" r="11"/></clipPath>
+  <!-- the patches of a real ball: one in the middle, five round the edge -->
+  <g fill="#1E2A2A" clip-path="url(#ballEdge)">
+    <path d="M67.00 27.40 L70.42 29.89 L69.12 33.91 L64.88 33.91 L63.58 29.89Z"/>
+    <path d="M70.64 25.98 L69.41 22.18 L72.64 19.83 L75.88 22.18 L74.64 25.98Z M72.90 32.92 L76.13 30.57 L79.36 32.92 L78.13 36.72 L74.13 36.72Z M67.00 37.20 L70.23 39.55 L69.00 43.35 L65.00 43.35 L63.77 39.55Z M61.10 32.92 L59.87 36.72 L55.87 36.72 L54.64 32.92 L57.87 30.57Z M63.36 25.98 L59.36 25.98 L58.12 22.18 L61.36 19.83 L64.59 22.18Z"/>
+  </g>
   <circle cx="67" cy="31" r="11" fill="none" stroke="#0B302F" stroke-width="1" opacity=".5"/>
 </svg>
