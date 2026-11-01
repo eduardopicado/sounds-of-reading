@@ -134,7 +134,7 @@ export function mount(root: HTMLElement): () => void {
     }
     busy = true;
     if (!missed) { firsts += 1; right.set(firsts); } else missedLetters.push(ch);
-    sfx.right();
+    sfx.cheer();
     btn?.classList.add('right');
     card.dataset.h = truth;
     note.className = 'ts-note good';

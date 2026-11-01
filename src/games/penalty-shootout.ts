@@ -372,8 +372,8 @@ export function mount(root: HTMLElement): () => void {
       drawBoard();
       if (kind === 'shoot') showBanner(right ? 'GOAL!' : 'Saved!', right);
       else showBanner(right ? 'SAVED!' : `${rival.short} score`, right);
-      if (right) sfx.cheer();
-      else sfx.wrong();
+      if (right) sfx.goal();
+      else sfx.groan();
       /* the commentator calls it — his goal, or his save — and then the word
          is said, now that it can only confirm */
       const moment = (kind === 'shoot') === right ? 'goal' : 'save';

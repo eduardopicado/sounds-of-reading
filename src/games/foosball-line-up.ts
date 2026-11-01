@@ -129,13 +129,13 @@ function build(kit: Kit) {
       field.classList.add('counting');
       const why = lineupWhy(q);
       if (ok) {
-        sfx.cheer();
+        sfx.goal();
         kit.note(`Yes! ${why}`, true);
         say(`Yes! ${why}`);
         await kit.wait(3000);
         return true;
       }
-      sfx.wrong();
+      sfx.groan();
       kit.note(why);
       say(why);
       await kit.wait(4200);
