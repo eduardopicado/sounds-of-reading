@@ -27,7 +27,6 @@ import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_S
 import { MAP_STEPS } from '../content/world';
 import { FLAG_STEPS } from '../content/flags';
 import { CAPITAL_STEPS } from '../content/capitals';
-import botaoIcon from '../assets/botao/icon.svg';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'chess';
 
@@ -46,7 +45,8 @@ export interface Game {
   /** the name on its tile */
   name: string;
   emoji: string;
-  /** a picture to show in place of the emoji, for a game no emoji draws */
+  /** a picture to show in place of the emoji, for a game no emoji draws: a
+      file in public/, so the catalog stays plain data the tests can read */
   art?: string;
   /** the line under the name, saying what he does */
   what: string;
@@ -140,7 +140,7 @@ export const GAMES: Game[] = [
     load: () => import('./kit-shapes') },
   { path: 'coach-whiteboard', name: "Coach's Whiteboard", emoji: '📋', what: 'Left, right, and turns', tone: '#6E7D8C', section: 'maths', ladder: BOARD_STEPS,
     load: () => import('./coach-whiteboard') },
-  { path: 'futebol-de-botao', name: 'Futebol de Botão', emoji: '🔘', art: botaoIcon, what: 'Flick the button, aim through the ball', tone: '#3B8D4A', section: 'maths', ladder: BOTAO_STEPS,
+  { path: 'futebol-de-botao', name: 'Futebol de Botão', emoji: '🔘', art: 'icons/futebol-de-botao.svg', what: 'Flick the button, aim through the ball', tone: '#3B8D4A', section: 'maths', ladder: BOTAO_STEPS,
     load: () => import('./futebol-de-botao') },
   { path: 'ice-cream-van', name: 'Ice Cream Van', emoji: '🍦', what: 'Pay with Aussie coins', tone: '#E58FB3', section: 'maths', ladder: KIOSK_STEPS,
     load: () => import('./ice-cream-van') },
