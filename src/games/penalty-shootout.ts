@@ -475,7 +475,9 @@ export function mount(root: HTMLElement): () => void {
     sfx.whistle();
     if (won || level) {
       later(() => { sfx.win(); confetti(); }, 350);
-      say(won ? 'You win!' : 'What a match!');
+      /* a shootout won is a cup won: "É campeão!", then the words */
+      if (won) narrate('champion', us, () => say('You win!'), later);
+      else say('What a match!');
     } else {
       later(() => sfx.over(), 350);
       say('Good game!');

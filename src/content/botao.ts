@@ -482,6 +482,27 @@ export const SHOT_SAYS = {
   touch: 'Good touch.',
 } as const;
 
+/** how far outside a post a shot can reach the goal end and still be close, in units (about two balls across) */
+const CLOSE = 6;
+
+/**
+ * What a shot that did not go in was, for the commentator: off a post, or
+ * close (where the ball first reached the goal end it was just outside a
+ * post), or neither. Only where it first got there: a ball sent into the
+ * corner that comes back along the end passes the posts too, and that was
+ * no near thing. A save is the goleiro's, and called as one.
+ */
+export function nearMiss(shot: Shot): 'post' | 'close' | null {
+  if (shot.goal || shot.own || shot.bumps.some((b) => b.what === 'keeper')) return null;
+  if (shot.bumps.some((b) => b.what === 'post')) return 'post';
+  const first = shot.frames.findIndex((f) => f[0].y <= BALL * 2);
+  /* never there, or there already before the flick */
+  if (first <= 0) return null;
+  const { x } = shot.frames[first][0];
+  const out = x < MOUTH[0] ? MOUTH[0] - x : x > MOUTH[1] ? x - MOUTH[1] : 0;
+  return out > 0 && out <= CLOSE ? 'close' : null;
+}
+
 /** why he is shown a way to score: he asked, scored for the other side, or ran out of touches */
 export const STUCK = 'Stuck?';
 export const OWN_GOAL = 'Own goal! That one went into your own net.';

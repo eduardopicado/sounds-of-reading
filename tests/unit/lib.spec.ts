@@ -240,6 +240,13 @@ describe('commentary', () => {
       /* his own side has no name to shout, so just the goal */
       expect(callFor('goal', YOU, 'pt')).toMatch(/^(Goooool|Golaço|É gol)!$/);
       expect(callFor('goal', brazil, 'en')).toBe('Goooal for Brazil!');
+      /* the cup for his side, and the moments that are the same for everyone */
+      expect(callFor('champion', brazil, 'pt')).toMatch(/^É campeão!( É campeão!)?$/);
+      expect(callFor('champion', brazil, 'en')).toBe('Brazil are the champions!');
+      expect(callFor('champion', YOU, 'en')).toBe('Champions!');
+      expect(callFor('post', brazil, 'pt')).toMatch(/^(Na trave|No pau|Bateu na trave)!$/);
+      expect(callFor('close', brazil, 'en')).toMatch(/^(So close|Just wide)!$/);
+      expect(callFor('own-goal', brazil, 'pt')).toBe('Gol contra!');
     }
   });
 });
