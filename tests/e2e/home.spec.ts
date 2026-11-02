@@ -25,6 +25,19 @@ test.describe('home screen', () => {
     noProblems(watch);
   });
 
+  test('a game no emoji draws has its own picture, loaded and the emoji\'s size', async ({ page }) => {
+    const watch = watchPage(page);
+    await page.goto('/');
+    for (const game of GAMES.filter((g) => g.art)) {
+      const art = page.locator(`.tile-link[data-game="${game.path}"] img.emoji.art`);
+      await expect(art).toBeVisible();
+      expect(await art.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), game.path).toBe(true);
+      const box = (await art.boundingBox())!;
+      expect([Math.round(box.width), Math.round(box.height)]).toEqual([40, 40]);
+    }
+    noProblems(watch);
+  });
+
   test('tiles and chips are big enough to tap', async ({ page }) => {
     await page.goto('/');
     await expectTapTargets(page, '.tile-link');
