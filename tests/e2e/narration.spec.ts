@@ -113,6 +113,26 @@ test.describe('the commentator', () => {
     await expect.poll(async () => (await said(page)).map((s) => s.text)).toContainEqual(expect.stringMatching(/ do Flamengo!$/));
   });
 
+  test('a shootout won is a cup won: "É campeão!", and only then "You win!"', async ({ page }) => {
+    await voices(page, true);
+    await seed(page, { 'shootout-team': 'brazil', 'shootout-rival': 'argentina' });
+    await kickOff(page);
+    /* every kick right, until the match is over: it can end before all ten */
+    const pitch = page.locator('.pk-pitch');
+    for (let i = 0; i < 12; i += 1) {
+      await expect.poll(async () => (await pitch.getAttribute('data-ready')) === '1' || (await pitch.getAttribute('data-phase')) === 'over',
+        { timeout: 8000 }).toBe(true);
+      if ((await pitch.getAttribute('data-phase')) === 'over') break;
+      await kick(page, true);
+    }
+    await expect(page.locator('.results:not([hidden])')).toBeVisible({ timeout: 8000 });
+    await expect.poll(async () => (await said(page)).map((s) => s.text)).toContain('You win!');
+    const texts = (await said(page)).map((s) => s.text);
+    const cup = texts.findIndex((t) => /^É campeão!( É campeão!)?$/.test(t));
+    expect(cup).toBeGreaterThan(-1);
+    expect(texts.indexOf('You win!')).toBeGreaterThan(cup);
+  });
+
   test('uses the right article for the team: da Argentina, de Portugal', async ({ page }) => {
     await voices(page, true);
     await seed(page, { 'shootout-team': 'argentina', 'shootout-rival': 'portugal' });

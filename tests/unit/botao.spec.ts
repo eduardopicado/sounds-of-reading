@@ -3,8 +3,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   BALL, BOTAO_STEPS, KEEPER_W, L, MARKS, MAX_SPEED, MOUTH, NET, POST, PULL, R, W,
-  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, oneTouch, robust, shownBounce, simulate, slant,
-  type Point, type Table,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, nearMiss, oneTouch, robust, shownBounce, simulate, slant,
+  type Point, type Shot, type Table,
 } from '../../src/content/botao';
 
 /* the same set pieces on every run */
@@ -222,6 +222,36 @@ describe('the rules', () => {
       expect(k - KEEPER_W / 2).toBeGreaterThan(MOUTH[0]);
       expect(k + KEEPER_W / 2).toBeLessThan(MOUTH[1]);
     }
+  });
+});
+
+describe('what the commentator calls', () => {
+  /* a ball running straight up the table at x, to the goal end */
+  const run = (x: number, extra: Partial<Shot> = {}): Shot => ({
+    frames: [30, 20, 10, 2, 1].map((y) => [{ x, y }]), end: table({ x, y: 1 }, []),
+    goal: false, own: false, bumps: [], bounces: [], touched: true, ...extra,
+  });
+
+  it('calls a shot just outside a post close, and one well wide nothing', () => {
+    expect(nearMiss(run(MOUTH[0] - 3))).toBe('close');
+    expect(nearMiss(run(MOUTH[1] + 3))).toBe('close');
+    expect(nearMiss(run(MOUTH[0] - 12))).toBeNull();
+    expect(nearMiss(run(2))).toBeNull();
+  });
+
+  it('calls the post, and leaves a goal, an own goal and a save to their own calls', () => {
+    expect(nearMiss(run(MOUTH[0] - 1, { bumps: [{ what: 'post', frame: 3 }] }))).toBe('post');
+    expect(nearMiss(run(MID, { goal: true }))).toBeNull();
+    expect(nearMiss(run(MID, { own: true }))).toBeNull();
+    expect(nearMiss(run(MOUTH[0] - 3, { bumps: [{ what: 'keeper', frame: 3 }] }))).toBeNull();
+  });
+
+  it('looks only where the ball first reached the end, not where it rolled after', () => {
+    /* into the corner, then back along the end past the post */
+    const corner: Shot = { ...run(2), frames: [[{ x: 10, y: 20 }], [{ x: 2, y: 2 }], [{ x: MOUTH[0] - 2, y: 2 }]] };
+    expect(nearMiss(corner)).toBeNull();
+    /* already at the end before the flick */
+    expect(nearMiss({ ...run(MOUTH[0] - 3), frames: [[{ x: MOUTH[0] - 3, y: 1 }], [{ x: MOUTH[0] - 3, y: 1 }]] })).toBeNull();
   });
 });
 

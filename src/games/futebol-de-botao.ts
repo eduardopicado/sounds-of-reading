@@ -40,7 +40,7 @@ import { say } from '../lib/speech';
 import { svg } from '../ui/writing';
 import {
   BALL, BOTAO_STEPS, HOW, OWN_GOAL, SHOT_SAYS, STUCK, outOfTouches, watch, KEEPER_W, KEEPER_Y, L, MARKS, MOUTH, NET, POST, R, TOUCHES, VIEW, W,
-  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, shownBounce, simulate,
+  angles, botaoQuestion, bounceWords, flickFor, keeperFor, mayFlick, nearMiss, shownBounce, simulate,
   type Bounce, type BotaoStep, type Flick, type Point, type Shot, type Table,
 } from '../content/botao';
 import { mountMaths, type Kit } from './maths-kit';
@@ -560,7 +560,8 @@ function build(kit: Kit) {
         const bounce = shownBounce(shot, f.button);
         const off = bounce ? ` ${bounceWords(bounce)}` : '';
         table = { ...shot.end, keeper: keeperFor(step.keeper, shot.end.ball) };
-        if (shot.own) { void demo(OWN_GOAL); return; }
+        /* the commentator calls it first, and what he is told waits for him */
+        if (shot.own) { narrate('own-goal', kit.us(), () => void demo(OWN_GOAL), kit.life.later); return; }
         if (shot.goal) {
           node.dataset.goal = 'scored';
           sfx.goal();
@@ -574,8 +575,15 @@ function build(kit: Kit) {
           : bumped.includes('keeper') ? SHOT_SAYS.keeper
             : bumped.includes('post') ? SHOT_SAYS.post
               : bumped.includes('block') ? SHOT_SAYS.block : SHOT_SAYS.touch;
-        if (bumped.includes('keeper')) narrate('save', kit.rival(), () => undefined, kit.life.later);
-        if (touches.length >= TOUCHES) { void demo(outOfTouches(what)); return; }
+        /* a save, or off the post, or just wide: the moment, not a verdict on
+           his aim, so a shot nowhere near gets no call */
+        const call = bumped.includes('keeper') ? 'save' : nearMiss(shot);
+        if (touches.length >= TOUCHES) {
+          if (call) narrate(call, kit.rival(), () => void demo(outOfTouches(what)), kit.life.later);
+          else void demo(outOfTouches(what));
+          return;
+        }
+        if (call) narrate(call, kit.rival(), () => undefined, kit.life.later);
         /* the goleiro gets ready for where the ball is now */
         keeperEl.classList.add('moving');
         draw(table);
