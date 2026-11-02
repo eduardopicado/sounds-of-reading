@@ -62,7 +62,9 @@ import { refereeLines, weighLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
-import { EN_SAVES, PT_SAVES, enGoal, ptGoals } from '../src/content/commentary';
+import {
+  EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
+} from '../src/content/commentary';
 import { TEAMS, real } from '../src/games/teams';
 
 const OUT = join(process.cwd(), 'public', 'audio');
@@ -158,6 +160,10 @@ export function clips(): Clip[] {
   for (const t of TEAMS) if (real(t)) add(enGoal(t.name));
   for (const line of [...PT_SAVES, ...ptGoals()]) add(line, 'pt-commentator');
   for (const t of TEAMS) if (t.pt) for (const line of ptGoals(t.pt)) add(line, 'pt-commentator');
+  /* and the cup, a post, a near miss and an own goal, which are the same for every team but the cup */
+  for (const line of [...EN_POSTS, ...EN_CLOSE, ...EN_OWN_GOALS, enChampion()]) add(line);
+  for (const t of TEAMS) if (real(t)) add(enChampion(t.name));
+  for (const line of [...PT_CHAMPIONS, ...PT_POSTS, ...PT_CLOSE, ...PT_OWN_GOALS]) add(line, 'pt-commentator');
 
   /* jiu-jitsu: everything the two referee games say, both ways */
   for (const line of refereeLines()) { add(line.en); add(line.pt, 'pt'); }
