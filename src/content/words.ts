@@ -1015,15 +1015,16 @@ export const NOT_BY_CHANCE: string[] = ['cock'];
 /*  Words never sounded out with the recorded sounds, because a letter in them
  *  does not make its usual sound: a silent letter (knight, thumb), a after w
  *  (wall), ch said as k (school), n said as ng before k (think), an s said as
- *  z (pins). They are still said whole. The content test names any word that
- *  needs adding here: it sounds every word out and checks it against the
- *  dictionary.
+ *  z (pins), a g that stays hard before i (girl). They are still said whole.
+ *  The content test names any word that needs adding here: it sounds every
+ *  word out and checks it against the dictionary.
  */
 export const NOT_SOUNDED_OUT: string[] = [
-  /* a silent letter */ 'thumb', 'knight', 'knew',
+  /* a silent letter */ 'thumb', 'knight', 'knew', 'climb',
   /* a after w */ 'wall', 'squash',
-  /* ch as k, n as ng */ 'school', 'think', 'yank',
+  /* ch as k, n as ng, gh as f */ 'school', 'think', 'yank', 'rough', 'tough',
+  /* g hard before i, against the c and g rule */ 'girl',
   /* s as z */ 'pins', 'tins', 'fans', 'jugs', 'peas', 'flies', 'tries', 'spies', 'skies',
-  'blues', 'toes', 'weighs', 'knees',
+  'blues', 'toes', 'weighs', 'knees', 'cries', 'clues', 'goes', 'crumbs',
   /* two vowel sounds in one spelling */ 'quiet',
 ];
