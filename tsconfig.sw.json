@@ -1,0 +1,10 @@
+{
+  "//": "the offline worker (src/sw.ts) runs in a worker, not a page: its own lib",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2022", "WebWorker"],
+    "types": ["vite-plugin-pwa/client"]
+  },
+  "include": ["src/sw.ts"],
+  "exclude": []
+}
