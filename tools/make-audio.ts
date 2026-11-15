@@ -65,7 +65,8 @@ import { capitalLines } from '../src/content/capitals';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
-import { TEAMS, real } from '../src/games/teams';
+import { TEAMS, flagCountries, real } from '../src/games/teams';
+import { surveyLines } from '../src/content/maths';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 const API = 'https://api.elevenlabs.io/v1';
@@ -77,6 +78,10 @@ const UI_LINES = [
   'You win!', 'What a match!', 'Good game!', 'Every one a goal!', 'Good passing!', 'Every one right!', 'Good spelling!',
   'Beautiful writing!', 'Good writing!', 'Well spotted!', 'Find every b', 'Find every d', 'Find every p', 'Find every q',
   'Every word found!', 'Every word, and no help!',
+  /* what each game says at the end of a round (its cheer, in src/games/);
+     the content test checks every cheer is here */
+  'Good counting!', 'Good map reading!', 'Good planning!', 'Good taking!', 'Good looking!', 'Good hunting!',
+  'Good moving!', 'Ready to play!', 'Good finding!', 'Good sprinting!',
 ];
 
 /* The games' questions and instructions that are always the same words. A
@@ -151,6 +156,8 @@ export function clips(): Clip[] {
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
   /* Word Parts: every word with its ending, and what is said after each answer */
   for (const line of partLines()) add(line);
+  /* Fan Survey: every question and every answer, for every team it can pick */
+  for (const line of surveyLines(flagCountries().map((t) => t.name))) add(line);
   /* Read and Point's stories, a sentence and a word at a time, and Flash Phrases */
   for (const line of [...storyLines(), ...phraseLines()]) add(line);
 

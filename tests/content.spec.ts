@@ -4,6 +4,8 @@
  * Run it before committing any content change:  npm run validate:content */
 
 import { describe, expect, it } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
@@ -24,6 +26,8 @@ import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
+import { SURVEY_STEPS, surveyAsk, surveyQuestion, surveySaid } from '../src/content/maths';
+import { flagCountries } from '../src/games/teams';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
 import { NOT_BY_CHANCE, NOT_SOUNDED_OUT, PHONEMES } from '../src/content/words';
@@ -284,6 +288,36 @@ describe('recorded audio', () => {
       byId.set(id, text);
     }
     expect(clash).toEqual([]);
+  });
+
+  it('records every game\'s end-of-round cheer', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const dir = join(process.cwd(), 'src', 'games');
+    const cheers = readdirSync(dir).filter((f) => f.endsWith('.ts'))
+      .flatMap((f) => [...readFileSync(join(dir, f), 'utf8').matchAll(/cheer: '([^']+)'/g)].map((m) => m[1]));
+    /* and the maths games' own, for one with none */
+    cheers.push('Good counting!');
+    expect(cheers.length).toBeGreaterThan(10);
+    expect(cheers.filter((c) => !list.has(clipId(c)))).toEqual([]);
+  });
+
+  it('records everything Fan Survey says, for every team and number', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const names = flagCountries().map((t) => t.name);
+    const missing = new Set<string>();
+    for (const step of SURVEY_STEPS) {
+      for (let i = 0; i < 400; i += 1) {
+        const q = surveyQuestion(step);
+        const t = i % names.length;
+        const team = names[t];
+        /* never the team itself */
+        const other = names[(t + 1 + (i % (names.length - 1))) % names.length];
+        const lines = [surveyAsk(step, team, other)];
+        lines.push('Yes!', ...surveySaid(step, q, team));
+        for (const line of lines) if (!list.has(clipId(line))) missing.add(`${step.name}: ${line}`);
+      }
+    }
+    expect([...missing].slice(0, 10)).toEqual([]);
   });
 
   it('records real words and never made-up ones', () => {
