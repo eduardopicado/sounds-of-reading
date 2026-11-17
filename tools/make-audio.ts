@@ -414,17 +414,20 @@ async function main(): Promise<void> {
   }
 
   let made = 0;
-  for (const c of todo) {
-    writeFileSync(join(OUT, `${clipId(c.text)}.mp3`), await speak(c));
-    made += 1;
-    if (made % 50 === 0) console.log(`  ${made} of ${todo.length}`);
+  try {
+    for (const c of todo) {
+      writeFileSync(join(OUT, `${clipId(c.text)}.mp3`), await speak(c));
+      made += 1;
+      if (made % 50 === 0) console.log(`  ${made} of ${todo.length}`);
+    }
+  } finally {
+    /* the manifest is what the app reads: it plays a clip only for a string
+       listed here, and speaks everything else. Written even when a run
+       stops part-way (out of credits, say), so what was made is used */
+    const shipped = readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4));
+    writeFileSync(join(OUT, 'clips.json'), JSON.stringify(shipped.sort()));
+    console.log(`\nrecorded ${made}, manifest lists ${shipped.length}`);
   }
-
-  /* the manifest is what the app reads: it plays a clip only for a string
-     listed here, and speaks everything else */
-  const shipped = readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4));
-  writeFileSync(join(OUT, 'clips.json'), JSON.stringify(shipped.sort()));
-  console.log(`\nrecorded ${made}, manifest lists ${shipped.length}`);
 }
 
 /* only when run as a command. The content test imports wanted() from here,
