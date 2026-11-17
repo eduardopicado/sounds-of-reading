@@ -19,6 +19,7 @@
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
 import { hasClip, hasSound, playClip, playSound, stopClips } from './audio';
+import { duckSfx } from './sfx';
 
 export { hasSound };
 
@@ -334,6 +335,8 @@ export const canSpeak = (lang: string): boolean => voicesFor(lang).length > 0;
 
 export function say(text: string, options: SayOptions = {}): void {
   if (!enabled || !text) { options.onEnd?.(); return; }
+  /* a cheer that has just started goes quiet under the word */
+  duckSfx();
   /* a recording where we shipped one (in either language), the device voice
      everywhere else. The diagnostics screen asks for a named voice, so it
      always gets the real thing rather than a clip that would sound the same
@@ -356,6 +359,7 @@ export function say(text: string, options: SayOptions = {}): void {
  */
 export function saySound(phoneme: string, options: { onEnd?: () => void } = {}): void {
   if (!enabled || !hasSound(phoneme)) { options.onEnd?.(); return; }
+  duckSfx();
   cancelSpeech();
   void playSound(phoneme, { onEnd: options.onEnd }).then((played) => { if (!played) options.onEnd?.(); });
 }

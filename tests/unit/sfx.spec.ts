@@ -24,7 +24,17 @@ class FakeSource {
   stop(at?: number): void { if (at === undefined) this.cut = true; else this.endsAt = at; }
 }
 
-const param = () => ({ value: 0, setValueAtTime: () => undefined, exponentialRampToValueAtTime: () => undefined });
+/** a volume, remembering where it was ramped to */
+const param = () => {
+  const p = {
+    value: 0, ramps: [] as number[],
+    setValueAtTime: () => undefined, exponentialRampToValueAtTime: () => undefined, cancelScheduledValues: () => undefined,
+    linearRampToValueAtTime: (v: number) => { p.ramps.push(v); },
+  };
+  return p;
+};
+/** every volume made, and what each was connected to */
+const gains: { gain: ReturnType<typeof param>; to: unknown[] }[] = [];
 
 class FakeContext {
   currentTime = 0;
@@ -33,7 +43,11 @@ class FakeContext {
   destination = {};
   createOscillator() { return new FakeSource('tone'); }
   createBufferSource() { return new FakeSource('noise'); }
-  createGain() { return { gain: param(), connect: <T>(n: T) => n }; }
+  createGain() {
+    const g = { gain: param(), to: [] as unknown[], connect: <T>(n: T) => { g.to.push(n); return n; } };
+    gains.push(g);
+    return g;
+  }
   createBiquadFilter() { return { type: '', frequency: { value: 0 }, Q: { value: 0 }, connect: <T>(n: T) => n }; }
   createBuffer(_c: number, length: number) { return { getChannelData: () => new Float32Array(length) }; }
   resume() { return Promise.resolve(); }
@@ -154,5 +168,34 @@ describe('recorded sounds', () => {
     sfx.win();
     sfx.cheer();
     expect(FakeSource.made).toEqual([]);
+  });
+});
+
+describe('the crowd under the words', () => {
+  beforeEach(() => {
+    vi.resetModules();
+    FakeSource.made = [];
+    gains.length = 0;
+    vi.stubGlobal('window', { AudioContext: FakeContext, localStorage: { getItem: () => null, setItem: () => undefined } });
+  });
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  it('turns a cheer down while a word is said, then back up', async () => {
+    const { sfx, duckSfx } = await import('../../src/lib/sfx');
+    sfx.cheer();
+    /* one volume for the loud sounds, straight to the speakers, and the cheer's own volumes into it */
+    const under = gains.find((g) => gains.some((o) => o.to.includes(g)))!;
+    expect(under).toBeTruthy();
+    duckSfx();
+    expect(under.gain.ramps).toEqual([0.2, 1]);
+  });
+
+  it('leaves a tap at full volume', async () => {
+    const { sfx, duckSfx } = await import('../../src/lib/sfx');
+    sfx.tap();
+    duckSfx();
+    expect(gains).toHaveLength(1);
+    expect(gains[0].to).toHaveLength(1);
+    expect(gains.some((g) => g.gain.ramps.length)).toBe(false);
   });
 });
