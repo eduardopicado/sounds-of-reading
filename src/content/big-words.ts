@@ -71,6 +71,9 @@ function parse(entry: string): BigWord {
 
 export const ALL_BIG_WORDS: BigWord[] = BIG_WORDS.split('|').filter((x) => x.trim()).map(parse);
 
+/** what is said after an answer: the parts, then the word, the way to read it */
+export const bigSaid = (w: BigWord): string => `${w.parts[0]}, ${w.parts[1]}, ${w.text}`;
+
 const DIGRAPHS = ['sh', 'ch', 'th', 'ck', 'ng', 'wh', 'ph', 'qu'];
 
 /** a word whose split is between two consonants, so he can be asked to find it */

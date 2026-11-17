@@ -981,6 +981,22 @@ describe('coach says', () => {
     expect(wrong).toEqual([]);
   });
 
+  it('says each instruction in recorded phrases, word for word what is on the screen', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const words = (t: string) => t.toLowerCase().match(/[a-z]+/g)!.join(' ');
+    const missing = new Set<string>();
+    for (const step of SAYS_STEPS) {
+      for (let level = 1; level <= TOP_LEVEL; level += 1) {
+        for (let i = 0; i < 30; i += 1) {
+          const q = saysQuestion(step, level);
+          expect(words(q.said.join(' ')), q.text).toBe(words(q.text));
+          for (const line of q.said) if (!list.has(clipId(line))) missing.add(line);
+        }
+      }
+    }
+    expect([...missing].slice(0, 10)).toEqual([]);
+  });
+
   it('has every step a template, and enough to play with at every level', () => {
     for (const step of SAYS_STEPS) expect(TEMPLATES[step.task], step.name).toBeTruthy();
     for (let level = 2; level <= TOP_LEVEL; level += 1) {
@@ -1020,9 +1036,14 @@ describe('coach says', () => {
 
 /* ── Big Words ──────────────────────────────────────────────────────────── */
 
-import { ALL_BIG_WORDS, BIG_STEPS, bigQuestion, plainSplit } from '../src/content/big-words';
+import { ALL_BIG_WORDS, BIG_STEPS, bigQuestion, bigSaid, plainSplit } from '../src/content/big-words';
 
 describe('big words', () => {
+  it('records every big word, and its parts then the word', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    expect(ALL_BIG_WORDS.flatMap((w) => [w.text, bigSaid(w)]).filter((t) => !list.has(clipId(t)))).toEqual([]);
+  });
+
   it('are real words, each two parts that make it', () => {
     expect(ALL_BIG_WORDS.filter((w) => !isRealWord(w.text)).map((w) => w.text)).toEqual([]);
     for (const w of ALL_BIG_WORDS) expect(w.parts.join('')).toBe(w.text);

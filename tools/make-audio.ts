@@ -67,6 +67,8 @@ import {
 } from '../src/content/commentary';
 import { TEAMS, flagCountries, real } from '../src/games/teams';
 import { surveyLines } from '../src/content/maths';
+import { saysLines } from '../src/content/coach-says';
+import { ALL_BIG_WORDS, bigSaid } from '../src/content/big-words';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 const API = 'https://api.elevenlabs.io/v1';
@@ -81,7 +83,7 @@ const UI_LINES = [
   /* what each game says at the end of a round (its cheer, in src/games/);
      the content test checks every cheer is here */
   'Good counting!', 'Good map reading!', 'Good planning!', 'Good taking!', 'Good looking!', 'Good hunting!',
-  'Good moving!', 'Ready to play!', 'Good finding!', 'Good sprinting!',
+  'Good moving!', 'Ready to play!', 'Good finding!', 'Good sprinting!', 'That is it!',
 ];
 
 /* The games' questions and instructions that are always the same words. A
@@ -156,6 +158,9 @@ export function clips(): Clip[] {
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
   /* Word Parts: every word with its ending, and what is said after each answer */
   for (const line of partLines()) add(line);
+  /* Coach Says: every instruction, in phrases; Big Words: each word, and its parts then the word */
+  for (const line of saysLines()) add(line);
+  for (const w of ALL_BIG_WORDS) { add(w.text); add(bigSaid(w)); }
   /* Fan Survey: every question and every answer, for every team it can pick */
   for (const line of surveyLines(flagCountries().map((t) => t.name))) add(line);
   /* Read and Point's stories, a sentence and a word at a time, and Flash Phrases */

@@ -20,7 +20,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, sayInTurn } from '../lib/speech';
 import { pro, settings } from '../lib/settings';
 import { TOP_LEVEL } from '../content/index';
 import {
@@ -65,7 +65,7 @@ function build(kit: Kit) {
     say1.textContent = q.text;
     node.dataset.task = q.task;
     help.hidden = pro();
-    help.onclick = () => { helped = true; sfx.tap(); say(q.text); };
+    help.onclick = () => { helped = true; sfx.tap(); sayInTurn(q.said); };
 
     const itemBtns = q.shown.map((s, i) => el('button', {
       class: s.big === undefined ? 'cs-thing' : s.big ? 'cs-thing big' : 'cs-thing small',
@@ -90,7 +90,7 @@ function build(kit: Kit) {
           if (a.kind === 'put') placeBtns[a.place].classList.add('meant');
         }
         kit.note(`The coach said: ${q.text}`);
-        say(q.text);
+        sayInTurn(q.said);
         await kit.wait(4200);
         resolve(false);
       }

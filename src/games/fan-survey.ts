@@ -17,7 +17,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, sayInTurn } from '../lib/speech';
 import { shuffle } from '../lib/random';
 import {
   SURVEY_STEPS, choices, countIn, surveyAsk, surveyChoices, surveyQuestion, surveySaid, tableHow, type SurveyQuestion, type SurveyStep,
@@ -128,12 +128,6 @@ function build(kit: Kit) {
     const total = withTally ? [] : [el('tr', { class: 'fs-total' }, cell('Total'), cell('?', 'fs-gap'))];
     board.replaceChildren(el('table', { class: 'fs-sheet' }, el('thead', {}, head), el('tbody', {}, ...rows, ...total)));
   }
-
-  /** one line after another; leaving the game cancels the speech, and with
-      it the lines still to come */
-  const sayInTurn = ([line, ...rest]: string[]): void => {
-    if (line) say(line, { onEnd: () => sayInTurn(rest) });
-  };
 
   /** the working on the screen, and the part of it said (recorded for
       every team and number: surveyLines in src/content/maths.ts) */
