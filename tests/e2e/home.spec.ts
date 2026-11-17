@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, recordSpeech, said, watchPage } from './helpers';
 import { GAMES, SECTIONS } from '../../src/games/catalog';
 
 test.describe('home screen', () => {
@@ -176,7 +176,7 @@ test.describe('the grown-ups corner', () => {
 
   test('groups the settings into cards', async ({ page }) => {
     await openGame(page, 'grown-ups');
-    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'Challenge', 'Sound', 'Team crests', 'Stickers']);
+    await expect(page.locator('.gu-card h2')).toHaveText(["This week's sounds", 'How it is going', 'His name', 'Challenge', 'Sound', 'Team crests', 'Stickers']);
     /* the sounds of the two default levels, one line each */
     await expect(page.locator('.sound-group .group-name')).toHaveText(['Level 4', 'Level 5']);
   });
@@ -251,5 +251,24 @@ test.describe('a game that will not open', () => {
     expect(errors.some((e) => e.includes('Could not open #/sound-sort'))).toBe(true);
     await page.getByRole('button', { name: 'Back to the games' }).click();
     await expect(page.locator('.tiles').first()).toBeVisible();
+  });
+});
+
+test.describe('his name', () => {
+  test('typed in Grown-ups, it is said, greets him and names his football side', async ({ page }) => {
+    const watch = watchPage(page);
+    await recordSpeech(page);
+    await openGame(page, 'grown-ups');
+    await page.getByLabel('Name', { exact: true }).fill('Tom');
+    await page.getByRole('button', { name: '🔊 Hear it' }).click();
+    await expect.poll(async () => (await said(page)).at(-1)).toBe('Tom');
+
+    /* on home, and on his side of the scoreboard */
+    await page.goto('/');
+    await expect(page.locator('.tag').first()).toHaveText('Olá, Tom! Pick a game.');
+    await openGame(page, 'penalty-shootout');
+    await expect(page.locator('.pk-board')).toContainText('Tom');
+
+    noProblems(watch);
   });
 });

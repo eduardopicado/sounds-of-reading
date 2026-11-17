@@ -66,6 +66,7 @@ import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
 import { TEAMS, real } from '../src/games/teams';
+import { RECORDED_NAMES } from '../src/lib/name';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 const API = 'https://api.elevenlabs.io/v1';
@@ -151,6 +152,8 @@ export function clips(): Clip[] {
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
   /* Word Parts: every word with its ending, and what is said after each answer */
   for (const line of partLines()) add(line);
+  /* his name, as it is said at home: in the Brazilian voice */
+  for (const n of RECORDED_NAMES) add(n, 'pt');
   /* Read and Point's stories, a sentence and a word at a time, and Flash Phrases */
   for (const line of [...storyLines(), ...phraseLines()]) add(line);
 

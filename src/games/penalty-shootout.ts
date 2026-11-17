@@ -23,6 +23,7 @@ import { el } from '../lib/dom';
 import { lifetime } from '../lib/life';
 import { pick, shuffle } from '../lib/random';
 import { say } from '../lib/speech';
+import { praise } from '../lib/name';
 import { sfx } from '../lib/sfx';
 import { marked, setMarked } from '../lib/highlight';
 import { pro, settings } from '../lib/settings';
@@ -476,7 +477,7 @@ export function mount(root: HTMLElement): () => void {
     if (won || level) {
       later(() => { sfx.win(); confetti(); }, 350);
       /* a shootout won is a cup won: "É campeão!", then the words */
-      if (won) narrate('champion', us, () => say('You win!'), later);
+      if (won) narrate('champion', us, () => praise('You win!'), later);
       else say('What a match!');
     } else {
       later(() => sfx.over(), 350);

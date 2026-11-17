@@ -9,7 +9,7 @@ import { LEVELS, PRACTICE_SOUNDS, SIGHT_SETS, type Level, type SightWord, type S
 import { TRICKY, sightSetsUpTo, sightWordsIn } from '../content/sight';
 import { settings, updateSettings } from '../lib/settings';
 import { read, write } from '../lib/storage';
-import { say } from '../lib/speech';
+import { praise } from '../lib/name';
 
 /* ── header ───────────────────────────────────────────────────────────── */
 
@@ -444,5 +444,5 @@ export function resultsTray(title: string | Node, body: Node, ...actions: HTMLEl
 export function celebrate(line?: string): void {
   sfx.win();
   confetti();
-  if (line) say(line);
+  if (line) praise(line);
 }

@@ -5,6 +5,7 @@
  * live on their own page (src/games/grown-ups.ts), behind a button that has
  * to be held for three seconds, so a tap about cannot change his week. */
 
+import { childName } from '../lib/name';
 import { el } from '../lib/dom';
 import { pick } from '../lib/random';
 import { go } from '../lib/router';
@@ -190,7 +191,7 @@ export function mount(root: HTMLElement): () => void {
   const node = el('div', { class: 'wrap wide' },
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } },
       el('h1', {}, 'Sounds of ', el('span', { class: 'swash', text: 'Reading' })),
-      el('p', { class: 'tag', text: 'Pick a game.' }),
+      el('p', { class: 'tag', text: childName() ? `Olá, ${childName()}! Pick a game.` : 'Pick a game.' }),
     ),
     el('div', { style: { textAlign: 'center', marginBottom: '14px' } }, starBtn),
     moveNote,

@@ -26,6 +26,10 @@ export interface Settings {
   /** the coach favours the sounds he is missing, and moves him up a level
       when the one he is on is mastered — see src/lib/coach.ts */
   coach: boolean;
+  /** his name, and a nickname, said after a round's praise (src/lib/name.ts);
+      empty for none. Kept on this device like everything else */
+  name: string;
+  nickname: string;
 }
 
 const DEFAULTS: Settings = {
@@ -37,7 +41,13 @@ const DEFAULTS: Settings = {
   voiceURI: null,
   pro: false,
   coach: true,
+  name: '',
+  nickname: '',
 };
+
+/** a name as typed: trimmed, one line, and short enough for a scoreboard */
+export const cleanName = (raw: string): string =>
+  raw.replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 20);
 
 /** is Pro mode on? A one-word question every game asks */
 export const pro = (): boolean => current.pro;
@@ -68,6 +78,9 @@ export function cleanSettings(raw: unknown): Partial<Settings> {
     if (typeof r[key] === 'boolean') out[key] = r[key] as boolean;
   }
   if (typeof r.voiceURI === 'string' || r.voiceURI === null) out.voiceURI = r.voiceURI as string | null;
+  for (const key of ['name', 'nickname'] as const) {
+    if (typeof r[key] === 'string') out[key] = cleanName(r[key] as string);
+  }
   return out;
 }
 

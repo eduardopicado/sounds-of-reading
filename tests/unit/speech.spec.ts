@@ -369,3 +369,62 @@ describe('a sound, then a word', () => {
     expect(engine.said).toEqual([]);
   });
 });
+
+describe('his name', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  async function withClips(lines: string[]): Promise<string[]> {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => lines.map((l) => clipId(l)) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    return played;
+  }
+
+  it('plays the Portuguese recording of Lucas, with no Portuguese voice needed', async () => {
+    await load();
+    const played = await withClips(['Lucas', 'Luquinhas']);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { sayName } = await import('../../src/lib/name');
+    updateSettings({ name: 'Lucas', nickname: '' });
+    sayName();
+    await settle();
+    expect(played).toHaveLength(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says any other name in the device voice', async () => {
+    await load();
+    await withClips(['Lucas']);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { sayName } = await import('../../src/lib/name');
+    updateSettings({ name: 'Tom', nickname: '' });
+    sayName();
+    await settle();
+    expect(engine.said.map((u) => u.text)).toEqual(['Tom']);
+  });
+
+  it('says the praise, then the name; and nothing more with no name given', async () => {
+    await load();
+    await withClips([]);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { praise } = await import('../../src/lib/name');
+    updateSettings({ name: 'Tom', nickname: 'Tommy' });
+    praise('Every one right!');
+    engine.finish();
+    await settle();
+    expect(engine.said.map((u) => u.text)).toEqual(['Every one right!', expect.stringMatching(/^(Tom|Tommy)$/)]);
+    updateSettings({ name: '', nickname: '' });
+    const onEnd = vi.fn();
+    praise('Good game!', { onEnd });
+    engine.finish();
+    expect(engine.said.map((u) => u.text).slice(2)).toEqual(['Good game!']);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+});

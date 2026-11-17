@@ -14,7 +14,8 @@ import { hasClip } from '../lib/audio';
 import { LEVELS, PRACTICE_SOUNDS, sound, type Level, type Sound } from '../content/index';
 import { chip, confirmButton, topbar } from '../ui/components';
 import { clearStickers } from '../lib/stickers';
-import { settings, updateSettings } from '../lib/settings';
+import { cleanName, settings, updateSettings } from '../lib/settings';
+import { RECORDED_NAMES, sayName } from '../lib/name';
 import { strongSounds, weakSounds } from '../lib/coach';
 import { clearCrest, crestFromFile, crestOf, setCrest } from '../lib/crests';
 import { GAMES } from './catalog';
@@ -311,6 +312,25 @@ export function mount(root: HTMLElement): () => void {
     drawOthers();
   }
 
+  /* ── his name ─────────────────────────────────────────────────────── */
+
+  const nameField = (label: string, key: 'name' | 'nickname', hint: string): HTMLElement => {
+    const input = el('input', {
+      type: 'text', class: 'gu-name', value: settings()[key], maxlength: '20', autocomplete: 'off',
+      autocapitalize: 'words', spellcheck: 'false', placeholder: hint, 'aria-label': label,
+    }) as HTMLInputElement;
+    input.addEventListener('input', () => updateSettings({ [key]: cleanName(input.value) }));
+    return el('label', { class: 'row' }, el('span', { class: 'lbl', text: label }), input);
+  };
+  const nameCard = card('His name', 'name',
+    nameField('Name', 'name', 'Lucas'),
+    nameField('Nickname', 'nickname', 'Luquinhas'),
+    el('div', { class: 'row' }, el('button', {
+      class: 'btn ghost small', type: 'button', text: '🔊 Hear it',
+      on: { click: () => sayName() },
+    })),
+    el('p', { class: 'tag', text: `Said after a round, and on his football team. ${RECORDED_NAMES.join(' and ')} are recorded in Portuguese; any other name is read by this iPad's own voice. It stays on this iPad.` }));
+
   function draw(): void {
     drawWeek();
     drawReport();
@@ -330,6 +350,7 @@ export function mount(root: HTMLElement): () => void {
     card("This week's sounds", 'week', summary, levelRow, soundRows, thRow,
       el('p', { class: 'tag', text: 'Every reading game starts from these. A game’s ⚙ can change them for one session.' })),
     card('How it is going', 'progress', reportEl, mathsList),
+    nameCard,
     card('Challenge', 'challenge', challengeRow,
       el('p', { class: 'tag', text: 'Pro mode makes every game a notch harder. The coach gives more practice to the sounds that need it, and moves the week up a level when one is mastered.' })),
     card('Sound', 'sound', soundRow, voiceRow),

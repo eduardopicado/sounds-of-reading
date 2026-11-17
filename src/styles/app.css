@@ -163,7 +163,7 @@ h1 .swash::after {
 @media (max-width: 380px) { .kind-btn { padding: 8px 12px; font-size: 15px; } }
 .setup-sight-row[hidden], .setup-sounds-row[hidden] { display: none; }
 
-select {
+select, input[type="text"] {
   font-family: var(--reading); font-size: 16px;
   min-height: var(--tap); padding: 8px 12px; border-radius: 14px;
   border: 2px solid rgba(255, 246, 231, .32);
