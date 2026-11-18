@@ -420,3 +420,46 @@ describe('a sound, then a word', () => {
     expect(engine.said).toEqual([]);
   });
 });
+
+describe('a word said before the list of recordings has loaded', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build whose list of recordings arrives only when `arrive` is called */
+  async function slowList(lines: string[]) {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    let arrive: () => void = () => undefined;
+    const gate = new Promise<void>((r) => { arrive = r; });
+    vi.stubGlobal('fetch', async () => { await gate; return { ok: true, json: async () => lines.map((l) => clipId(l)) }; });
+    const audio = await import('../../src/lib/audio');
+    const loaded = audio.loadClips('./audio/clips.json');
+    return { played, arrive: async () => { arrive(); await loaded; await settle(); } };
+  }
+
+  it('waits for the list, then plays the recording rather than the device voice', async () => {
+    const speech = await load();
+    const list = await slowList(['cat']);
+    speech.say('cat');
+    await settle();
+    expect(engine.said).toEqual([]);
+    await list.arrive();
+    expect(list.played).toHaveLength(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says nothing of it once the game is left, or something else is said', async () => {
+    const speech = await load();
+    const list = await slowList(['cat', 'dog']);
+    speech.say('cat');
+    speech.cancelSpeech();
+    speech.say('dog');
+    await list.arrive();
+    expect(list.played).toHaveLength(1);
+    expect(list.played[0]).not.toContain(((await import('../../src/lib/clip-id')).clipId('cat')));
+  });
+});

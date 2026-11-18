@@ -111,9 +111,13 @@ test.describe('Be the Commentator', () => {
     await openGame(page, 'be-the-commentator');
     await page.getByRole('button', { name: '🎙 Record' }).click();
     await page.getByRole('button', { name: '⏹ Stop' }).click();
-    await page.getByRole('button', { name: '🎙 Again' }).click();
-    await expect(page.getByRole('button', { name: '🎙 Record' })).toBeVisible();
+    /* straight to recording: it is the only thing another go can mean */
+    await page.getByRole('button', { name: '🎙 Record again' }).click();
+    await expect(page.locator('.cm-card')).toHaveClass(/live/);
+    await expect(page.getByRole('button', { name: '⏹ Stop' })).toBeVisible();
     await expect(page.locator('.score')).toContainText('Line 1');
+    await page.getByRole('button', { name: '⏹ Stop' }).click();
+    await expect(page.getByRole('button', { name: '🎙 Record again' })).toBeVisible();
   });
 
   test('with the microphone refused, he reads to a grown-up and the game goes on', async ({ page }) => {

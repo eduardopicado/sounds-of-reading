@@ -117,6 +117,54 @@ export function wakeSfx(): void {
 
 interface Note { hz: number; at: number; for: number; gain?: number; type?: OscillatorType }
 
+/* The crowd under the words. A cheer, a roar or a groan lasts a second or
+   two, and a game says the word as it starts, so the two were heard on top
+   of each other. These loud ones go through a volume of their own, turned
+   down while a word is said (duckSfx, from src/lib/speech.ts) and back up
+   after, the way the crowd sits under the commentary on the telly. */
+const LOUD = new Set<string>(['cheer', 'win', 'goal', 'groan', 'crowd']);
+let under: GainNode | null = null;
+/** where the sound being made goes: under the words for a loud one */
+let toUnder = false;
+
+function out(ac: AudioContext): AudioNode {
+  if (!toUnder) return ac.destination;
+  if (!under) {
+    under = ac.createGain();
+    under.connect(ac.destination);
+  }
+  return under;
+}
+
+/** make a sound, sent under the words if it is a loud one */
+function routed(name: string, make: () => void): void {
+  toUnder = LOUD.has(name);
+  try { make(); } finally { toUnder = false; }
+}
+
+/** how far the crowd goes down while a word is said */
+const DUCKED = 0.2;
+
+/**
+ * Turns the cheers and the crowd down while a word is said, then back up:
+ * held down for `seconds`, as long as a cheer lasts, unless a later word
+ * holds it longer. Called by say() for every word.
+ */
+export function duckSfx(seconds = 1.6): void {
+  if (!ctx || !under) return;
+  try {
+    const g = under.gain;
+    const now = ctx.currentTime;
+    g.cancelScheduledValues(now);
+    g.setValueAtTime(g.value, now);
+    g.linearRampToValueAtTime(DUCKED, now + 0.12);
+    g.setValueAtTime(DUCKED, now + seconds);
+    g.linearRampToValueAtTime(1, now + seconds + 0.4);
+  } catch {
+    /* at full volume, as before */
+  }
+}
+
 /* Everything scheduled and not yet finished, with when it ends, so leaving a
    game can silence it: a crowd murmur runs as long as the take it sits
    under, and a fanfare lasts most of a second. */
@@ -158,7 +206,7 @@ function play(notes: Note[]): void {
       vol.gain.setValueAtTime(0.0001, start);
       vol.gain.exponentialRampToValueAtTime(peak, start + 0.015);
       vol.gain.exponentialRampToValueAtTime(0.0001, start + note.for);
-      osc.connect(vol).connect(ac.destination);
+      osc.connect(vol).connect(out(ac));
       osc.start(start);
       osc.stop(start + note.for + 0.02);
       track(osc, start + note.for + 0.02);
@@ -193,7 +241,7 @@ function noise(seconds: number, peak: number): void {
     vol.gain.setValueAtTime(0.0001, now);
     vol.gain.exponentialRampToValueAtTime(peak, now + seconds * 0.25);
     vol.gain.exponentialRampToValueAtTime(0.0001, now + seconds);
-    source.connect(band).connect(vol).connect(ac.destination);
+    source.connect(band).connect(vol).connect(out(ac));
     source.start(now);
     source.stop(now + seconds + 0.02);
     track(source, now + seconds + 0.02);
@@ -226,7 +274,7 @@ function recording(name: Recordable, seconds?: number): boolean {
     } else {
       vol.gain.value = take.gain;
     }
-    source.connect(vol).connect(ctx.destination);
+    source.connect(vol).connect(out(ctx));
     source.start(now);
     if (seconds) source.stop(end + 0.02);
     track(source, end + 0.02);
@@ -239,7 +287,7 @@ function recording(name: Recordable, seconds?: number): boolean {
 /** the recording of a sound where there is one, and the made one otherwise */
 function sound(name: Recordable, made: () => void): void {
   if (!enabled) return;
-  if (!recording(name)) made();
+  routed(name, () => { if (!recording(name)) made(); });
 }
 
 const TAP: Note[] = [{ hz: 520, at: 0, for: 0.05, gain: 0.07 }];
@@ -305,7 +353,7 @@ export const sfx = {
   /** a crowd murmuring under the commentary, for as long as asked */
   crowd: (seconds: number) => {
     const s = Math.max(1, seconds);
-    if (enabled && !recording('crowd', s)) noise(s, 0.07);
+    if (enabled) routed('crowd', () => { if (!recording('crowd', s)) noise(s, 0.07); });
   },
   /** a goal or a save, or any right answer: the crowd, and the rising third on top */
   cheer: () => sound('cheer', () => {
