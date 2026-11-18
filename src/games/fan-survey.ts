@@ -17,11 +17,13 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, sayInTurn } from '../lib/speech';
 import { shuffle } from '../lib/random';
-import { SURVEY_STEPS, choices, countIn, surveyChoices, surveyQuestion, type SurveyQuestion, type SurveyStep } from '../content/maths';
+import {
+  SURVEY_STEPS, choices, countIn, surveyAsk, surveyChoices, surveyQuestion, surveySaid, tableHow, type SurveyQuestion, type SurveyStep,
+} from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
-import { TEAMS, strong, type Team } from './teams';
+import { flagCountries, strong, type Team } from './teams';
 import { svg } from '../ui/writing';
 
 export function mount(root: HTMLElement): () => void {
@@ -35,8 +37,6 @@ export function mount(root: HTMLElement): () => void {
     build,
   }, root);
 }
-
-const COUNTRIES = (): Team[] => TEAMS.filter((t) => t.kind === 'country' && t.flag);
 
 
 /** tally marks: a gate of five, then the rest */
@@ -129,17 +129,19 @@ function build(kit: Kit) {
     board.replaceChildren(el('table', { class: 'fs-sheet' }, el('thead', {}, head), el('tbody', {}, ...rows, ...total)));
   }
 
-  async function finish(ok: boolean, how: string): Promise<boolean> {
+  /** the working on the screen, and the part of it said (recorded for
+      every team and number: surveyLines in src/content/maths.ts) */
+  async function finish(ok: boolean, how: string, said: string[]): Promise<boolean> {
     if (ok) {
       sfx.cheer();
       kit.note(`Yes! ${how}`, true);
-      say(`Yes! ${how}`);
+      sayInTurn(['Yes!', ...said]);
       await kit.wait(2400);
       return true;
     }
     sfx.wrong();
     kit.note(how);
-    say(how);
+    sayInTurn(said);
     await kit.wait(3600);
     return false;
   }
@@ -149,19 +151,19 @@ function build(kit: Kit) {
     ask: async (step: SurveyStep): Promise<boolean> => {
       const q = surveyQuestion(step, last);
       last = q;
-      const teams = shuffle(COUNTRIES()).slice(0, step.teams);
+      const teams = shuffle(flagCountries()).slice(0, step.teams);
       const team = teams[q.team];
       board.dataset.answer = step.task === 'most' ? label(teams[q.answer]) : String(q.answer);
 
       if (step.task === 'most') {
         pictures(q, teams);
-        ask.textContent = 'Which team got the most votes?';
+        ask.textContent = surveyAsk(step, team.name);
         say(ask.textContent);
         const options = teams.map(label);
         const picked = await kit.choices.askWords(options);
         const answer = label(teams[q.answer]);
         kit.choices.revealWord(answer, picked);
-        return finish(picked === answer, `${teams[q.answer].name} got the most: ${q.votes[q.answer]} votes.`);
+        return finish(picked === answer, `${teams[q.answer].name} got the most: ${q.votes[q.answer]} votes.`, surveySaid(step, q, teams[q.answer].name));
       }
 
       if (step.task === 'count') crowd(q, teams);
@@ -171,12 +173,7 @@ function build(kit: Kit) {
       else if (step.task === 'table' || step.task === 'total') table(q, teams, step.task === 'table');
       else columns(q, teams, step.max);
 
-      ask.textContent = step.task === 'more'
-        ? `How many more fans voted for ${team.name} than for ${teams[q.other].name}?`
-        : step.task === 'count' ? `How many fans are waving the flag of ${team.name}?`
-          : step.task === 'table' ? `Fill in the table: how many fans voted for ${team.name}?`
-            : step.task === 'total' ? 'How many fans voted altogether?'
-              : `How many fans voted for ${team.name}?`;
+      ask.textContent = surveyAsk(step, team.name, teams[q.other].name);
       say(ask.textContent);
       /* every team got a vote, and "how many more" is never none */
       const big = ['key', 'scale', 'table', 'total'].includes(step.task);
@@ -187,13 +184,12 @@ function build(kit: Kit) {
         board.querySelectorAll<HTMLElement>(`.fs-fan[data-team="${team.id}"]`).forEach((f) => f.classList.add('lit'));
       }
       const v = q.votes[q.team];
-      const gates = Math.floor(v / 5);
       const how = step.task === 'more'
         ? `${team.name} got ${q.votes[q.team]} and ${teams[q.other].name} got ${q.votes[q.other]}. That's ${q.answer} more.`
         : step.task === 'tally' ? `${q.answer} for ${team.name}: count the gate of five, then the rest.`
           : step.task === 'key' ? `${team.name} has ${v / step.key!} ●, and each ● is ${step.key} fans: ${countIn(step.key!, v / step.key!)}. That's ${v} fans.`
             : step.task === 'scale' ? `The column for ${team.name} stops on the line halfway between ${v - 5} and ${v + 5}: that's ${v}.`
-              : step.task === 'table' ? `Count the gates of five, then the rest: ${countIn(5, gates)}${v % 5 ? `, and ${v % 5} more makes ${v}` : ` makes ${v}`}.`
+              : step.task === 'table' ? tableHow(v)
                 : step.task === 'total' ? `${q.votes.join(' + ')} = ${q.answer}.`
                   : `${q.answer} for ${team.name}.`;
       if (step.task === 'table' || step.task === 'total') {
@@ -201,7 +197,7 @@ function build(kit: Kit) {
         const gap = board.querySelector('.fs-gap');
         if (gap) { gap.textContent = String(q.answer); gap.classList.add('filled'); }
       }
-      return finish(picked === q.answer, how);
+      return finish(picked === q.answer, how, surveySaid(step, q, team.name));
     },
   };
 }

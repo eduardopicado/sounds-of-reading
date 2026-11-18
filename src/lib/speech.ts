@@ -357,6 +357,24 @@ export function say(text: string, options: SayOptions = {}): void {
  * nothing, so with no recording nothing is said, and a game that needs bare
  * sounds checks hasSound() before it offers itself.
  */
+/**
+ * Several lines, one after another: a sentence too long to record in every
+ * form is said in recorded phrases. Anything said next, or leaving the game,
+ * stops the speech, and with it the lines still to come.
+ *
+ * All recorded or none: with a phrase missing, the device voice says the
+ * whole sentence, rather than two voices taking turns inside it.
+ */
+export function sayInTurn(lines: readonly string[], options: SayOptions = {}): void {
+  if (lines.length > 1 && !lines.every((l) => hasClip(l))) { say(lines.join(' '), options); return; }
+  inTurn(lines, options);
+}
+
+function inTurn([line, ...rest]: readonly string[], options: SayOptions): void {
+  if (!line) { options.onEnd?.(); return; }
+  say(line, { ...options, onEnd: rest.length ? () => inTurn(rest, options) : options.onEnd });
+}
+
 export function saySound(phoneme: string, options: { onEnd?: () => void } = {}): void {
   if (!enabled || !hasSound(phoneme)) { options.onEnd?.(); return; }
   duckSfx();

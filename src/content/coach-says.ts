@@ -74,6 +74,46 @@ export interface SaysQuestion {
   /** whether the actions must come in that order; two taps or two moves
       joined by "and" may come either way round */
   ordered: boolean;
+  /** the instruction as it is said, in phrases (saidAs) */
+  said: string[];
+}
+
+/**
+ * The instruction cut into phrases, each recorded once for every thing and
+ * place: "Put the dog," "in the box," "then tap the cat." Whole, there are
+ * some 57,000 instructions, far too many to record; in phrases, a few
+ * hundred. The content test checks the phrases say exactly the words of the
+ * instruction on the screen.
+ */
+export function saidAs(task: Task, w: { a: string; b?: string; c?: string; in?: string }): string[] {
+  switch (task) {
+    case 'tap': return [`Tap the ${w.a}.`];
+    case 'big': return [`Tap the big ${w.a}.`];
+    case 'notBig': return [`Tap the ${w.a} that is not big.`];
+    case 'both': return [`Tap the ${w.a},`, `and the ${w.b}.`];
+    case 'then': return [`Tap the ${w.a},`, `then tap the ${w.b}.`];
+    case 'put': return [`Put the ${w.a},`, `${w.in} the ${w.b}.`];
+    case 'putBoth': return [`Put the ${w.a},`, `and the ${w.b},`, `${w.in} the ${w.c}.`];
+    case 'putThen': return [`Put the ${w.a},`, `${w.in} the ${w.b},`, `then tap the ${w.c}.`];
+  }
+}
+
+/** every phrase Coach Says can say, for the recordings */
+export function saysLines(): string[] {
+  const out = new Set<string>();
+  const words = THINGS.map((t) => t.word);
+  for (const a of words) {
+    for (const task of ['tap', 'big', 'notBig', 'both', 'then', 'putThen'] as Task[]) {
+      for (const line of saidAs(task, { a, b: a, c: a, in: 'in' })) if (!line.startsWith('in ')) out.add(line);
+    }
+    for (const line of saidAs('putBoth', { a, b: a, c: a, in: 'in' })) if (!line.startsWith('in ')) out.add(line);
+  }
+  for (const p of PLACES) {
+    for (const line of [...saidAs('put', { a: '', b: p.word, in: p.prep }), ...saidAs('putThen', { a: '', b: p.word, c: '', in: p.prep })]) {
+      if (line.startsWith(p.prep)) out.add(line);
+    }
+  }
+  return [...out];
 }
 
 /** the things and places he can read: up to his top level, or the easiest
@@ -100,7 +140,7 @@ export function saysQuestion(step: SaysStep, maxLevel: number, avoid: string[] =
     const [a, b] = shuffle(pool).slice(0, 2);
     const shown = shuffle<Shown>([{ thing: a, big: true }, { thing: a, big: false }, { thing: b, big: true }, { thing: b, big: false }]);
     const want = shown.findIndex((s) => s.thing === a && s.big === (step.task === 'big'));
-    return { task: step.task, text: fill(template.text, { a: a.word }), shown, places: [], answer: [{ kind: 'tap', item: want }], ordered: true };
+    return { task: step.task, text: fill(template.text, { a: a.word }), shown, places: [], answer: [{ kind: 'tap', item: want }], ordered: true, said: saidAs(step.task, { a: a.word }) };
   }
 
   const shown: Shown[] = shuffle(pool).slice(0, 4).map((thing) => ({ thing }));
@@ -108,11 +148,11 @@ export function saysQuestion(step: SaysStep, maxLevel: number, avoid: string[] =
   const ix = (t: Thing): number => shown.findIndex((s) => s.thing === t);
   if (step.task === 'tap') {
     const t = pick(shown).thing;
-    return { task: 'tap', text: fill(template.text, { a: t.word }), shown, places: [], answer: [{ kind: 'tap', item: ix(t) }], ordered: true };
+    return { task: 'tap', text: fill(template.text, { a: t.word }), shown, places: [], answer: [{ kind: 'tap', item: ix(t) }], ordered: true, said: saidAs('tap', { a: t.word }) };
   }
   if (step.task === 'both' || step.task === 'then') {
     const text = fill(template.text, { a: a.word, b: b.word });
-    return withAnswer({ task: step.task, text, shown, places: [], answer: [], ordered: step.task === 'then' }, [a, b]);
+    return withAnswer({ task: step.task, text, shown, places: [], answer: [], ordered: step.task === 'then', said: saidAs(step.task, { a: a.word, b: b.word }) }, [a, b]);
   }
 
   const at = shuffle(places).slice(0, 3);
@@ -123,7 +163,7 @@ export function saysQuestion(step: SaysStep, maxLevel: number, avoid: string[] =
   const answer: Action[] = step.task === 'putBoth'
     ? [{ kind: 'put', item: ix(a), place: p }, { kind: 'put', item: ix(b), place: p }]
     : [{ kind: 'put', item: ix(a), place: p }, ...(step.task === 'putThen' ? [{ kind: 'tap', item: ix(c) } as Action] : [])];
-  return { task: step.task, text, shown, places: at, answer, ordered: step.task !== 'putBoth' };
+  return { task: step.task, text, shown, places: at, answer, ordered: step.task !== 'putBoth', said: saidAs(step.task, words) };
 }
 
 /** taps on these things, in this order */

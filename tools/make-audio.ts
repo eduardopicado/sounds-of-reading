@@ -65,7 +65,10 @@ import { capitalLines } from '../src/content/capitals';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
-import { TEAMS, real } from '../src/games/teams';
+import { TEAMS, flagCountries, real } from '../src/games/teams';
+import { surveyLines } from '../src/content/maths';
+import { saysLines } from '../src/content/coach-says';
+import { ALL_BIG_WORDS, bigSaid } from '../src/content/big-words';
 
 const OUT = join(process.cwd(), 'public', 'audio');
 const API = 'https://api.elevenlabs.io/v1';
@@ -77,6 +80,10 @@ const UI_LINES = [
   'You win!', 'What a match!', 'Good game!', 'Every one a goal!', 'Good passing!', 'Every one right!', 'Good spelling!',
   'Beautiful writing!', 'Good writing!', 'Well spotted!', 'Find every b', 'Find every d', 'Find every p', 'Find every q',
   'Every word found!', 'Every word, and no help!',
+  /* what each game says at the end of a round (its cheer, in src/games/);
+     the content test checks every cheer is here */
+  'Good counting!', 'Good map reading!', 'Good planning!', 'Good taking!', 'Good looking!', 'Good hunting!',
+  'Good moving!', 'Ready to play!', 'Good finding!', 'Good sprinting!', 'That is it!',
 ];
 
 /* The games' questions and instructions that are always the same words. A
@@ -151,6 +158,11 @@ export function clips(): Clip[] {
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
   /* Word Parts: every word with its ending, and what is said after each answer */
   for (const line of partLines()) add(line);
+  /* Coach Says: every instruction, in phrases; Big Words: each word, and its parts then the word */
+  for (const line of saysLines()) add(line);
+  for (const w of ALL_BIG_WORDS) { add(w.text); add(bigSaid(w)); }
+  /* Fan Survey: every question and every answer, for every team it can pick */
+  for (const line of surveyLines(flagCountries().map((t) => t.name))) add(line);
   /* Read and Point's stories, a sentence and a word at a time, and Flash Phrases */
   for (const line of [...storyLines(), ...phraseLines()]) add(line);
 
@@ -402,17 +414,20 @@ async function main(): Promise<void> {
   }
 
   let made = 0;
-  for (const c of todo) {
-    writeFileSync(join(OUT, `${clipId(c.text)}.mp3`), await speak(c));
-    made += 1;
-    if (made % 50 === 0) console.log(`  ${made} of ${todo.length}`);
+  try {
+    for (const c of todo) {
+      writeFileSync(join(OUT, `${clipId(c.text)}.mp3`), await speak(c));
+      made += 1;
+      if (made % 50 === 0) console.log(`  ${made} of ${todo.length}`);
+    }
+  } finally {
+    /* the manifest is what the app reads: it plays a clip only for a string
+       listed here, and speaks everything else. Written even when a run
+       stops part-way (out of credits, say), so what was made is used */
+    const shipped = readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4));
+    writeFileSync(join(OUT, 'clips.json'), JSON.stringify(shipped.sort()));
+    console.log(`\nrecorded ${made}, manifest lists ${shipped.length}`);
   }
-
-  /* the manifest is what the app reads: it plays a clip only for a string
-     listed here, and speaks everything else */
-  const shipped = readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4));
-  writeFileSync(join(OUT, 'clips.json'), JSON.stringify(shipped.sort()));
-  console.log(`\nrecorded ${made}, manifest lists ${shipped.length}`);
 }
 
 /* only when run as a command. The content test imports wanted() from here,
