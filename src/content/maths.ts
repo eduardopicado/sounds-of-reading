@@ -1394,6 +1394,88 @@ export function surveyChoices(step: SurveyStep, q: SurveyQuestion): number[] {
   return out.sort((x, y) => x - y);
 }
 
+/** what Fan Survey asks: the team asked about, and for "how many more",
+    the team it is compared with */
+export function surveyAsk(step: SurveyStep, team: string, other = ''): string {
+  switch (step.task) {
+    case 'most': return 'Which team got the most votes?';
+    case 'total': return 'How many fans voted altogether?';
+    case 'more': return `How many more fans voted for ${team} than for ${other}?`;
+    case 'count': return `How many fans are waving the flag of ${team}?`;
+    case 'table': return `Fill in the table: how many fans voted for ${team}?`;
+    default: return `How many fans voted for ${team}?`;
+  }
+}
+
+/**
+ * What is said after an answer, a line at a time: the answer, with the team
+ * named where there is one, and for the tallies and the scale the way to
+ * read them. The working with three or four numbers in it ("Brazil got 7 and
+ * Spain got 4") stays on the screen; said, it would be thousands of lines to
+ * record. Every line here is recorded (surveyLines), so the voice never
+ * changes mid-game. A right answer is "Yes!" first.
+ */
+export function surveySaid(step: SurveyStep, q: SurveyQuestion, team: string): string[] {
+  const v = q.votes[q.team];
+  switch (step.task) {
+    case 'most': return [`${team} got the most votes.`];
+    case 'more': return [`That's ${q.answer} more.`];
+    case 'tally': return [`${v} for ${team}.`, SURVEY_TIPS.tally];
+    case 'key': return [`That's ${v} fans.`];
+    case 'scale': return [`${v} for ${team}.`, SURVEY_TIPS.scale];
+    case 'table': return [tableHow(v)];
+    case 'total': return [`That's ${q.answer} altogether.`];
+    default: return [`${v} for ${team}.`];
+  }
+}
+
+/** how to read tally marks and a scale, said after the answer */
+export const SURVEY_TIPS = {
+  tally: 'Count the gate of five, then the rest.',
+  scale: 'It stops on the line with no number, halfway between two.',
+};
+
+/** counting a table's tallies: the gates of five, then the rest */
+export function tableHow(v: number): string {
+  const gates = Math.floor(v / 5);
+  return `Count the gates of five, then the rest: ${countIn(5, gates)}${v % 5 ? `, and ${v % 5} more makes ${v}` : ` makes ${v}`}.`;
+}
+
+/**
+ * Everything Fan Survey can say, for the recordings: every question, and
+ * every answer for every team and every number a step can come to. `teams`
+ * are the names of the teams it can pick.
+ */
+export function surveyLines(teams: string[]): string[] {
+  const out = new Set<string>(['Yes!']);
+  for (const step of SURVEY_STEPS) {
+    const by = step.key ?? 1;
+    const pool = Array.from({ length: step.max / by }, (_, i) => (i + 1) * by);
+    for (const team of teams) {
+      if (step.task === 'more') for (const other of teams) if (other !== team) out.add(surveyAsk(step, team, other));
+      if (step.task !== 'more') out.add(surveyAsk(step, team));
+    }
+    /* the numbers each step can come to: a team's votes, a difference, or a total */
+    let answers = pool;
+    if (step.task === 'more') answers = pool.slice(1).map((_, i) => i + 1);
+    if (step.task === 'total') {
+      const least = pool.filter((v) => v >= 2);
+      const low = least.slice(0, step.teams).reduce((a, b) => a + b, 0);
+      const high = least.slice(-step.teams).reduce((a, b) => a + b, 0);
+      answers = Array.from({ length: high - low + 1 }, (_, i) => low + i);
+    }
+    for (const n of answers) {
+      if (step.task === 'scale' && n % 10 === 0) continue;
+      if (step.task === 'table' && n < 6) continue;
+      const votes = Array.from({ length: step.teams }, () => 0);
+      votes[0] = n;
+      const q: SurveyQuestion = { votes, team: 0, other: 1, answer: step.task === 'most' ? 0 : n };
+      for (const team of teams) for (const line of surveySaid(step, q, team)) out.add(line);
+    }
+  }
+  return [...out];
+}
+
 /** counting in a step: "5, 10, 15, 20" */
 export const countIn = (by: number, times: number): string =>
   Array.from({ length: times }, (_, i) => String((i + 1) * by)).join(', ');

@@ -233,6 +233,57 @@ describe('a line in Portuguese', () => {
   });
 });
 
+describe('a sentence in phrases', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build with these recordings, and a player that can be told a clip has ended */
+  async function recorded(lines: string[]) {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    let player: { onended: (() => void) | null } | null = null;
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      constructor() { player = this; }
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => lines.map((l) => clipId(l)) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    return { played, end: () => player?.onended?.(), id: clipId };
+  }
+
+  const PHRASES = ['Put the dog,', 'in the box,', 'then tap the cat.'];
+
+  it('plays each phrase in turn, the next when the last has ended, then reports the end', async () => {
+    const speech = await load();
+    const clips = await recorded(PHRASES);
+    const onEnd = vi.fn();
+    speech.sayInTurn(PHRASES, { onEnd });
+    await settle();
+    expect(clips.played).toHaveLength(1);
+    for (let i = 1; i < 3; i += 1) {
+      clips.end();
+      await settle();
+      expect(clips.played).toHaveLength(i + 1);
+      expect(clips.played[i]).toContain(clips.id(PHRASES[i]));
+    }
+    expect(onEnd).not.toHaveBeenCalled();
+    clips.end();
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('with a phrase not recorded, says the whole sentence in the device voice, never two voices in one', async () => {
+    const speech = await load();
+    const clips = await recorded(PHRASES.slice(0, 2));
+    speech.sayInTurn(PHRASES);
+    await settle();
+    expect(clips.played).toEqual([]);
+    expect(engine.said.map((u) => u.text)).toEqual(['Put the dog, in the box, then tap the cat.']);
+  });
+});
+
 describe('the first tap', () => {
   afterEach(() => { vi.unstubAllGlobals(); });
 
