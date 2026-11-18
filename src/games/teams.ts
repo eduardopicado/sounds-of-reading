@@ -83,6 +83,9 @@ export const teamById = (id: string | null | undefined): Team | undefined => TEA
 /** a country or a club, rather than one of his own sides */
 export const real = (t: Team): boolean => t.kind === 'country' || t.kind === 'club';
 
+/** the countries with a flag to wave: the teams of the maths games' pictures */
+export const flagCountries = (): Team[] => TEAMS.filter((t) => t.kind === 'country' && !!t.flag);
+
 /** the side he plays for, chosen in Penalty Shootout and Pass and Shoot and
     the same in every football game */
 export const ourTeam = (): Team => teamById(read<string>('shootout-team', YOU.id)) ?? YOU;

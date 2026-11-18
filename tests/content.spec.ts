@@ -4,6 +4,8 @@
  * Run it before committing any content change:  npm run validate:content */
 
 import { describe, expect, it } from 'vitest';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import {
   ALL_FAMILIES, ALL_PHRASES, ALL_SOUNDS, BLOCKLIST, PRACTICE_SOUNDS,
   REAL_WORDS, SILLY_WORDS, buildWord, familySpans, realWords, sound, type Level,
@@ -24,6 +26,8 @@ import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
 import { wanted } from '../tools/make-audio';
+import { SURVEY_STEPS, surveyAsk, surveyQuestion, surveySaid } from '../src/content/maths';
+import { flagCountries } from '../src/games/teams';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
 import { NOT_BY_CHANCE, NOT_SOUNDED_OUT, PHONEMES } from '../src/content/words';
@@ -284,6 +288,36 @@ describe('recorded audio', () => {
       byId.set(id, text);
     }
     expect(clash).toEqual([]);
+  });
+
+  it('records every game\'s end-of-round cheer', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const dir = join(process.cwd(), 'src', 'games');
+    const cheers = readdirSync(dir).filter((f) => f.endsWith('.ts'))
+      .flatMap((f) => [...readFileSync(join(dir, f), 'utf8').matchAll(/cheer: '([^']+)'/g)].map((m) => m[1]));
+    /* and the maths games' own, for one with none */
+    cheers.push('Good counting!');
+    expect(cheers.length).toBeGreaterThan(10);
+    expect(cheers.filter((c) => !list.has(clipId(c)))).toEqual([]);
+  });
+
+  it('records everything Fan Survey says, for every team and number', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const names = flagCountries().map((t) => t.name);
+    const missing = new Set<string>();
+    for (const step of SURVEY_STEPS) {
+      for (let i = 0; i < 400; i += 1) {
+        const q = surveyQuestion(step);
+        const t = i % names.length;
+        const team = names[t];
+        /* never the team itself */
+        const other = names[(t + 1 + (i % (names.length - 1))) % names.length];
+        const lines = [surveyAsk(step, team, other)];
+        lines.push('Yes!', ...surveySaid(step, q, team));
+        for (const line of lines) if (!list.has(clipId(line))) missing.add(`${step.name}: ${line}`);
+      }
+    }
+    expect([...missing].slice(0, 10)).toEqual([]);
   });
 
   it('records real words and never made-up ones', () => {
@@ -947,6 +981,22 @@ describe('coach says', () => {
     expect(wrong).toEqual([]);
   });
 
+  it('says each instruction in recorded phrases, word for word what is on the screen', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    const words = (t: string) => t.toLowerCase().match(/[a-z]+/g)!.join(' ');
+    const missing = new Set<string>();
+    for (const step of SAYS_STEPS) {
+      for (let level = 1; level <= TOP_LEVEL; level += 1) {
+        for (let i = 0; i < 30; i += 1) {
+          const q = saysQuestion(step, level);
+          expect(words(q.said.join(' ')), q.text).toBe(words(q.text));
+          for (const line of q.said) if (!list.has(clipId(line))) missing.add(line);
+        }
+      }
+    }
+    expect([...missing].slice(0, 10)).toEqual([]);
+  });
+
   it('has every step a template, and enough to play with at every level', () => {
     for (const step of SAYS_STEPS) expect(TEMPLATES[step.task], step.name).toBeTruthy();
     for (let level = 2; level <= TOP_LEVEL; level += 1) {
@@ -986,9 +1036,14 @@ describe('coach says', () => {
 
 /* ── Big Words ──────────────────────────────────────────────────────────── */
 
-import { ALL_BIG_WORDS, BIG_STEPS, bigQuestion, plainSplit } from '../src/content/big-words';
+import { ALL_BIG_WORDS, BIG_STEPS, bigQuestion, bigSaid, plainSplit } from '../src/content/big-words';
 
 describe('big words', () => {
+  it('records every big word, and its parts then the word', () => {
+    const list = new Set(wanted().map((t) => clipId(t)));
+    expect(ALL_BIG_WORDS.flatMap((w) => [w.text, bigSaid(w)]).filter((t) => !list.has(clipId(t)))).toEqual([]);
+  });
+
   it('are real words, each two parts that make it', () => {
     expect(ALL_BIG_WORDS.filter((w) => !isRealWord(w.text)).map((w) => w.text)).toEqual([]);
     for (const w of ALL_BIG_WORDS) expect(w.parts.join('')).toBe(w.text);

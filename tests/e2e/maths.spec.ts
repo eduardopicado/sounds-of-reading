@@ -1,7 +1,7 @@
 /* The maths games, played through by reading the screen the way he does. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
 import { GAMES } from '../../src/games/catalog';
 
 /** open a maths game and tap Start, as he does */
@@ -1207,6 +1207,32 @@ test.describe('maths games', () => {
     await expect(page.locator('.results')).toContainText('8 of 8');
     noProblems(watch);
   });
+
+  /* every question and every answer is recorded, for every team and every
+     number, so none of it is left to the device voice: a step of each kind,
+     answered wrong (the answer, and the tip where there is one) */
+  for (const [step, lines] of [[0, 2], [1, 3], [2, 2], [3, 2], [4, 2], [5, 2], [8, 3], [9, 2], [10, 2]]) {
+    test(`Fan Survey says it all in the recorded voice: step ${step + 1}`, async ({ page }) => {
+      await recordPlays(page);
+      await page.addInitScript(() => {
+        const device: string[] = [];
+        (window as unknown as { __device: string[] }).__device = device;
+        const engine = window.speechSynthesis;
+        if (engine) engine.speak = (u: SpeechSynthesisUtterance) => { if (u.text) device.push(u.text); };
+      });
+      await seed(page, { 'maths-step:fan-survey': step });
+      await startGame(page, 'fan-survey');
+      await expect(page.locator('.mx-choice').first()).toBeEnabled({ timeout: 10000 });
+      const answer = await page.locator('.fs-board').getAttribute('data-answer');
+      const before = (await plays(page)).length;
+      const options = page.locator('.mx-choice');
+      const texts = (await options.allTextContents()).map((t) => t.trim());
+      await options.nth(texts.findIndex((t) => t !== answer)).click();
+      await expect(page.locator('.mx-note')).toBeVisible();
+      await expect.poll(async () => (await plays(page)).length - before).toBeGreaterThanOrEqual(lines);
+      expect(await page.evaluate(() => (window as unknown as { __device: string[] }).__device)).toEqual([]);
+    });
+  }
 
   test('Fan Survey: counting the flags, and a miss lights them up', async ({ page }) => {
     await startGame(page, 'fan-survey');
