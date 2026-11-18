@@ -823,6 +823,24 @@ test.describe('Penalty Shootout', () => {
     noProblems(watch);
   });
 
+  test('shows whose turn it is without reading: a ball or gloves, and an arrow on him', async ({ page }) => {
+    const watch = watchPage(page);
+    await startShootout(page);
+    /* his kick: the ball, and the arrow over the kicker */
+    await expect(page.locator('.pk-role')).toHaveText('⚽');
+    await expect(page.locator('.pk-taker.me .pk-you')).toBeVisible();
+    await expect(page.locator('.pk-keeper.me')).toHaveCount(0);
+    await takeKick(page, true);
+    /* in goal: the gloves, and the arrow under the keeper, clear of the words */
+    await expect(page.locator('.pk-role')).toHaveText('🧤', { timeout: 6000 });
+    await expect(page.locator('.pk-keeper.me .pk-you')).toBeVisible();
+    await expect(page.locator('.pk-taker.me')).toHaveCount(0);
+    const arrow = await page.locator('.pk-you').boundingBox();
+    const words = await page.locator('.pk-spots').boundingBox();
+    expect(arrow!.y).toBeGreaterThan(words!.y + words!.height);
+    noProblems(watch);
+  });
+
   test('misreading every word loses it, and shows which words were missed', async ({ page }) => {
     const watch = watchPage(page);
     await startShootout(page);

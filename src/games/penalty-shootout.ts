@@ -106,7 +106,11 @@ export function mount(root: HTMLElement): () => void {
     class: 'btn ghost small', type: 'button', text: '🔊 Say it',
     on: { click: () => { if (current) say(current.text); } },
   });
-  const cue = el('div', { class: 'pk-cue', 'aria-live': 'polite' }, cueText, cuePic, hearBtn);
+  /* whose turn it is, without reading: a ball for his kick and gloves in
+     goal, the same two on the pitch, where an arrow and a glow mark which
+     player is him (see you() below) */
+  const role = el('span', { class: 'pk-role', 'aria-hidden': 'true' });
+  const cue = el('div', { class: 'pk-cue', 'aria-live': 'polite' }, role, cueText, cuePic, hearBtn);
 
   /* ── the pitch ───────────────────────────────────────────────────────── */
 
@@ -123,6 +127,22 @@ export function mount(root: HTMLElement): () => void {
   const ball = el('div', { class: 'pk-ball', 'aria-hidden': 'true', text: '⚽' });
   const taker = el('div', { class: 'pk-taker', 'aria-hidden': 'true' });
   const box = el('div', { class: 'pk-box' }, taker, ball);
+  const arrow = el('span', { class: 'pk-you', 'aria-hidden': 'true', text: '▼' });
+
+  /** mark which player is him: the kicker on his kick, the keeper in goal;
+      neither before kick-off */
+  function you(who: 'kicker' | 'keeper' | null): void {
+    taker.classList.toggle('me', who === 'kicker');
+    keeper.classList.toggle('me', who === 'keeper');
+    /* over the kicker's head; under the keeper's feet, where an arrow over
+       his head would seem to point at a word */
+    arrow.textContent = who === 'keeper' ? '▲' : '▼';
+    if (who) (who === 'kicker' ? taker : keeper).append(arrow);
+    else arrow.remove();
+    role.textContent = who === 'kicker' ? '⚽' : who === 'keeper' ? '🧤' : '';
+    if (who) cue.dataset.role = who;
+    else delete cue.dataset.role;
+  }
   const banner = el('div', { class: 'pk-banner', hidden: 'hidden', role: 'status' });
 
   const matchup = el('p', { class: 'pk-big' });
@@ -296,6 +316,7 @@ export function mount(root: HTMLElement): () => void {
     setSpots(word, nearWords(word, lookalikes(), decoyCount(), { picture: true }));
     keeper.replaceChildren(player(rival, 84, 'keeper'));
     taker.replaceChildren(player(us, 64, 'kicker'));
+    you('kicker');
     ball.classList.add('mine');
     cueText.textContent = 'Your kick! Shoot at';
     cuePic.textContent = word.picture ?? '';
@@ -316,10 +337,13 @@ export function mount(root: HTMLElement): () => void {
     setSpots(word, nearWords(word, lookalikes(), decoyCount(), { picture: !heard }));
     keeper.replaceChildren(player(us, 84, 'keeper'));
     taker.replaceChildren(player(rival, 64, 'kicker'));
+    you('keeper');
     ball.classList.remove('mine');
     if (heard) {
       cueText.textContent = `You're in goal! Listen, then dive to the word.`;
-      cuePic.hidden = true;
+      /* an ear, not a picture: this one is heard, not seen */
+      cuePic.textContent = '👂';
+      cuePic.hidden = false;
       /* the dive waits until the word has been said: a tap before it would be
          a guess, and a guess is not a save */
       let done = false;
@@ -430,6 +454,7 @@ export function mount(root: HTMLElement): () => void {
     resetKeeper();
     keeper.replaceChildren(player(rival, 84, 'keeper'));
     taker.replaceChildren();
+    you(null);
     for (const btn of spots) { btn.textContent = ''; btn.className = 'pk-spot'; btn.disabled = true; }
     spotRow.classList.add('waiting');
     matchup.replaceChildren(

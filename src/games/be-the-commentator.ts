@@ -27,7 +27,7 @@
 import { el } from '../lib/dom';
 import { lifetime } from '../lib/life';
 import { shuffle } from '../lib/random';
-import { sfx } from '../lib/sfx';
+import { hushSfx, sfx } from '../lib/sfx';
 import { awardFace } from '../lib/stickers';
 import { ALL_COMMENTARY, LEVELS, type CommentaryLine, type Level, type Mood } from '../content/index';
 import { confetti, counter, createSetup, resultsTray, scoreLine, topbar } from '../ui/components';
@@ -69,7 +69,7 @@ export function mount(root: HTMLElement): () => void {
   const recordBtn = el('button', { class: 'btn cm-rec', type: 'button', text: '🎙 Record' });
   const stopBtn = el('button', { class: 'btn cm-stop', type: 'button', text: '⏹ Stop' });
   const playBtn = el('button', { class: 'btn ghost', type: 'button', text: '▶ Play it back' });
-  const againBtn = el('button', { class: 'btn ghost', type: 'button', text: '🎙 Again' });
+  const againBtn = el('button', { class: 'btn ghost', type: 'button', text: '🎙 Record again' });
   const nextBtn = el('button', { class: 'btn', type: 'button', text: 'Next line ➡' });
   const readBtn = el('button', { class: 'btn', type: 'button', text: '✅ I read it!' });
   const controls = el('div', { class: 'cm-controls' }, recordBtn, stopBtn, playBtn, againBtn, nextBtn, readBtn);
@@ -201,18 +201,43 @@ export function mount(root: HTMLElement): () => void {
     if (take) void playBack();
   }
 
+  /** the take playing back, and a count of play-backs, so one cut short
+      knows it was */
+  let playingNow: Promise<void> | null = null;
+  let playTurn = 0;
+
   /** his take, with the crowd under it, and a roar after an exclamation */
   async function playBack(): Promise<void> {
     const take = takes[index];
     if (!take || busy) return;
     busy = true;
     playBtn.disabled = true;
+    const mine = (playTurn += 1);
     sfx.crowd(take.seconds + 0.6);
-    await play(take);
+    playingNow = play(take);
+    await playingNow;
+    playingNow = null;
     if (!life.alive()) return;
-    if (lines[index]?.mood === 'excited') sfx.goal();
+    if (mine === playTurn && lines[index]?.mood === 'excited') sfx.goal();
     playBtn.disabled = false;
     busy = false;
+  }
+
+  /** another go: recording again straight away, as there is nothing else
+      the button could mean, cutting short the take still playing back */
+  async function recordAgain(): Promise<void> {
+    if (phase !== 'recorded') return;
+    if (playingNow) {
+      playTurn += 1;
+      hushSfx();
+      const cut = playingNow;
+      stopPlaying();
+      await cut;
+      if (!life.alive()) return;
+    }
+    busy = false;
+    show('ready');
+    await startRecording();
   }
 
   function nextLine(): void {
@@ -225,7 +250,7 @@ export function mount(root: HTMLElement): () => void {
   recordBtn.addEventListener('click', () => { void startRecording(); });
   stopBtn.addEventListener('click', () => { void stopRecording(); });
   playBtn.addEventListener('click', () => { void playBack(); });
-  againBtn.addEventListener('click', () => { if (!busy) show('ready'); });
+  againBtn.addEventListener('click', () => { void recordAgain(); });
   nextBtn.addEventListener('click', nextLine);
   readBtn.addEventListener('click', () => { sfx.right(); nextLine(); });
 
