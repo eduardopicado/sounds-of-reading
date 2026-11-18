@@ -82,6 +82,12 @@ export function hasSound(phoneme: string): boolean {
   return !!sounds?.has(phoneme);
 }
 
+/** the list of recordings, while it is still on its way: a word said before
+    it arrives would miss its recording and go to the device voice */
+export function clipsPending(): Promise<void> | null {
+  return have === null && loading ? loading : null;
+}
+
 /** is there a recording of this, or does it need the device voice? */
 export function hasClip(text: string): boolean {
   if (!have || !text) return false;

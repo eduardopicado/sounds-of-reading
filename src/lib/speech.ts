@@ -18,7 +18,7 @@
  * even reaching for the object is inside a try. On iOS nothing is spoken until
  * a user gesture has happened, so the first tap in the app unlocks it. */
 
-import { hasClip, hasSound, playClip, playSound, stopClips } from './audio';
+import { clipsPending, hasClip, hasSound, playClip, playSound, stopClips } from './audio';
 import { duckSfx } from './sfx';
 
 export { hasSound };
@@ -249,6 +249,7 @@ export function onVoicesChanged(fn: () => void): () => void {
  *  Whatever was being said is dropped, not finished: its onEnd never runs */
 export function cancelSpeech(): void {
   speaking = null;
+  asked += 1;
   stopClips();
   try {
     engine()?.cancel();
@@ -333,8 +334,31 @@ export function voicesFor(lang: string): SpeechSynthesisVoice[] {
 /** can this device say something in that language at all? */
 export const canSpeak = (lang: string): boolean => voicesFor(lang).length > 0;
 
+/** counts every word asked for and every stop, so a word waiting for the
+    list of recordings knows when something else has been said since */
+let asked = 0;
+/** how long a word waits for the list of recordings before the device voice says it */
+const LIST_WAIT_MS = 1500;
+
 export function say(text: string, options: SayOptions = {}): void {
   if (!enabled || !text) { options.onEnd?.(); return; }
+  /* A game opened straight from the home-screen icon says its first word at
+     once, often before the list of recordings has loaded, and that word went
+     to the device voice. It waits for the list (briefly) instead; anything
+     said or stopped meanwhile takes its place. */
+  const mine = (asked += 1);
+  const pending = options.deviceVoiceOnly || options.voiceURI ? null : clipsPending();
+  if (pending) {
+    const late = new Promise<void>((done) => { window.setTimeout(done, LIST_WAIT_MS); });
+    void Promise.race([pending, late]).then(() => {
+      if (mine === asked) sayNow(text, options);
+    });
+    return;
+  }
+  sayNow(text, options);
+}
+
+function sayNow(text: string, options: SayOptions): void {
   /* a cheer that has just started goes quiet under the word */
   duckSfx();
   /* a recording where we shipped one (in either language), the device voice
