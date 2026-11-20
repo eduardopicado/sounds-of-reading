@@ -30,6 +30,8 @@
  *
  *   npm run make:audio -- --dry               how many clips are missing, and the cost
  *   npm run make:audio -- --list clips.txt    every clip, one a line, to read through
+ *   npm run make:audio -- --todo docs/to-record.md  what is still to record, by voice (the content
+ *                                             test checks that file is up to date)
  *   npm run make:audio -- --voices            the voices the key can use, Australian first
  *   npm run make:audio -- --audition ID,ID    ten test words in each voice, into audition/<voice>-<model>/
  *                                             (set ELEVENLABS_MODEL to hear the same voice on another model)
@@ -66,6 +68,7 @@ import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
 import { TEAMS, flagCountries, real } from '../src/games/teams';
+import { RECORDED_NAMES } from '../src/lib/name';
 import { surveyLines } from '../src/content/maths';
 import { saysLines } from '../src/content/coach-says';
 import { ALL_BIG_WORDS, bigSaid } from '../src/content/big-words';
@@ -158,6 +161,8 @@ export function clips(): Clip[] {
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
   /* Word Parts: every word with its ending, and what is said after each answer */
   for (const line of partLines()) add(line);
+  /* his name, as it is said at home: in the Brazilian voice */
+  for (const n of RECORDED_NAMES) add(n, 'pt');
   /* Coach Says: every instruction, in phrases; Big Words: each word, and its parts then the word */
   for (const line of saysLines()) add(line);
   for (const w of ALL_BIG_WORDS) { add(w.text); add(bigSaid(w)); }
@@ -183,6 +188,38 @@ export function clips(): Clip[] {
   for (const line of weighLines()) { add(line.en); add(line.pt, 'pt'); }
 
   return [...out.values()].sort((a, b) => speakable(a.text).localeCompare(speakable(b.text)));
+}
+
+/** who says what, in the list of what is still to record */
+const VOICE_NAMES: Record<Voice, string> = {
+  en: 'English (Stuart, Australian)', pt: 'Portuguese (Roberto Valença, Brazilian)', 'pt-commentator': 'The commentator (Nassif, Brazilian)',
+};
+
+/**
+ * What is still to record, as a page: every clip wanted with no file yet,
+ * by voice, with what it costs. docs/to-record.md is this, so the next run
+ * with credit knows what it is for; the content test checks it is current.
+ */
+export function toRecord(have: Set<string> = new Set(readdirSync(OUT).filter((f) => f.endsWith('.mp3')).map((f) => f.slice(0, -4)))): string {
+  const todo = clips().filter((c) => !have.has(clipId(c.text)));
+  const chars = todo.reduce((n, c) => n + c.text.length + 1, 0);
+  const out = [
+    '# Still to record',
+    '',
+    'Made by `npm run make:audio -- --todo docs/to-record.md`; the content test checks it is up to date.',
+    'Until a line is recorded the app says it in the device voice (and Coach Says says a whole instruction',
+    'in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records',
+    'exactly these, with the voices in public/audio/README.md.',
+    '',
+    todo.length ? `**${todo.length} clips, about ${chars} characters.**` : '**Nothing: every line is recorded.**',
+  ];
+  for (const voice of Object.keys(VOICE_ENV) as Voice[]) {
+    const mine = todo.filter((c) => c.voice === voice);
+    if (!mine.length) continue;
+    out.push('', `## ${VOICE_NAMES[voice]}: ${mine.length}`, '');
+    for (const c of mine) out.push(`- ${c.text.replace(/([*_`\\[\]<>])/g, '\\$1')}`);
+  }
+  return out.join('\n') + '\n';
 }
 
 /** what the content test checks against: the keys the app looks clips up by */
@@ -398,6 +435,13 @@ async function main(): Promise<void> {
     const clash = byId.get(id);
     if (clash) throw new Error(`"${c.text}" and "${clash}" both hash to ${id}: change clipId`);
     byId.set(id, c.text);
+  }
+
+  const todoTo = flag('--todo');
+  if (todoTo) {
+    writeFileSync(resolve(todoTo), toRecord(already));
+    console.log(`${todo.length} clips still to record, written to ${todoTo}`);
+    return;
   }
 
   if (args.includes('--dry')) {

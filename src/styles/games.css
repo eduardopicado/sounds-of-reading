@@ -2396,3 +2396,7 @@
 .rp-actions { justify-content: center; margin-top: 10px; }
 .rp-ask[hidden], .rp-book[hidden], .rp-note[hidden], .rp-actions[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rp-word.nope { animation: none; } }
+
+/* his name: a field wide enough for a name, never past the card */
+.grown-ups .gu-name { flex: 1 1 12em; min-width: 0; max-width: 20em; }
+.grown-ups .gu-name::placeholder { color: var(--on-deep-soft); }

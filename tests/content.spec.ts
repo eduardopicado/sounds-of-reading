@@ -25,7 +25,7 @@ import { judge, parsePath, samplePath, type Point } from '../src/lib/strokes';
 import { dictionary as CMU } from 'cmu-pronouncing-dictionary';
 import { CONTRASTS, contrastSpan, obeysRule } from '../src/content/contrasts';
 import { clipId } from '../src/lib/clip-id';
-import { wanted } from '../tools/make-audio';
+import { toRecord, wanted } from '../tools/make-audio';
 import { SURVEY_STEPS, surveyAsk, surveyQuestion, surveySaid } from '../src/content/maths';
 import { flagCountries } from '../src/games/teams';
 import { contrast, INK, PAPER } from '../src/lib/colour';
@@ -318,6 +318,11 @@ describe('recorded audio', () => {
       }
     }
     expect([...missing].slice(0, 10)).toEqual([]);
+  });
+
+  it('keeps docs/to-record.md, the list of what is still to record, up to date', () => {
+    const page = readFileSync(join(process.cwd(), 'docs', 'to-record.md'), 'utf8');
+    expect(page, 'run: npm run make:audio -- --todo docs/to-record.md').toBe(toRecord());
   });
 
   it('records real words and never made-up ones', () => {

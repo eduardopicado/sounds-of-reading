@@ -16,6 +16,7 @@
  * any size and works offline. */
 
 import { crestOf } from '../lib/crests';
+import { childName } from '../lib/name';
 import { pick } from '../lib/random';
 import { read } from '../lib/storage';
 
@@ -45,7 +46,12 @@ export interface Team {
 }
 
 /** the side he plays for until he picks one */
-export const YOU: Team = { id: 'you', name: 'You', short: 'You', kind: 'you', flag: '⭐', colours: ['#F3B229', '#10403E'], pattern: 'plain', shorts: '#10403E' };
+export const YOU: Team = {
+  id: 'you', kind: 'you', flag: '⭐', colours: ['#F3B229', '#10403E'], pattern: 'plain', shorts: '#10403E',
+  /* his own side carries his name, once a grown-up has given it */
+  get name() { return childName() || 'You'; },
+  get short() { return childName() || 'You'; },
+};
 
 /** his favourite opponent, made up: in purple, which no real team here wears */
 export const RIVALS: Team = { id: 'rivals', name: 'The Rivals', short: 'Rivals', kind: 'rivals', flag: '🛡️', colours: ['#6B3FA0', '#FFFFFF'], pattern: 'plain', shorts: '#2E1A47' };

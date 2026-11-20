@@ -1,0 +1,460 @@
+# Still to record
+
+Made by `npm run make:audio -- --todo docs/to-record.md`; the content test checks it is up to date.
+Until a line is recorded the app says it in the device voice (and Coach Says says a whole instruction
+in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
+exactly these, with the voices in public/audio/README.md.
+
+**446 clips, about 7124 characters.**
+
+## English (Stuart, Australian): 444
+
+- and the crab,
+- and the crab.
+- and the cup,
+- and the cup.
+- and the deer,
+- and the deer.
+- and the dog,
+- and the dog.
+- and the drum,
+- and the drum.
+- and the duck,
+- and the duck.
+- and the egg,
+- and the egg.
+- and the fish,
+- and the fish.
+- and the fox,
+- and the fox.
+- and the frog,
+- and the frog.
+- and the gift,
+- and the gift.
+- and the goat,
+- and the goat.
+- and the hat,
+- and the hat.
+- and the hen,
+- and the hen.
+- and the king,
+- and the king.
+- and the kite,
+- and the kite.
+- and the mouse,
+- and the mouse.
+- and the owl,
+- and the owl.
+- and the pig,
+- and the pig.
+- and the shark,
+- and the shark.
+- and the sheep,
+- and the sheep.
+- and the shell,
+- and the shell.
+- and the snail,
+- and the snail.
+- and the snake,
+- and the snake.
+- and the sock,
+- and the sock.
+- and the spider,
+- and the spider.
+- and the squid,
+- and the squid.
+- and the tiger,
+- and the tiger.
+- and the whale,
+- and the whale.
+- and the zebra,
+- and the zebra.
+- bath, tub, bathtub
+- bathtub
+- buck, et, bucket
+- bucket
+- cac, tus, cactus
+- cactus
+- cam, el, camel
+- chick, en, chicken
+- chicken
+- chip, munk, chipmunk
+- chipmunk
+- cob, web, cobweb
+- cobweb
+- cow, boy, cowboy
+- den, tist, dentist
+- dentist
+- drag, on, dragon
+- dragon
+- drum, stick, drumstick
+- drumstick
+- farm, er, farmer
+- farmer
+- ham, ster, hamster
+- hamster
+- hel, met, helmet
+- helmet
+- hot, dog, hotdog
+- hotdog
+- in the bag,
+- in the bag.
+- in the bath,
+- in the bath.
+- in the bin,
+- in the bin.
+- in the boat,
+- in the boat.
+- in the box,
+- in the box.
+- in the car,
+- in the car.
+- in the house,
+- in the house.
+- in the hut,
+- in the hut.
+- in the nest,
+- in the nest.
+- in the net,
+- in the net.
+- in the tree,
+- in the tree.
+- in the truck,
+- in the truck.
+- in the van,
+- in the van.
+- in, sect, insect
+- insect
+- jack, et, jacket
+- jacket
+- ketch, up, ketchup
+- ketchup
+- kit, ten, kitten
+- kitten
+- lap, top, laptop
+- laptop
+- lem, on, lemon
+- lemon
+- lip, stick, lipstick
+- lipstick
+- lob, ster, lobster
+- lobster
+- mag, net, magnet
+- magnet
+- match, box, matchbox
+- matchbox
+- mel, on, melon
+- melon
+- mit, ten, mitten
+- mitten
+- mon, ster, monster
+- monster
+- mush, room, mushroom
+- mushroom
+- nap, kin, napkin
+- napkin
+- oat, meal, oatmeal
+- oatmeal
+- on the bed,
+- on the bed.
+- on the bench,
+- on the bench.
+- on the log,
+- on the log.
+- on the ship,
+- on the ship.
+- pad, lock, padlock
+- padlock
+- pea, cock, peacock
+- pea, nut, peanut
+- peacock
+- peanut
+- pic, nic, picnic
+- picnic
+- pop, corn, popcorn
+- popcorn
+- pud, ding, pudding
+- pudding
+- pump, kin, pumpkin
+- pumpkin
+- Put the bat,
+- Put the bear,
+- Put the bee,
+- Put the bell,
+- Put the bike,
+- Put the cake,
+- Put the cap,
+- Put the cat,
+- Put the chick,
+- Put the cow,
+- Put the crab,
+- Put the cup,
+- Put the deer,
+- Put the dog,
+- Put the drum,
+- Put the duck,
+- Put the egg,
+- Put the fish,
+- Put the fox,
+- Put the frog,
+- Put the gift,
+- Put the goat,
+- Put the hat,
+- Put the hen,
+- Put the king,
+- Put the kite,
+- Put the mouse,
+- Put the owl,
+- Put the pig,
+- Put the shark,
+- Put the sheep,
+- Put the shell,
+- Put the snail,
+- Put the snake,
+- Put the sock,
+- Put the spider,
+- Put the squid,
+- Put the tiger,
+- Put the whale,
+- Put the zebra,
+- rab, bit, rabbit
+- rail, way, railway
+- railway
+- rain, bow, rainbow
+- rock, et, rocket
+- rub, bish, rubbish
+- rubbish
+- sail, boat, sailboat
+- sailboat
+- sand, wich, sandwich
+- sandwich
+- sea, weed, seaweed
+- seaweed
+- see, saw, seesaw
+- snow, man, snowman
+- snowman
+- sum, mer, summer
+- sun, set, sunset
+- sunset
+- Tap the bat that is not big.
+- Tap the bat,
+- Tap the bat.
+- Tap the bear that is not big.
+- Tap the bear,
+- Tap the bear.
+- Tap the bee that is not big.
+- Tap the bee,
+- Tap the bee.
+- Tap the bell that is not big.
+- Tap the bell,
+- Tap the bell.
+- Tap the big bat.
+- Tap the big bear.
+- Tap the big bee.
+- Tap the big bell.
+- Tap the big bike.
+- Tap the big cake.
+- Tap the big cap.
+- Tap the big cat.
+- Tap the big chick.
+- Tap the big cow.
+- Tap the big crab.
+- Tap the big cup.
+- Tap the big deer.
+- Tap the big dog.
+- Tap the big drum.
+- Tap the big duck.
+- Tap the big egg.
+- Tap the big fish.
+- Tap the big fox.
+- Tap the big frog.
+- Tap the big gift.
+- Tap the big goat.
+- Tap the big hat.
+- Tap the big hen.
+- Tap the big king.
+- Tap the big kite.
+- Tap the big mouse.
+- Tap the big owl.
+- Tap the big pig.
+- Tap the big shark.
+- Tap the big sheep.
+- Tap the big shell.
+- Tap the big snail.
+- Tap the big snake.
+- Tap the big sock.
+- Tap the big spider.
+- Tap the big squid.
+- Tap the big tiger.
+- Tap the big whale.
+- Tap the big zebra.
+- Tap the bike that is not big.
+- Tap the bike,
+- Tap the bike.
+- Tap the cake that is not big.
+- Tap the cake,
+- Tap the cake.
+- Tap the cap that is not big.
+- Tap the cap,
+- Tap the cap.
+- Tap the cat that is not big.
+- Tap the cat,
+- Tap the cat.
+- Tap the chick that is not big.
+- Tap the chick,
+- Tap the chick.
+- Tap the cow that is not big.
+- Tap the cow,
+- Tap the cow.
+- Tap the crab that is not big.
+- Tap the crab,
+- Tap the crab.
+- Tap the cup that is not big.
+- Tap the cup,
+- Tap the cup.
+- Tap the deer that is not big.
+- Tap the deer,
+- Tap the deer.
+- Tap the dog that is not big.
+- Tap the dog,
+- Tap the dog.
+- Tap the drum that is not big.
+- Tap the drum,
+- Tap the drum.
+- Tap the duck that is not big.
+- Tap the duck,
+- Tap the duck.
+- Tap the egg that is not big.
+- Tap the egg,
+- Tap the egg.
+- Tap the fish that is not big.
+- Tap the fish,
+- Tap the fish.
+- Tap the fox that is not big.
+- Tap the fox,
+- Tap the fox.
+- Tap the frog that is not big.
+- Tap the frog,
+- Tap the frog.
+- Tap the gift that is not big.
+- Tap the gift,
+- Tap the gift.
+- Tap the goat that is not big.
+- Tap the goat,
+- Tap the goat.
+- Tap the hat that is not big.
+- Tap the hat,
+- Tap the hat.
+- Tap the hen that is not big.
+- Tap the hen,
+- Tap the hen.
+- Tap the king that is not big.
+- Tap the king,
+- Tap the king.
+- Tap the kite that is not big.
+- Tap the kite,
+- Tap the kite.
+- Tap the mouse that is not big.
+- Tap the mouse,
+- Tap the mouse.
+- Tap the owl that is not big.
+- Tap the owl,
+- Tap the owl.
+- Tap the pig that is not big.
+- Tap the pig,
+- Tap the pig.
+- Tap the shark that is not big.
+- Tap the shark,
+- Tap the shark.
+- Tap the sheep that is not big.
+- Tap the sheep,
+- Tap the sheep.
+- Tap the shell that is not big.
+- Tap the shell,
+- Tap the shell.
+- Tap the snail that is not big.
+- Tap the snail,
+- Tap the snail.
+- Tap the snake that is not big.
+- Tap the snake,
+- Tap the snake.
+- Tap the sock that is not big.
+- Tap the sock,
+- Tap the sock.
+- Tap the spider that is not big.
+- Tap the spider,
+- Tap the spider.
+- Tap the squid that is not big.
+- Tap the squid,
+- Tap the squid.
+- Tap the tiger that is not big.
+- Tap the tiger,
+- Tap the tiger.
+- Tap the whale that is not big.
+- Tap the whale,
+- Tap the whale.
+- Tap the zebra that is not big.
+- Tap the zebra,
+- Tap the zebra.
+- tea, pot, teapot
+- teapot
+- ten, nis, tennis
+- tennis
+- That is it!
+- then tap the bat.
+- then tap the bear.
+- then tap the bee.
+- then tap the bell.
+- then tap the bike.
+- then tap the cake.
+- then tap the cap.
+- then tap the cat.
+- then tap the chick.
+- then tap the cow.
+- then tap the crab.
+- then tap the cup.
+- then tap the deer.
+- then tap the dog.
+- then tap the drum.
+- then tap the duck.
+- then tap the egg.
+- then tap the fish.
+- then tap the fox.
+- then tap the frog.
+- then tap the gift.
+- then tap the goat.
+- then tap the hat.
+- then tap the hen.
+- then tap the king.
+- then tap the kite.
+- then tap the mouse.
+- then tap the owl.
+- then tap the pig.
+- then tap the shark.
+- then tap the sheep.
+- then tap the shell.
+- then tap the snail.
+- then tap the snake.
+- then tap the sock.
+- then tap the spider.
+- then tap the squid.
+- then tap the tiger.
+- then tap the whale.
+- then tap the zebra.
+- thun, der, thunder
+- thunder
+- tick, et, ticket
+- ticket
+- tooth, brush, toothbrush
+- toothbrush
+- up, set, upset
+- upset
+- week, end, weekend
+- weekend
+- win, ter, winter
+- zig, zag, zigzag
+
+## Portuguese (Roberto Valença, Brazilian): 2
+
+- Lucas
+- Luquinhas

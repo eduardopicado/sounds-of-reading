@@ -15,7 +15,7 @@ import { lifetime, type Life } from '../lib/life';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { praise } from '../lib/name';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
 import { climb, signed, type Climb, type Step } from '../content/maths';
@@ -253,7 +253,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     results.hidden = false;
     sfx.whistle();
     life.later(() => { sfx.win(); confetti(); }, 350);
-    say(right === n ? 'Every one right!' : game.cheer ?? 'Good counting!');
+    praise(right === n ? 'Every one right!' : game.cheer ?? 'Good counting!');
   }
 
   root.append(node);
