@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**446 clips, about 7124 characters.**
+**1108 clips, about 22030 characters.**
 
-## English (Stuart, Australian): 444
+## English (Stuart, Australian): 773
 
 - and the crab,
 - and the crab.
@@ -89,14 +89,63 @@ exactly these, with the voices in public/audio/README.md.
 - dragon
 - drum, stick, drumstick
 - drumstick
+- Each square is 10 metres.
+- Each square is 2 metres.
+- Each square is 5 metres.
 - farm, er, farmer
 - farmer
+- Go 1 square east,
+- Go 1 square east.
+- Go 1 square north-east.
+- Go 1 square north-west.
+- Go 1 square north,
+- Go 1 square north.
+- Go 1 square south-east.
+- Go 1 square south-west.
+- Go 1 square south,
+- Go 1 square south.
+- Go 1 square west,
+- Go 1 square west.
+- Go 2 squares east,
+- Go 2 squares east.
+- Go 2 squares north-east.
+- Go 2 squares north-west.
+- Go 2 squares north,
+- Go 2 squares north.
+- Go 2 squares south-east.
+- Go 2 squares south-west.
+- Go 2 squares south,
+- Go 2 squares south.
+- Go 2 squares west,
+- Go 2 squares west.
+- Go 3 squares east,
+- Go 3 squares east.
+- Go 3 squares north,
+- Go 3 squares north.
+- Go 3 squares south,
+- Go 3 squares south.
+- Go 3 squares west,
+- Go 3 squares west.
 - ham, ster, hamster
 - hamster
 - hel, met, helmet
 - helmet
 - hot, dog, hotdog
 - hotdog
+- How far is it to the bench?
+- How far is it to the boat?
+- How far is it to the crab?
+- How far is it to the duck?
+- How far is it to the flag?
+- How far is it to the hill?
+- How far is it to the hut?
+- How far is it to the log?
+- How far is it to the nest?
+- How far is it to the rock?
+- How far is it to the shell?
+- How far is it to the ship?
+- How far is it to the swing?
+- How far is it to the tree?
 - in the bag,
 - in the bag.
 - in the bath,
@@ -125,6 +174,47 @@ exactly these, with the voices in public/audio/README.md.
 - in the van.
 - in, sect, insect
 - insect
+- It is 10 metres.
+- It is 15 metres.
+- It is 2 metres.
+- It is 20 metres.
+- It is 25 metres.
+- It is 30 metres.
+- It is 4 metres.
+- It is 40 metres.
+- It is 5 metres.
+- It is 50 metres.
+- It is 6 metres.
+- It is 8 metres.
+- It is east.
+- It is in A1.
+- It is in A2.
+- It is in A3.
+- It is in A4.
+- It is in A5.
+- It is in B1.
+- It is in B2.
+- It is in B3.
+- It is in B4.
+- It is in B5.
+- It is in C1.
+- It is in C2.
+- It is in C3.
+- It is in C4.
+- It is in C5.
+- It is in D1.
+- It is in D2.
+- It is in D3.
+- It is in D4.
+- It is in D5.
+- It is in E1.
+- It is in E2.
+- It is in E3.
+- It is in E4.
+- It is in E5.
+- It is north.
+- It is south.
+- It is west.
 - jack, et, jacket
 - jacket
 - ketch, up, ketchup
@@ -233,9 +323,73 @@ exactly these, with the voices in public/audio/README.md.
 - see, saw, seesaw
 - snow, man, snowman
 - snowman
+- Square A1 is here.
+- Square A2 is here.
+- Square A3 is here.
+- Square A4 is here.
+- Square A5 is here.
+- Square B1 is here.
+- Square B2 is here.
+- Square B3 is here.
+- Square B4 is here.
+- Square B5 is here.
+- Square C1 is here.
+- Square C2 is here.
+- Square C3 is here.
+- Square C4 is here.
+- Square C5 is here.
+- Square D1 is here.
+- Square D2 is here.
+- Square D3 is here.
+- Square D4 is here.
+- Square D5 is here.
+- Square E1 is here.
+- Square E2 is here.
+- Square E3 is here.
+- Square E4 is here.
+- Square E5 is here.
+- Start at the bench.
+- Start at the boat.
+- Start at the crab.
+- Start at the duck.
+- Start at the flag.
+- Start at the hill.
+- Start at the hut.
+- Start at the log.
+- Start at the nest.
+- Start at the rock.
+- Start at the shell.
+- Start at the ship.
+- Start at the swing.
+- Start at the tree.
 - sum, mer, summer
 - sun, set, sunset
 - sunset
+- Tap square A1.
+- Tap square A2.
+- Tap square A3.
+- Tap square A4.
+- Tap square A5.
+- Tap square B1.
+- Tap square B2.
+- Tap square B3.
+- Tap square B4.
+- Tap square B5.
+- Tap square C1.
+- Tap square C2.
+- Tap square C3.
+- Tap square C4.
+- Tap square C5.
+- Tap square D1.
+- Tap square D2.
+- Tap square D3.
+- Tap square D4.
+- Tap square D5.
+- Tap square E1.
+- Tap square E2.
+- Tap square E3.
+- Tap square E4.
+- Tap square E5.
 - Tap the bat that is not big.
 - Tap the bat,
 - Tap the bat.
@@ -248,6 +402,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the bell that is not big.
 - Tap the bell,
 - Tap the bell.
+- Tap the bench.
 - Tap the big bat.
 - Tap the big bear.
 - Tap the big bee.
@@ -291,6 +446,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the bike that is not big.
 - Tap the bike,
 - Tap the bike.
+- Tap the boat.
 - Tap the cake that is not big.
 - Tap the cake,
 - Tap the cake.
@@ -330,6 +486,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the fish that is not big.
 - Tap the fish,
 - Tap the fish.
+- Tap the flag.
 - Tap the fox that is not big.
 - Tap the fox,
 - Tap the fox.
@@ -348,21 +505,26 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the hen that is not big.
 - Tap the hen,
 - Tap the hen.
+- Tap the hill.
+- Tap the hut.
 - Tap the king that is not big.
 - Tap the king,
 - Tap the king.
 - Tap the kite that is not big.
 - Tap the kite,
 - Tap the kite.
+- Tap the log.
 - Tap the mouse that is not big.
 - Tap the mouse,
 - Tap the mouse.
+- Tap the nest.
 - Tap the owl that is not big.
 - Tap the owl,
 - Tap the owl.
 - Tap the pig that is not big.
 - Tap the pig,
 - Tap the pig.
+- Tap the rock.
 - Tap the shark that is not big.
 - Tap the shark,
 - Tap the shark.
@@ -372,6 +534,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the shell that is not big.
 - Tap the shell,
 - Tap the shell.
+- Tap the ship.
 - Tap the snail that is not big.
 - Tap the snail,
 - Tap the snail.
@@ -387,20 +550,100 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the squid that is not big.
 - Tap the squid,
 - Tap the squid.
+- Tap the swing.
 - Tap the tiger that is not big.
 - Tap the tiger,
 - Tap the tiger.
+- Tap the tree.
 - Tap the whale that is not big.
 - Tap the whale,
 - Tap the whale.
 - Tap the zebra that is not big.
 - Tap the zebra,
 - Tap the zebra.
+- Tap where the treasure is.
 - tea, pot, teapot
 - teapot
 - ten, nis, tennis
 - tennis
 - That is it!
+- That is square A1.
+- That is square A2.
+- That is square A3.
+- That is square A4.
+- That is square A5.
+- That is square A6.
+- That is square B1.
+- That is square B2.
+- That is square B3.
+- That is square B4.
+- That is square B5.
+- That is square B6.
+- That is square C1.
+- That is square C2.
+- That is square C3.
+- That is square C4.
+- That is square C5.
+- That is square C6.
+- That is square D1.
+- That is square D2.
+- That is square D3.
+- That is square D4.
+- That is square D5.
+- That is square D6.
+- That is square E1.
+- That is square E2.
+- That is square E3.
+- That is square E4.
+- That is square E5.
+- That is square E6.
+- That is square F1.
+- That is square F2.
+- That is square F3.
+- That is square F4.
+- That is square F5.
+- That is square F6.
+- That is the bench.
+- That is the boat.
+- That is the crab.
+- That is the duck.
+- That is the flag.
+- That is the hill.
+- That is the hut.
+- That is the log.
+- That is the nest.
+- That is the rock.
+- That is the shell.
+- That is the ship.
+- That is the swing.
+- That is the tree.
+- The bench is here.
+- The boat is here.
+- The crab is here.
+- The duck is here.
+- The flag is here.
+- The hill is here.
+- The hut is here.
+- The log is here.
+- The nest is here.
+- The rock is here.
+- The shell is here.
+- The ship is here.
+- The swing is here.
+- The treasure is here.
+- The tree is here.
+- then 1 square east.
+- then 1 square north.
+- then 1 square south.
+- then 1 square west.
+- then 2 squares east.
+- then 2 squares north.
+- then 2 squares south.
+- then 2 squares west.
+- then 3 squares east.
+- then 3 squares north.
+- then 3 squares south.
+- then 3 squares west.
 - then tap the bat.
 - then tap the bear.
 - then tap the bee.
@@ -451,10 +694,429 @@ exactly these, with the voices in public/audio/README.md.
 - upset
 - week, end, weekend
 - weekend
+- What is above the bench?
+- What is above the boat?
+- What is above the crab?
+- What is above the duck?
+- What is above the flag?
+- What is above the hill?
+- What is above the hut?
+- What is above the log?
+- What is above the nest?
+- What is above the rock?
+- What is above the shell?
+- What is above the ship?
+- What is above the swing?
+- What is above the tree?
+- What is below the bench?
+- What is below the boat?
+- What is below the crab?
+- What is below the duck?
+- What is below the flag?
+- What is below the hill?
+- What is below the hut?
+- What is below the log?
+- What is below the nest?
+- What is below the rock?
+- What is below the shell?
+- What is below the ship?
+- What is below the swing?
+- What is below the tree?
+- What is there?
+- What is to the left of the bench?
+- What is to the left of the boat?
+- What is to the left of the crab?
+- What is to the left of the duck?
+- What is to the left of the flag?
+- What is to the left of the hill?
+- What is to the left of the hut?
+- What is to the left of the log?
+- What is to the left of the nest?
+- What is to the left of the rock?
+- What is to the left of the shell?
+- What is to the left of the ship?
+- What is to the left of the swing?
+- What is to the left of the tree?
+- What is to the right of the bench?
+- What is to the right of the boat?
+- What is to the right of the crab?
+- What is to the right of the duck?
+- What is to the right of the flag?
+- What is to the right of the hill?
+- What is to the right of the hut?
+- What is to the right of the log?
+- What is to the right of the nest?
+- What is to the right of the rock?
+- What is to the right of the shell?
+- What is to the right of the ship?
+- What is to the right of the swing?
+- What is to the right of the tree?
+- Which square is the bench in?
+- Which square is the boat in?
+- Which square is the crab in?
+- Which square is the duck in?
+- Which square is the flag in?
+- Which square is the hill in?
+- Which square is the hut in?
+- Which square is the log in?
+- Which square is the nest in?
+- Which square is the rock in?
+- Which square is the shell in?
+- Which square is the ship in?
+- Which square is the swing in?
+- Which square is the tree in?
+- Which way is the bench?
+- Which way is the boat?
+- Which way is the crab?
+- Which way is the duck?
+- Which way is the flag?
+- Which way is the hill?
+- Which way is the hut?
+- Which way is the log?
+- Which way is the nest?
+- Which way is the rock?
+- Which way is the shell?
+- Which way is the ship?
+- Which way is the swing?
+- Which way is the tree?
 - win, ter, winter
+- You found the treasure!
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 2
+## Portuguese (Roberto Valença, Brazilian): 335
 
+- A árvore está aqui.
+- A bandeira está aqui.
+- A cabana está aqui.
+- A concha está aqui.
+- A pedra está aqui.
+- Ande 1 quadrado para o leste,
+- Ande 1 quadrado para o leste.
+- Ande 1 quadrado para o nordeste.
+- Ande 1 quadrado para o noroeste.
+- Ande 1 quadrado para o norte,
+- Ande 1 quadrado para o norte.
+- Ande 1 quadrado para o oeste,
+- Ande 1 quadrado para o oeste.
+- Ande 1 quadrado para o sudeste.
+- Ande 1 quadrado para o sudoeste.
+- Ande 1 quadrado para o sul,
+- Ande 1 quadrado para o sul.
+- Ande 2 quadrados para o leste,
+- Ande 2 quadrados para o leste.
+- Ande 2 quadrados para o nordeste.
+- Ande 2 quadrados para o noroeste.
+- Ande 2 quadrados para o norte,
+- Ande 2 quadrados para o norte.
+- Ande 2 quadrados para o oeste,
+- Ande 2 quadrados para o oeste.
+- Ande 2 quadrados para o sudeste.
+- Ande 2 quadrados para o sudoeste.
+- Ande 2 quadrados para o sul,
+- Ande 2 quadrados para o sul.
+- Ande 3 quadrados para o leste,
+- Ande 3 quadrados para o leste.
+- Ande 3 quadrados para o norte,
+- Ande 3 quadrados para o norte.
+- Ande 3 quadrados para o oeste,
+- Ande 3 quadrados para o oeste.
+- Ande 3 quadrados para o sul,
+- Ande 3 quadrados para o sul.
+- Cada quadrado tem 10 metros.
+- Cada quadrado tem 2 metros.
+- Cada quadrado tem 5 metros.
+- Comece na árvore.
+- Comece na bandeira.
+- Comece na cabana.
+- Comece na concha.
+- Comece na pedra.
+- Comece no balanço.
+- Comece no banco.
+- Comece no barco.
+- Comece no caranguejo.
+- Comece no morro.
+- Comece no navio.
+- Comece no ninho.
+- Comece no pato.
+- Comece no tronco.
+- depois 1 quadrado para o leste.
+- depois 1 quadrado para o norte.
+- depois 1 quadrado para o oeste.
+- depois 1 quadrado para o sul.
+- depois 2 quadrados para o leste.
+- depois 2 quadrados para o norte.
+- depois 2 quadrados para o oeste.
+- depois 2 quadrados para o sul.
+- depois 3 quadrados para o leste.
+- depois 3 quadrados para o norte.
+- depois 3 quadrados para o oeste.
+- depois 3 quadrados para o sul.
+- Em que quadrado está a árvore?
+- Em que quadrado está a bandeira?
+- Em que quadrado está a cabana?
+- Em que quadrado está a concha?
+- Em que quadrado está a pedra?
+- Em que quadrado está o balanço?
+- Em que quadrado está o banco?
+- Em que quadrado está o barco?
+- Em que quadrado está o caranguejo?
+- Em que quadrado está o morro?
+- Em que quadrado está o navio?
+- Em que quadrado está o ninho?
+- Em que quadrado está o pato?
+- Em que quadrado está o tronco?
+- Essa é a árvore.
+- Essa é a bandeira.
+- Essa é a cabana.
+- Essa é a concha.
+- Essa é a pedra.
+- Esse é o balanço.
+- Esse é o banco.
+- Esse é o barco.
+- Esse é o caranguejo.
+- Esse é o morro.
+- Esse é o navio.
+- Esse é o ninho.
+- Esse é o pato.
+- Esse é o quadrado A1.
+- Esse é o quadrado A2.
+- Esse é o quadrado A3.
+- Esse é o quadrado A4.
+- Esse é o quadrado A5.
+- Esse é o quadrado A6.
+- Esse é o quadrado B1.
+- Esse é o quadrado B2.
+- Esse é o quadrado B3.
+- Esse é o quadrado B4.
+- Esse é o quadrado B5.
+- Esse é o quadrado B6.
+- Esse é o quadrado C1.
+- Esse é o quadrado C2.
+- Esse é o quadrado C3.
+- Esse é o quadrado C4.
+- Esse é o quadrado C5.
+- Esse é o quadrado C6.
+- Esse é o quadrado D1.
+- Esse é o quadrado D2.
+- Esse é o quadrado D3.
+- Esse é o quadrado D4.
+- Esse é o quadrado D5.
+- Esse é o quadrado D6.
+- Esse é o quadrado E1.
+- Esse é o quadrado E2.
+- Esse é o quadrado E3.
+- Esse é o quadrado E4.
+- Esse é o quadrado E5.
+- Esse é o quadrado E6.
+- Esse é o quadrado F1.
+- Esse é o quadrado F2.
+- Esse é o quadrado F3.
+- Esse é o quadrado F4.
+- Esse é o quadrado F5.
+- Esse é o quadrado F6.
+- Esse é o tronco.
+- Está no A1.
+- Está no A2.
+- Está no A3.
+- Está no A4.
+- Está no A5.
+- Está no B1.
+- Está no B2.
+- Está no B3.
+- Está no B4.
+- Está no B5.
+- Está no C1.
+- Está no C2.
+- Está no C3.
+- Está no C4.
+- Está no C5.
+- Está no D1.
+- Está no D2.
+- Está no D3.
+- Está no D4.
+- Está no D5.
+- Está no E1.
+- Está no E2.
+- Está no E3.
+- Está no E4.
+- Está no E5.
+- Fica para o leste.
+- Fica para o norte.
+- Fica para o oeste.
+- Fica para o sul.
+- Isso!
 - Lucas
 - Luquinhas
+- O balanço está aqui.
+- O banco está aqui.
+- O barco está aqui.
+- O caranguejo está aqui.
+- O morro está aqui.
+- O navio está aqui.
+- O ninho está aqui.
+- O pato está aqui.
+- O quadrado A1 fica aqui.
+- O quadrado A2 fica aqui.
+- O quadrado A3 fica aqui.
+- O quadrado A4 fica aqui.
+- O quadrado A5 fica aqui.
+- O quadrado B1 fica aqui.
+- O quadrado B2 fica aqui.
+- O quadrado B3 fica aqui.
+- O quadrado B4 fica aqui.
+- O quadrado B5 fica aqui.
+- O quadrado C1 fica aqui.
+- O quadrado C2 fica aqui.
+- O quadrado C3 fica aqui.
+- O quadrado C4 fica aqui.
+- O quadrado C5 fica aqui.
+- O quadrado D1 fica aqui.
+- O quadrado D2 fica aqui.
+- O quadrado D3 fica aqui.
+- O quadrado D4 fica aqui.
+- O quadrado D5 fica aqui.
+- O quadrado E1 fica aqui.
+- O quadrado E2 fica aqui.
+- O quadrado E3 fica aqui.
+- O quadrado E4 fica aqui.
+- O quadrado E5 fica aqui.
+- O que está à direita da árvore?
+- O que está à direita da bandeira?
+- O que está à direita da cabana?
+- O que está à direita da concha?
+- O que está à direita da pedra?
+- O que está à direita do balanço?
+- O que está à direita do banco?
+- O que está à direita do barco?
+- O que está à direita do caranguejo?
+- O que está à direita do morro?
+- O que está à direita do navio?
+- O que está à direita do ninho?
+- O que está à direita do pato?
+- O que está à direita do tronco?
+- O que está à esquerda da árvore?
+- O que está à esquerda da bandeira?
+- O que está à esquerda da cabana?
+- O que está à esquerda da concha?
+- O que está à esquerda da pedra?
+- O que está à esquerda do balanço?
+- O que está à esquerda do banco?
+- O que está à esquerda do barco?
+- O que está à esquerda do caranguejo?
+- O que está à esquerda do morro?
+- O que está à esquerda do navio?
+- O que está à esquerda do ninho?
+- O que está à esquerda do pato?
+- O que está à esquerda do tronco?
+- O que está abaixo da árvore?
+- O que está abaixo da bandeira?
+- O que está abaixo da cabana?
+- O que está abaixo da concha?
+- O que está abaixo da pedra?
+- O que está abaixo do balanço?
+- O que está abaixo do banco?
+- O que está abaixo do barco?
+- O que está abaixo do caranguejo?
+- O que está abaixo do morro?
+- O que está abaixo do navio?
+- O que está abaixo do ninho?
+- O que está abaixo do pato?
+- O que está abaixo do tronco?
+- O que está acima da árvore?
+- O que está acima da bandeira?
+- O que está acima da cabana?
+- O que está acima da concha?
+- O que está acima da pedra?
+- O que está acima do balanço?
+- O que está acima do banco?
+- O que está acima do barco?
+- O que está acima do caranguejo?
+- O que está acima do morro?
+- O que está acima do navio?
+- O que está acima do ninho?
+- O que está acima do pato?
+- O que está acima do tronco?
+- O que tem lá?
+- O tesouro está aqui.
+- O tronco está aqui.
+- Para que lado fica a árvore?
+- Para que lado fica a bandeira?
+- Para que lado fica a cabana?
+- Para que lado fica a concha?
+- Para que lado fica a pedra?
+- Para que lado fica o balanço?
+- Para que lado fica o banco?
+- Para que lado fica o barco?
+- Para que lado fica o caranguejo?
+- Para que lado fica o morro?
+- Para que lado fica o navio?
+- Para que lado fica o ninho?
+- Para que lado fica o pato?
+- Para que lado fica o tronco?
+- Qual é a distância até a árvore?
+- Qual é a distância até a bandeira?
+- Qual é a distância até a cabana?
+- Qual é a distância até a concha?
+- Qual é a distância até a pedra?
+- Qual é a distância até o balanço?
+- Qual é a distância até o banco?
+- Qual é a distância até o barco?
+- Qual é a distância até o caranguejo?
+- Qual é a distância até o morro?
+- Qual é a distância até o navio?
+- Qual é a distância até o ninho?
+- Qual é a distância até o pato?
+- Qual é a distância até o tronco?
+- São 10 metros.
+- São 15 metros.
+- São 2 metros.
+- São 20 metros.
+- São 25 metros.
+- São 30 metros.
+- São 4 metros.
+- São 40 metros.
+- São 5 metros.
+- São 50 metros.
+- São 6 metros.
+- São 8 metros.
+- Toque na árvore.
+- Toque na bandeira.
+- Toque na cabana.
+- Toque na concha.
+- Toque na pedra.
+- Toque no balanço.
+- Toque no banco.
+- Toque no barco.
+- Toque no caranguejo.
+- Toque no morro.
+- Toque no navio.
+- Toque no ninho.
+- Toque no pato.
+- Toque no quadrado A1.
+- Toque no quadrado A2.
+- Toque no quadrado A3.
+- Toque no quadrado A4.
+- Toque no quadrado A5.
+- Toque no quadrado B1.
+- Toque no quadrado B2.
+- Toque no quadrado B3.
+- Toque no quadrado B4.
+- Toque no quadrado B5.
+- Toque no quadrado C1.
+- Toque no quadrado C2.
+- Toque no quadrado C3.
+- Toque no quadrado C4.
+- Toque no quadrado C5.
+- Toque no quadrado D1.
+- Toque no quadrado D2.
+- Toque no quadrado D3.
+- Toque no quadrado D4.
+- Toque no quadrado D5.
+- Toque no quadrado E1.
+- Toque no quadrado E2.
+- Toque no quadrado E3.
+- Toque no quadrado E4.
+- Toque no quadrado E5.
+- Toque no tronco.
+- Toque onde está o tesouro.
+- Você achou o tesouro!

@@ -12,7 +12,7 @@
 
 import { el } from '../lib/dom';
 import { read, write } from '../lib/storage';
-import { canSpeak, say } from '../lib/speech';
+import { canSpeak, say, sayInTurn } from '../lib/speech';
 import { hasClip } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import type { Both, Lang } from '../content/pt';
@@ -65,4 +65,12 @@ export function langSwitch(key: string): LangSwitch {
 export function speak(text: Both, lang: Lang, onEnd?: () => void): void {
   if (lang === 'pt' && (hasClip(text.pt) || canSpeak(PT))) say(text.pt, { lang: PT, onEnd });
   else say(text.en, { onEnd });
+}
+
+/** several phrases, one after another, in the chosen language: Portuguese
+    where every phrase is recorded or there is a Portuguese voice, English
+    otherwise (sayInTurn: never two voices in one sentence) */
+export function speakTurn(lines: readonly Both[], lang: Lang, onEnd?: () => void): void {
+  if (lang === 'pt' && (lines.every((l) => hasClip(l.pt)) || canSpeak(PT))) sayInTurn(lines.map((l) => l.pt), { lang: PT, onEnd });
+  else sayInTurn(lines.map((l) => l.en), { onEnd });
 }

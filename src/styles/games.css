@@ -2400,3 +2400,62 @@
 /* his name: a field wide enough for a name, never past the card */
 .grown-ups .gu-name { flex: 1 1 12em; min-width: 0; max-width: 20em; }
 .grown-ups .gu-name::placeholder { color: var(--on-deep-soft); }
+
+/* ── Treasure Map ──────────────────────────────────────────────────────── */
+
+.tm-stage { gap: 8px; }
+.tm-board { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 14px; width: 100%; }
+/* the island: sand squares in a ring of sea, letters across, numbers down */
+.tm-map {
+  display: grid; grid-template-columns: 26px repeat(var(--cols, 5), minmax(0, 1fr)); gap: 3px;
+  width: min(100%, 470px); padding: 8px 10px 10px 4px; border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 50%, #3E93C8 0 60%, #2C79AD 100%);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .18);
+}
+.tm-head {
+  display: grid; place-items: center; min-height: 22px;
+  font-family: var(--display); font-weight: 800; font-size: 17px; color: #FFFFFF;
+}
+.tm-cell {
+  aspect-ratio: 1; min-width: 0; min-height: 44px; padding: 0;
+  display: grid; place-items: center;
+  border: 2px solid rgba(20, 49, 47, .18); border-radius: 8px;
+  background: #F2DDA4; color: var(--ink); cursor: pointer;
+}
+.tm-cell:disabled { cursor: default; opacity: 1; }
+.tm-cell:not(:disabled):active { transform: scale(.94); }
+.tm-cell .tm-pic { font-size: clamp(22px, 6.4vw, 40px); line-height: 1; }
+.tm-cell.start { box-shadow: 0 0 0 4px var(--mustard); border-color: var(--mustard-dark); }
+.tm-cell.right { box-shadow: 0 0 0 4px var(--mint-dark); background: #D8F3E7; }
+.tm-cell.wrong { box-shadow: 0 0 0 4px var(--tomato); }
+.tm-cell.walked:not(.treasure)::after { content: '👣'; font-size: 22px; grid-area: 1 / 1; opacity: .85; }
+.tm-cell.treasure::after { content: '💎'; font-size: clamp(24px, 7vw, 42px); grid-area: 1 / 1; animation: pop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.tm-cell .tm-pic, .tm-cell::after { grid-area: 1 / 1; }
+
+/* the compass and the key, beside the map on an iPad, under it on a phone */
+.tm-side { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tm-compass {
+  display: grid; grid-template-areas: '. n .' 'w r e' '. s .'; place-items: center;
+  width: 92px; height: 92px; border-radius: 50%;
+  background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+  font-family: var(--display); font-weight: 800; font-size: 17px; line-height: 1;
+}
+.tm-compass .tm-n { grid-area: n; color: var(--tomato); font-size: 20px; }
+.tm-compass .tm-s { grid-area: s; }
+.tm-compass .tm-e { grid-area: e; }
+.tm-compass .tm-w { grid-area: w; }
+.tm-compass .tm-rose { grid-area: r; font-size: 22px; color: var(--mustard-dark); }
+.tm-key {
+  list-style: none; margin: 0; padding: 8px 12px; border-radius: 14px;
+  display: grid; grid-template-columns: repeat(2, auto); gap: 4px 14px;
+  background: var(--paper); color: var(--ink);
+}
+.tm-key li { display: flex; align-items: center; gap: 6px; }
+.tm-key .tm-pic { font-size: 24px; }
+.tm-key .tm-word { font-family: var(--reading); font-size: 18px; }
+@media (max-width: 600px) {
+  .tm-side { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm-cell.treasure::after { animation: none; }
+}
