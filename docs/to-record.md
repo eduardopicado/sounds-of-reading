@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**446 clips, about 7124 characters.**
+**480 clips, about 8075 characters.**
 
-## English (Stuart, Australian): 444
+## English (Stuart, Australian): 461
 
 - and the crab,
 - and the crab.
@@ -125,6 +125,7 @@ exactly these, with the voices in public/audio/README.md.
 - in the van.
 - in, sect, insect
 - insect
+- It goes here.
 - jack, et, jacket
 - jacket
 - ketch, up, ketchup
@@ -153,6 +154,7 @@ exactly these, with the voices in public/audio/README.md.
 - mushroom
 - nap, kin, napkin
 - napkin
+- Not there. Try again.
 - oat, meal, oatmeal
 - oatmeal
 - on the bed,
@@ -177,6 +179,17 @@ exactly these, with the voices in public/audio/README.md.
 - pudding
 - pump, kin, pumpkin
 - pumpkin
+- Put Africa on the map.
+- Put Antarctica on the map.
+- Put Asia on the map.
+- Put Australia on the map.
+- Put Europe on the map.
+- Put New South Wales on the map.
+- Put North America on the map.
+- Put Queensland on the map.
+- Put South America on the map.
+- Put South Australia on the map.
+- Put Tasmania on the map.
 - Put the bat,
 - Put the bear,
 - Put the bee,
@@ -204,6 +217,7 @@ exactly these, with the voices in public/audio/README.md.
 - Put the king,
 - Put the kite,
 - Put the mouse,
+- Put the Northern Territory on the map.
 - Put the owl,
 - Put the pig,
 - Put the shark,
@@ -217,6 +231,8 @@ exactly these, with the voices in public/audio/README.md.
 - Put the tiger,
 - Put the whale,
 - Put the zebra,
+- Put Victoria on the map.
+- Put Western Australia on the map.
 - rab, bit, rabbit
 - rail, way, railway
 - railway
@@ -451,10 +467,28 @@ exactly these, with the voices in public/audio/README.md.
 - upset
 - week, end, weekend
 - weekend
+- Where does this piece go?
 - win, ter, winter
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 2
+## Portuguese (Roberto Valença, Brazilian): 19
 
+- Aí não. Tente de novo.
+- Coloque a África no mapa.
+- Coloque a América do Norte no mapa.
+- Coloque a América do Sul no mapa.
+- Coloque a Antártida no mapa.
+- Coloque a Ásia no mapa.
+- Coloque a Austrália Meridional no mapa.
+- Coloque a Austrália no mapa.
+- Coloque a Austrália Ocidental no mapa.
+- Coloque a Europa no mapa.
+- Coloque a Tasmânia no mapa.
+- Coloque Nova Gales do Sul no mapa.
+- Coloque o Território do Norte no mapa.
+- Coloque Queensland no mapa.
+- Coloque Vitória no mapa.
+- Ela vai aqui.
 - Lucas
 - Luquinhas
+- Onde vai esta peça?

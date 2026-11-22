@@ -27,6 +27,7 @@ import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_S
 import { MAP_STEPS } from '../content/world';
 import { FLAG_STEPS } from '../content/flags';
 import { CAPITAL_STEPS } from '../content/capitals';
+import { JIGSAW_STEPS } from '../content/jigsaw';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'chess';
 
@@ -150,6 +151,8 @@ export const GAMES: Game[] = [
     load: () => import('./flags') },
   { path: 'capitals', name: 'Capital Cities', emoji: '🏛️', what: 'Sydney, Canberra and the world', tone: '#8C6A3F', section: 'geography', ladder: CAPITAL_STEPS,
     load: () => import('./capitals') },
+  { path: 'map-jigsaw', name: 'Map Jigsaw', emoji: '🧩', what: 'Continents and states back in place', tone: '#4D7FB8', section: 'geography', ladder: JIGSAW_STEPS,
+    load: () => import('./map-jigsaw') },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj', ladder: REF_STEPS,
     load: () => import('./refs-call') },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj', ladder: MATCH_STEPS,
