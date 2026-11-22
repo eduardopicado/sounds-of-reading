@@ -33,7 +33,7 @@ export interface MapThing { word: string; picture: string; pt: PtName }
 
 /** each thing's name in Portuguese, as he would say it at home */
 const PT_THINGS: Record<string, PtName> = {
-  hut: pt('cabana', 'f'), tree: pt('árvore', 'f'), rock: pt('pedra', 'f'), hill: pt('morro', 'm'),
+  hut: pt('cabana', 'f'), tent: pt('barraca', 'f'), tree: pt('árvore', 'f'), rock: pt('pedra', 'f'), hill: pt('morro', 'm'),
   log: pt('tronco', 'm'), flag: pt('bandeira', 'f'), boat: pt('barco', 'm'), ship: pt('navio', 'm'),
   crab: pt('caranguejo', 'm'), shell: pt('concha', 'f'), duck: pt('pato', 'm'), nest: pt('ninho', 'm'),
   bench: pt('banco', 'm'), swing: pt('balanço', 'm'),

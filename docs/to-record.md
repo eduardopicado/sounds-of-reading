@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1108 clips, about 22030 characters.**
+**1130 clips, about 22591 characters.**
 
-## English (Stuart, Australian): 773
+## English (Stuart, Australian): 784
 
 - and the crab,
 - and the crab.
@@ -145,6 +145,7 @@ exactly these, with the voices in public/audio/README.md.
 - How far is it to the shell?
 - How far is it to the ship?
 - How far is it to the swing?
+- How far is it to the tent?
 - How far is it to the tree?
 - in the bag,
 - in the bag.
@@ -361,6 +362,7 @@ exactly these, with the voices in public/audio/README.md.
 - Start at the shell.
 - Start at the ship.
 - Start at the swing.
+- Start at the tent.
 - Start at the tree.
 - sum, mer, summer
 - sun, set, sunset
@@ -551,6 +553,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the squid,
 - Tap the squid.
 - Tap the swing.
+- Tap the tent.
 - Tap the tiger that is not big.
 - Tap the tiger,
 - Tap the tiger.
@@ -616,6 +619,7 @@ exactly these, with the voices in public/audio/README.md.
 - That is the shell.
 - That is the ship.
 - That is the swing.
+- That is the tent.
 - That is the tree.
 - The bench is here.
 - The boat is here.
@@ -630,6 +634,7 @@ exactly these, with the voices in public/audio/README.md.
 - The shell is here.
 - The ship is here.
 - The swing is here.
+- The tent is here.
 - The treasure is here.
 - The tree is here.
 - then 1 square east.
@@ -707,6 +712,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is above the shell?
 - What is above the ship?
 - What is above the swing?
+- What is above the tent?
 - What is above the tree?
 - What is below the bench?
 - What is below the boat?
@@ -721,6 +727,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is below the shell?
 - What is below the ship?
 - What is below the swing?
+- What is below the tent?
 - What is below the tree?
 - What is there?
 - What is to the left of the bench?
@@ -736,6 +743,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is to the left of the shell?
 - What is to the left of the ship?
 - What is to the left of the swing?
+- What is to the left of the tent?
 - What is to the left of the tree?
 - What is to the right of the bench?
 - What is to the right of the boat?
@@ -750,6 +758,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is to the right of the shell?
 - What is to the right of the ship?
 - What is to the right of the swing?
+- What is to the right of the tent?
 - What is to the right of the tree?
 - Which square is the bench in?
 - Which square is the boat in?
@@ -764,6 +773,7 @@ exactly these, with the voices in public/audio/README.md.
 - Which square is the shell in?
 - Which square is the ship in?
 - Which square is the swing in?
+- Which square is the tent in?
 - Which square is the tree in?
 - Which way is the bench?
 - Which way is the boat?
@@ -778,15 +788,17 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the shell?
 - Which way is the ship?
 - Which way is the swing?
+- Which way is the tent?
 - Which way is the tree?
 - win, ter, winter
 - You found the treasure!
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 335
+## Portuguese (Roberto Valença, Brazilian): 346
 
 - A árvore está aqui.
 - A bandeira está aqui.
+- A barraca está aqui.
 - A cabana está aqui.
 - A concha está aqui.
 - A pedra está aqui.
@@ -827,6 +839,7 @@ exactly these, with the voices in public/audio/README.md.
 - Cada quadrado tem 5 metros.
 - Comece na árvore.
 - Comece na bandeira.
+- Comece na barraca.
 - Comece na cabana.
 - Comece na concha.
 - Comece na pedra.
@@ -853,6 +866,7 @@ exactly these, with the voices in public/audio/README.md.
 - depois 3 quadrados para o sul.
 - Em que quadrado está a árvore?
 - Em que quadrado está a bandeira?
+- Em que quadrado está a barraca?
 - Em que quadrado está a cabana?
 - Em que quadrado está a concha?
 - Em que quadrado está a pedra?
@@ -867,6 +881,7 @@ exactly these, with the voices in public/audio/README.md.
 - Em que quadrado está o tronco?
 - Essa é a árvore.
 - Essa é a bandeira.
+- Essa é a barraca.
 - Essa é a cabana.
 - Essa é a concha.
 - Essa é a pedra.
@@ -982,6 +997,7 @@ exactly these, with the voices in public/audio/README.md.
 - O quadrado E5 fica aqui.
 - O que está à direita da árvore?
 - O que está à direita da bandeira?
+- O que está à direita da barraca?
 - O que está à direita da cabana?
 - O que está à direita da concha?
 - O que está à direita da pedra?
@@ -996,6 +1012,7 @@ exactly these, with the voices in public/audio/README.md.
 - O que está à direita do tronco?
 - O que está à esquerda da árvore?
 - O que está à esquerda da bandeira?
+- O que está à esquerda da barraca?
 - O que está à esquerda da cabana?
 - O que está à esquerda da concha?
 - O que está à esquerda da pedra?
@@ -1010,6 +1027,7 @@ exactly these, with the voices in public/audio/README.md.
 - O que está à esquerda do tronco?
 - O que está abaixo da árvore?
 - O que está abaixo da bandeira?
+- O que está abaixo da barraca?
 - O que está abaixo da cabana?
 - O que está abaixo da concha?
 - O que está abaixo da pedra?
@@ -1024,6 +1042,7 @@ exactly these, with the voices in public/audio/README.md.
 - O que está abaixo do tronco?
 - O que está acima da árvore?
 - O que está acima da bandeira?
+- O que está acima da barraca?
 - O que está acima da cabana?
 - O que está acima da concha?
 - O que está acima da pedra?
@@ -1041,6 +1060,7 @@ exactly these, with the voices in public/audio/README.md.
 - O tronco está aqui.
 - Para que lado fica a árvore?
 - Para que lado fica a bandeira?
+- Para que lado fica a barraca?
 - Para que lado fica a cabana?
 - Para que lado fica a concha?
 - Para que lado fica a pedra?
@@ -1055,6 +1075,7 @@ exactly these, with the voices in public/audio/README.md.
 - Para que lado fica o tronco?
 - Qual é a distância até a árvore?
 - Qual é a distância até a bandeira?
+- Qual é a distância até a barraca?
 - Qual é a distância até a cabana?
 - Qual é a distância até a concha?
 - Qual é a distância até a pedra?
@@ -1081,6 +1102,7 @@ exactly these, with the voices in public/audio/README.md.
 - São 8 metros.
 - Toque na árvore.
 - Toque na bandeira.
+- Toque na barraca.
 - Toque na cabana.
 - Toque na concha.
 - Toque na pedra.
