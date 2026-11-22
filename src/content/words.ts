@@ -131,7 +131,7 @@ export const SOUNDS: SoundSpec[] = [
     words: 'duck 🦆 | rock 🪨 | sock 🧦 | sick 🤒 | pick | pack 🎒 | neck | tick ⏰ | stick | truck 🚚 | sack | kick ⚽',
     silly: 'nuck | ceck | gick | gock | kock | gack | nack | cuck | kuck | teck' },
   { id: 'e', label: 'e', asIn: 'egg', spellings: ['e'], level: 2, practice: true, phoneme: 'e', hue: 315,
-    words: 'egg 🥚 | end | red 🟥 | den 🏕 | ten 🔟 | net 🥅 | pet 🐶 | get | met | desk 🪑 | nest 🪺 | rest 😴',
+    words: 'egg 🥚 | end | red 🟥 | den 🏕 | ten 🔟 | net 🥅 | pet 🐶 | get | met | desk 🪑 | nest 🪺 | rest 😴 | tent ⛺',
     silly: 'sek | sem | sep | ses | sest | senk | semp | sesk | seck | senn' },
   { id: 'u', label: 'u', asIn: 'cup', spellings: ['u'], level: 2, practice: true, phoneme: 'u', hue: 90,
     words: 'up ⬆️ | us | cup ☕ | cut ✂️ | mud | mug ☕ | sun ☀️ | run 🏃 | rug 🧶 | duck 🦆 | dust | gum',
@@ -893,7 +893,7 @@ export const COACH_THINGS: string =
 /* Treasure Map's things: what can be drawn on the island, each with its
    picture in the word lists (src/content/treasure.ts has them in Portuguese) */
 export const MAP_THINGS: string =
-  'hut | tree | rock | hill | log | flag | boat | ship | crab | shell | duck | nest | bench | swing';
+  'hut | tent | tree | rock | hill | log | flag | boat | ship | crab | shell | duck | nest | bench | swing';
 /* Animals of the World: each animal's name and picture. Where each one
    lives, and a true thing about it, are in src/content/animals.ts */
 export const WORLD_ANIMALS: string =
