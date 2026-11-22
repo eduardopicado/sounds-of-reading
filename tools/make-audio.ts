@@ -64,6 +64,7 @@ import { refereeLines, weighLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
+import { treasureLines } from '../src/content/treasure';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
@@ -156,6 +157,9 @@ export function clips(): Clip[] {
   for (const line of flagLines()) add(line);
   /* Capital Cities: the states, their capitals, and the world's */
   for (const line of capitalLines((code) => country(code).name)) add(line);
+  /* Treasure Map: every phrase, in English and, by the teacher, in Portuguese */
+  for (const line of treasureLines()) add(line);
+  for (const line of treasureLines('pt')) add(line, 'pt');
   /* and the three in Portuguese, said by the teacher */
   for (const line of [...mapLines('pt'), ...flagLines('pt'), ...capitalLines((code) => country(code).name, (code) => country(code).pt)]) add(line, 'pt');
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);
