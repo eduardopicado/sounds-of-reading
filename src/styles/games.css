@@ -2460,6 +2460,54 @@
   .tm-cell.treasure::after { animation: none; }
 }
 
+/* ── Map Jigsaw ────────────────────────────────────────────────────────── */
+
+.jg-stage { gap: 8px; }
+.jg-board {
+  width: min(100%, 860px); max-height: calc(100svh - 230px); height: auto;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.jg-board[data-map="australia"] { width: min(100%, 620px); }
+.jg-sea { fill: #A9D6F2; stroke: #2B5F7F; stroke-width: 1.2; }
+.jg-tray { fill: rgba(255, 246, 231, .14); stroke: rgba(255, 246, 231, .5); stroke-width: 2; stroke-dasharray: 10 8; }
+/* where each piece goes, a dashed line round it */
+.jg-hole .edge { fill: none; stroke: #2B5F7F; stroke-width: 3; stroke-dasharray: 6 4; stroke-linejoin: round; }
+.jg-hole .fill { fill: #DCEFFA; }
+.jg-board[data-map="australia"] .jg-hole .edge { stroke-width: 5; stroke-dasharray: 12 8; }
+.jg-hole.filled { visibility: hidden; }
+.jg-coast-edge { fill: none; stroke: #2B5F7F; stroke-width: 5; stroke-linejoin: round; }
+.jg-coast { fill: #F4EBD6; }
+.jg-hint .edge { fill: none; stroke: #14312F; stroke-width: 4; stroke-linejoin: round; }
+.jg-hint .fill { fill: #FFD84D; }
+.jg-hint { animation: wm-glow 1.2s ease-in-out infinite; }
+.jg-piece { cursor: grab; }
+.jg-piece .edge { fill: none; stroke: #14312F; stroke-width: 2.4; stroke-linejoin: round; }
+.jg-piece .fill { stroke: none; }
+.jg-piece.held { cursor: grabbing; filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .35)); }
+.jg-piece.in { cursor: default; pointer-events: none; }
+.jg-piece .grab { fill: transparent; stroke: none; pointer-events: all; }
+.jg-piece.in .grab { display: none; }
+.jg-piece.back { animation: jg-back .3s ease-out; }
+@keyframes jg-back { 30% { opacity: .5; } }
+.jg-piece[data-piece="africa"] { fill: #F2BC48; }
+.jg-piece[data-piece="antarctica"] { fill: #F4F7FA; }
+.jg-piece[data-piece="asia"] { fill: #E9785F; }
+.jg-piece[data-piece="australia"] { fill: #EE86A7; }
+.jg-piece[data-piece="europe"] { fill: #A78AD8; }
+.jg-piece[data-piece="north-america"] { fill: #79BE6F; }
+.jg-piece[data-piece="south-america"] { fill: #45AE9F; }
+.jg-piece[data-piece="WA"] { fill: #F2BC48; }
+.jg-piece[data-piece="NT"] { fill: #E9785F; }
+.jg-piece[data-piece="SA"] { fill: #A78AD8; }
+.jg-piece[data-piece="QLD"] { fill: #79BE6F; }
+.jg-piece[data-piece="NSW"] { fill: #6FB3E0; }
+.jg-piece[data-piece="VIC"] { fill: #45AE9F; }
+.jg-piece[data-piece="TAS"] { fill: #EE86A7; }
+.jg-board[data-map="australia"] .jg-piece .edge { stroke-width: 4; }
+@media (prefers-reduced-motion: reduce) {
+  .jg-hint, .jg-piece.back { animation: none; }
+}
+
 /* ── Animals of the World ──────────────────────────────────────────────── */
 
 .an-card {

@@ -65,6 +65,7 @@ import { mapLines } from '../src/content/world';
 import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
 import { treasureLines } from '../src/content/treasure';
+import { jigsawLines } from '../src/content/jigsaw';
 import { animalLines } from '../src/content/animals';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
@@ -161,6 +162,9 @@ export function clips(): Clip[] {
   /* Treasure Map: every phrase, in English and, by the teacher, in Portuguese */
   for (const line of treasureLines()) add(line);
   for (const line of treasureLines('pt')) add(line, 'pt');
+  /* Map Jigsaw: the pieces' questions both ways (the facts are World Map's and Capital Cities') */
+  for (const line of jigsawLines()) add(line);
+  for (const line of jigsawLines('pt')) add(line, 'pt');
   /* Animals of the World, both ways */
   for (const line of animalLines()) add(line);
   for (const line of animalLines('pt')) add(line, 'pt');
