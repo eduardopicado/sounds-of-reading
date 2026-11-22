@@ -890,6 +890,13 @@ export const COACH_THINGS: string =
   'fish | chick | squid | shell | king | sheep | snail | bee | goat | cow | owl | mouse | shark | ' +
   'whale | snake | kite | bike | cake | tiger | zebra | spider | bear | deer';
 
+/* Animals of the World: each animal's name and picture. Where each one
+   lives, and a true thing about it, are in src/content/animals.ts */
+export const WORLD_ANIMALS: string =
+  'kangaroo 🦘 | koala 🐨 | panda 🐼 | tiger 🐯 | orangutan 🦧 | zebra 🦓 | giraffe 🦒 | hippo 🦛 | ' +
+  'gorilla 🦍 | lion 🦁 | camel 🐫 | elephant 🐘 | llama 🦙 | sloth 🦥 | raccoon 🦝 | bison 🦬 | ' +
+  'polar bear 🐻‍❄️ | penguin 🐧 | hedgehog 🦔 | crocodile 🐊 | whale 🐋 | dolphin 🐬 | shark 🦈 | octopus 🐙';
+
 export const COACH_PLACES: string =
   'in box | in bag | in bin | in net | in nest | on bed | on log | in van | in truck | on ship | ' +
   'in hut | in bath | on bench | in boat | in tree | in house | in car';
