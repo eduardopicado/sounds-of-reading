@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1108 clips, about 22030 characters.**
+**1142 clips, about 22981 characters.**
 
-## English (Stuart, Australian): 773
+## English (Stuart, Australian): 790
 
 - and the crab,
 - and the crab.
@@ -174,6 +174,7 @@ exactly these, with the voices in public/audio/README.md.
 - in the van.
 - in, sect, insect
 - insect
+- It goes here.
 - It is 10 metres.
 - It is 15 metres.
 - It is 2 metres.
@@ -243,6 +244,7 @@ exactly these, with the voices in public/audio/README.md.
 - mushroom
 - nap, kin, napkin
 - napkin
+- Not there. Try again.
 - oat, meal, oatmeal
 - oatmeal
 - on the bed,
@@ -267,6 +269,17 @@ exactly these, with the voices in public/audio/README.md.
 - pudding
 - pump, kin, pumpkin
 - pumpkin
+- Put Africa on the map.
+- Put Antarctica on the map.
+- Put Asia on the map.
+- Put Australia on the map.
+- Put Europe on the map.
+- Put New South Wales on the map.
+- Put North America on the map.
+- Put Queensland on the map.
+- Put South America on the map.
+- Put South Australia on the map.
+- Put Tasmania on the map.
 - Put the bat,
 - Put the bear,
 - Put the bee,
@@ -294,6 +307,7 @@ exactly these, with the voices in public/audio/README.md.
 - Put the king,
 - Put the kite,
 - Put the mouse,
+- Put the Northern Territory on the map.
 - Put the owl,
 - Put the pig,
 - Put the shark,
@@ -307,6 +321,8 @@ exactly these, with the voices in public/audio/README.md.
 - Put the tiger,
 - Put the whale,
 - Put the zebra,
+- Put Victoria on the map.
+- Put Western Australia on the map.
 - rab, bit, rabbit
 - rail, way, railway
 - railway
@@ -751,6 +767,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is to the right of the ship?
 - What is to the right of the swing?
 - What is to the right of the tree?
+- Where does this piece go?
 - Which square is the bench in?
 - Which square is the boat in?
 - Which square is the crab in?
@@ -783,13 +800,14 @@ exactly these, with the voices in public/audio/README.md.
 - You found the treasure!
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 335
+## Portuguese (Roberto Valença, Brazilian): 352
 
 - A árvore está aqui.
 - A bandeira está aqui.
 - A cabana está aqui.
 - A concha está aqui.
 - A pedra está aqui.
+- Aí não. Tente de novo.
 - Ande 1 quadrado para o leste,
 - Ande 1 quadrado para o leste.
 - Ande 1 quadrado para o nordeste.
@@ -825,6 +843,20 @@ exactly these, with the voices in public/audio/README.md.
 - Cada quadrado tem 10 metros.
 - Cada quadrado tem 2 metros.
 - Cada quadrado tem 5 metros.
+- Coloque a África no mapa.
+- Coloque a América do Norte no mapa.
+- Coloque a América do Sul no mapa.
+- Coloque a Antártida no mapa.
+- Coloque a Ásia no mapa.
+- Coloque a Austrália Meridional no mapa.
+- Coloque a Austrália no mapa.
+- Coloque a Austrália Ocidental no mapa.
+- Coloque a Europa no mapa.
+- Coloque a Tasmânia no mapa.
+- Coloque Nova Gales do Sul no mapa.
+- Coloque o Território do Norte no mapa.
+- Coloque Queensland no mapa.
+- Coloque Vitória no mapa.
 - Comece na árvore.
 - Comece na bandeira.
 - Comece na cabana.
@@ -851,6 +883,7 @@ exactly these, with the voices in public/audio/README.md.
 - depois 3 quadrados para o norte.
 - depois 3 quadrados para o oeste.
 - depois 3 quadrados para o sul.
+- Ela vai aqui.
 - Em que quadrado está a árvore?
 - Em que quadrado está a bandeira?
 - Em que quadrado está a cabana?
@@ -1039,6 +1072,7 @@ exactly these, with the voices in public/audio/README.md.
 - O que tem lá?
 - O tesouro está aqui.
 - O tronco está aqui.
+- Onde vai esta peça?
 - Para que lado fica a árvore?
 - Para que lado fica a bandeira?
 - Para que lado fica a cabana?
