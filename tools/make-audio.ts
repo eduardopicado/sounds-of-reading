@@ -66,6 +66,7 @@ import { country, flagLines } from '../src/content/flags';
 import { capitalLines } from '../src/content/capitals';
 import { treasureLines } from '../src/content/treasure';
 import { jigsawLines } from '../src/content/jigsaw';
+import { animalLines } from '../src/content/animals';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
 } from '../src/content/commentary';
@@ -164,6 +165,9 @@ export function clips(): Clip[] {
   /* Map Jigsaw: the pieces' questions both ways (the facts are World Map's and Capital Cities') */
   for (const line of jigsawLines()) add(line);
   for (const line of jigsawLines('pt')) add(line, 'pt');
+  /* Animals of the World, both ways */
+  for (const line of animalLines()) add(line);
+  for (const line of animalLines('pt')) add(line, 'pt');
   /* and the three in Portuguese, said by the teacher */
   for (const line of [...mapLines('pt'), ...flagLines('pt'), ...capitalLines((code) => country(code).name, (code) => country(code).pt)]) add(line, 'pt');
   for (const line of [...Object.values(HOW), ...watchLines()]) add(line);

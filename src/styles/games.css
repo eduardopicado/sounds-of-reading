@@ -2507,3 +2507,17 @@
 @media (prefers-reduced-motion: reduce) {
   .jg-hint, .jg-piece.back { animation: none; }
 }
+
+/* ── Animals of the World ──────────────────────────────────────────────── */
+
+.an-card {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 64px; padding: 6px 18px; border-radius: 16px;
+  background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.an-card[hidden], .an-pic[hidden], .an-stage .wm-wrap[hidden] { display: none; }
+.an-pic { font-size: 44px; line-height: 1; }
+.an-name { font-family: var(--reading); font-weight: 700; font-size: clamp(22px, 6vw, 30px); }
+/* reading it: the name alone, bigger */
+.an-card.words-only .an-name { font-size: clamp(30px, 8vw, 44px); padding: 4px 8px; }
+.an-stage .mx-choice.word { font-size: clamp(17px, 4.4vw, 22px); }

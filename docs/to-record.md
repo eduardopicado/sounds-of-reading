@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1164 clips, about 23542 characters.**
+**1372 clips, about 32700 characters.**
 
-## English (Stuart, Australian): 801
+## English (Stuart, Australian): 905
 
 - and the crab,
 - and the crab.
@@ -71,11 +71,15 @@ exactly these, with the voices in public/audio/README.md.
 - and the zebra.
 - bath, tub, bathtub
 - bathtub
+- Bison live in North America, and a smaller kind lives in the forests of Europe.
+- Bison live on the grassland.
 - buck, et, bucket
 - bucket
 - cac, tus, cactus
 - cactus
 - cam, el, camel
+- Camels live in the desert.
+- Camels live in the deserts of Africa and Asia, and can go for days without water.
 - chick, en, chicken
 - chicken
 - chip, munk, chipmunk
@@ -83,8 +87,12 @@ exactly these, with the voices in public/audio/README.md.
 - cob, web, cobweb
 - cobweb
 - cow, boy, cowboy
+- Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
+- Crocodiles live in rivers.
 - den, tist, dentist
 - dentist
+- Dolphins live in the ocean, and breathe air through a hole on top of their heads.
+- Dolphins live in the ocean.
 - drag, on, dragon
 - dragon
 - drum, stick, drumstick
@@ -92,8 +100,11 @@ exactly these, with the voices in public/audio/README.md.
 - Each square is 10 metres.
 - Each square is 2 metres.
 - Each square is 5 metres.
+- Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
+- Giraffes live in Africa, and they are the tallest animals in the world.
+- Giraffes live on the grassland.
 - Go 1 square east,
 - Go 1 square east.
 - Go 1 square north-east.
@@ -126,10 +137,15 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Gorillas live in the rainforest.
+- Gorillas live in the rainforests of Africa, and they are the biggest apes.
 - ham, ster, hamster
 - hamster
+- Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.
 - hel, met, helmet
 - helmet
+- Hippos live in Africa, and spend their days in rivers and lakes.
+- Hippos live in rivers.
 - hot, dog, hotdog
 - hotdog
 - How far is it to the bench?
@@ -219,16 +235,23 @@ exactly these, with the voices in public/audio/README.md.
 - It is west.
 - jack, et, jacket
 - jacket
+- Kangaroos live on the grassland.
+- Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.
 - ketch, up, ketchup
 - ketchup
 - kit, ten, kitten
 - kitten
+- Koalas live in Australia's gum trees, and eat their leaves.
+- Koalas live in the forest.
 - lap, top, laptop
 - laptop
 - lem, on, lemon
 - lemon
+- Lions live on the grassland.
 - lip, stick, lipstick
 - lipstick
+- Llamas come from the Andes mountains, in South America.
+- Llamas live in the mountains.
 - lob, ster, lobster
 - lobster
 - mag, net, magnet
@@ -241,6 +264,7 @@ exactly these, with the voices in public/audio/README.md.
 - mitten
 - mon, ster, monster
 - monster
+- Most lions live in Africa, and a few live in a forest in India, in Asia.
 - mush, room, mushroom
 - mushroom
 - nap, kin, napkin
@@ -248,6 +272,8 @@ exactly these, with the voices in public/audio/README.md.
 - Not there. Try again.
 - oat, meal, oatmeal
 - oatmeal
+- Octopuses live in the ocean, and have eight arms.
+- Octopuses live in the ocean.
 - on the bed,
 - on the bed.
 - on the bench,
@@ -256,14 +282,21 @@ exactly these, with the voices in public/audio/README.md.
 - on the log.
 - on the ship,
 - on the ship.
+- Orangutans live in the rainforest.
+- Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
 - pad, lock, padlock
 - padlock
+- Pandas live in the forest.
+- Pandas live in the mountain forests of China, in Asia, and eat bamboo nearly all day.
 - pea, cock, peacock
 - pea, nut, peanut
 - peacock
 - peanut
+- Penguins live in the south: in Antarctica, and on the coasts of Australia, Africa and South America.
 - pic, nic, picnic
 - picnic
+- Polar bears live on the Arctic ice, in the far north of North America, Europe and Asia.
+- Polar bears live on the ice.
 - pop, corn, popcorn
 - popcorn
 - pud, ding, pudding
@@ -325,9 +358,12 @@ exactly these, with the voices in public/audio/README.md.
 - Put Victoria on the map.
 - Put Western Australia on the map.
 - rab, bit, rabbit
+- Raccoons come from North America, and wash their food with their front paws.
+- Raccoons live in the forest.
 - rail, way, railway
 - railway
 - rain, bow, rainbow
+- Read the name. Where does this animal live?
 - rock, et, rocket
 - rub, bish, rubbish
 - rubbish
@@ -338,6 +374,10 @@ exactly these, with the voices in public/audio/README.md.
 - sea, weed, seaweed
 - seaweed
 - see, saw, seesaw
+- Sharks live in every ocean, and there were sharks before there were dinosaurs.
+- Sharks live in the ocean.
+- Sloths live in the rainforest.
+- Sloths live in the rainforests of South America and the south of North America, and move very slowly.
 - snow, man, snowman
 - snowman
 - Square A1 is here.
@@ -383,6 +423,15 @@ exactly these, with the voices in public/audio/README.md.
 - sum, mer, summer
 - sun, set, sunset
 - sunset
+- Tap every continent where bison live.
+- Tap every continent where camels live.
+- Tap every continent where crocodiles live.
+- Tap every continent where elephants live.
+- Tap every continent where hedgehogs live.
+- Tap every continent where lions live.
+- Tap every continent where penguins live.
+- Tap every continent where polar bears live.
+- Tap every continent where sloths live.
 - Tap square A1.
 - Tap square A2.
 - Tap square A3.
@@ -709,12 +758,16 @@ exactly these, with the voices in public/audio/README.md.
 - thunder
 - tick, et, ticket
 - ticket
+- Tigers live in Asia, and they are the biggest cats in the world.
+- Tigers live in the forest.
 - tooth, brush, toothbrush
 - toothbrush
 - up, set, upset
 - upset
 - week, end, weekend
 - weekend
+- Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
+- Whales live in the ocean.
 - What is above the bench?
 - What is above the boat?
 - What is above the crab?
@@ -776,7 +829,55 @@ exactly these, with the voices in public/audio/README.md.
 - What is to the right of the swing?
 - What is to the right of the tent?
 - What is to the right of the tree?
+- What kind of place does the bison live in?
+- What kind of place does the camel live in?
+- What kind of place does the crocodile live in?
+- What kind of place does the dolphin live in?
+- What kind of place does the giraffe live in?
+- What kind of place does the gorilla live in?
+- What kind of place does the hippo live in?
+- What kind of place does the kangaroo live in?
+- What kind of place does the koala live in?
+- What kind of place does the lion live in?
+- What kind of place does the llama live in?
+- What kind of place does the octopus live in?
+- What kind of place does the orangutan live in?
+- What kind of place does the panda live in?
+- What kind of place does the polar bear live in?
+- What kind of place does the raccoon live in?
+- What kind of place does the shark live in?
+- What kind of place does the sloth live in?
+- What kind of place does the tiger live in?
+- What kind of place does the whale live in?
+- What kind of place does the zebra live in?
+- Where does the bison live?
+- Where does the camel live?
+- Where does the crocodile live?
+- Where does the elephant live?
+- Where does the giraffe live?
+- Where does the gorilla live?
+- Where does the hedgehog live?
+- Where does the hippo live?
+- Where does the kangaroo live?
+- Where does the koala live?
+- Where does the lion live?
+- Where does the llama live?
+- Where does the orangutan live?
+- Where does the panda live?
+- Where does the penguin live?
+- Where does the polar bear live?
+- Where does the raccoon live?
+- Where does the sloth live?
+- Where does the tiger live?
+- Where does the zebra live?
 - Where does this piece go?
+- Which animal lives in Africa?
+- Which animal lives in Antarctica?
+- Which animal lives in Asia?
+- Which animal lives in Australia?
+- Which animal lives in Europe?
+- Which animal lives in North America?
+- Which animal lives in South America?
 - Which square is the bench in?
 - Which square is the boat in?
 - Which square is the crab in?
@@ -808,16 +909,20 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the tent?
 - Which way is the tree?
 - win, ter, winter
+- Yes! Find another one.
 - You found the treasure!
+- Zebras live in Africa, and every zebra has its own pattern of stripes.
+- Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 363
+## Portuguese (Roberto Valença, Brazilian): 467
 
 - A árvore está aqui.
 - A bandeira está aqui.
 - A barraca está aqui.
 - A cabana está aqui.
 - A concha está aqui.
+- A maioria dos leões vive na África, e alguns vivem numa floresta da Índia, na Ásia.
 - A pedra está aqui.
 - Aí não. Tente de novo.
 - Ande 1 quadrado para o leste,
@@ -852,6 +957,14 @@ exactly these, with the voices in public/audio/README.md.
 - Ande 3 quadrados para o oeste.
 - Ande 3 quadrados para o sul,
 - Ande 3 quadrados para o sul.
+- As baleias vivem em todos os oceanos, e a baleia-azul é o maior animal que já existiu.
+- As baleias vivem no oceano.
+- As girafas vivem na África, e são os animais mais altos do mundo.
+- As girafas vivem no campo.
+- As lhamas vêm da Cordilheira dos Andes, na América do Sul.
+- As lhamas vivem nas montanhas.
+- As zebras vivem na África, e cada zebra tem listras só dela.
+- As zebras vivem no campo.
 - Cada quadrado tem 10 metros.
 - Cada quadrado tem 2 metros.
 - Cada quadrado tem 5 metros.
@@ -912,6 +1025,27 @@ exactly these, with the voices in public/audio/README.md.
 - Em que quadrado está o ninho?
 - Em que quadrado está o pato?
 - Em que quadrado está o tronco?
+- Em que tipo de lugar vive a baleia?
+- Em que tipo de lugar vive a girafa?
+- Em que tipo de lugar vive a lhama?
+- Em que tipo de lugar vive a zebra?
+- Em que tipo de lugar vive o bicho-preguiça?
+- Em que tipo de lugar vive o bisão?
+- Em que tipo de lugar vive o camelo?
+- Em que tipo de lugar vive o canguru?
+- Em que tipo de lugar vive o coala?
+- Em que tipo de lugar vive o crocodilo?
+- Em que tipo de lugar vive o golfinho?
+- Em que tipo de lugar vive o gorila?
+- Em que tipo de lugar vive o guaxinim?
+- Em que tipo de lugar vive o hipopótamo?
+- Em que tipo de lugar vive o leão?
+- Em que tipo de lugar vive o orangotango?
+- Em que tipo de lugar vive o panda?
+- Em que tipo de lugar vive o polvo?
+- Em que tipo de lugar vive o tigre?
+- Em que tipo de lugar vive o tubarão?
+- Em que tipo de lugar vive o urso-polar?
 - Essa é a árvore.
 - Essa é a bandeira.
 - Essa é a barraca.
@@ -993,6 +1127,8 @@ exactly these, with the voices in public/audio/README.md.
 - Fica para o oeste.
 - Fica para o sul.
 - Isso!
+- Isso! Ache outro.
+- Leia o nome. Onde vive esse animal?
 - Lucas
 - Luquinhas
 - O balanço está aqui.
@@ -1092,6 +1228,62 @@ exactly these, with the voices in public/audio/README.md.
 - O tesouro está aqui.
 - O tronco está aqui.
 - Onde vai esta peça?
+- Onde vive a girafa?
+- Onde vive a lhama?
+- Onde vive a zebra?
+- Onde vive o bicho-preguiça?
+- Onde vive o bisão?
+- Onde vive o camelo?
+- Onde vive o canguru?
+- Onde vive o coala?
+- Onde vive o crocodilo?
+- Onde vive o elefante?
+- Onde vive o gorila?
+- Onde vive o guaxinim?
+- Onde vive o hipopótamo?
+- Onde vive o leão?
+- Onde vive o orangotango?
+- Onde vive o ouriço?
+- Onde vive o panda?
+- Onde vive o pinguim?
+- Onde vive o tigre?
+- Onde vive o urso-polar?
+- Os bichos-preguiça vivem na floresta tropical.
+- Os bichos-preguiça vivem nas florestas tropicais da América do Sul e no sul da América do Norte, e se mexem bem devagar.
+- Os bisões vivem na América do Norte, e um tipo menor vive nas florestas da Europa.
+- Os bisões vivem no campo.
+- Os camelos vivem no deserto.
+- Os camelos vivem nos desertos da África e da Ásia, e passam dias sem beber água.
+- Os cangurus só vivem na Austrália, e carregam os filhotes numa bolsa.
+- Os cangurus vivem no campo.
+- Os coalas vivem na floresta.
+- Os coalas vivem nos eucaliptos da Austrália, e comem as folhas deles.
+- Os crocodilos vivem em rios e pântanos da África, da Ásia, da Austrália e das Américas.
+- Os crocodilos vivem nos rios.
+- Os elefantes vivem na África e na Ásia, e os elefantes africanos têm as orelhas maiores.
+- Os golfinhos vivem no oceano, e respiram por um buraco no alto da cabeça.
+- Os golfinhos vivem no oceano.
+- Os gorilas vivem na floresta tropical.
+- Os gorilas vivem nas florestas tropicais da África, e são os maiores primatas.
+- Os guaxinins vêm da América do Norte, e lavam a comida com as patas da frente.
+- Os guaxinins vivem na floresta.
+- Os hipopótamos vivem na África, e passam o dia nos rios e lagos.
+- Os hipopótamos vivem nos rios.
+- Os leões vivem no campo.
+- Os orangotangos vivem na floresta tropical.
+- Os orangotangos vivem nas florestas tropicais de duas ilhas da Ásia, Bornéu e Sumatra.
+- Os ouriços vivem na Europa, na Ásia e na África, e viram uma bola de espinhos para se proteger.
+- Os pandas vivem na floresta.
+- Os pandas vivem nas florestas das montanhas da China, na Ásia, e comem bambu quase o dia todo.
+- Os pinguins vivem no sul: na Antártida, e nas costas da Austrália, da África e da América do Sul.
+- Os polvos vivem no oceano, e têm oito braços.
+- Os polvos vivem no oceano.
+- Os tigres vivem na Ásia, e são os maiores felinos do mundo.
+- Os tigres vivem na floresta.
+- Os tubarões vivem em todos os oceanos, e já existiam antes dos dinossauros.
+- Os tubarões vivem no oceano.
+- Os ursos-polares vivem no gelo do Ártico, no extremo norte da América do Norte, da Europa e da Ásia.
+- Os ursos-polares vivem no gelo.
 - Para que lado fica a árvore?
 - Para que lado fica a bandeira?
 - Para que lado fica a barraca?
@@ -1107,6 +1299,13 @@ exactly these, with the voices in public/audio/README.md.
 - Para que lado fica o ninho?
 - Para que lado fica o pato?
 - Para que lado fica o tronco?
+- Qual animal vive na África?
+- Qual animal vive na América do Norte?
+- Qual animal vive na América do Sul?
+- Qual animal vive na Antártida?
+- Qual animal vive na Ásia?
+- Qual animal vive na Austrália?
+- Qual animal vive na Europa?
 - Qual é a distância até a árvore?
 - Qual é a distância até a bandeira?
 - Qual é a distância até a barraca?
@@ -1134,6 +1333,15 @@ exactly these, with the voices in public/audio/README.md.
 - São 50 metros.
 - São 6 metros.
 - São 8 metros.
+- Toque em todos os continentes onde vivem os bichos-preguiça.
+- Toque em todos os continentes onde vivem os bisões.
+- Toque em todos os continentes onde vivem os camelos.
+- Toque em todos os continentes onde vivem os crocodilos.
+- Toque em todos os continentes onde vivem os elefantes.
+- Toque em todos os continentes onde vivem os leões.
+- Toque em todos os continentes onde vivem os ouriços.
+- Toque em todos os continentes onde vivem os pinguins.
+- Toque em todos os continentes onde vivem os ursos-polares.
 - Toque na árvore.
 - Toque na bandeira.
 - Toque na barraca.
