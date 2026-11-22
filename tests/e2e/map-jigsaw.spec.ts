@@ -16,6 +16,13 @@ async function waiting(page: Page, n: number): Promise<{ id: string; x: number; 
   await expect(page.locator('.score')).toContainText(`Piece ${n}`, { timeout: 8000 });
   const board = page.locator('.jg-board');
   await expect(board).toHaveAttribute('data-piece', /.+/);
+  return where(page);
+}
+
+/** where the piece that is up goes, on the screen as it is now (a longer
+ * question can wrap and move the map down) */
+async function where(page: Page): Promise<{ id: string; x: number; y: number }> {
+  const board = page.locator('.jg-board');
   const id = (await board.getAttribute('data-piece'))!;
   const [gx, gy] = (await board.getAttribute('data-goes'))!.split(' ').map(Number);
   const [x, y] = await page.evaluate(([x, y]) => {
@@ -114,9 +121,10 @@ test.describe('Map Jigsaw', () => {
   test('in Portuguese', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 3);
-    const p = await waiting(page, 1);
+    const { id } = await waiting(page, 1);
     await page.getByRole('button', { name: 'Português' }).click();
-    await expect(page.locator('.mx-ask')).toHaveText(piece(p.id).ask.pt);
+    await expect(page.locator('.mx-ask')).toHaveText(piece(id).ask.pt);
+    const p = await where(page);
     await drag(page, p.x, p.y);
     await expect(page.locator('.mx-note')).toContainText(piece(p.id).facts[0].pt);
     noProblems(watch);
