@@ -27,6 +27,7 @@ import { BALL_STEPS, CAPTURE_STEPS, CHECK_STEPS, MATE_STEPS, PAWN_STEPS, PIECE_S
 import { MAP_STEPS } from '../content/world';
 import { FLAG_STEPS } from '../content/flags';
 import { CAPITAL_STEPS } from '../content/capitals';
+import { TREASURE_STEPS } from '../content/treasure';
 import { ANIMAL_STEPS } from '../content/animals';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'chess';
@@ -151,6 +152,8 @@ export const GAMES: Game[] = [
     load: () => import('./flags') },
   { path: 'capitals', name: 'Capital Cities', emoji: '🏛️', what: 'Sydney, Canberra and the world', tone: '#8C6A3F', section: 'geography', ladder: CAPITAL_STEPS,
     load: () => import('./capitals') },
+  { path: 'treasure-map', name: 'Treasure Map', emoji: '🧭', what: 'Map squares, keys and compass points', tone: '#B07A3A', section: 'geography', ladder: TREASURE_STEPS,
+    load: () => import('./treasure-map') },
   { path: 'animals', name: 'Animals of the World', emoji: '🦘', what: 'Who lives where?', tone: '#5E8C3A', section: 'geography', ladder: ANIMAL_STEPS,
     load: () => import('./animals') },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj', ladder: REF_STEPS,

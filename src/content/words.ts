@@ -890,6 +890,10 @@ export const COACH_THINGS: string =
   'fish | chick | squid | shell | king | sheep | snail | bee | goat | cow | owl | mouse | shark | ' +
   'whale | snake | kite | bike | cake | tiger | zebra | spider | bear | deer';
 
+/* Treasure Map's things: what can be drawn on the island, each with its
+   picture in the word lists (src/content/treasure.ts has them in Portuguese) */
+export const MAP_THINGS: string =
+  'hut | tree | rock | hill | log | flag | boat | ship | crab | shell | duck | nest | bench | swing';
 /* Animals of the World: each animal's name and picture. Where each one
    lives, and a true thing about it, are in src/content/animals.ts */
 export const WORLD_ANIMALS: string =
