@@ -2308,6 +2308,25 @@
 .wm-compass .tm-n { font-size: 1.2em; }
 .wm-compass .tm-rose { font-size: 1.2em; }
 .wm-compass[hidden] { display: none; }
+/* the globe: square, as big as fits, turned with a finger; the flat map
+   stays on the page, hidden, as its paint */
+.wm-wrap.globe { width: min(100%, 620px, calc(100vh - 350px)); width: min(100%, 620px, calc(100svh - 350px)); margin: 0 auto; }
+.wm-wrap.globe > .wm-map, .wm-wrap.globe > .wm-labels { display: none; }
+.wm-globe { display: none; position: relative; width: 100%; aspect-ratio: 1; }
+.wm-wrap.globe .wm-globe { display: block; }
+.wm-globe-ball {
+  display: block; width: 100%; height: 100%; touch-action: none; cursor: grab;
+  user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
+}
+.wm-globe-ball:active { cursor: grabbing; }
+.wm-globe-labels .wm-label.far { visibility: hidden; }
+.wm-globe-btn {
+  position: absolute; right: 0; top: 0; z-index: 2; width: 48px; height: 48px; padding: 0;
+  border: 0; border-radius: 50%; cursor: pointer; font-size: 26px; line-height: 48px;
+  background: var(--paper); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.wm-globe-btn[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--mustard), 0 3px 0 rgba(0, 0, 0, .25); }
+@media (max-width: 560px) { .wm-globe-btn { right: -8px; top: -14px; width: 44px; height: 44px; font-size: 22px; line-height: 44px; } }
 .wm-label {
   position: absolute; transform: translate(-50%, -50%); display: none;
   width: min-content; text-align: center; white-space: normal;
