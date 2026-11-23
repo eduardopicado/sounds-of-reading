@@ -14,7 +14,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { MAP_STEPS, findSays, mapQuestion, nameIn, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
+import { MAP_STEPS, findSays, mapClimb, mapQuestion, nameIn, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
@@ -29,6 +29,7 @@ export function mount(root: HTMLElement): () => void {
     steps: MAP_STEPS,
     face: '🌏',
     cheer: 'Good map reading!',
+    climb: mapClimb,
     build,
   }, root);
 }
@@ -82,6 +83,8 @@ function build(kit: Kit) {
       recent = [q.answer, ...recent].slice(0, step.of === 'ocean' ? 3 : 4);
       map.reset();
       map.names(step.names ? step.of : null);
+      /* the easiest steps have a compass on the map too */
+      map.compass(step.names);
       for (const id of q.given ?? []) map.give(id);
       /* what the tests look for, the way the other games' cards say it */
       node.dataset.answer = q.answer;
