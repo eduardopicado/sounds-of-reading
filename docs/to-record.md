@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1372 clips, about 32700 characters.**
+**1380 clips, about 32925 characters.**
 
-## English (Stuart, Australian): 905
+## English (Stuart, Australian): 913
 
 - and the crab,
 - and the crab.
@@ -137,6 +137,7 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Good reading! Try again.
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
 - ham, ster, hamster
@@ -235,6 +236,7 @@ exactly these, with the voices in public/audio/README.md.
 - It is west.
 - jack, et, jacket
 - jacket
+- Just the same! Try again.
 - Kangaroos live on the grassland.
 - Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.
 - ketch, up, ketchup
@@ -270,6 +272,7 @@ exactly these, with the voices in public/audio/README.md.
 - nap, kin, napkin
 - napkin
 - Not there. Try again.
+- Now read it again. Can you beat your time?
 - oat, meal, oatmeal
 - oatmeal
 - Octopuses live in the ocean, and have eight arms.
@@ -364,6 +367,7 @@ exactly these, with the voices in public/audio/README.md.
 - railway
 - rain, bow, rainbow
 - Read the name. Where does this animal live?
+- Ready, set, go!
 - rock, et, rocket
 - rub, bish, rubbish
 - rubbish
@@ -754,6 +758,8 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the tiger.
 - then tap the whale.
 - then tap the zebra.
+- Three reads! Great reading.
+- Three reads! Look how much faster you got.
 - thun, der, thunder
 - thunder
 - tick, et, ticket
@@ -910,7 +916,9 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the tree?
 - win, ter, winter
 - Yes! Find another one.
+- You beat your time!
 - You found the treasure!
+- Your fastest read ever!
 - Zebras live in Africa, and every zebra has its own pattern of stripes.
 - Zebras live on the grassland.
 - zig, zag, zigzag
@@ -1384,3 +1392,7 @@ exactly these, with the voices in public/audio/README.md.
 - Toque no tronco.
 - Toque onde está o tesouro.
 - Você achou o tesouro!
+
+## To improve: recorded, but worth doing again
+
+- The sounds on their own: o as in dog, u as in cup, oo as in moon, qu as in queen, with `npm run make:sounds` (public/audio/sounds/)

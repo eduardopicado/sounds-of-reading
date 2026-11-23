@@ -59,6 +59,7 @@ import { THEMES } from '../src/content/word-search';
 import { BOTAO_STEPS, HOW, watchLines } from '../src/content/botao';
 import { partLines } from '../src/content/word-parts';
 import { storyLines } from '../src/content/stories';
+import { beatLines } from '../src/content/beat-time';
 import { phraseLines } from '../src/content/flash-phrases';
 import { refereeLines, weighLines } from '../src/content/bjj';
 import { mapLines } from '../src/content/world';
@@ -182,6 +183,8 @@ export function clips(): Clip[] {
   for (const line of surveyLines(flagCountries().map((t) => t.name))) add(line);
   /* Read and Point's stories, a sentence and a word at a time, and Flash Phrases */
   for (const line of [...storyLines(), ...phraseLines()]) add(line);
+  /* Beat Your Time: what it says (the stories are Read and Point's) */
+  for (const line of beatLines()) add(line);
 
   /* the commentator, in English and in Portuguese, for every team */
   for (const line of EN_SAVES) add(line);
@@ -207,6 +210,12 @@ const VOICE_NAMES: Record<Voice, string> = {
   en: 'English (Stuart, Australian)', pt: 'Portuguese (Roberto Valença, Brazilian)', 'pt-commentator': 'The commentator (Nassif, Brazilian)',
 };
 
+/** recorded, but worth doing again: he wasn't happy with these. Kept here by
+ * hand, and listed at the end of docs/to-record.md so they are not forgotten */
+const TO_IMPROVE: { what: string; how: string }[] = [
+  { what: 'The sounds on their own: o as in dog, u as in cup, oo as in moon, qu as in queen', how: '`npm run make:sounds` (public/audio/sounds/)' },
+];
+
 /**
  * What is still to record, as a page: every clip wanted with no file yet,
  * by voice, with what it costs. docs/to-record.md is this, so the next run
@@ -230,6 +239,10 @@ export function toRecord(have: Set<string> = new Set(readdirSync(OUT).filter((f)
     if (!mine.length) continue;
     out.push('', `## ${VOICE_NAMES[voice]}: ${mine.length}`, '');
     for (const c of mine) out.push(`- ${c.text.replace(/([*_`\\[\]<>])/g, '\\$1')}`);
+  }
+  if (TO_IMPROVE.length) {
+    out.push('', '## To improve: recorded, but worth doing again', '');
+    for (const r of TO_IMPROVE) out.push(`- ${r.what}, with ${r.how}`);
   }
   return out.join('\n') + '\n';
 }

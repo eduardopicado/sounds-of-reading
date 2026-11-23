@@ -83,6 +83,8 @@ export const GAMES: Game[] = [
     load: () => import('./tricky-words') },
   { path: 'read-and-point', name: 'Read and Point', emoji: '👉', what: 'Find the sight words in a story', tone: '#5E8FD6', section: 'reading',
     load: () => import('./read-and-point') },
+  { path: 'beat-your-time', name: 'Beat Your Time', emoji: '⏱️', what: 'Read a story three times, faster each time', tone: '#D2663C', section: 'reading',
+    load: () => import('./beat-your-time') },
   { path: 'sound-rocket', name: 'Sound Rocket', emoji: '🚀', what: 'Catch the sound, dodge the rest', tone: '#5B8DEF', section: 'reading',
     load: () => import('./sound-rocket') },
   { path: 'penalty-shootout', name: 'Penalty Shootout', emoji: '⚽', what: 'Read the word, beat the keeper', tone: '#4CAF6E', section: 'reading',

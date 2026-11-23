@@ -79,6 +79,8 @@ src/content/sight.ts   sight words for the games with the Phonics / Sight words
 src/content/stories.ts Read and Point: the stories (STORIES in words.ts, every
                        word readable at the story's level) cut into words to
                        tap, and the sight word to hunt for in each
+src/content/beat-time.ts Beat Your Time: the same stories read three times, each
+                       read's time against the last, and the race of the three
 src/content/coach-says.ts Coach Says: the things, places and instructions from
                        words.ts, made into questions with exactly one answer
 src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his levels

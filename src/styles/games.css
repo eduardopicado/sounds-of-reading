@@ -2521,3 +2521,64 @@
 /* reading it: the name alone, bigger */
 .an-card.words-only .an-name { font-size: clamp(30px, 8vw, 44px); padding: 4px 8px; }
 .an-stage .mx-choice.word { font-size: clamp(17px, 4.4vw, 22px); }
+
+/* ── Beat Your Time ────────────────────────────────────────────────────── */
+
+.bt-choose[hidden], .bt-play[hidden], .bt-after[hidden], .bt-chase[hidden], .bt-count[hidden] { display: none; }
+.bt-head { margin: 4px 0 12px; text-align: center; font: 700 22px var(--display); color: var(--on-deep); }
+.bt-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+.bt-pick {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px;
+  padding: 10px 16px; border: 0; border-radius: 14px; cursor: pointer; text-align: left;
+  background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.bt-pick-title { font: 700 22px var(--reading); }
+.bt-pick-sub { font-size: 14px; color: rgba(20, 49, 47, .78); }
+.bt-clock { font: 800 22px var(--display); color: var(--mustard); font-variant-numeric: tabular-nums; }
+.bt-book .rp-word:disabled { cursor: default; color: inherit; opacity: 1; }
+/* a word he got stuck on: a wavy tomato line under it, for the grown-up */
+.rp-word.bt-stuck { text-decoration: underline wavy var(--tomato); text-decoration-thickness: 3px; text-underline-offset: 6px; background: rgba(228, 87, 46, .12); }
+.bt-hint { margin: 10px 0 0; min-height: 1.4em; text-align: center; color: var(--on-deep-soft); font-size: 16px; }
+.bt-count {
+  margin: 12px auto 0; text-align: center; font: 800 72px/1 var(--display); color: var(--mustard);
+}
+.bt-go, .bt-done { font-size: 22px; min-height: 60px; padding: 0 28px; }
+.bt-other { justify-content: center; margin-top: 8px; }
+.bt-other .btn[hidden], .rp-actions .btn[hidden] { display: none; }
+
+/* the race: a track with a flag at the end, a runner running to it */
+.bt-chase { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.bt-chase-lbl, .bt-lane-lbl { flex: none; width: 5.2em; font: 700 15px var(--display); color: var(--on-deep); }
+.bt-track {
+  position: relative; flex: 1; height: 40px; border-radius: 99px;
+  background: rgba(255, 246, 231, .12); border: 2px dashed rgba(255, 246, 231, .3);
+}
+.bt-flag { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); font-size: 24px; }
+.bt-runner {
+  --at: 0; position: absolute; top: 50%; left: calc(4px + var(--at) * (100% - 78px)); z-index: 1;
+  font-size: 28px; line-height: 1; transform: translateY(-50%) scaleX(-1);
+}
+.bt-runner.ghost { opacity: .5; transition: left .2s linear; }
+.bt-race { list-style: none; margin: 10px 0; padding: 0; display: grid; gap: 8px; }
+.results .bt-race li.bt-lane, .bt-lane {
+  display: flex; align-items: center; gap: 10px; padding: 0; background: none; color: var(--on-deep);
+  font-weight: 400;
+}
+.bt-race .bt-runner { transition: left var(--run, 2s) cubic-bezier(.3, .1, .6, 1); }
+.bt-race.go .bt-runner { --at: 1; }
+.bt-lane-time { flex: none; min-width: 7.5em; font: 700 15px var(--display); color: var(--on-deep); }
+.bt-lane[data-place="1"] .bt-lane-time { color: var(--mustard); }
+.bt-medal { margin-right: 4px; }
+.bt-verdict { margin: 6px 0; text-align: center; font: 700 24px var(--display); color: var(--on-deep); }
+.bt-stuck-list { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; margin-top: 8px; }
+.bt-stuck-lbl { color: var(--on-deep-soft); font-size: 16px; }
+.bt-stuck-word { font-family: var(--reading); font-size: 20px; }
+.results .bt-notes { display: grid; gap: 6px; margin-top: 10px; }
+@media (max-width: 480px) {
+  .bt-chase-lbl, .bt-lane-lbl { width: 3.6em; font-size: 13px; }
+  .bt-lane-time { min-width: 6.4em; font-size: 13px; }
+  .bt-runner { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bt-race .bt-runner, .bt-runner.ghost { transition: none; }
+}
