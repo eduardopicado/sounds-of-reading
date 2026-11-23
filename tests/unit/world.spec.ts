@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  AROUND_AUSTRALIA, BETWEEN, DIRECTIONS, MAP_STEPS, PLACES, SEAS, mapLines, mapQuestion, place,
+  AROUND_AUSTRALIA, BETWEEN, DIRECTIONS, MAP_STEPS, PLACES, SEAS, mapClimb, mapLines, mapQuestion, place,
   type PlaceId,
 } from '../../src/content/world';
 import { MAP_H, MAP_W, project } from '../../src/content/projection';
@@ -139,5 +139,30 @@ describe('the questions', () => {
   it('has every line it says on the list to record', () => {
     const list = new Set(wanted());
     expect(mapLines().filter((line) => !list.has(speakable(line)))).toEqual([]);
+  });
+});
+
+describe('the ladder', () => {
+  const at = (name: string): number => MAP_STEPS.findIndex((s) => s.name === name);
+  const twoMisses = (step: number): number => {
+    const once = mapClimb({ step, right: 0, wrong: 0 }, false, MAP_STEPS.length);
+    return mapClimb(once, false, MAP_STEPS.length).step;
+  };
+
+  it('two misses finding the continents brings their names back, not the oceans', () => {
+    expect(twoMisses(at('Continents'))).toBe(at('Continents, with their names'));
+  });
+
+  it('two misses finding the oceans brings the oceans\' names back', () => {
+    expect(twoMisses(at('Oceans'))).toBe(at('Oceans, with their names'));
+    /* and with the names already up, the oceans stay the oceans */
+    expect(twoMisses(at('Oceans, with their names'))).toBe(at('Oceans, with their names'));
+    expect(twoMisses(at('Continents, with their names'))).toBe(at('Continents, with their names'));
+  });
+
+  it('otherwise climbs as every ladder does', () => {
+    const up = [true, true, true].reduce((c, ok) => mapClimb(c, ok, MAP_STEPS.length), { step: 2, right: 0, wrong: 0 });
+    expect(up.step).toBe(3);
+    expect(twoMisses(at('What is it called?'))).toBe(at('What is it called?') - 1);
   });
 });

@@ -14,6 +14,7 @@ import { MAP_H, MAP_W, project } from '../content/projection';
 import { COUNTRY_SHAPES, OCEAN_SHAPES, OUTLINE, SEA_SHAPES } from '../content/world-shapes';
 import { PLACES, SEAS, nameIn, place, type MapStep, type PlaceId, type SeaId } from '../content/world';
 import type { Lang } from '../content/pt';
+import { dirName, type Dir } from '../content/treasure';
 
 export const isPlace = (id: string): id is PlaceId => PLACES.some((p) => p.id === id);
 export const isSea = (id: string): id is SeaId => SEAS.some((s) => s.id === id);
@@ -52,7 +53,18 @@ export function worldMap() {
       }));
     }
   }
-  const node = el('div', { class: 'wm-wrap' }, map, labels);
+  /* north, south, east and west, in the corner of the map, in his language */
+  const rose = el('div', { class: 'tm-compass wm-compass', hidden: 'hidden', 'aria-hidden': 'true' });
+  const drawRose = (lang: Lang): void => {
+    const n = (d: Dir): string => dirName(d, lang)[0];
+    rose.replaceChildren(
+      el('span', { class: 'tm-n', text: n('north') }), el('span', { class: 'tm-w', text: n('west') }),
+      el('span', { class: 'tm-rose', text: '✦' }), el('span', { class: 'tm-e', text: n('east') }),
+      el('span', { class: 'tm-s', text: n('south') }),
+    );
+  };
+  drawRose('en');
+  const node = el('div', { class: 'wm-wrap' }, map, labels, rose);
 
   /* a country smaller than this, in map units, is an island a tap goes
      through when an ocean is asked for */
@@ -118,7 +130,10 @@ export function worldMap() {
     /** the names on the map in English or Portuguese */
     language: (lang: Lang) => {
       for (const n of labels.querySelectorAll<HTMLElement>('[data-place]')) n.textContent = nameIn(place(n.dataset.place as PlaceId), lang);
+      drawRose(lang);
     },
+    /** the compass on the map, or not */
+    compass: (on: boolean) => { rose.hidden = !on; },
     /** the names of the continents, or the oceans, or both, on the map; or none */
     names: (of: MapStep['of'] | null) => {
       if (of) node.dataset.names = of;

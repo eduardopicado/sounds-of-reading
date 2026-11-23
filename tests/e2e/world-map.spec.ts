@@ -182,4 +182,32 @@ test.describe('World Map', () => {
     await expect(page.locator('.mx-ask')).toContainText('Onde fica');
     noProblems(watch);
   });
+
+  test('two misses finding the continents bring their names back, with the compass, and not the oceans', async ({ page }) => {
+    const watch = watchPage(page);
+    await startAt(page, 2);
+    await expect(page.locator('.score')).toContainText('Continents');
+    /* no names and no compass on the harder step */
+    await expect(page.locator('.wm-label:visible')).toHaveCount(0);
+    await expect(page.locator('.wm-compass')).toBeHidden();
+    for (let n = 1; n <= 2; n += 1) {
+      await wanted(page, n);
+      /* the middle of the Pacific: never a continent */
+      const at = await spot(page, -150, 0);
+      await page.mouse.click(at.x, at.y);
+    }
+    await wanted(page, 3);
+    await expect(page.locator('.score')).toContainText('Continents, with their names');
+    await expect(page.locator('.mx-ask')).toHaveText(/^Where is /);
+    await expect(page.locator('.wm-label.continent:visible')).toHaveCount(7);
+    await expect(page.locator('.wm-label.ocean:visible')).toHaveCount(0);
+    /* north, south, east and west, in his language */
+    const compass = page.locator('.wm-compass');
+    await expect(compass).toBeVisible();
+    await expect(compass).toHaveText('NW✦ES');
+    await page.getByRole('button', { name: 'Português' }).click();
+    await expect(compass).toHaveText('NO✦LS');
+    noProblems(watch);
+  });
 });
+

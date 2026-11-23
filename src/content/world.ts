@@ -18,7 +18,7 @@
  * and Australia both lie between the Pacific and the Indian, and Africa as
  * well as Europe is west of Asia, from Arabia. */
 
-import type { Step } from './maths';
+import { climb, type Climb, type Step } from './maths';
 import { The, of, pt, the, thatIs, thisIs, whereIs, isHere, type Both, type Lang, type PtName } from './pt';
 
 export type ContinentId = 'africa' | 'antarctica' | 'asia' | 'australia' | 'europe' | 'north-america' | 'south-america';
@@ -221,6 +221,21 @@ export const MAP_STEPS: MapStep[] = [
   { name: 'Which ocean is between?', task: 'between', of: 'both', names: false },
   { name: 'North, south, east and west', task: 'direction', of: 'both', names: false },
 ];
+
+/**
+ * Where he goes next on World Map's ladder. Up as on every ladder; but two
+ * misses finding the continents takes him to the continents with their names
+ * on, and two finding the oceans to the oceans with theirs, rather than one
+ * step down, which from the continents was the oceans: a different question,
+ * with every name on the map.
+ */
+export function mapClimb(c: Climb, ok: boolean, steps: number): Climb {
+  const next = climb(c, ok, steps);
+  const from = MAP_STEPS[c.step];
+  if (ok || next.step >= c.step || from?.task !== 'find') return next;
+  const easier = MAP_STEPS.findIndex((s) => s.task === 'find' && s.of === from.of && s.names);
+  return { ...next, step: easier >= 0 ? easier : c.step };
+}
 
 export interface MapQuestion {
   task: MapStep['task'];
