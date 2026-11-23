@@ -45,6 +45,11 @@ export default defineConfig({
       /* the iPad keeps the old version until the app is reopened, sometimes
          twice, so a new one says so and waits for a tap (src/lib/update.ts) */
       registerType: 'prompt',
+      /* our own worker (src/sw.ts), to hand Safari a recording the way it
+         plays one; the precache list is injected into it as before */
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['icons/favicon.svg', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'Sounds of Reading',
@@ -64,12 +69,10 @@ export default defineConfig({
           { src: 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
+      injectManifest: {
         /* everything the app is, including the fonts — it has to work in the
            car with no signal, and it never asks the network for anything else */
         globPatterns: ['**/*.{js,css,html,woff2,png,webp,svg,webmanifest,json,mp3}'],
-        navigateFallback: 'index.html',
-        cleanupOutdatedCaches: true,
       },
       devOptions: { enabled: false },
     }),

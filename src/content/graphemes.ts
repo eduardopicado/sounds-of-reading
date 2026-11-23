@@ -87,9 +87,16 @@ export function pieces(word: Word): Piece[] | null {
  * the sound of every spelling it could be by the word's level, and only if
  * they all agree: "i" in a level 4 word can only be the i in pin, but "th"
  * could be them or thin, and then the word is not sounded out at all (null)
- * rather than guessed. The content test checks every word this answers for
+ * rather than guessed. The one rule it does use is the one his class is
+ * taught: c and g are soft before e, i or y and hard anywhere else. The content test checks every word this answers for
  * against the pronunciation dictionary.
  */
+/** the two letters with a hard and a soft sound, and which is which */
+const SOFT: Record<string, { hard: string; soft: string }> = {
+  c: { hard: 'k', soft: 's' },
+  g: { hard: 'g', soft: 'j' },
+};
+
 export function soundsOf(word: Word): string[] | null {
   if (NOT_SOUNDED_OUT.includes(word.text)) return null;
   const cut = pieces(word);
@@ -105,6 +112,13 @@ export function soundsOf(word: Word): string[] | null {
     const could = new Set(ALL_SOUNDS
       .filter((s) => s.level <= word.level && s.spellings.includes(piece.text))
       .map((s) => s.phoneme));
+    const soft = SOFT[piece.text];
+    if (soft && could.size === 2 && could.has(soft.hard) && could.has(soft.soft)) {
+      /* c and g: soft before e, i or y (circle, gent), hard anywhere else (cat, got) */
+      const next = word.text.toLowerCase()[piece.at + piece.text.length] ?? '';
+      out.push('eiy'.includes(next) && next ? soft.soft : soft.hard);
+      continue;
+    }
     const [only] = could;
     if (could.size !== 1 || !only) return null;
     out.push(only);

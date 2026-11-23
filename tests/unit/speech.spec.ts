@@ -233,6 +233,57 @@ describe('a line in Portuguese', () => {
   });
 });
 
+describe('a sentence in phrases', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build with these recordings, and a player that can be told a clip has ended */
+  async function recorded(lines: string[]) {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    let player: { onended: (() => void) | null } | null = null;
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      constructor() { player = this; }
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => lines.map((l) => clipId(l)) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    return { played, end: () => player?.onended?.(), id: clipId };
+  }
+
+  const PHRASES = ['Put the dog,', 'in the box,', 'then tap the cat.'];
+
+  it('plays each phrase in turn, the next when the last has ended, then reports the end', async () => {
+    const speech = await load();
+    const clips = await recorded(PHRASES);
+    const onEnd = vi.fn();
+    speech.sayInTurn(PHRASES, { onEnd });
+    await settle();
+    expect(clips.played).toHaveLength(1);
+    for (let i = 1; i < 3; i += 1) {
+      clips.end();
+      await settle();
+      expect(clips.played).toHaveLength(i + 1);
+      expect(clips.played[i]).toContain(clips.id(PHRASES[i]));
+    }
+    expect(onEnd).not.toHaveBeenCalled();
+    clips.end();
+    expect(onEnd).toHaveBeenCalledTimes(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('with a phrase not recorded, says the whole sentence in the device voice, never two voices in one', async () => {
+    const speech = await load();
+    const clips = await recorded(PHRASES.slice(0, 2));
+    speech.sayInTurn(PHRASES);
+    await settle();
+    expect(clips.played).toEqual([]);
+    expect(engine.said.map((u) => u.text)).toEqual(['Put the dog, in the box, then tap the cat.']);
+  });
+});
+
 describe('the first tap', () => {
   afterEach(() => { vi.unstubAllGlobals(); });
 
@@ -367,5 +418,107 @@ describe('a sound, then a word', () => {
     for (let i = 0; i < 8; i += 1) await settle();
     expect(played.length).toBeLessThanOrEqual(1);
     expect(engine.said).toEqual([]);
+  });
+});
+
+describe('his name', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  async function withClips(lines: string[]): Promise<string[]> {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => lines.map((l) => clipId(l)) }));
+    const audio = await import('../../src/lib/audio');
+    await audio.loadClips('./audio/clips.json');
+    return played;
+  }
+
+  it('plays the Portuguese recording of Lucas, with no Portuguese voice needed', async () => {
+    await load();
+    const played = await withClips(['Lucas', 'Luquinhas']);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { sayName } = await import('../../src/lib/name');
+    updateSettings({ name: 'Lucas', nickname: '' });
+    sayName();
+    await settle();
+    expect(played).toHaveLength(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says any other name in the device voice', async () => {
+    await load();
+    await withClips(['Lucas']);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { sayName } = await import('../../src/lib/name');
+    updateSettings({ name: 'Tom', nickname: '' });
+    sayName();
+    await settle();
+    expect(engine.said.map((u) => u.text)).toEqual(['Tom']);
+  });
+
+  it('says the praise, then the name; and nothing more with no name given', async () => {
+    await load();
+    await withClips([]);
+    const { updateSettings } = await import('../../src/lib/settings');
+    const { praise } = await import('../../src/lib/name');
+    updateSettings({ name: 'Tom', nickname: 'Tommy' });
+    praise('Every one right!');
+    engine.finish();
+    await settle();
+    expect(engine.said.map((u) => u.text)).toEqual(['Every one right!', expect.stringMatching(/^(Tom|Tommy)$/)]);
+    updateSettings({ name: '', nickname: '' });
+    const onEnd = vi.fn();
+    praise('Good game!', { onEnd });
+    engine.finish();
+    expect(engine.said.map((u) => u.text).slice(2)).toEqual(['Good game!']);
+    expect(onEnd).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('a word said before the list of recordings has loaded', () => {
+  afterEach(() => { vi.unstubAllGlobals(); });
+
+  /** a build whose list of recordings arrives only when `arrive` is called */
+  async function slowList(lines: string[]) {
+    const { clipId } = await import('../../src/lib/clip-id');
+    const played: string[] = [];
+    vi.stubGlobal('Audio', class {
+      src = ''; paused = true; currentTime = 0; playbackRate = 1; defaultPlaybackRate = 1; onended: (() => void) | null = null;
+      play(): Promise<void> { this.paused = false; played.push(this.src); return Promise.resolve(); }
+      pause(): void { this.paused = true; }
+    });
+    let arrive: () => void = () => undefined;
+    const gate = new Promise<void>((r) => { arrive = r; });
+    vi.stubGlobal('fetch', async () => { await gate; return { ok: true, json: async () => lines.map((l) => clipId(l)) }; });
+    const audio = await import('../../src/lib/audio');
+    const loaded = audio.loadClips('./audio/clips.json');
+    return { played, arrive: async () => { arrive(); await loaded; await settle(); } };
+  }
+
+  it('waits for the list, then plays the recording rather than the device voice', async () => {
+    const speech = await load();
+    const list = await slowList(['cat']);
+    speech.say('cat');
+    await settle();
+    expect(engine.said).toEqual([]);
+    await list.arrive();
+    expect(list.played).toHaveLength(1);
+    expect(engine.said).toEqual([]);
+  });
+
+  it('says nothing of it once the game is left, or something else is said', async () => {
+    const speech = await load();
+    const list = await slowList(['cat', 'dog']);
+    speech.say('cat');
+    speech.cancelSpeech();
+    speech.say('dog');
+    await list.arrive();
+    expect(list.played).toHaveLength(1);
+    expect(list.played[0]).not.toContain(((await import('../../src/lib/clip-id')).clipId('cat')));
   });
 });

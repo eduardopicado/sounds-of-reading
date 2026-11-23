@@ -1,0 +1,1386 @@
+# Still to record
+
+Made by `npm run make:audio -- --todo docs/to-record.md`; the content test checks it is up to date.
+Until a line is recorded the app says it in the device voice (and Coach Says says a whole instruction
+in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
+exactly these, with the voices in public/audio/README.md.
+
+**1372 clips, about 32700 characters.**
+
+## English (Stuart, Australian): 905
+
+- and the crab,
+- and the crab.
+- and the cup,
+- and the cup.
+- and the deer,
+- and the deer.
+- and the dog,
+- and the dog.
+- and the drum,
+- and the drum.
+- and the duck,
+- and the duck.
+- and the egg,
+- and the egg.
+- and the fish,
+- and the fish.
+- and the fox,
+- and the fox.
+- and the frog,
+- and the frog.
+- and the gift,
+- and the gift.
+- and the goat,
+- and the goat.
+- and the hat,
+- and the hat.
+- and the hen,
+- and the hen.
+- and the king,
+- and the king.
+- and the kite,
+- and the kite.
+- and the mouse,
+- and the mouse.
+- and the owl,
+- and the owl.
+- and the pig,
+- and the pig.
+- and the shark,
+- and the shark.
+- and the sheep,
+- and the sheep.
+- and the shell,
+- and the shell.
+- and the snail,
+- and the snail.
+- and the snake,
+- and the snake.
+- and the sock,
+- and the sock.
+- and the spider,
+- and the spider.
+- and the squid,
+- and the squid.
+- and the tiger,
+- and the tiger.
+- and the whale,
+- and the whale.
+- and the zebra,
+- and the zebra.
+- bath, tub, bathtub
+- bathtub
+- Bison live in North America, and a smaller kind lives in the forests of Europe.
+- Bison live on the grassland.
+- buck, et, bucket
+- bucket
+- cac, tus, cactus
+- cactus
+- cam, el, camel
+- Camels live in the desert.
+- Camels live in the deserts of Africa and Asia, and can go for days without water.
+- chick, en, chicken
+- chicken
+- chip, munk, chipmunk
+- chipmunk
+- cob, web, cobweb
+- cobweb
+- cow, boy, cowboy
+- Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
+- Crocodiles live in rivers.
+- den, tist, dentist
+- dentist
+- Dolphins live in the ocean, and breathe air through a hole on top of their heads.
+- Dolphins live in the ocean.
+- drag, on, dragon
+- dragon
+- drum, stick, drumstick
+- drumstick
+- Each square is 10 metres.
+- Each square is 2 metres.
+- Each square is 5 metres.
+- Elephants live in Africa and Asia, and African elephants have the bigger ears.
+- farm, er, farmer
+- farmer
+- Giraffes live in Africa, and they are the tallest animals in the world.
+- Giraffes live on the grassland.
+- Go 1 square east,
+- Go 1 square east.
+- Go 1 square north-east.
+- Go 1 square north-west.
+- Go 1 square north,
+- Go 1 square north.
+- Go 1 square south-east.
+- Go 1 square south-west.
+- Go 1 square south,
+- Go 1 square south.
+- Go 1 square west,
+- Go 1 square west.
+- Go 2 squares east,
+- Go 2 squares east.
+- Go 2 squares north-east.
+- Go 2 squares north-west.
+- Go 2 squares north,
+- Go 2 squares north.
+- Go 2 squares south-east.
+- Go 2 squares south-west.
+- Go 2 squares south,
+- Go 2 squares south.
+- Go 2 squares west,
+- Go 2 squares west.
+- Go 3 squares east,
+- Go 3 squares east.
+- Go 3 squares north,
+- Go 3 squares north.
+- Go 3 squares south,
+- Go 3 squares south.
+- Go 3 squares west,
+- Go 3 squares west.
+- Gorillas live in the rainforest.
+- Gorillas live in the rainforests of Africa, and they are the biggest apes.
+- ham, ster, hamster
+- hamster
+- Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.
+- hel, met, helmet
+- helmet
+- Hippos live in Africa, and spend their days in rivers and lakes.
+- Hippos live in rivers.
+- hot, dog, hotdog
+- hotdog
+- How far is it to the bench?
+- How far is it to the boat?
+- How far is it to the crab?
+- How far is it to the duck?
+- How far is it to the flag?
+- How far is it to the hill?
+- How far is it to the hut?
+- How far is it to the log?
+- How far is it to the nest?
+- How far is it to the rock?
+- How far is it to the shell?
+- How far is it to the ship?
+- How far is it to the swing?
+- How far is it to the tent?
+- How far is it to the tree?
+- in the bag,
+- in the bag.
+- in the bath,
+- in the bath.
+- in the bin,
+- in the bin.
+- in the boat,
+- in the boat.
+- in the box,
+- in the box.
+- in the car,
+- in the car.
+- in the house,
+- in the house.
+- in the hut,
+- in the hut.
+- in the nest,
+- in the nest.
+- in the net,
+- in the net.
+- in the tree,
+- in the tree.
+- in the truck,
+- in the truck.
+- in the van,
+- in the van.
+- in, sect, insect
+- insect
+- It goes here.
+- It is 10 metres.
+- It is 15 metres.
+- It is 2 metres.
+- It is 20 metres.
+- It is 25 metres.
+- It is 30 metres.
+- It is 4 metres.
+- It is 40 metres.
+- It is 5 metres.
+- It is 50 metres.
+- It is 6 metres.
+- It is 8 metres.
+- It is east.
+- It is in A1.
+- It is in A2.
+- It is in A3.
+- It is in A4.
+- It is in A5.
+- It is in B1.
+- It is in B2.
+- It is in B3.
+- It is in B4.
+- It is in B5.
+- It is in C1.
+- It is in C2.
+- It is in C3.
+- It is in C4.
+- It is in C5.
+- It is in D1.
+- It is in D2.
+- It is in D3.
+- It is in D4.
+- It is in D5.
+- It is in E1.
+- It is in E2.
+- It is in E3.
+- It is in E4.
+- It is in E5.
+- It is north.
+- It is south.
+- It is west.
+- jack, et, jacket
+- jacket
+- Kangaroos live on the grassland.
+- Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.
+- ketch, up, ketchup
+- ketchup
+- kit, ten, kitten
+- kitten
+- Koalas live in Australia's gum trees, and eat their leaves.
+- Koalas live in the forest.
+- lap, top, laptop
+- laptop
+- lem, on, lemon
+- lemon
+- Lions live on the grassland.
+- lip, stick, lipstick
+- lipstick
+- Llamas come from the Andes mountains, in South America.
+- Llamas live in the mountains.
+- lob, ster, lobster
+- lobster
+- mag, net, magnet
+- magnet
+- match, box, matchbox
+- matchbox
+- mel, on, melon
+- melon
+- mit, ten, mitten
+- mitten
+- mon, ster, monster
+- monster
+- Most lions live in Africa, and a few live in a forest in India, in Asia.
+- mush, room, mushroom
+- mushroom
+- nap, kin, napkin
+- napkin
+- Not there. Try again.
+- oat, meal, oatmeal
+- oatmeal
+- Octopuses live in the ocean, and have eight arms.
+- Octopuses live in the ocean.
+- on the bed,
+- on the bed.
+- on the bench,
+- on the bench.
+- on the log,
+- on the log.
+- on the ship,
+- on the ship.
+- Orangutans live in the rainforest.
+- Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
+- pad, lock, padlock
+- padlock
+- Pandas live in the forest.
+- Pandas live in the mountain forests of China, in Asia, and eat bamboo nearly all day.
+- pea, cock, peacock
+- pea, nut, peanut
+- peacock
+- peanut
+- Penguins live in the south: in Antarctica, and on the coasts of Australia, Africa and South America.
+- pic, nic, picnic
+- picnic
+- Polar bears live on the Arctic ice, in the far north of North America, Europe and Asia.
+- Polar bears live on the ice.
+- pop, corn, popcorn
+- popcorn
+- pud, ding, pudding
+- pudding
+- pump, kin, pumpkin
+- pumpkin
+- Put Africa on the map.
+- Put Antarctica on the map.
+- Put Asia on the map.
+- Put Australia on the map.
+- Put Europe on the map.
+- Put New South Wales on the map.
+- Put North America on the map.
+- Put Queensland on the map.
+- Put South America on the map.
+- Put South Australia on the map.
+- Put Tasmania on the map.
+- Put the bat,
+- Put the bear,
+- Put the bee,
+- Put the bell,
+- Put the bike,
+- Put the cake,
+- Put the cap,
+- Put the cat,
+- Put the chick,
+- Put the cow,
+- Put the crab,
+- Put the cup,
+- Put the deer,
+- Put the dog,
+- Put the drum,
+- Put the duck,
+- Put the egg,
+- Put the fish,
+- Put the fox,
+- Put the frog,
+- Put the gift,
+- Put the goat,
+- Put the hat,
+- Put the hen,
+- Put the king,
+- Put the kite,
+- Put the mouse,
+- Put the Northern Territory on the map.
+- Put the owl,
+- Put the pig,
+- Put the shark,
+- Put the sheep,
+- Put the shell,
+- Put the snail,
+- Put the snake,
+- Put the sock,
+- Put the spider,
+- Put the squid,
+- Put the tiger,
+- Put the whale,
+- Put the zebra,
+- Put Victoria on the map.
+- Put Western Australia on the map.
+- rab, bit, rabbit
+- Raccoons come from North America, and wash their food with their front paws.
+- Raccoons live in the forest.
+- rail, way, railway
+- railway
+- rain, bow, rainbow
+- Read the name. Where does this animal live?
+- rock, et, rocket
+- rub, bish, rubbish
+- rubbish
+- sail, boat, sailboat
+- sailboat
+- sand, wich, sandwich
+- sandwich
+- sea, weed, seaweed
+- seaweed
+- see, saw, seesaw
+- Sharks live in every ocean, and there were sharks before there were dinosaurs.
+- Sharks live in the ocean.
+- Sloths live in the rainforest.
+- Sloths live in the rainforests of South America and the south of North America, and move very slowly.
+- snow, man, snowman
+- snowman
+- Square A1 is here.
+- Square A2 is here.
+- Square A3 is here.
+- Square A4 is here.
+- Square A5 is here.
+- Square B1 is here.
+- Square B2 is here.
+- Square B3 is here.
+- Square B4 is here.
+- Square B5 is here.
+- Square C1 is here.
+- Square C2 is here.
+- Square C3 is here.
+- Square C4 is here.
+- Square C5 is here.
+- Square D1 is here.
+- Square D2 is here.
+- Square D3 is here.
+- Square D4 is here.
+- Square D5 is here.
+- Square E1 is here.
+- Square E2 is here.
+- Square E3 is here.
+- Square E4 is here.
+- Square E5 is here.
+- Start at the bench.
+- Start at the boat.
+- Start at the crab.
+- Start at the duck.
+- Start at the flag.
+- Start at the hill.
+- Start at the hut.
+- Start at the log.
+- Start at the nest.
+- Start at the rock.
+- Start at the shell.
+- Start at the ship.
+- Start at the swing.
+- Start at the tent.
+- Start at the tree.
+- sum, mer, summer
+- sun, set, sunset
+- sunset
+- Tap every continent where bison live.
+- Tap every continent where camels live.
+- Tap every continent where crocodiles live.
+- Tap every continent where elephants live.
+- Tap every continent where hedgehogs live.
+- Tap every continent where lions live.
+- Tap every continent where penguins live.
+- Tap every continent where polar bears live.
+- Tap every continent where sloths live.
+- Tap square A1.
+- Tap square A2.
+- Tap square A3.
+- Tap square A4.
+- Tap square A5.
+- Tap square B1.
+- Tap square B2.
+- Tap square B3.
+- Tap square B4.
+- Tap square B5.
+- Tap square C1.
+- Tap square C2.
+- Tap square C3.
+- Tap square C4.
+- Tap square C5.
+- Tap square D1.
+- Tap square D2.
+- Tap square D3.
+- Tap square D4.
+- Tap square D5.
+- Tap square E1.
+- Tap square E2.
+- Tap square E3.
+- Tap square E4.
+- Tap square E5.
+- Tap the bat that is not big.
+- Tap the bat,
+- Tap the bat.
+- Tap the bear that is not big.
+- Tap the bear,
+- Tap the bear.
+- Tap the bee that is not big.
+- Tap the bee,
+- Tap the bee.
+- Tap the bell that is not big.
+- Tap the bell,
+- Tap the bell.
+- Tap the bench.
+- Tap the big bat.
+- Tap the big bear.
+- Tap the big bee.
+- Tap the big bell.
+- Tap the big bike.
+- Tap the big cake.
+- Tap the big cap.
+- Tap the big cat.
+- Tap the big chick.
+- Tap the big cow.
+- Tap the big crab.
+- Tap the big cup.
+- Tap the big deer.
+- Tap the big dog.
+- Tap the big drum.
+- Tap the big duck.
+- Tap the big egg.
+- Tap the big fish.
+- Tap the big fox.
+- Tap the big frog.
+- Tap the big gift.
+- Tap the big goat.
+- Tap the big hat.
+- Tap the big hen.
+- Tap the big king.
+- Tap the big kite.
+- Tap the big mouse.
+- Tap the big owl.
+- Tap the big pig.
+- Tap the big shark.
+- Tap the big sheep.
+- Tap the big shell.
+- Tap the big snail.
+- Tap the big snake.
+- Tap the big sock.
+- Tap the big spider.
+- Tap the big squid.
+- Tap the big tiger.
+- Tap the big whale.
+- Tap the big zebra.
+- Tap the bike that is not big.
+- Tap the bike,
+- Tap the bike.
+- Tap the boat.
+- Tap the cake that is not big.
+- Tap the cake,
+- Tap the cake.
+- Tap the cap that is not big.
+- Tap the cap,
+- Tap the cap.
+- Tap the cat that is not big.
+- Tap the cat,
+- Tap the cat.
+- Tap the chick that is not big.
+- Tap the chick,
+- Tap the chick.
+- Tap the cow that is not big.
+- Tap the cow,
+- Tap the cow.
+- Tap the crab that is not big.
+- Tap the crab,
+- Tap the crab.
+- Tap the cup that is not big.
+- Tap the cup,
+- Tap the cup.
+- Tap the deer that is not big.
+- Tap the deer,
+- Tap the deer.
+- Tap the dog that is not big.
+- Tap the dog,
+- Tap the dog.
+- Tap the drum that is not big.
+- Tap the drum,
+- Tap the drum.
+- Tap the duck that is not big.
+- Tap the duck,
+- Tap the duck.
+- Tap the egg that is not big.
+- Tap the egg,
+- Tap the egg.
+- Tap the fish that is not big.
+- Tap the fish,
+- Tap the fish.
+- Tap the flag.
+- Tap the fox that is not big.
+- Tap the fox,
+- Tap the fox.
+- Tap the frog that is not big.
+- Tap the frog,
+- Tap the frog.
+- Tap the gift that is not big.
+- Tap the gift,
+- Tap the gift.
+- Tap the goat that is not big.
+- Tap the goat,
+- Tap the goat.
+- Tap the hat that is not big.
+- Tap the hat,
+- Tap the hat.
+- Tap the hen that is not big.
+- Tap the hen,
+- Tap the hen.
+- Tap the hill.
+- Tap the hut.
+- Tap the king that is not big.
+- Tap the king,
+- Tap the king.
+- Tap the kite that is not big.
+- Tap the kite,
+- Tap the kite.
+- Tap the log.
+- Tap the mouse that is not big.
+- Tap the mouse,
+- Tap the mouse.
+- Tap the nest.
+- Tap the owl that is not big.
+- Tap the owl,
+- Tap the owl.
+- Tap the pig that is not big.
+- Tap the pig,
+- Tap the pig.
+- Tap the rock.
+- Tap the shark that is not big.
+- Tap the shark,
+- Tap the shark.
+- Tap the sheep that is not big.
+- Tap the sheep,
+- Tap the sheep.
+- Tap the shell that is not big.
+- Tap the shell,
+- Tap the shell.
+- Tap the ship.
+- Tap the snail that is not big.
+- Tap the snail,
+- Tap the snail.
+- Tap the snake that is not big.
+- Tap the snake,
+- Tap the snake.
+- Tap the sock that is not big.
+- Tap the sock,
+- Tap the sock.
+- Tap the spider that is not big.
+- Tap the spider,
+- Tap the spider.
+- Tap the squid that is not big.
+- Tap the squid,
+- Tap the squid.
+- Tap the swing.
+- Tap the tent.
+- Tap the tiger that is not big.
+- Tap the tiger,
+- Tap the tiger.
+- Tap the tree.
+- Tap the whale that is not big.
+- Tap the whale,
+- Tap the whale.
+- Tap the zebra that is not big.
+- Tap the zebra,
+- Tap the zebra.
+- Tap where the treasure is.
+- tea, pot, teapot
+- teapot
+- ten, nis, tennis
+- tennis
+- That is it!
+- That is square A1.
+- That is square A2.
+- That is square A3.
+- That is square A4.
+- That is square A5.
+- That is square A6.
+- That is square B1.
+- That is square B2.
+- That is square B3.
+- That is square B4.
+- That is square B5.
+- That is square B6.
+- That is square C1.
+- That is square C2.
+- That is square C3.
+- That is square C4.
+- That is square C5.
+- That is square C6.
+- That is square D1.
+- That is square D2.
+- That is square D3.
+- That is square D4.
+- That is square D5.
+- That is square D6.
+- That is square E1.
+- That is square E2.
+- That is square E3.
+- That is square E4.
+- That is square E5.
+- That is square E6.
+- That is square F1.
+- That is square F2.
+- That is square F3.
+- That is square F4.
+- That is square F5.
+- That is square F6.
+- That is the bench.
+- That is the boat.
+- That is the crab.
+- That is the duck.
+- That is the flag.
+- That is the hill.
+- That is the hut.
+- That is the log.
+- That is the nest.
+- That is the rock.
+- That is the shell.
+- That is the ship.
+- That is the swing.
+- That is the tent.
+- That is the tree.
+- The bench is here.
+- The boat is here.
+- The crab is here.
+- The duck is here.
+- The flag is here.
+- The hill is here.
+- The hut is here.
+- The log is here.
+- The nest is here.
+- The rock is here.
+- The shell is here.
+- The ship is here.
+- The swing is here.
+- The tent is here.
+- The treasure is here.
+- The tree is here.
+- then 1 square east.
+- then 1 square north.
+- then 1 square south.
+- then 1 square west.
+- then 2 squares east.
+- then 2 squares north.
+- then 2 squares south.
+- then 2 squares west.
+- then 3 squares east.
+- then 3 squares north.
+- then 3 squares south.
+- then 3 squares west.
+- then tap the bat.
+- then tap the bear.
+- then tap the bee.
+- then tap the bell.
+- then tap the bike.
+- then tap the cake.
+- then tap the cap.
+- then tap the cat.
+- then tap the chick.
+- then tap the cow.
+- then tap the crab.
+- then tap the cup.
+- then tap the deer.
+- then tap the dog.
+- then tap the drum.
+- then tap the duck.
+- then tap the egg.
+- then tap the fish.
+- then tap the fox.
+- then tap the frog.
+- then tap the gift.
+- then tap the goat.
+- then tap the hat.
+- then tap the hen.
+- then tap the king.
+- then tap the kite.
+- then tap the mouse.
+- then tap the owl.
+- then tap the pig.
+- then tap the shark.
+- then tap the sheep.
+- then tap the shell.
+- then tap the snail.
+- then tap the snake.
+- then tap the sock.
+- then tap the spider.
+- then tap the squid.
+- then tap the tiger.
+- then tap the whale.
+- then tap the zebra.
+- thun, der, thunder
+- thunder
+- tick, et, ticket
+- ticket
+- Tigers live in Asia, and they are the biggest cats in the world.
+- Tigers live in the forest.
+- tooth, brush, toothbrush
+- toothbrush
+- up, set, upset
+- upset
+- week, end, weekend
+- weekend
+- Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
+- Whales live in the ocean.
+- What is above the bench?
+- What is above the boat?
+- What is above the crab?
+- What is above the duck?
+- What is above the flag?
+- What is above the hill?
+- What is above the hut?
+- What is above the log?
+- What is above the nest?
+- What is above the rock?
+- What is above the shell?
+- What is above the ship?
+- What is above the swing?
+- What is above the tent?
+- What is above the tree?
+- What is below the bench?
+- What is below the boat?
+- What is below the crab?
+- What is below the duck?
+- What is below the flag?
+- What is below the hill?
+- What is below the hut?
+- What is below the log?
+- What is below the nest?
+- What is below the rock?
+- What is below the shell?
+- What is below the ship?
+- What is below the swing?
+- What is below the tent?
+- What is below the tree?
+- What is there?
+- What is to the left of the bench?
+- What is to the left of the boat?
+- What is to the left of the crab?
+- What is to the left of the duck?
+- What is to the left of the flag?
+- What is to the left of the hill?
+- What is to the left of the hut?
+- What is to the left of the log?
+- What is to the left of the nest?
+- What is to the left of the rock?
+- What is to the left of the shell?
+- What is to the left of the ship?
+- What is to the left of the swing?
+- What is to the left of the tent?
+- What is to the left of the tree?
+- What is to the right of the bench?
+- What is to the right of the boat?
+- What is to the right of the crab?
+- What is to the right of the duck?
+- What is to the right of the flag?
+- What is to the right of the hill?
+- What is to the right of the hut?
+- What is to the right of the log?
+- What is to the right of the nest?
+- What is to the right of the rock?
+- What is to the right of the shell?
+- What is to the right of the ship?
+- What is to the right of the swing?
+- What is to the right of the tent?
+- What is to the right of the tree?
+- What kind of place does the bison live in?
+- What kind of place does the camel live in?
+- What kind of place does the crocodile live in?
+- What kind of place does the dolphin live in?
+- What kind of place does the giraffe live in?
+- What kind of place does the gorilla live in?
+- What kind of place does the hippo live in?
+- What kind of place does the kangaroo live in?
+- What kind of place does the koala live in?
+- What kind of place does the lion live in?
+- What kind of place does the llama live in?
+- What kind of place does the octopus live in?
+- What kind of place does the orangutan live in?
+- What kind of place does the panda live in?
+- What kind of place does the polar bear live in?
+- What kind of place does the raccoon live in?
+- What kind of place does the shark live in?
+- What kind of place does the sloth live in?
+- What kind of place does the tiger live in?
+- What kind of place does the whale live in?
+- What kind of place does the zebra live in?
+- Where does the bison live?
+- Where does the camel live?
+- Where does the crocodile live?
+- Where does the elephant live?
+- Where does the giraffe live?
+- Where does the gorilla live?
+- Where does the hedgehog live?
+- Where does the hippo live?
+- Where does the kangaroo live?
+- Where does the koala live?
+- Where does the lion live?
+- Where does the llama live?
+- Where does the orangutan live?
+- Where does the panda live?
+- Where does the penguin live?
+- Where does the polar bear live?
+- Where does the raccoon live?
+- Where does the sloth live?
+- Where does the tiger live?
+- Where does the zebra live?
+- Where does this piece go?
+- Which animal lives in Africa?
+- Which animal lives in Antarctica?
+- Which animal lives in Asia?
+- Which animal lives in Australia?
+- Which animal lives in Europe?
+- Which animal lives in North America?
+- Which animal lives in South America?
+- Which square is the bench in?
+- Which square is the boat in?
+- Which square is the crab in?
+- Which square is the duck in?
+- Which square is the flag in?
+- Which square is the hill in?
+- Which square is the hut in?
+- Which square is the log in?
+- Which square is the nest in?
+- Which square is the rock in?
+- Which square is the shell in?
+- Which square is the ship in?
+- Which square is the swing in?
+- Which square is the tent in?
+- Which square is the tree in?
+- Which way is the bench?
+- Which way is the boat?
+- Which way is the crab?
+- Which way is the duck?
+- Which way is the flag?
+- Which way is the hill?
+- Which way is the hut?
+- Which way is the log?
+- Which way is the nest?
+- Which way is the rock?
+- Which way is the shell?
+- Which way is the ship?
+- Which way is the swing?
+- Which way is the tent?
+- Which way is the tree?
+- win, ter, winter
+- Yes! Find another one.
+- You found the treasure!
+- Zebras live in Africa, and every zebra has its own pattern of stripes.
+- Zebras live on the grassland.
+- zig, zag, zigzag
+
+## Portuguese (Roberto Valença, Brazilian): 467
+
+- A árvore está aqui.
+- A bandeira está aqui.
+- A barraca está aqui.
+- A cabana está aqui.
+- A concha está aqui.
+- A maioria dos leões vive na África, e alguns vivem numa floresta da Índia, na Ásia.
+- A pedra está aqui.
+- Aí não. Tente de novo.
+- Ande 1 quadrado para o leste,
+- Ande 1 quadrado para o leste.
+- Ande 1 quadrado para o nordeste.
+- Ande 1 quadrado para o noroeste.
+- Ande 1 quadrado para o norte,
+- Ande 1 quadrado para o norte.
+- Ande 1 quadrado para o oeste,
+- Ande 1 quadrado para o oeste.
+- Ande 1 quadrado para o sudeste.
+- Ande 1 quadrado para o sudoeste.
+- Ande 1 quadrado para o sul,
+- Ande 1 quadrado para o sul.
+- Ande 2 quadrados para o leste,
+- Ande 2 quadrados para o leste.
+- Ande 2 quadrados para o nordeste.
+- Ande 2 quadrados para o noroeste.
+- Ande 2 quadrados para o norte,
+- Ande 2 quadrados para o norte.
+- Ande 2 quadrados para o oeste,
+- Ande 2 quadrados para o oeste.
+- Ande 2 quadrados para o sudeste.
+- Ande 2 quadrados para o sudoeste.
+- Ande 2 quadrados para o sul,
+- Ande 2 quadrados para o sul.
+- Ande 3 quadrados para o leste,
+- Ande 3 quadrados para o leste.
+- Ande 3 quadrados para o norte,
+- Ande 3 quadrados para o norte.
+- Ande 3 quadrados para o oeste,
+- Ande 3 quadrados para o oeste.
+- Ande 3 quadrados para o sul,
+- Ande 3 quadrados para o sul.
+- As baleias vivem em todos os oceanos, e a baleia-azul é o maior animal que já existiu.
+- As baleias vivem no oceano.
+- As girafas vivem na África, e são os animais mais altos do mundo.
+- As girafas vivem no campo.
+- As lhamas vêm da Cordilheira dos Andes, na América do Sul.
+- As lhamas vivem nas montanhas.
+- As zebras vivem na África, e cada zebra tem listras só dela.
+- As zebras vivem no campo.
+- Cada quadrado tem 10 metros.
+- Cada quadrado tem 2 metros.
+- Cada quadrado tem 5 metros.
+- Coloque a África no mapa.
+- Coloque a América do Norte no mapa.
+- Coloque a América do Sul no mapa.
+- Coloque a Antártida no mapa.
+- Coloque a Ásia no mapa.
+- Coloque a Austrália Meridional no mapa.
+- Coloque a Austrália no mapa.
+- Coloque a Austrália Ocidental no mapa.
+- Coloque a Europa no mapa.
+- Coloque a Tasmânia no mapa.
+- Coloque Nova Gales do Sul no mapa.
+- Coloque o Território do Norte no mapa.
+- Coloque Queensland no mapa.
+- Coloque Vitória no mapa.
+- Comece na árvore.
+- Comece na bandeira.
+- Comece na barraca.
+- Comece na cabana.
+- Comece na concha.
+- Comece na pedra.
+- Comece no balanço.
+- Comece no banco.
+- Comece no barco.
+- Comece no caranguejo.
+- Comece no morro.
+- Comece no navio.
+- Comece no ninho.
+- Comece no pato.
+- Comece no tronco.
+- depois 1 quadrado para o leste.
+- depois 1 quadrado para o norte.
+- depois 1 quadrado para o oeste.
+- depois 1 quadrado para o sul.
+- depois 2 quadrados para o leste.
+- depois 2 quadrados para o norte.
+- depois 2 quadrados para o oeste.
+- depois 2 quadrados para o sul.
+- depois 3 quadrados para o leste.
+- depois 3 quadrados para o norte.
+- depois 3 quadrados para o oeste.
+- depois 3 quadrados para o sul.
+- Ela vai aqui.
+- Em que quadrado está a árvore?
+- Em que quadrado está a bandeira?
+- Em que quadrado está a barraca?
+- Em que quadrado está a cabana?
+- Em que quadrado está a concha?
+- Em que quadrado está a pedra?
+- Em que quadrado está o balanço?
+- Em que quadrado está o banco?
+- Em que quadrado está o barco?
+- Em que quadrado está o caranguejo?
+- Em que quadrado está o morro?
+- Em que quadrado está o navio?
+- Em que quadrado está o ninho?
+- Em que quadrado está o pato?
+- Em que quadrado está o tronco?
+- Em que tipo de lugar vive a baleia?
+- Em que tipo de lugar vive a girafa?
+- Em que tipo de lugar vive a lhama?
+- Em que tipo de lugar vive a zebra?
+- Em que tipo de lugar vive o bicho-preguiça?
+- Em que tipo de lugar vive o bisão?
+- Em que tipo de lugar vive o camelo?
+- Em que tipo de lugar vive o canguru?
+- Em que tipo de lugar vive o coala?
+- Em que tipo de lugar vive o crocodilo?
+- Em que tipo de lugar vive o golfinho?
+- Em que tipo de lugar vive o gorila?
+- Em que tipo de lugar vive o guaxinim?
+- Em que tipo de lugar vive o hipopótamo?
+- Em que tipo de lugar vive o leão?
+- Em que tipo de lugar vive o orangotango?
+- Em que tipo de lugar vive o panda?
+- Em que tipo de lugar vive o polvo?
+- Em que tipo de lugar vive o tigre?
+- Em que tipo de lugar vive o tubarão?
+- Em que tipo de lugar vive o urso-polar?
+- Essa é a árvore.
+- Essa é a bandeira.
+- Essa é a barraca.
+- Essa é a cabana.
+- Essa é a concha.
+- Essa é a pedra.
+- Esse é o balanço.
+- Esse é o banco.
+- Esse é o barco.
+- Esse é o caranguejo.
+- Esse é o morro.
+- Esse é o navio.
+- Esse é o ninho.
+- Esse é o pato.
+- Esse é o quadrado A1.
+- Esse é o quadrado A2.
+- Esse é o quadrado A3.
+- Esse é o quadrado A4.
+- Esse é o quadrado A5.
+- Esse é o quadrado A6.
+- Esse é o quadrado B1.
+- Esse é o quadrado B2.
+- Esse é o quadrado B3.
+- Esse é o quadrado B4.
+- Esse é o quadrado B5.
+- Esse é o quadrado B6.
+- Esse é o quadrado C1.
+- Esse é o quadrado C2.
+- Esse é o quadrado C3.
+- Esse é o quadrado C4.
+- Esse é o quadrado C5.
+- Esse é o quadrado C6.
+- Esse é o quadrado D1.
+- Esse é o quadrado D2.
+- Esse é o quadrado D3.
+- Esse é o quadrado D4.
+- Esse é o quadrado D5.
+- Esse é o quadrado D6.
+- Esse é o quadrado E1.
+- Esse é o quadrado E2.
+- Esse é o quadrado E3.
+- Esse é o quadrado E4.
+- Esse é o quadrado E5.
+- Esse é o quadrado E6.
+- Esse é o quadrado F1.
+- Esse é o quadrado F2.
+- Esse é o quadrado F3.
+- Esse é o quadrado F4.
+- Esse é o quadrado F5.
+- Esse é o quadrado F6.
+- Esse é o tronco.
+- Está no A1.
+- Está no A2.
+- Está no A3.
+- Está no A4.
+- Está no A5.
+- Está no B1.
+- Está no B2.
+- Está no B3.
+- Está no B4.
+- Está no B5.
+- Está no C1.
+- Está no C2.
+- Está no C3.
+- Está no C4.
+- Está no C5.
+- Está no D1.
+- Está no D2.
+- Está no D3.
+- Está no D4.
+- Está no D5.
+- Está no E1.
+- Está no E2.
+- Está no E3.
+- Está no E4.
+- Está no E5.
+- Fica para o leste.
+- Fica para o norte.
+- Fica para o oeste.
+- Fica para o sul.
+- Isso!
+- Isso! Ache outro.
+- Leia o nome. Onde vive esse animal?
+- Lucas
+- Luquinhas
+- O balanço está aqui.
+- O banco está aqui.
+- O barco está aqui.
+- O caranguejo está aqui.
+- O morro está aqui.
+- O navio está aqui.
+- O ninho está aqui.
+- O pato está aqui.
+- O quadrado A1 fica aqui.
+- O quadrado A2 fica aqui.
+- O quadrado A3 fica aqui.
+- O quadrado A4 fica aqui.
+- O quadrado A5 fica aqui.
+- O quadrado B1 fica aqui.
+- O quadrado B2 fica aqui.
+- O quadrado B3 fica aqui.
+- O quadrado B4 fica aqui.
+- O quadrado B5 fica aqui.
+- O quadrado C1 fica aqui.
+- O quadrado C2 fica aqui.
+- O quadrado C3 fica aqui.
+- O quadrado C4 fica aqui.
+- O quadrado C5 fica aqui.
+- O quadrado D1 fica aqui.
+- O quadrado D2 fica aqui.
+- O quadrado D3 fica aqui.
+- O quadrado D4 fica aqui.
+- O quadrado D5 fica aqui.
+- O quadrado E1 fica aqui.
+- O quadrado E2 fica aqui.
+- O quadrado E3 fica aqui.
+- O quadrado E4 fica aqui.
+- O quadrado E5 fica aqui.
+- O que está à direita da árvore?
+- O que está à direita da bandeira?
+- O que está à direita da barraca?
+- O que está à direita da cabana?
+- O que está à direita da concha?
+- O que está à direita da pedra?
+- O que está à direita do balanço?
+- O que está à direita do banco?
+- O que está à direita do barco?
+- O que está à direita do caranguejo?
+- O que está à direita do morro?
+- O que está à direita do navio?
+- O que está à direita do ninho?
+- O que está à direita do pato?
+- O que está à direita do tronco?
+- O que está à esquerda da árvore?
+- O que está à esquerda da bandeira?
+- O que está à esquerda da barraca?
+- O que está à esquerda da cabana?
+- O que está à esquerda da concha?
+- O que está à esquerda da pedra?
+- O que está à esquerda do balanço?
+- O que está à esquerda do banco?
+- O que está à esquerda do barco?
+- O que está à esquerda do caranguejo?
+- O que está à esquerda do morro?
+- O que está à esquerda do navio?
+- O que está à esquerda do ninho?
+- O que está à esquerda do pato?
+- O que está à esquerda do tronco?
+- O que está abaixo da árvore?
+- O que está abaixo da bandeira?
+- O que está abaixo da barraca?
+- O que está abaixo da cabana?
+- O que está abaixo da concha?
+- O que está abaixo da pedra?
+- O que está abaixo do balanço?
+- O que está abaixo do banco?
+- O que está abaixo do barco?
+- O que está abaixo do caranguejo?
+- O que está abaixo do morro?
+- O que está abaixo do navio?
+- O que está abaixo do ninho?
+- O que está abaixo do pato?
+- O que está abaixo do tronco?
+- O que está acima da árvore?
+- O que está acima da bandeira?
+- O que está acima da barraca?
+- O que está acima da cabana?
+- O que está acima da concha?
+- O que está acima da pedra?
+- O que está acima do balanço?
+- O que está acima do banco?
+- O que está acima do barco?
+- O que está acima do caranguejo?
+- O que está acima do morro?
+- O que está acima do navio?
+- O que está acima do ninho?
+- O que está acima do pato?
+- O que está acima do tronco?
+- O que tem lá?
+- O tesouro está aqui.
+- O tronco está aqui.
+- Onde vai esta peça?
+- Onde vive a girafa?
+- Onde vive a lhama?
+- Onde vive a zebra?
+- Onde vive o bicho-preguiça?
+- Onde vive o bisão?
+- Onde vive o camelo?
+- Onde vive o canguru?
+- Onde vive o coala?
+- Onde vive o crocodilo?
+- Onde vive o elefante?
+- Onde vive o gorila?
+- Onde vive o guaxinim?
+- Onde vive o hipopótamo?
+- Onde vive o leão?
+- Onde vive o orangotango?
+- Onde vive o ouriço?
+- Onde vive o panda?
+- Onde vive o pinguim?
+- Onde vive o tigre?
+- Onde vive o urso-polar?
+- Os bichos-preguiça vivem na floresta tropical.
+- Os bichos-preguiça vivem nas florestas tropicais da América do Sul e no sul da América do Norte, e se mexem bem devagar.
+- Os bisões vivem na América do Norte, e um tipo menor vive nas florestas da Europa.
+- Os bisões vivem no campo.
+- Os camelos vivem no deserto.
+- Os camelos vivem nos desertos da África e da Ásia, e passam dias sem beber água.
+- Os cangurus só vivem na Austrália, e carregam os filhotes numa bolsa.
+- Os cangurus vivem no campo.
+- Os coalas vivem na floresta.
+- Os coalas vivem nos eucaliptos da Austrália, e comem as folhas deles.
+- Os crocodilos vivem em rios e pântanos da África, da Ásia, da Austrália e das Américas.
+- Os crocodilos vivem nos rios.
+- Os elefantes vivem na África e na Ásia, e os elefantes africanos têm as orelhas maiores.
+- Os golfinhos vivem no oceano, e respiram por um buraco no alto da cabeça.
+- Os golfinhos vivem no oceano.
+- Os gorilas vivem na floresta tropical.
+- Os gorilas vivem nas florestas tropicais da África, e são os maiores primatas.
+- Os guaxinins vêm da América do Norte, e lavam a comida com as patas da frente.
+- Os guaxinins vivem na floresta.
+- Os hipopótamos vivem na África, e passam o dia nos rios e lagos.
+- Os hipopótamos vivem nos rios.
+- Os leões vivem no campo.
+- Os orangotangos vivem na floresta tropical.
+- Os orangotangos vivem nas florestas tropicais de duas ilhas da Ásia, Bornéu e Sumatra.
+- Os ouriços vivem na Europa, na Ásia e na África, e viram uma bola de espinhos para se proteger.
+- Os pandas vivem na floresta.
+- Os pandas vivem nas florestas das montanhas da China, na Ásia, e comem bambu quase o dia todo.
+- Os pinguins vivem no sul: na Antártida, e nas costas da Austrália, da África e da América do Sul.
+- Os polvos vivem no oceano, e têm oito braços.
+- Os polvos vivem no oceano.
+- Os tigres vivem na Ásia, e são os maiores felinos do mundo.
+- Os tigres vivem na floresta.
+- Os tubarões vivem em todos os oceanos, e já existiam antes dos dinossauros.
+- Os tubarões vivem no oceano.
+- Os ursos-polares vivem no gelo do Ártico, no extremo norte da América do Norte, da Europa e da Ásia.
+- Os ursos-polares vivem no gelo.
+- Para que lado fica a árvore?
+- Para que lado fica a bandeira?
+- Para que lado fica a barraca?
+- Para que lado fica a cabana?
+- Para que lado fica a concha?
+- Para que lado fica a pedra?
+- Para que lado fica o balanço?
+- Para que lado fica o banco?
+- Para que lado fica o barco?
+- Para que lado fica o caranguejo?
+- Para que lado fica o morro?
+- Para que lado fica o navio?
+- Para que lado fica o ninho?
+- Para que lado fica o pato?
+- Para que lado fica o tronco?
+- Qual animal vive na África?
+- Qual animal vive na América do Norte?
+- Qual animal vive na América do Sul?
+- Qual animal vive na Antártida?
+- Qual animal vive na Ásia?
+- Qual animal vive na Austrália?
+- Qual animal vive na Europa?
+- Qual é a distância até a árvore?
+- Qual é a distância até a bandeira?
+- Qual é a distância até a barraca?
+- Qual é a distância até a cabana?
+- Qual é a distância até a concha?
+- Qual é a distância até a pedra?
+- Qual é a distância até o balanço?
+- Qual é a distância até o banco?
+- Qual é a distância até o barco?
+- Qual é a distância até o caranguejo?
+- Qual é a distância até o morro?
+- Qual é a distância até o navio?
+- Qual é a distância até o ninho?
+- Qual é a distância até o pato?
+- Qual é a distância até o tronco?
+- São 10 metros.
+- São 15 metros.
+- São 2 metros.
+- São 20 metros.
+- São 25 metros.
+- São 30 metros.
+- São 4 metros.
+- São 40 metros.
+- São 5 metros.
+- São 50 metros.
+- São 6 metros.
+- São 8 metros.
+- Toque em todos os continentes onde vivem os bichos-preguiça.
+- Toque em todos os continentes onde vivem os bisões.
+- Toque em todos os continentes onde vivem os camelos.
+- Toque em todos os continentes onde vivem os crocodilos.
+- Toque em todos os continentes onde vivem os elefantes.
+- Toque em todos os continentes onde vivem os leões.
+- Toque em todos os continentes onde vivem os ouriços.
+- Toque em todos os continentes onde vivem os pinguins.
+- Toque em todos os continentes onde vivem os ursos-polares.
+- Toque na árvore.
+- Toque na bandeira.
+- Toque na barraca.
+- Toque na cabana.
+- Toque na concha.
+- Toque na pedra.
+- Toque no balanço.
+- Toque no banco.
+- Toque no barco.
+- Toque no caranguejo.
+- Toque no morro.
+- Toque no navio.
+- Toque no ninho.
+- Toque no pato.
+- Toque no quadrado A1.
+- Toque no quadrado A2.
+- Toque no quadrado A3.
+- Toque no quadrado A4.
+- Toque no quadrado A5.
+- Toque no quadrado B1.
+- Toque no quadrado B2.
+- Toque no quadrado B3.
+- Toque no quadrado B4.
+- Toque no quadrado B5.
+- Toque no quadrado C1.
+- Toque no quadrado C2.
+- Toque no quadrado C3.
+- Toque no quadrado C4.
+- Toque no quadrado C5.
+- Toque no quadrado D1.
+- Toque no quadrado D2.
+- Toque no quadrado D3.
+- Toque no quadrado D4.
+- Toque no quadrado D5.
+- Toque no quadrado E1.
+- Toque no quadrado E2.
+- Toque no quadrado E3.
+- Toque no quadrado E4.
+- Toque no quadrado E5.
+- Toque no tronco.
+- Toque onde está o tesouro.
+- Você achou o tesouro!

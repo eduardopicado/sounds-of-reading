@@ -16,7 +16,7 @@ import { sfx } from '../lib/sfx';
 import { say } from '../lib/speech';
 import { settings } from '../lib/settings';
 import { TOP_LEVEL } from '../content/index';
-import { BIG_STEPS, bigQuestion, type BigQuestion, type BigStep } from '../content/big-words';
+import { BIG_STEPS, bigQuestion, bigSaid, type BigQuestion, type BigStep } from '../content/big-words';
 import { mountMaths, type Kit } from './maths-kit';
 
 export function mount(root: HTMLElement): () => void {
@@ -49,7 +49,7 @@ function build(kit: Kit) {
     word.replaceChildren(el('span', { class: 'bw-part one', text: a }), el('span', { class: 'bw-dot', text: '·' }),
       el('span', { class: 'bw-part two', text: b }));
     kit.note(`${ok ? 'Yes! ' : ''}${a} · ${b}: ${q.word.text}`, ok);
-    say(`${a}, ${b}, ${q.word.text}`);
+    say(bigSaid(q.word));
     await kit.wait(ok ? 2400 : 3600);
     return ok;
   }

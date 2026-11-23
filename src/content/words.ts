@@ -131,7 +131,7 @@ export const SOUNDS: SoundSpec[] = [
     words: 'duck 🦆 | rock 🪨 | sock 🧦 | sick 🤒 | pick | pack 🎒 | neck | tick ⏰ | stick | truck 🚚 | sack | kick ⚽',
     silly: 'nuck | ceck | gick | gock | kock | gack | nack | cuck | kuck | teck' },
   { id: 'e', label: 'e', asIn: 'egg', spellings: ['e'], level: 2, practice: true, phoneme: 'e', hue: 315,
-    words: 'egg 🥚 | end | red 🟥 | den 🏕 | ten 🔟 | net 🥅 | pet 🐶 | get | met | desk 🪑 | nest 🪺 | rest 😴',
+    words: 'egg 🥚 | end | red 🟥 | den 🏕 | ten 🔟 | net 🥅 | pet 🐶 | get | met | desk 🪑 | nest 🪺 | rest 😴 | tent ⛺',
     silly: 'sek | sem | sep | ses | sest | senk | semp | sesk | seck | senn' },
   { id: 'u', label: 'u', asIn: 'cup', spellings: ['u'], level: 2, practice: true, phoneme: 'u', hue: 90,
     words: 'up ⬆️ | us | cup ☕ | cut ✂️ | mud | mug ☕ | sun ☀️ | run 🏃 | rug 🧶 | duck 🦆 | dust | gum',
@@ -890,6 +890,17 @@ export const COACH_THINGS: string =
   'fish | chick | squid | shell | king | sheep | snail | bee | goat | cow | owl | mouse | shark | ' +
   'whale | snake | kite | bike | cake | tiger | zebra | spider | bear | deer';
 
+/* Treasure Map's things: what can be drawn on the island, each with its
+   picture in the word lists (src/content/treasure.ts has them in Portuguese) */
+export const MAP_THINGS: string =
+  'hut | tent | tree | rock | hill | log | flag | boat | ship | crab | shell | duck | nest | bench | swing';
+/* Animals of the World: each animal's name and picture. Where each one
+   lives, and a true thing about it, are in src/content/animals.ts */
+export const WORLD_ANIMALS: string =
+  'kangaroo 🦘 | koala 🐨 | panda 🐼 | tiger 🐯 | orangutan 🦧 | zebra 🦓 | giraffe 🦒 | hippo 🦛 | ' +
+  'gorilla 🦍 | lion 🦁 | camel 🐫 | elephant 🐘 | llama 🦙 | sloth 🦥 | raccoon 🦝 | bison 🦬 | ' +
+  'polar bear 🐻‍❄️ | penguin 🐧 | hedgehog 🦔 | crocodile 🐊 | whale 🐋 | dolphin 🐬 | shark 🦈 | octopus 🐙';
+
 export const COACH_PLACES: string =
   'in box | in bag | in bin | in net | in nest | on bed | on log | in van | in truck | on ship | ' +
   'in hut | in bath | on bench | in boat | in tree | in house | in car';
@@ -1015,15 +1026,16 @@ export const NOT_BY_CHANCE: string[] = ['cock'];
 /*  Words never sounded out with the recorded sounds, because a letter in them
  *  does not make its usual sound: a silent letter (knight, thumb), a after w
  *  (wall), ch said as k (school), n said as ng before k (think), an s said as
- *  z (pins). They are still said whole. The content test names any word that
- *  needs adding here: it sounds every word out and checks it against the
- *  dictionary.
+ *  z (pins), a g that stays hard before i (girl). They are still said whole.
+ *  The content test names any word that needs adding here: it sounds every
+ *  word out and checks it against the dictionary.
  */
 export const NOT_SOUNDED_OUT: string[] = [
-  /* a silent letter */ 'thumb', 'knight', 'knew',
+  /* a silent letter */ 'thumb', 'knight', 'knew', 'climb',
   /* a after w */ 'wall', 'squash',
-  /* ch as k, n as ng */ 'school', 'think', 'yank',
+  /* ch as k, n as ng, gh as f */ 'school', 'think', 'yank', 'rough', 'tough',
+  /* g hard before i, against the c and g rule */ 'girl',
   /* s as z */ 'pins', 'tins', 'fans', 'jugs', 'peas', 'flies', 'tries', 'spies', 'skies',
-  'blues', 'toes', 'weighs', 'knees',
+  'blues', 'toes', 'weighs', 'knees', 'cries', 'clues', 'goes', 'crumbs',
   /* two vowel sounds in one spelling */ 'quiet',
 ];

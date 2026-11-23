@@ -211,6 +211,13 @@ describe('saved settings', () => {
     expect(cleanSettings({ levels: [10, 9, 8, 11] }).levels).toEqual([8, 9, 10]);
   });
 
+  it('keeps his name to one short line', async () => {
+    const { cleanSettings, cleanName } = await import('../../src/lib/settings');
+    expect(cleanName('  Lucas \n Silva  ')).toBe('Lucas Silva');
+    expect(cleanName('A'.repeat(40))).toHaveLength(20);
+    expect(cleanSettings({ name: ' Lucas ', nickname: 7 })).toEqual({ name: 'Lucas' });
+  });
+
   it('ignores values of the wrong type and keeps the default instead', async () => {
     const { cleanSettings } = await import('../../src/lib/settings');
     expect(cleanSettings({ pro: 'yes', coach: false, voiceURI: 3 })).toEqual({ coach: false });

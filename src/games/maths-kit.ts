@@ -15,7 +15,7 @@ import { lifetime, type Life } from '../lib/life';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { praise } from '../lib/name';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
 import { climb, signed, type Climb, type Step } from '../content/maths';
@@ -42,6 +42,9 @@ export interface Question<S extends Step> {
   ask: (step: S) => Promise<boolean>;
   /** a control of the game's own for the setup panel, such as Flash Count's speed */
   setup?: HTMLElement;
+  /** called as each round starts, for a game whose questions build on each
+      other through a round (Map Jigsaw's pieces make one puzzle) */
+  begin?: () => void;
 }
 
 export interface MathsGame<S extends Step> {
@@ -202,6 +205,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     let c: Climb = { step: Number(stepSel.value), right: 0, wrong: 0 };
     let right = 0;
     const startStep = c.step;
+    question.begin?.();
     for (let i = 0; i < n; i += 1) {
       pos.set(i + 1);
       stepEl.textContent = game.steps[c.step].name;
@@ -253,7 +257,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
     results.hidden = false;
     sfx.whistle();
     life.later(() => { sfx.win(); confetti(); }, 350);
-    say(right === n ? 'Every one right!' : game.cheer ?? 'Good counting!');
+    praise(right === n ? 'Every one right!' : game.cheer ?? 'Good counting!');
   }
 
   root.append(node);

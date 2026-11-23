@@ -63,6 +63,42 @@ test.describe('progressive web app', () => {
     noProblems(watch);
   });
 
+  test('hands a recording over in pieces, the only way Safari will play it', async ({ page }) => {
+    /* Safari asks for an <audio> file a range at a time ("bytes=0-1" first)
+       and refuses to play one answered whole. The precache answers whole, so
+       with the worker in charge every recording on the iPad fell back to the
+       device voice. Chromium plays either, so this is checked at the worker */
+    await page.goto('/');
+    /* installed (everything precached), then in charge from the next load */
+    await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+    await page.reload();
+    await page.waitForFunction(() => navigator.serviceWorker?.controller != null, null, { timeout: 20_000 });
+    const clip = await page.evaluate(async () => {
+      const list: string[] = await (await fetch('./audio/clips.json')).json();
+      return `./audio/${list[0]}.mp3`;
+    });
+    const piece = await page.evaluate(async (url) => {
+      const res = await fetch(url, { headers: { Range: 'bytes=0-1' } });
+      return { status: res.status, range: res.headers.get('content-range'), bytes: (await res.arrayBuffer()).byteLength };
+    }, clip);
+    expect(piece.status).toBe(206);
+    expect(piece.range).toMatch(/^bytes 0-1\/\d+$/);
+    expect(piece.bytes).toBe(2);
+    /* and asked for whole, it comes whole */
+    const whole = await page.evaluate(async (url) => {
+      const res = await fetch(url);
+      return { status: res.status, bytes: (await res.arrayBuffer()).byteLength };
+    }, clip);
+    expect(whole.status).toBe(200);
+    expect(whole.bytes).toBeGreaterThan(1000);
+    /* the sound effects and the sounds on their own are recordings too */
+    const sfx = await page.evaluate(async () => {
+      const res = await fetch('./audio/sfx/goal.mp3', { headers: { Range: 'bytes=0-1' } });
+      return res.status;
+    });
+    expect(sfx).toBe(206);
+  });
+
   test('tells the browser to refuse any other origin, whatever the code asks', async ({ page }) => {
     const errors: string[] = [];
     const external: string[] = [];

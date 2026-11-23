@@ -514,6 +514,15 @@
   font-size: 46px; line-height: 1.1; padding: 4px 14px;
   background: var(--paper); border-radius: 16px;
 }
+/* whose turn: a ball on mint for his kick, gloves on mustard in goal */
+.pk-role {
+  flex: none; display: grid; place-items: center;
+  width: 54px; height: 54px; border-radius: 50%;
+  font-size: 32px; line-height: 1; background: var(--mint);
+  box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.pk-role:empty { display: none; }
+.pk-cue[data-role="keeper"] .pk-role { background: var(--mustard); }
 
 /* mown stripes, and the goal at the far end */
 .pk-pitch {
@@ -586,6 +595,17 @@
 }
 /* drawn at a nominal size; the box above decides the real one */
 .pk-keeper svg, .pk-taker svg { width: 100%; height: 100%; }
+/* him: a glow, and an arrow bobbing over his head */
+.pk-keeper.me svg, .pk-taker.me svg { filter: drop-shadow(0 0 5px #FFE27A) drop-shadow(0 0 2px #FFFFFF); }
+.pk-you {
+  position: absolute; left: 50%; top: -30px; margin-left: -12px; z-index: 2;
+  width: 24px; text-align: center; font-size: 22px; line-height: 1;
+  color: var(--mustard); text-shadow: 0 2px 0 rgba(0, 0, 0, .4);
+  animation: pk-bob 1s ease-in-out infinite;
+}
+.pk-keeper .pk-you { top: auto; bottom: -32px; animation-name: pk-bob-up; }
+@keyframes pk-bob { 50% { translate: 0 6px; } }
+@keyframes pk-bob-up { 50% { translate: 0 -6px; } }
 
 .pk-banner {
   position: absolute; left: 0; right: 0; top: 42%; z-index: 3;
@@ -620,7 +640,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pk-ball, .pk-keeper { transition: none; }
-  .pk-banner { animation: none; }
+  .pk-banner, .pk-you { animation: none; }
 }
 
 /* ── Pass and Shoot ────────────────────────────────────────────────────── */
@@ -2376,3 +2396,128 @@
 .rp-actions { justify-content: center; margin-top: 10px; }
 .rp-ask[hidden], .rp-book[hidden], .rp-note[hidden], .rp-actions[hidden] { display: none; }
 @media (prefers-reduced-motion: reduce) { .rp-word.nope { animation: none; } }
+
+/* his name: a field wide enough for a name, never past the card */
+.grown-ups .gu-name { flex: 1 1 12em; min-width: 0; max-width: 20em; }
+.grown-ups .gu-name::placeholder { color: var(--on-deep-soft); }
+
+/* ── Treasure Map ──────────────────────────────────────────────────────── */
+
+.tm-stage { gap: 8px; }
+.tm-board { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 14px; width: 100%; }
+/* the island: sand squares in a ring of sea, letters across, numbers down */
+.tm-map {
+  display: grid; grid-template-columns: 26px repeat(var(--cols, 5), minmax(0, 1fr)); gap: 3px;
+  width: min(100%, 470px); padding: 8px 10px 10px 4px; border-radius: var(--radius);
+  background: radial-gradient(circle at 50% 50%, #3E93C8 0 60%, #2C79AD 100%);
+  box-shadow: inset 0 0 0 4px rgba(255, 255, 255, .18);
+}
+.tm-head {
+  display: grid; place-items: center; min-height: 22px;
+  font-family: var(--display); font-weight: 800; font-size: 17px; color: #FFFFFF;
+}
+.tm-cell {
+  aspect-ratio: 1; min-width: 0; min-height: 44px; padding: 0;
+  display: grid; place-items: center;
+  border: 2px solid rgba(20, 49, 47, .18); border-radius: 8px;
+  background: #F2DDA4; color: var(--ink); cursor: pointer;
+}
+.tm-cell:disabled { cursor: default; opacity: 1; }
+.tm-cell:not(:disabled):active { transform: scale(.94); }
+.tm-cell .tm-pic { font-size: clamp(22px, 6.4vw, 40px); line-height: 1; }
+.tm-cell.start { box-shadow: 0 0 0 4px var(--mustard); border-color: var(--mustard-dark); }
+.tm-cell.right { box-shadow: 0 0 0 4px var(--mint-dark); background: #D8F3E7; }
+.tm-cell.wrong { box-shadow: 0 0 0 4px var(--tomato); }
+.tm-cell.walked:not(.treasure)::after { content: '👣'; font-size: 22px; grid-area: 1 / 1; opacity: .85; }
+.tm-cell.treasure::after { content: '💎'; font-size: clamp(24px, 7vw, 42px); grid-area: 1 / 1; animation: pop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.tm-cell .tm-pic, .tm-cell::after { grid-area: 1 / 1; }
+
+/* the compass and the key, beside the map on an iPad, under it on a phone */
+.tm-side { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tm-compass {
+  display: grid; grid-template-areas: '. n .' 'w r e' '. s .'; place-items: center;
+  width: 92px; height: 92px; border-radius: 50%;
+  background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+  font-family: var(--display); font-weight: 800; font-size: 17px; line-height: 1;
+}
+.tm-compass .tm-n { grid-area: n; color: var(--tomato); font-size: 20px; }
+.tm-compass .tm-s { grid-area: s; }
+.tm-compass .tm-e { grid-area: e; }
+.tm-compass .tm-w { grid-area: w; }
+.tm-compass .tm-rose { grid-area: r; font-size: 22px; color: var(--mustard-dark); }
+.tm-key {
+  list-style: none; margin: 0; padding: 8px 12px; border-radius: 14px;
+  display: grid; grid-template-columns: repeat(2, auto); gap: 4px 14px;
+  background: var(--paper); color: var(--ink);
+}
+.tm-key li { display: flex; align-items: center; gap: 6px; }
+.tm-key .tm-pic { font-size: 24px; }
+.tm-key .tm-word { font-family: var(--reading); font-size: 18px; }
+@media (max-width: 600px) {
+  .tm-side { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tm-cell.treasure::after { animation: none; }
+}
+
+/* ── Map Jigsaw ────────────────────────────────────────────────────────── */
+
+.jg-stage { gap: 8px; }
+.jg-board {
+  width: min(100%, 860px); max-height: calc(100svh - 230px); height: auto;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.jg-board[data-map="australia"] { width: min(100%, 620px); }
+.jg-sea { fill: #A9D6F2; stroke: #2B5F7F; stroke-width: 1.2; }
+.jg-tray { fill: rgba(255, 246, 231, .14); stroke: rgba(255, 246, 231, .5); stroke-width: 2; stroke-dasharray: 10 8; }
+/* where each piece goes, a dashed line round it */
+.jg-hole .edge { fill: none; stroke: #2B5F7F; stroke-width: 3; stroke-dasharray: 6 4; stroke-linejoin: round; }
+.jg-hole .fill { fill: #DCEFFA; }
+.jg-board[data-map="australia"] .jg-hole .edge { stroke-width: 5; stroke-dasharray: 12 8; }
+.jg-hole.filled { visibility: hidden; }
+.jg-coast-edge { fill: none; stroke: #2B5F7F; stroke-width: 5; stroke-linejoin: round; }
+.jg-coast { fill: #F4EBD6; }
+.jg-hint .edge { fill: none; stroke: #14312F; stroke-width: 4; stroke-linejoin: round; }
+.jg-hint .fill { fill: #FFD84D; }
+.jg-hint { animation: wm-glow 1.2s ease-in-out infinite; }
+.jg-piece { cursor: grab; }
+.jg-piece .edge { fill: none; stroke: #14312F; stroke-width: 2.4; stroke-linejoin: round; }
+.jg-piece .fill { stroke: none; }
+.jg-piece.held { cursor: grabbing; filter: drop-shadow(0 6px 6px rgba(0, 0, 0, .35)); }
+.jg-piece.in { cursor: default; pointer-events: none; }
+.jg-piece .grab { fill: transparent; stroke: none; pointer-events: all; }
+.jg-piece.in .grab { display: none; }
+.jg-piece.back { animation: jg-back .3s ease-out; }
+@keyframes jg-back { 30% { opacity: .5; } }
+.jg-piece[data-piece="africa"] { fill: #F2BC48; }
+.jg-piece[data-piece="antarctica"] { fill: #F4F7FA; }
+.jg-piece[data-piece="asia"] { fill: #E9785F; }
+.jg-piece[data-piece="australia"] { fill: #EE86A7; }
+.jg-piece[data-piece="europe"] { fill: #A78AD8; }
+.jg-piece[data-piece="north-america"] { fill: #79BE6F; }
+.jg-piece[data-piece="south-america"] { fill: #45AE9F; }
+.jg-piece[data-piece="WA"] { fill: #F2BC48; }
+.jg-piece[data-piece="NT"] { fill: #E9785F; }
+.jg-piece[data-piece="SA"] { fill: #A78AD8; }
+.jg-piece[data-piece="QLD"] { fill: #79BE6F; }
+.jg-piece[data-piece="NSW"] { fill: #6FB3E0; }
+.jg-piece[data-piece="VIC"] { fill: #45AE9F; }
+.jg-piece[data-piece="TAS"] { fill: #EE86A7; }
+.jg-board[data-map="australia"] .jg-piece .edge { stroke-width: 4; }
+@media (prefers-reduced-motion: reduce) {
+  .jg-hint, .jg-piece.back { animation: none; }
+}
+
+/* ── Animals of the World ──────────────────────────────────────────────── */
+
+.an-card {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 64px; padding: 6px 18px; border-radius: 16px;
+  background: var(--paper); color: var(--ink); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.an-card[hidden], .an-pic[hidden], .an-stage .wm-wrap[hidden] { display: none; }
+.an-pic { font-size: 44px; line-height: 1; }
+.an-name { font-family: var(--reading); font-weight: 700; font-size: clamp(22px, 6vw, 30px); }
+/* reading it: the name alone, bigger */
+.an-card.words-only .an-name { font-size: clamp(30px, 8vw, 44px); padding: 4px 8px; }
+.an-stage .mx-choice.word { font-size: clamp(17px, 4.4vw, 22px); }
