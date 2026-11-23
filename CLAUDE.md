@@ -106,6 +106,8 @@ src/content/world.ts   World Map: the continents and oceans, a fact for each,
                        tools/make-world.ts from Natural Earth, never edited),
                        projection.ts puts a longitude and latitude on it, and
                        seas.ts says which ocean a point of water is in
+src/content/globe.ts   the globe's sums: the map's shapes taken back to longitude
+                       and latitude, the ball turned, and what is under a tap
 src/content/flags.ts   Flags: the countries, their flags, what is on each one,
                        the look-alikes, and the questions
 src/content/capitals.ts Capital Cities: Australia's states and their capitals,
@@ -156,7 +158,9 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        the BJJ and geography games share; bjj-kit.ts adds
                        the belt
                        world-kit.ts is the world map the geography games
-                       share, with its taps (a little off a coast counts)
+                       share, with its taps (a little off a coast counts),
+                       and the 🌍 button that makes it a globe (globe.ts:
+                       the ball, painted from the flat map's own colours)
                        teams.ts: the football teams, their flags and kits,
                        and the side he plays and the opponent, the same in
                        every football game (rivalFor; never his own made-up
