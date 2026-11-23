@@ -7,11 +7,11 @@ import { noProblems, openGame, recordSpeech, said, seed, watchPage } from './hel
 import { ALL_STORIES } from '../../src/content/index';
 import { SAYS, wordCount } from '../../src/content/beat-time';
 
-/** Go, the countdown, a read of `ms`, then Finished */
+/** Go, the countdown (3, 2, 1 at 700 ms each), a read of `ms`, then Finished */
 async function readFor(page: Page, ms: number, stuckOn?: string): Promise<void> {
   await page.getByRole('button', { name: '▶ Go!' }).click();
   await expect(page.locator('.bt-count')).toBeVisible();
-  await page.clock.runFor(2200);
+  await page.clock.runFor(2100);
   await expect(page.getByRole('button', { name: '🏁 Finished!' })).toBeVisible();
   if (stuckOn) await page.locator(`.rp-word[data-word="${stuckOn}"]`).first().click();
   await page.clock.runFor(ms);
@@ -20,13 +20,22 @@ async function readFor(page: Page, ms: number, stuckOn?: string): Promise<void> 
 
 const last = async (page: Page): Promise<string | undefined> => (await said(page)).at(-1);
 
+/** the game opened, and its clock stopped: from here time moves only when
+ * the test moves it, so a read takes exactly as long as the test says
+ * (a running test clock drifts on, by a second on a slow WebKit run) */
+async function open(page: Page): Promise<void> {
+  await openGame(page, 'beat-your-time');
+  await expect(page.locator('.bt-pick').first()).toBeVisible();
+  await page.clock.pauseAt(await page.evaluate(() => Date.now() + 1000));
+}
+
 test.describe('Beat Your Time', () => {
   test('three reads of a story, each against the one before, then the race and a sticker', async ({ page }) => {
     const watch = watchPage(page);
     await page.clock.install();
     await recordSpeech(page);
     await seed(page, { settings: { levels: [5], sounds: [] } });
-    await openGame(page, 'beat-your-time');
+    await open(page);
 
     /* his level's stories come first */
     const first = page.locator('.bt-pick').first();
@@ -57,7 +66,7 @@ test.describe('Beat Your Time', () => {
     await expect(page.locator('.bt-hint')).toHaveText('Time to beat: 30 seconds');
     await expect(page.locator('.rp-word.bt-stuck')).toHaveCount(0);
     await page.getByRole('button', { name: '▶ Go!' }).click();
-    await page.clock.runFor(2200);
+    await page.clock.runFor(2100);
     await expect(page.locator('.bt-chase')).toBeVisible();
     await page.clock.runFor(15_000);
     const ghostAt = await page.locator('.bt-runner.ghost').evaluate((n) => Number(getComputedStyle(n).getPropertyValue('--at')));
@@ -79,16 +88,12 @@ test.describe('Beat Your Time', () => {
     await expect(results).toBeVisible();
     await expect(results.locator('.bt-lane')).toHaveCount(3);
     await expect(results.locator('.bt-lane').nth(2)).toHaveAttribute('data-place', '1');
-    /* words read right in a minute (the test clock also moves on its own a
-       little, so near enough) */
+    /* words read right in a minute, the stuck word left out */
     const n = wordCount(story);
     const notes = results.locator('.bt-notes li');
-    const perMin = async (i: number): Promise<number> => Number(/(\d+) words a minute/.exec((await notes.nth(i).textContent())!)![1]);
-    await expect(notes.nth(0)).toContainText('Read 1: 30 seconds');
+    await expect(notes.nth(0)).toContainText(`Read 1: 30 seconds · ${Math.round(((n - 1) * 60000) / 30000)} words a minute`);
     await expect(notes.nth(0)).toContainText(`stuck on ${word}`);
-    expect(Math.abs(await perMin(0) - ((n - 1) * 60000) / 30000)).toBeLessThan(2);
-    await expect(notes.nth(2)).toContainText('Read 3: 20 seconds');
-    expect(Math.abs(await perMin(2) - (n * 60000) / 20000)).toBeLessThan(3);
+    await expect(notes.nth(2)).toContainText(`Read 3: 20 seconds · ${Math.round((n * 60000) / 20000)} words a minute`);
     await expect(results.locator('.sticker')).toHaveText('⏱️');
     expect(await said(page)).toContain(SAYS.doneFaster);
 
@@ -104,7 +109,7 @@ test.describe('Beat Your Time', () => {
     await page.clock.install();
     await recordSpeech(page);
     await seed(page, { settings: { levels: [2], sounds: [] }, 'beat-best': { 'The Duck': 40_000 } });
-    await openGame(page, 'beat-your-time');
+    await open(page);
     await page.locator('.bt-pick[data-story="The Duck"]').click();
     await expect(page.locator('.bt-hint')).toHaveText('Time to beat: 40 seconds');
     await readFor(page, 35_000);
@@ -120,7 +125,7 @@ test.describe('Beat Your Time', () => {
     await page.clock.install();
     await recordSpeech(page);
     await seed(page, { settings: { levels: [1], sounds: [] } });
-    await openGame(page, 'beat-your-time');
+    await open(page);
     const title = (await page.locator('.bt-pick').first().getAttribute('data-story'))!;
     const story = ALL_STORIES.find((s) => s.title === title)!;
     await page.locator('.bt-pick').first().click();
