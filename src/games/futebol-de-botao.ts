@@ -510,8 +510,7 @@ function build(kit: Kit) {
         busy = true;
         showMe.disabled = true;
         kit.note(`${why} Watch: here is one way.`);
-        say(watch(why));
-        await kit.wait(1400);
+        await kit.say(watch(why), 1400);
         let t: Table = q.table;
         draw(t);
         clearAim();
@@ -542,8 +541,7 @@ function build(kit: Kit) {
         /* the angles are on the screen only: a sentence with a number in it
            is not one of the recordings */
         kit.note(last ? `${HOW[q.plan.kind]} ${bounceWords(last)}` : HOW[q.plan.kind]);
-        say(HOW[q.plan.kind]);
-        await kit.wait(3200);
+        await kit.say(HOW[q.plan.kind], 3200);
         void end(false);
       };
       showMe.onclick = () => { if (!busy && !finished) void demo(STUCK); };

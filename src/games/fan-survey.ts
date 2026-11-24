@@ -17,7 +17,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say, sayInTurn } from '../lib/speech';
+import { say, sayInTurn, speakingMs } from '../lib/speech';
 import { shuffle } from '../lib/random';
 import {
   SURVEY_STEPS, choices, countIn, surveyAsk, surveyChoices, surveyQuestion, surveySaid, tableHow, type SurveyQuestion, type SurveyStep,
@@ -135,14 +135,12 @@ function build(kit: Kit) {
     if (ok) {
       sfx.cheer();
       kit.note(`Yes! ${how}`, true);
-      sayInTurn(['Yes!', ...said]);
-      await kit.wait(2400);
+      await kit.said((end) => sayInTurn(['Yes!', ...said], { onEnd: end }), 2400, speakingMs(['Yes!', ...said].join(' ')));
       return true;
     }
     sfx.wrong();
     kit.note(how);
-    sayInTurn(said);
-    await kit.wait(3600);
+    await kit.said((end) => sayInTurn(said, { onEnd: end }), 3600, speakingMs(said.join(' ')));
     return false;
   }
 

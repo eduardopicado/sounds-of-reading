@@ -97,8 +97,7 @@ function build(kit: Kit) {
       if (ok) sfx.cheer(); else sfx.wrong();
       kit.note(ok ? `Yes! ${q.why}` : q.why, ok);
       /* a letter on its own is said as its name, so the ed question says the word */
-      say(q.task === 'ed' ? q.word : q.why);
-      await kit.wait(ok ? 2600 : 4000);
+      await kit.say(q.task === 'ed' ? q.word : q.why, ok ? 2600 : 4000);
       return ok;
     },
   };

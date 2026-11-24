@@ -1,7 +1,10 @@
 /* Flash Phrases: a phrase flashes up and goes, and he picks the one he read. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, seed, standInVoice, watchPage } from './helpers';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function start(page: Page, step = 0): Promise<void> {
   await seed(page, { 'maths-step:flash-phrases': step });

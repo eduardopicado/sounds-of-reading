@@ -11,9 +11,10 @@ test.describe('every game', () => {
   test.use({ serviceWorkers: 'block' });
 
   test('shows every game and opens each one', async ({ page }) => {
-    /* a visit to each game, so its time grows with the catalog: two seconds
-       a game, when one takes under a second even in WebKit */
-    test.setTimeout(Math.max(90_000, GAMES.length * 2_000));
+    /* a visit to each game, so its time grows with the catalog: three
+       seconds a game. In CI's WebKit the visits average nearly two seconds
+       (two minutes for the catalog), so two a game ran out on a busy runner */
+    test.setTimeout(Math.max(90_000, GAMES.length * 3_000));
     const watch = watchPage(page);
     await page.goto('/');
 
