@@ -22,14 +22,14 @@ describe('the games', () => {
   });
 
   it('every maths, geography and jiu-jitsu game has the steps it climbs, for the progress card', () => {
-    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj' || x.section === 'football')) {
+    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj' || x.section === 'football' || x.section === 'space')) {
       expect(g.ladder?.length, g.path).toBeGreaterThan(1);
     }
   });
 
   it('every game file is in the list, so none is left out of the home screen', () => {
     /* the files in src/games that are not a game */
-    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'chess-kit', 'narration', 'teams', 'world-kit', 'globe', 'lang-kit', 'football-art']);
+    const parts = new Set(['home', 'grown-ups', 'voices', 'catalog', 'maths-kit', 'bjj-kit', 'bjj-art', 'chess-kit', 'narration', 'teams', 'world-kit', 'globe', 'lang-kit', 'football-art', 'space-art']);
     const files = readdirSync(new URL('../../src/games', import.meta.url))
       .map((f) => f.replace(/\.ts$/, ''))
       .filter((f) => !parts.has(f));

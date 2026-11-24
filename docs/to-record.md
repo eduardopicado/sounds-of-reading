@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1487 clips, about 38043 characters.**
+**1807 clips, about 48149 characters.**
 
-## English (Stuart, Australian): 967
+## English (Stuart, Australian): 1128
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A dangerous tackle is a red card: he has to leave the game.
@@ -99,8 +99,17 @@ exactly these, with the voices in public/audio/README.md.
 - cow, boy, cowboy
 - Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
 - Crocodiles live in rivers.
+- Day! The house is on the side facing the Sun.
 - den, tist, dentist
 - dentist
+- Do people live there? No.
+- Do people live there? Yes!
+- Does it have a moon? No.
+- Does it have a moon? Yes!
+- Does it have big, bright rings? No.
+- Does it have big, bright rings? Yes!
+- Does it spin on its side? No.
+- Does it spin on its side? Yes!
 - Dolphins live in the ocean, and breathe air through a hole on top of their heads.
 - Dolphins live in the ocean.
 - drag, on, dragon
@@ -110,6 +119,18 @@ exactly these, with the voices in public/audio/README.md.
 - Each square is 10 metres.
 - Each square is 2 metres.
 - Each square is 5 metres.
+- Earth comes after Venus.
+- Earth could still be it. Look at the answer again.
+- Earth is bigger than Mars.
+- Earth is bigger than Mercury.
+- Earth is bigger than Venus.
+- Earth is here.
+- Earth is nearer to the Sun than Jupiter.
+- Earth is nearer to the Sun than Mars.
+- Earth is nearer to the Sun than Neptune.
+- Earth is nearer to the Sun than Saturn.
+- Earth is nearer to the Sun than Uranus.
+- Earth is our home, the only planet we know with living things.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
@@ -149,6 +170,7 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares west.
 - Good reading! Try again.
 - Good refereeing!
+- Good space exploring!
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
 - ham, ster, hamster
@@ -187,6 +209,7 @@ exactly these, with the voices in public/audio/README.md.
 - How far is it to the swing?
 - How far is it to the tent?
 - How far is it to the tree?
+- I am thinking of a planet. Ask me questions to find it!
 - in the bag,
 - in the bag.
 - in the bath,
@@ -215,6 +238,23 @@ exactly these, with the voices in public/audio/README.md.
 - in the van.
 - in, sect, insect
 - insect
+- Is it bigger than Earth? No.
+- Is it bigger than Earth? Yes!
+- Is it day or night at the house?
+- Is it made of rock? No.
+- Is it made of rock? Yes!
+- Is it nearer the Sun than Earth? No.
+- Is it nearer the Sun than Earth? Yes!
+- Is it red? No.
+- Is it red? Yes!
+- Is it the biggest planet? No.
+- Is it the biggest planet? Yes!
+- Is it the farthest from the Sun? No.
+- Is it the farthest from the Sun? Yes!
+- Is it the hottest planet? No.
+- Is it the hottest planet? Yes!
+- Is it the smallest planet? No.
+- Is it the smallest planet? Yes!
 - It goes here.
 - It is 10 metres.
 - It is 15 metres.
@@ -255,6 +295,14 @@ exactly these, with the voices in public/audio/README.md.
 - It is in E4.
 - It is in E5.
 - It is north.
+- It is not Earth.
+- It is not Jupiter.
+- It is not Mars.
+- It is not Mercury.
+- It is not Neptune.
+- It is not Saturn.
+- It is not Uranus.
+- It is not Venus.
 - It is south.
 - It is west.
 - It went over the goal line, and a defender touched it last: corner.
@@ -262,6 +310,20 @@ exactly these, with the voices in public/audio/README.md.
 - It went over the side line: throw-in.
 - jack, et, jacket
 - jacket
+- Jupiter comes after Mars.
+- Jupiter could still be it. Look at the answer again.
+- Jupiter is bigger than Earth.
+- Jupiter is bigger than Mars.
+- Jupiter is bigger than Mercury.
+- Jupiter is bigger than Neptune.
+- Jupiter is bigger than Saturn.
+- Jupiter is bigger than Uranus.
+- Jupiter is bigger than Venus.
+- Jupiter is here.
+- Jupiter is nearer to the Sun than Neptune.
+- Jupiter is nearer to the Sun than Saturn.
+- Jupiter is nearer to the Sun than Uranus.
+- Jupiter is the biggest planet. All the others could fit inside it.
 - Just a little past the last defender is still offside.
 - Just the same! Try again.
 - Kangaroos live on the grassland.
@@ -285,10 +347,30 @@ exactly these, with the voices in public/audio/README.md.
 - lobster
 - mag, net, magnet
 - magnet
+- Mars comes after Earth.
+- Mars could still be it. Look at the answer again.
+- Mars is bigger than Mercury.
+- Mars is here.
+- Mars is nearer to the Sun than Jupiter.
+- Mars is nearer to the Sun than Neptune.
+- Mars is nearer to the Sun than Saturn.
+- Mars is nearer to the Sun than Uranus.
+- Mars is the red planet. Its dust is red with rust.
 - match, box, matchbox
 - matchbox
 - mel, on, melon
 - melon
+- Mercury could still be it. Look at the answer again.
+- Mercury is here.
+- Mercury is nearer to the Sun than Earth.
+- Mercury is nearer to the Sun than Jupiter.
+- Mercury is nearer to the Sun than Mars.
+- Mercury is nearer to the Sun than Neptune.
+- Mercury is nearer to the Sun than Saturn.
+- Mercury is nearer to the Sun than Uranus.
+- Mercury is nearer to the Sun than Venus.
+- Mercury is nearest to the Sun.
+- Mercury is the smallest planet, and the nearest to the Sun.
 - mit, ten, mitten
 - mitten
 - mon, ster, monster
@@ -298,6 +380,15 @@ exactly these, with the voices in public/audio/README.md.
 - mushroom
 - nap, kin, napkin
 - napkin
+- Neptune comes after Uranus.
+- Neptune could still be it. Look at the answer again.
+- Neptune is bigger than Earth.
+- Neptune is bigger than Mars.
+- Neptune is bigger than Mercury.
+- Neptune is bigger than Venus.
+- Neptune is here.
+- Neptune is the farthest planet from the Sun, and the windiest.
+- Night! The house is on the side away from the Sun. The Earth turns, so it will be day there soon.
 - North America is north of Central America.
 - Not there. Try again.
 - Now read it again. Can you beat your time?
@@ -405,6 +496,18 @@ exactly these, with the voices in public/audio/README.md.
 - sailboat
 - sand, wich, sandwich
 - sandwich
+- Saturn comes after Jupiter.
+- Saturn could still be it. Look at the answer again.
+- Saturn has big, bright rings, made of ice and rock.
+- Saturn is bigger than Earth.
+- Saturn is bigger than Mars.
+- Saturn is bigger than Mercury.
+- Saturn is bigger than Neptune.
+- Saturn is bigger than Uranus.
+- Saturn is bigger than Venus.
+- Saturn is here.
+- Saturn is nearer to the Sun than Neptune.
+- Saturn is nearer to the Sun than Uranus.
 - sea, weed, seaweed
 - seaweed
 - see, saw, seesaw
@@ -674,7 +777,13 @@ exactly these, with the voices in public/audio/README.md.
 - ten, nis, tennis
 - tennis
 - That is Central America.
+- That is Earth.
 - That is it!
+- That is Jupiter.
+- That is Mars.
+- That is Mercury.
+- That is Neptune.
+- That is Saturn.
 - That is square A1.
 - That is square A2.
 - That is square A3.
@@ -726,6 +835,8 @@ exactly these, with the voices in public/audio/README.md.
 - That is the swing.
 - That is the tent.
 - That is the tree.
+- That is Uranus.
+- That is Venus.
 - The assistant holds the flag straight up: offside.
 - The ball came from a throw-in. There is no offside from a throw-in.
 - The ball hit his hand by accident.
@@ -748,6 +859,7 @@ exactly these, with the voices in public/audio/README.md.
 - The rock is here.
 - The shell is here.
 - The ship is here.
+- The Sun is a star. It gives us light and keeps us warm.
 - The swing is here.
 - The tent is here.
 - The treasure is here.
@@ -815,9 +927,32 @@ exactly these, with the voices in public/audio/README.md.
 - Tigers live in the forest.
 - tooth, brush, toothbrush
 - toothbrush
+- Turn over the planets it cannot be.
 - Two yellow cards make a red card.
 - up, set, upset
 - upset
+- Uranus comes after Saturn.
+- Uranus could still be it. Look at the answer again.
+- Uranus is bigger than Earth.
+- Uranus is bigger than Mars.
+- Uranus is bigger than Mercury.
+- Uranus is bigger than Neptune.
+- Uranus is bigger than Venus.
+- Uranus is here.
+- Uranus is nearer to the Sun than Neptune.
+- Uranus spins on its side, like a ball rolling around the Sun.
+- Venus comes after Mercury.
+- Venus could still be it. Look at the answer again.
+- Venus is bigger than Mars.
+- Venus is bigger than Mercury.
+- Venus is here.
+- Venus is nearer to the Sun than Earth.
+- Venus is nearer to the Sun than Jupiter.
+- Venus is nearer to the Sun than Mars.
+- Venus is nearer to the Sun than Neptune.
+- Venus is nearer to the Sun than Saturn.
+- Venus is nearer to the Sun than Uranus.
+- Venus is the hottest planet, even hotter than Mercury.
 - week, end, weekend
 - weekend
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
@@ -928,6 +1063,14 @@ exactly these, with the voices in public/audio/README.md.
 - Where does the zebra live?
 - Where does this piece go?
 - Where is Central America?
+- Where is Earth?
+- Where is Jupiter?
+- Where is Mars?
+- Where is Mercury?
+- Where is Neptune?
+- Where is Saturn?
+- Where is Uranus?
+- Where is Venus?
 - Which animal lives in Africa?
 - Which animal lives in Antarctica?
 - Which animal lives in Asia?
@@ -938,6 +1081,16 @@ exactly these, with the voices in public/audio/README.md.
 - Which animal lives in South America?
 - Which continent is north of Central America?
 - Which continent is south of Central America?
+- Which planet comes after Earth?
+- Which planet comes after Jupiter?
+- Which planet comes after Mars?
+- Which planet comes after Mercury?
+- Which planet comes after Saturn?
+- Which planet comes after Uranus?
+- Which planet comes after Venus?
+- Which planet is bigger?
+- Which planet is nearer to the Sun?
+- Which planet is nearest to the Sun?
 - Which square is the bench in?
 - Which square is the boat in?
 - Which square is the crab in?
@@ -970,6 +1123,14 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the tree?
 - win, ter, winter
 - Yes! Find another one.
+- Yes! It is Earth!
+- Yes! It is Jupiter!
+- Yes! It is Mars!
+- Yes! It is Mercury!
+- Yes! It is Neptune!
+- Yes! It is Saturn!
+- Yes! It is Uranus!
+- Yes! It is Venus!
 - You beat your time!
 - You found the treasure!
 - Your fastest read ever!
@@ -977,7 +1138,7 @@ exactly these, with the voices in public/audio/README.md.
 - Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 520
+## Portuguese (Roberto Valença, Brazilian): 679
 
 - A América Central fica ao norte da América do Sul.
 - A América Central fica ao sul da América do Norte.
@@ -998,7 +1159,26 @@ exactly these, with the voices in public/audio/README.md.
 - A falta foi fora da área: é falta.
 - A maioria dos leões vive na África, e alguns vivem numa floresta da Índia, na Ásia.
 - A pedra está aqui.
+- A Terra é a nossa casa, o único planeta que conhecemos com seres vivos.
+- A Terra é maior que Marte.
+- A Terra é maior que Mercúrio.
+- A Terra é maior que Vênus.
+- A Terra está aqui.
+- A Terra fica mais perto do Sol que Júpiter.
+- A Terra fica mais perto do Sol que Marte.
+- A Terra fica mais perto do Sol que Netuno.
+- A Terra fica mais perto do Sol que Saturno.
+- A Terra fica mais perto do Sol que Urano.
+- A Terra vem depois de Vênus.
 - Aí não. Tente de novo.
+- Ainda pode ser a Terra. Olhe a resposta de novo.
+- Ainda pode ser Júpiter. Olhe a resposta de novo.
+- Ainda pode ser Marte. Olhe a resposta de novo.
+- Ainda pode ser Mercúrio. Olhe a resposta de novo.
+- Ainda pode ser Netuno. Olhe a resposta de novo.
+- Ainda pode ser Saturno. Olhe a resposta de novo.
+- Ainda pode ser Urano. Olhe a resposta de novo.
+- Ainda pode ser Vênus. Olhe a resposta de novo.
 - Ande 1 quadrado para o leste,
 - Ande 1 quadrado para o leste.
 - Ande 1 quadrado para o nordeste.
@@ -1085,8 +1265,24 @@ exactly these, with the voices in public/audio/README.md.
 - depois 3 quadrados para o norte.
 - depois 3 quadrados para o oeste.
 - depois 3 quadrados para o sul.
+- Dia! A casa está do lado virado para o Sol.
 - Discutir com o árbitro é cartão amarelo.
 - Dois cartões amarelos viram um vermelho.
+- É dia ou noite na casa?
+- É feito de rocha? Não.
+- É feito de rocha? Sim!
+- É maior que a Terra? Não.
+- É maior que a Terra? Sim!
+- É o maior planeta? Não.
+- É o maior planeta? Sim!
+- É o mais longe do Sol? Não.
+- É o mais longe do Sol? Sim!
+- É o menor planeta? Não.
+- É o menor planeta? Sim!
+- É o planeta mais quente? Não.
+- É o planeta mais quente? Sim!
+- É vermelho? Não.
+- É vermelho? Sim!
 - Ela vai aqui.
 - Ele derrubou um jogador sem querer.
 - Ele deu uma entrada perigosa, que podia machucar feio.
@@ -1095,6 +1291,8 @@ exactly these, with the voices in public/audio/README.md.
 - Ele estava na frente do último defensor quando a bola foi passada: impedimento!
 - Ele estava na mesma linha do último defensor. Na mesma linha não é impedimento.
 - Ele estava no campo dele. No próprio campo nunca é impedimento.
+- Ele gira deitado? Não.
+- Ele gira deitado? Sim!
 - Ele levou o segundo cartão amarelo.
 - Ele não estava na frente do último defensor quando a bola foi passada: não é impedimento.
 - Ele puxou a camisa para parar um contra-ataque.
@@ -1144,6 +1342,11 @@ exactly these, with the voices in public/audio/README.md.
 - Essa é a cabana.
 - Essa é a concha.
 - Essa é a pedra.
+- Essa é a Terra.
+- Esse é Júpiter.
+- Esse é Marte.
+- Esse é Mercúrio.
+- Esse é Netuno.
 - Esse é o balanço.
 - Esse é o banco.
 - Esse é o barco.
@@ -1189,6 +1392,9 @@ exactly these, with the voices in public/audio/README.md.
 - Esse é o quadrado F5.
 - Esse é o quadrado F6.
 - Esse é o tronco.
+- Esse é Saturno.
+- Esse é Urano.
+- Esse é Vênus.
 - Esta é a América Central.
 - Está no A1.
 - Está no A2.
@@ -1215,6 +1421,9 @@ exactly these, with the voices in public/audio/README.md.
 - Está no E3.
 - Está no E4.
 - Está no E5.
+- Estou pensando num planeta. Faça perguntas para descobrir qual é!
+- Fica mais perto do Sol que a Terra? Não.
+- Fica mais perto do Sol que a Terra? Sim!
 - Fica para o leste.
 - Fica para o norte.
 - Fica para o oeste.
@@ -1223,9 +1432,66 @@ exactly these, with the voices in public/audio/README.md.
 - Impedir um gol com a mão é cartão vermelho, e pênalti.
 - Isso!
 - Isso! Ache outro.
+- Isso! É a Terra!
+- Isso! É Júpiter!
+- Isso! É Marte!
+- Isso! É Mercúrio!
+- Isso! É Netuno!
+- Isso! É Saturno!
+- Isso! É Urano!
+- Isso! É Vênus!
+- Júpiter é maior que a Terra.
+- Júpiter é maior que Marte.
+- Júpiter é maior que Mercúrio.
+- Júpiter é maior que Netuno.
+- Júpiter é maior que Saturno.
+- Júpiter é maior que Urano.
+- Júpiter é maior que Vênus.
+- Júpiter é o maior planeta. Todos os outros caberiam dentro dele.
+- Júpiter está aqui.
+- Júpiter fica mais perto do Sol que Netuno.
+- Júpiter fica mais perto do Sol que Saturno.
+- Júpiter fica mais perto do Sol que Urano.
+- Júpiter vem depois de Marte.
 - Leia o nome. Onde vive esse animal?
 - Lucas
 - Luquinhas
+- Marte é maior que Mercúrio.
+- Marte é o planeta vermelho. A poeira dele é vermelha de ferrugem.
+- Marte está aqui.
+- Marte fica mais perto do Sol que Júpiter.
+- Marte fica mais perto do Sol que Netuno.
+- Marte fica mais perto do Sol que Saturno.
+- Marte fica mais perto do Sol que Urano.
+- Marte vem depois da Terra.
+- Mercúrio é o mais perto do Sol.
+- Mercúrio é o menor planeta, e o mais perto do Sol.
+- Mercúrio está aqui.
+- Mercúrio fica mais perto do Sol que a Terra.
+- Mercúrio fica mais perto do Sol que Júpiter.
+- Mercúrio fica mais perto do Sol que Marte.
+- Mercúrio fica mais perto do Sol que Netuno.
+- Mercúrio fica mais perto do Sol que Saturno.
+- Mercúrio fica mais perto do Sol que Urano.
+- Mercúrio fica mais perto do Sol que Vênus.
+- Mora gente lá? Não.
+- Mora gente lá? Sim!
+- Não é a Terra.
+- Não é Júpiter.
+- Não é Marte.
+- Não é Mercúrio.
+- Não é Netuno.
+- Não é Saturno.
+- Não é Urano.
+- Não é Vênus.
+- Netuno é maior que a Terra.
+- Netuno é maior que Marte.
+- Netuno é maior que Mercúrio.
+- Netuno é maior que Vênus.
+- Netuno é o planeta mais longe do Sol, e o que tem mais vento.
+- Netuno está aqui.
+- Netuno vem depois de Urano.
+- Noite! A casa está do lado de costas para o Sol. A Terra gira, então logo vai ser dia lá.
 - O árbitro aponta para a bandeirinha de escanteio: escanteio.
 - O árbitro aponta para a marca do pênalti: pênalti.
 - O árbitro aponta para a pequena área: tiro de meta.
@@ -1326,8 +1592,17 @@ exactly these, with the voices in public/audio/README.md.
 - O que o árbitro está dizendo?
 - O que o árbitro faz?
 - O que tem lá?
+- O Sol é uma estrela. Ele nos dá luz e calor.
 - O tesouro está aqui.
 - O tronco está aqui.
+- Onde está a Terra?
+- Onde está Júpiter?
+- Onde está Marte?
+- Onde está Mercúrio?
+- Onde está Netuno?
+- Onde está Saturno?
+- Onde está Urano?
+- Onde está Vênus?
 - Onde fica a América Central?
 - Onde vai esta peça?
 - Onde vive a girafa?
@@ -1428,6 +1703,15 @@ exactly these, with the voices in public/audio/README.md.
 - Qual é a distância até o ninho?
 - Qual é a distância até o pato?
 - Qual é a distância até o tronco?
+- Qual planeta é maior?
+- Qual planeta fica mais perto do Sol?
+- Qual planeta vem depois da Terra?
+- Qual planeta vem depois de Júpiter?
+- Qual planeta vem depois de Marte?
+- Qual planeta vem depois de Mercúrio?
+- Qual planeta vem depois de Saturno?
+- Qual planeta vem depois de Urano?
+- Qual planeta vem depois de Vênus?
 - Saiu pela lateral: é lateral.
 - Saiu pela linha de fundo, e um atacante tocou por último: tiro de meta.
 - Saiu pela linha de fundo, e um defensor tocou por último: escanteio.
@@ -1443,8 +1727,23 @@ exactly these, with the voices in public/audio/README.md.
 - São 50 metros.
 - São 6 metros.
 - São 8 metros.
+- Saturno é maior que a Terra.
+- Saturno é maior que Marte.
+- Saturno é maior que Mercúrio.
+- Saturno é maior que Netuno.
+- Saturno é maior que Urano.
+- Saturno é maior que Vênus.
+- Saturno está aqui.
+- Saturno fica mais perto do Sol que Netuno.
+- Saturno fica mais perto do Sol que Urano.
+- Saturno tem anéis grandes e brilhantes, feitos de gelo e pedra.
+- Saturno vem depois de Júpiter.
 - Sem querer é só falta, sem cartão.
 - Só um pouquinho na frente do último defensor já é impedimento.
+- Tem anéis grandes e brilhantes? Não.
+- Tem anéis grandes e brilhantes? Sim!
+- Tem lua? Não.
+- Tem lua? Sim!
 - Tirar a camisa é cartão amarelo, mesmo depois de um gol.
 - Toque em todos os continentes onde vivem os bichos-preguiça.
 - Toque em todos os continentes onde vivem os bisões.
@@ -1498,6 +1797,27 @@ exactly these, with the voices in public/audio/README.md.
 - Toque no tronco.
 - Toque onde está o tesouro.
 - Um braço esticado, para o lado de quem vai cobrar: falta.
+- Urano é maior que a Terra.
+- Urano é maior que Marte.
+- Urano é maior que Mercúrio.
+- Urano é maior que Netuno.
+- Urano é maior que Vênus.
+- Urano está aqui.
+- Urano fica mais perto do Sol que Netuno.
+- Urano gira deitado, como uma bola rolando em volta do Sol.
+- Urano vem depois de Saturno.
+- Vênus é maior que Marte.
+- Vênus é maior que Mercúrio.
+- Vênus é o planeta mais quente, mais quente até que Mercúrio.
+- Vênus está aqui.
+- Vênus fica mais perto do Sol que a Terra.
+- Vênus fica mais perto do Sol que Júpiter.
+- Vênus fica mais perto do Sol que Marte.
+- Vênus fica mais perto do Sol que Netuno.
+- Vênus fica mais perto do Sol que Saturno.
+- Vênus fica mais perto do Sol que Urano.
+- Vênus vem depois de Mercúrio.
+- Vire os planetas que não podem ser.
 - Você achou o tesouro!
 
 ## To improve: recorded, but worth doing again

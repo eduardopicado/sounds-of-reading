@@ -123,6 +123,9 @@ src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (onl
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask and say (Weigh-In's things and weight classes
                        too), every word in English and Portuguese
+src/content/space.ts   Solar System: the eight planets (size, moons, a fact each),
+                       the Mystery Planet questions, which planets each says yes
+                       to and when to offer it, and day and night, both languages
 src/content/football-rules.ts Football Ref: the Laws of the Game cut down to what a
                        child sees (throw-in, corner, goal kick, free kick or
                        penalty, cards, the referee's signals, offside and the
@@ -162,6 +165,7 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        games share (src/content/chess.ts has the rules);
                        bjj-art.ts draws the moves and the referee's signals;
                        football-art.ts the pitch and the football referee;
+                       space-art.ts the planets, the Sun, and day and night;
                        lang-kit.ts is the 🇦🇺/🇧🇷 language switch and speech
                        the BJJ and geography games share; bjj-kit.ts adds
                        the belt

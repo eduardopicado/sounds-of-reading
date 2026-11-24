@@ -2653,3 +2653,69 @@
 .fr-flag { fill: #F3B229; stroke: #C98F14; stroke-width: 1; }
 .fr-flag.corner { fill: #E4572E; stroke: #B23D1B; }
 .fr-go { fill: none; stroke: #F3B229; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Solar System ──────────────────────────────────────────────────────── */
+
+.ss-area { display: grid; gap: 10px; justify-items: center; width: 100%; }
+/* the Sun's edge, then the planets out from it */
+.ss-system {
+  display: grid; grid-template-columns: 34px repeat(8, minmax(0, 1fr)); align-items: center; gap: 4px;
+  width: min(100%, 900px); padding: 8px 8px 8px 0; border-radius: 16px; background: #0E1A3A;
+}
+.ss-sun { align-self: stretch; }
+.ss-sun-art { display: block; width: 100%; height: 100%; }
+.ss-tile {
+  display: grid; justify-items: center; gap: 2px; min-width: 44px; min-height: 48px; padding: 4px 2px;
+  border: 0; border-radius: 12px; background: none; cursor: pointer; color: var(--on-deep);
+}
+.ss-tile:disabled { cursor: default; }
+.ss-planet-art { display: block; width: 100%; max-width: 84px; height: auto; aspect-ratio: 1; }
+.ss-tile.rocky .ss-planet-art { max-width: 60px; }
+.ss-name { font: 700 clamp(11px, 1.9vw, 16px) / 1.1 var(--reading); text-align: center; }
+.ss-tile.right { background: rgba(121, 211, 176, .3); box-shadow: 0 0 0 3px var(--mint); }
+.ss-tile.wrong { background: rgba(228, 87, 46, .25); box-shadow: 0 0 0 3px var(--tomato); }
+.ss-tile.nope { animation: shake .35s; }
+.ss-tile.arrived { animation: pop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.ss-slot {
+  display: grid; place-items: center; aspect-ratio: 1; width: 70%; justify-self: center; border-radius: 50%;
+  border: 2px dashed rgba(255, 246, 231, .45); color: rgba(255, 246, 231, .7); font: 700 16px var(--display);
+}
+.ss-tray { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 900px); }
+.ss-tray .ss-tile { width: 84px; background: rgba(255, 246, 231, .08); }
+/* Mystery Planet: the planets, what he asked, and the questions */
+.ss-mystery {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px;
+  width: min(100%, 640px); padding: 8px; border-radius: 16px; background: #0E1A3A;
+}
+.ss-mystery .ss-tile { transition: opacity .3s, transform .3s; }
+/* turned over: it cannot be this one */
+.ss-mystery .ss-tile.out { opacity: .22; transform: scale(.9) rotateY(180deg); }
+.ss-mystery .ss-tile.out .ss-name { visibility: hidden; }
+.ss-said { margin: 0; min-height: 1.3em; text-align: center; font: 700 clamp(18px, 3.6vw, 24px) var(--reading); color: var(--mustard); }
+.ss-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; width: min(100%, 760px); }
+.ss-card {
+  min-height: 52px; padding: 8px 14px; border: 0; border-radius: 14px; cursor: pointer;
+  font: 700 clamp(16px, 3.2vw, 20px) / 1.15 var(--reading); color: var(--ink);
+  background: var(--paper); box-shadow: 0 3px 0 rgba(0, 0, 0, .25);
+}
+.ss-pair { display: flex; gap: 24px; justify-content: center; padding: 10px 24px; border-radius: 16px; background: #0E1A3A; }
+.ss-pair .ss-tile { width: 120px; }
+.ss-pair .ss-planet-art, .ss-pair .ss-tile.rocky .ss-planet-art { max-width: 96px; }
+.ss-daybox { width: min(100%, 560px); }
+.ss-daynight { display: block; width: 100%; height: auto; border-radius: 16px; }
+/* on a phone the eight sit in two rows of four, the Sun along the top */
+@media (max-width: 560px) {
+  .ss-system { grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 6px 8px; overflow: hidden; }
+  /* the Sun's glow along the top, out of which the planets go */
+  .ss-sun { grid-column: 1 / -1; height: 18px; margin: 0 -6px; background: radial-gradient(120% 220% at 50% -120%, #FBD14B 70%, #F7B733 85%, transparent 86%); }
+  .ss-sun-art { display: none; }
+  .ss-planet-art { max-width: 52px; }
+  .ss-tile.rocky .ss-planet-art { max-width: 40px; }
+  .ss-tray .ss-tile { width: 74px; }
+  .ss-card { min-height: 46px; padding: 6px 10px; font-size: 15px; }
+  .ss-pair .ss-planet-art, .ss-pair .ss-tile.rocky .ss-planet-art { max-width: 80px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ss-tile.nope, .ss-tile.arrived { animation: none; }
+  .ss-mystery .ss-tile { transition: none; }
+}
