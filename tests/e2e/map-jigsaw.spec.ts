@@ -1,7 +1,7 @@
 /* Map Jigsaw: drag the continents, and Australia's states, back into place. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { CONTINENT_PIECES, STATE_PIECES, SAYS } from '../../src/content/jigsaw';
 import { STATES } from '../../src/content/capitals';
 
@@ -46,6 +46,10 @@ async function drag(page: Page, x: number, y: number): Promise<void> {
 const piece = (id: string) => [...CONTINENT_PIECES, ...STATE_PIECES].find((p) => p.id === id)!;
 
 test.describe('Map Jigsaw', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('the seven continents, each dragged into place, to the sticker and the next step', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

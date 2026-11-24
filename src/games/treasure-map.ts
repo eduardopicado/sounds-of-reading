@@ -20,7 +20,7 @@ import {
   type Cell, type Dir, type IslandMap, type TreasureQuestion, type TreasureStep,
 } from '../content/treasure';
 import { mountMaths, type Kit } from './maths-kit';
-import { GEO_LANG, langSwitch, speakTurn } from './lang-kit';
+import { GEO_LANG, langSwitch, speakTurn, talkMs } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<TreasureStep>({
@@ -121,8 +121,7 @@ function build(kit: Kit) {
     if (ok) sfx.cheer(); else sfx.wrong();
     retext = () => kit.note(write(said), ok);
     retext();
-    speakTurn(said, lang());
-    await kit.wait(ok ? 2800 : 4400);
+    await kit.said((end) => speakTurn(said, lang(), end), ok ? 2800 : 4400, talkMs(said));
     return ok;
   }
 

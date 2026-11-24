@@ -12,7 +12,7 @@
 
 import { el } from '../lib/dom';
 import { read, write } from '../lib/storage';
-import { canSpeak, say, sayInTurn } from '../lib/speech';
+import { canSpeak, say, sayInTurn, speakingMs } from '../lib/speech';
 import { hasClip } from '../lib/audio';
 import { sfx } from '../lib/sfx';
 import type { Both, Lang } from '../content/pt';
@@ -65,6 +65,12 @@ export function langSwitch(key: string): LangSwitch {
 export function speak(text: Both, lang: Lang, onEnd?: () => void): void {
   if (lang === 'pt' && (hasClip(text.pt) || canSpeak(PT))) say(text.pt, { lang: PT, onEnd });
   else say(text.en, { onEnd });
+}
+
+/** about as long as saying these takes, for waiting on a voice that never
+    says it has finished: the longer language of each (speakingMs) */
+export function talkMs(lines: readonly Both[]): number {
+  return lines.reduce((ms, l) => ms + speakingMs(l.en.length > l.pt.length ? l.en : l.pt), 0);
 }
 
 /** several phrases, one after another, in the chosen language: Portuguese

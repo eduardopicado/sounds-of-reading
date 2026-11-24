@@ -20,7 +20,7 @@ import { findSays, place, seaSays, type PlaceId } from '../content/world';
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
-import { GEO_LANG, langSwitch, speak } from './lang-kit';
+import { GEO_LANG, langSwitch, speak, talkMs } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<AnimalStep>({
@@ -67,8 +67,7 @@ function build(kit: Kit) {
         kit.note(`${SAYS.yes[lang()]} ${fact[lang()]}`, true);
       };
       retext();
-      speak(fact, lang());
-      await kit.wait(3000);
+      await kit.said((end) => speak(fact, lang(), end), 3000, talkMs([fact]));
       return true;
     }
     sfx.wrong();
@@ -81,9 +80,7 @@ function build(kit: Kit) {
     };
     retext();
     const now = lang();
-    if (first) speak(first, now, () => speak(fact, now));
-    else speak(fact, now);
-    await kit.wait(5200);
+    await kit.said((end) => (first ? speak(first, now, () => speak(fact, now, end)) : speak(fact, now, end)), 5200, talkMs(first ? [first, fact] : [fact]));
     return false;
   }
 

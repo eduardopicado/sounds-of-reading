@@ -1,7 +1,7 @@
 /* Capital Cities: Australia's states and their capitals, then the world's. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { AUS_H, AUS_W, projectAus } from '../../src/content/australia-projection';
 import { CAPITALS, STATES, cityIn, type StateId } from '../../src/content/capitals';
 import { of } from '../../src/content/pt';
@@ -29,6 +29,10 @@ async function tapAt(page: Page, lon: number, lat: number): Promise<void> {
 }
 
 test.describe('Capital Cities', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('a whole round, from the states to their capitals, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

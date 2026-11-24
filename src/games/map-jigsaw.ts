@@ -24,7 +24,7 @@ import {
   type JigsawStep, type Piece,
 } from '../content/jigsaw';
 import { mountMaths, type Kit } from './maths-kit';
-import { GEO_LANG, langSwitch, speak } from './lang-kit';
+import { GEO_LANG, langSwitch, speak, talkMs } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<JigsawStep>({
@@ -229,9 +229,8 @@ function build(kit: Kit) {
       retext();
       const now = lang();
       /* one line after another, each its own recording */
-      const sayFrom = (i: number): void => { if (said[i]) speak(said[i], now, () => sayFrom(i + 1)); };
-      sayFrom(0);
-      await kit.wait(3200 + 1600 * (said.length - 2));
+      const sayFrom = (i: number, end: () => void): void => { if (said[i]) speak(said[i], now, () => sayFrom(i + 1, end)); else end(); };
+      await kit.said((end) => sayFrom(0, end), 3200 + 1600 * (said.length - 2), talkMs(said));
       return ok;
     },
   };
