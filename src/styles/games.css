@@ -2635,7 +2635,8 @@
 .fr-what[hidden] { display: none; }
 .fr-cards { font-size: 72px; line-height: 1; padding: 8px 0; }
 /* the referee */
-.fr-signal { display: block; width: min(100%, 360px); height: auto; background: #CFE9F8; border-radius: 14px; }
+/* the referee, no taller than leaves room for the three answers under him */
+.fr-signal { display: block; height: min(250px, 24svh); width: auto; max-width: 100%; background: #CFE9F8; border-radius: 14px; }
 .fr-ref.skin { fill: #E8B48A; }
 .fr-ref.shirt { fill: #1E1E1E; }
 .fr-ref.limb { stroke: #1E1E1E; stroke-width: 5; stroke-linecap: round; }
