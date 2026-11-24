@@ -58,6 +58,10 @@ export interface Question<S extends Step> {
   /** called as each round starts, for a game whose questions build on each
       other through a round (Map Jigsaw's pieces make one puzzle) */
   begin?: () => void;
+  /** how many questions a round has, for the step it starts on, where the
+      game decides rather than the grown-up (Map Jigsaw: a puzzle's pieces,
+      seven continents in English and eight in Portuguese) */
+  size?: (step: S) => number;
 }
 
 export interface MathsGame<S extends Step> {
@@ -226,8 +230,9 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   let round = 0;
 
   async function play(me: number): Promise<void> {
-    const n = Number(lenSel.value);
     let c: Climb = { step: Number(stepSel.value), right: 0, wrong: 0 };
+    const n = question.size?.(game.steps[c.step]) ?? Number(lenSel.value);
+    totalEl.textContent = String(n);
     let right = 0;
     const startStep = c.step;
     question.begin?.();

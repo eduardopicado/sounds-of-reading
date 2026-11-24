@@ -16,7 +16,7 @@ import { sfx } from '../lib/sfx';
 import { svg } from '../ui/writing';
 import { OUTLINE } from '../content/world-shapes';
 import { STATE_SHAPES } from '../content/australia-shapes';
-import { findSays, place } from '../content/world';
+import { continentsIn, findSays, place, type Continents } from '../content/world';
 import { STATES, stateSays, type StateId } from '../content/capitals';
 import type { Both } from '../content/pt';
 import {
@@ -38,10 +38,14 @@ export function mount(root: HTMLElement): () => void {
     unit: 'Piece',
     lengths: [PIECES_A_PUZZLE],
     counts: 'In first time',
-    climb: jigsawClimb,
-    build,
+    /* the step moves once the whole puzzle is in, however many pieces it has */
+    climb: (c, ok, steps) => jigsawClimb(c, ok, steps, size),
+    build: (kit) => build(kit, (n) => { size = n; }),
   }, root);
 }
+
+/** the pieces in the puzzle being done: seven continents, or eight in Portuguese */
+let size = PIECES_A_PUZZLE;
 
 const shuffled = <T>(list: T[]): T[] => [...list].sort(() => Math.random() - 0.5);
 
@@ -53,7 +57,7 @@ const thatIs = (p: Piece): Both => {
   return { en: stateSays(s).that, pt: stateSays(s, 'pt').that };
 };
 
-function build(kit: Kit) {
+function build(kit: Kit, sized: (n: number) => void) {
   const langs = langSwitch(GEO_LANG);
   const lang = () => langs.lang();
   const ask = el('p', { class: 'mx-ask' });
@@ -64,7 +68,7 @@ function build(kit: Kit) {
   langs.onChange(() => retext());
 
   /* the puzzle being done: its step, the pieces in order, how many are in */
-  let puzzle: { step: JigsawStep; order: Piece[]; done: number } | null = null;
+  let puzzle: { step: JigsawStep; count: Continents; order: Piece[]; done: number } | null = null;
   let tray = { x: 0, y: 0, w: 0, h: 0 };
 
   /** a shape with only its outside edge drawn: the edge thick underneath,
@@ -78,7 +82,7 @@ function build(kit: Kit) {
   const outline = (p: Piece, cls: string): SVGGElement => shape(p, cls);
 
   /** the map for a step, with the outlines it gives, and room under it for the piece */
-  function drawBoard(step: JigsawStep): void {
+  function drawBoard(step: JigsawStep, count: Continents): void {
     const { w, h } = BOARDS[step.map];
     const trayH = Math.round(h * (step.map === 'world' ? 0.5 : 0.36));
     tray = { x: w * 0.1, y: h + trayH * 0.08, w: w * 0.8, h: trayH * 0.84 };
@@ -94,7 +98,7 @@ function build(kit: Kit) {
       const all = STATE_SHAPES.map((s) => s.d).join('');
       layers.push(svg('path', { class: 'jg-coast-edge', d: all }), svg('path', { class: 'jg-coast', d: all }));
     }
-    if (step.guide === 'outlines') for (const p of piecesFor(step)) layers.push(outline(p, 'jg-hole'));
+    if (step.guide === 'outlines') for (const p of piecesFor(step, count)) layers.push(outline(p, 'jg-hole'));
     layers.push(svg('rect', { class: 'jg-tray', x: tray.x, y: tray.y, width: tray.w, height: tray.h, rx: 28 }));
     board.replaceChildren(...layers);
   }
@@ -205,10 +209,15 @@ function build(kit: Kit) {
   return {
     node,
     begin: () => { puzzle = null; },
+    size: (step: JigsawStep) => piecesFor(step, continentsIn(lang())).length,
     ask: async (step: JigsawStep): Promise<boolean> => {
       if (!puzzle || puzzle.step !== step || puzzle.done >= puzzle.order.length) {
-        puzzle = { step, order: shuffled(piecesFor(step)), done: 0 };
-        drawBoard(step);
+        /* the continents counted as the language counts them when the puzzle
+           starts: eight in Portuguese, with Central America (src/content/world.ts) */
+        const count = continentsIn(lang());
+        puzzle = { step, count, order: shuffled(piecesFor(step, count)), done: 0 };
+        sized(puzzle.order.length);
+        drawBoard(step, count);
       }
       const p = puzzle.order[puzzle.done];
       const question = askFor(p, step);

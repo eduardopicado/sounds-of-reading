@@ -11,6 +11,7 @@
 
 import { COUNTRY_SHAPES, OCEAN_SHAPES, SEA_SHAPES } from './world-shapes';
 import { project, unproject } from './projection';
+import { continentOf, type Continents } from './world';
 
 const RAD = Math.PI / 180;
 
@@ -151,11 +152,11 @@ export function inside(s: Shape, x: number, y: number): boolean {
  * or the sea or ocean. A country that is no continent's is passed through,
  * and so is a small island when an ocean is asked for.
  */
-export function placeAt(lon: number, lat: number, o: { byCountry?: boolean; wantsOcean?: boolean } = {}): string | null {
+export function placeAt(lon: number, lat: number, o: { byCountry?: boolean; wantsOcean?: boolean; continents?: Continents } = {}): string | null {
   const [x, y] = project(lon, lat);
   for (const c of COUNTRIES) {
     if (!c.continent || (o.wantsOcean && isIsland(c)) || !inside(c, x, y)) continue;
-    return o.byCountry ? c.id : c.continent;
+    return o.byCountry ? c.id : continentOf(c.id, c.continent, o.continents ?? 7);
   }
   for (const s of SEA_PARTS) if (inside(s, x, y)) return s.id;
   for (const s of OCEANS) if (inside(s, x, y)) return s.id;

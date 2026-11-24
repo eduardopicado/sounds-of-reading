@@ -18,7 +18,7 @@
 
 import { WORLD_ANIMALS } from './words';
 import type { Step } from './maths';
-import type { ContinentId } from './world';
+import type { ContinentId, Continents } from './world';
 import { place } from './world';
 import { pt, type Both, type Lang, type PtName } from './pt';
 
@@ -52,8 +52,12 @@ interface AnimalFacts {
   /** "canguru", masculine; and "cangurus" */
   pt: PtName;
   ptPlural: string;
-  /** every continent it lives on in the wild; none for a sea animal */
+  /** every continent it lives on in the wild, counting seven (Central
+      America in North America); none for a sea animal */
   homes: ContinentId[];
+  /** counting eight, with Central America its own: an animal that lives
+      there too, or there instead of North America */
+  central?: 'too' | 'instead';
   /** the kind of place it lives in, the usual one first; any other listed
       is never offered as a wrong answer. None: too many to ask about */
   habitats: HabitatId[];
@@ -63,8 +67,10 @@ interface AnimalFacts {
 /* Checked against field guides for where each lives in the wild, not where
    zoos and farms have taken them. Sea animals list the ice as well, since
    there are whales, dolphins (orcas), sharks and octopuses in the polar seas,
-   and the ice is then never offered as a wrong answer for them. Central America is part of North America,
-   so the sloth lives on both of the Americas. */
+   and the ice is then never offered as a wrong answer for them. Counting
+   seven continents, Central America is part of North America, so the sloth
+   lives on both of the Americas; counting eight, as in Portuguese, it lives
+   in Central and South America, and its Portuguese fact says so. */
 const FACTS: Record<string, AnimalFacts> = {
   kangaroo: { plural: 'kangaroos', pt: pt('canguru', 'm'), ptPlural: 'cangurus', homes: ['australia'], habitats: ['grassland', 'desert', 'forest'],
     fact: { en: 'Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.', pt: 'Os cangurus só vivem na Austrália, e carregam os filhotes numa bolsa.' } },
@@ -92,10 +98,10 @@ const FACTS: Record<string, AnimalFacts> = {
     fact: { en: 'Elephants live in Africa and Asia, and African elephants have the bigger ears.', pt: 'Os elefantes vivem na África e na Ásia, e os elefantes africanos têm as orelhas maiores.' } },
   llama: { plural: 'llamas', pt: pt('lhama', 'f'), ptPlural: 'lhamas', homes: ['south-america'], habitats: ['mountains', 'grassland'],
     fact: { en: 'Llamas come from the Andes mountains, in South America.', pt: 'As lhamas vêm da Cordilheira dos Andes, na América do Sul.' } },
-  sloth: { plural: 'sloths', pt: pt('bicho-preguiça', 'm'), ptPlural: 'bichos-preguiça', homes: ['south-america', 'north-america'], habitats: ['rainforest'],
-    fact: { en: 'Sloths live in the rainforests of South America and the south of North America, and move very slowly.', pt: 'Os bichos-preguiça vivem nas florestas tropicais da América do Sul e no sul da América do Norte, e se mexem bem devagar.' } },
-  raccoon: { plural: 'raccoons', pt: pt('guaxinim', 'm'), ptPlural: 'guaxinins', homes: ['north-america'], habitats: ['forest', 'river'],
-    fact: { en: 'Raccoons come from North America, and wash their food with their front paws.', pt: 'Os guaxinins vêm da América do Norte, e lavam a comida com as patas da frente.' } },
+  sloth: { plural: 'sloths', pt: pt('bicho-preguiça', 'm'), ptPlural: 'bichos-preguiça', homes: ['south-america', 'north-america'], central: 'instead', habitats: ['rainforest'],
+    fact: { en: 'Sloths live in the rainforests of South America and the south of North America, and move very slowly.', pt: 'Os bichos-preguiça vivem nas florestas tropicais da América do Sul e da América Central, e se mexem bem devagar.' } },
+  raccoon: { plural: 'raccoons', pt: pt('guaxinim', 'm'), ptPlural: 'guaxinins', homes: ['north-america'], central: 'too', habitats: ['forest', 'river'],
+    fact: { en: 'Raccoons come from North America, and wash their food with their front paws.', pt: 'Os guaxinins vivem na América do Norte e na América Central, e lavam a comida com as patas da frente.' } },
   bison: { plural: 'bison', pt: pt('bisão', 'm'), ptPlural: 'bisões', homes: ['north-america', 'europe'], habitats: ['grassland', 'forest'],
     fact: { en: 'Bison live in North America, and a smaller kind lives in the forests of Europe.', pt: 'Os bisões vivem na América do Norte, e um tipo menor vive nas florestas da Europa.' } },
   'polar bear': { plural: 'polar bears', pt: pt('urso-polar', 'm'), ptPlural: 'ursos-polares', homes: ['north-america', 'europe', 'asia'], habitats: ['ice', 'ocean'],
@@ -104,7 +110,7 @@ const FACTS: Record<string, AnimalFacts> = {
     fact: { en: 'Penguins live in the south: in Antarctica, and on the coasts of Australia, Africa and South America.', pt: 'Os pinguins vivem no sul: na Antártida, e nas costas da Austrália, da África e da América do Sul.' } },
   hedgehog: { plural: 'hedgehogs', pt: pt('ouriço', 'm'), ptPlural: 'ouriços', homes: ['europe', 'asia', 'africa'], habitats: [],
     fact: { en: 'Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.', pt: 'Os ouriços vivem na Europa, na Ásia e na África, e viram uma bola de espinhos para se proteger.' } },
-  crocodile: { plural: 'crocodiles', pt: pt('crocodilo', 'm'), ptPlural: 'crocodilos', homes: ['africa', 'asia', 'australia', 'north-america', 'south-america'], habitats: ['river', 'ocean'],
+  crocodile: { plural: 'crocodiles', pt: pt('crocodilo', 'm'), ptPlural: 'crocodilos', homes: ['africa', 'asia', 'australia', 'north-america', 'south-america'], central: 'too', habitats: ['river', 'ocean'],
     fact: { en: 'Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.', pt: 'Os crocodilos vivem em rios e pântanos da África, da Ásia, da Austrália e das Américas.' } },
   whale: { plural: 'whales', pt: pt('baleia', 'f'), ptPlural: 'baleias', homes: [], habitats: ['ocean', 'ice'],
     fact: { en: 'Whales live in every ocean, and the blue whale is the biggest animal there has ever been.', pt: 'As baleias vivem em todos os oceanos, e a baleia-azul é o maior animal que já existiu.' } },
@@ -127,6 +133,15 @@ export const ANIMALS: Animal[] = WORLD_ANIMALS.split('|').map((entry) => {
 });
 
 export const animal = (name: string): Animal => ANIMALS.find((a) => a.name === name)!;
+
+/** every continent an animal lives on, counting seven continents or eight */
+export function homesIn(a: Animal, n: Continents): ContinentId[] {
+  if (n === 7 || !a.central) return a.homes;
+  const homes = a.central === 'instead' ? a.homes.filter((h) => h !== 'north-america') : [...a.homes];
+  const at = homes.indexOf('south-america');
+  homes.splice(at < 0 ? homes.length : at, 0, 'central-america');
+  return homes;
+}
 
 /** its name, in either language */
 export const animalName = (a: Animal, lang: Lang): string => (lang === 'pt' ? a.pt.name : a.name);
@@ -179,6 +194,8 @@ export const ANIMAL_STEPS: AnimalStep[] = [
 export interface AnimalQuestion {
   task: AnimalStep['task'];
   animal: Animal;
+  /** every continent it lives on, as this question counts them */
+  homes: ContinentId[];
   ask: Both;
   /** for "who": the continent that glows */
   continent?: ContinentId;
@@ -195,29 +212,32 @@ const pickOf = <T>(list: T[], avoid: (x: T) => boolean): T => {
   return from[Math.floor(Math.random() * from.length)];
 };
 
-/** one question at this step, avoiding the animals in `recent` */
-export function animalQuestion(step: AnimalStep, recent: string[] = []): AnimalQuestion {
+/** one question at this step, avoiding the animals in `recent`, counting
+    seven continents or eight */
+export function animalQuestion(step: AnimalStep, recent: string[] = [], n: Continents = 7): AnimalQuestion {
   const seen = (a: Animal): boolean => recent.includes(a.name);
+  const homes = (a: Animal): ContinentId[] => homesIn(a, n);
   if (step.task === 'habitat') {
     const a = pickOf(ANIMALS.filter((x) => x.habitats.length), seen);
     /* two wrong places, never one it could be said to live in too */
     const wrong = shuffled(HABITATS.filter((h) => !a.habitats.includes(h.id))).slice(0, 2);
     const options = shuffled([a.habitats[0], ...wrong.map((h) => h.id)]);
-    return { task: 'habitat', animal: a, ask: SAYS.whatPlace(a), options, pick: a.habitats[0] };
+    return { task: 'habitat', animal: a, homes: homes(a), ask: SAYS.whatPlace(a), options, pick: a.habitats[0] };
   }
   if (step.task === 'who') {
     /* a continent, the animal that lives there, and two that do not */
     const a = pickOf(ANIMALS.filter((x) => x.homes.length), seen);
-    const continent = a.homes[Math.floor(Math.random() * a.homes.length)];
-    const others = shuffled(ANIMALS.filter((x) => x.homes.length && !x.homes.includes(continent))).slice(0, 2);
+    const its = homes(a);
+    const continent = its[Math.floor(Math.random() * its.length)];
+    const others = shuffled(ANIMALS.filter((x) => x.homes.length && !homes(x).includes(continent))).slice(0, 2);
     const options = shuffled([a, ...others]).map((x) => x.name);
-    return { task: 'who', animal: a, ask: SAYS.whoLives(continent), continent, options, pick: a.name };
+    return { task: 'who', animal: a, homes: its, ask: SAYS.whoLives(continent), continent, options, pick: a.name };
   }
-  const pool = ANIMALS.filter((x) => x.homes.length && (step.task === 'all' ? x.homes.length > 1 : !step.oneHome || x.homes.length === 1));
+  const pool = ANIMALS.filter((x) => x.homes.length && (step.task === 'all' ? homes(x).length > 1 : !step.oneHome || homes(x).length === 1));
   const a = pickOf(pool, seen);
-  if (step.task === 'all') return { task: 'all', animal: a, ask: SAYS.everyHome(a) };
-  if (step.task === 'read') return { task: 'read', animal: a, ask: SAYS.readIt };
-  return { task: 'home', animal: a, ask: SAYS.whereLives(a) };
+  if (step.task === 'all') return { task: 'all', animal: a, homes: homes(a), ask: SAYS.everyHome(a) };
+  if (step.task === 'read') return { task: 'read', animal: a, homes: homes(a), ask: SAYS.readIt };
+  return { task: 'home', animal: a, homes: homes(a), ask: SAYS.whereLives(a) };
 }
 
 /** what is said after an answer: its fact, or for the habitat, where it lives */
@@ -227,12 +247,12 @@ export const animalSays = (q: AnimalQuestion): Both =>
 /** every line the game can say in one language, for the recordings */
 export function animalLines(lang: Lang = 'en'): string[] {
   const out = new Set<string>([SAYS.readIt[lang], SAYS.moreToFind[lang], SAYS.yes[lang]]);
-  const continents: ContinentId[] = ['africa', 'antarctica', 'asia', 'australia', 'europe', 'north-america', 'south-america'];
+  const continents: ContinentId[] = ['africa', 'antarctica', 'asia', 'australia', 'europe', 'north-america', 'central-america', 'south-america'];
   for (const id of continents) out.add(SAYS.whoLives(id)[lang]);
   for (const a of ANIMALS) {
     out.add(a.fact[lang]);
     if (a.homes.length) out.add(SAYS.whereLives(a)[lang]);
-    if (a.homes.length > 1) out.add(SAYS.everyHome(a)[lang]);
+    if (a.homes.length > 1 || homesIn(a, 8).length > 1) out.add(SAYS.everyHome(a)[lang]);
     if (a.habitats.length) { out.add(SAYS.whatPlace(a)[lang]); out.add(SAYS.livesIn(a, a.habitats[0])[lang]); }
   }
   return [...out];
