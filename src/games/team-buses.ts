@@ -114,15 +114,13 @@ function build(kit: Kit) {
     if (picked === n) {
       sfx.cheer();
       kit.note(`Yes! ${how}`, true);
-      say(`Yes! ${how}`);
-      await kit.wait(2400);
+      await kit.say(`Yes! ${how}`, 2400);
       return true;
     }
     sfx.wrong();
     yard.classList.add('explain');
     kit.note(how);
-    say(how);
-    await kit.wait(3400);
+    await kit.say(how, 3400);
     yard.classList.remove('explain');
     return false;
   }
@@ -149,8 +147,7 @@ function build(kit: Kit) {
     const how = `${plural(p.tens, 'bus', 'buses')} and ${plural(p.ones, 'fan', 'fans')} left over. ${p.tens} tens and ${p.ones} ones make ${n}.`;
     if (left === p.ones) sfx.cheer(); else sfx.wrong();
     kit.note(how, ok);
-    say(how);
-    await kit.wait(3200);
+    await kit.say(how, 3200);
     return ok;
   }
 
@@ -201,16 +198,14 @@ function build(kit: Kit) {
         if (ok) {
           sfx.cheer();
           kit.note(`Yes! ${how}`, true);
-          say(`Yes! ${how}`);
-          await kit.wait(2600);
+          await kit.say(`Yes! ${how}`, 2600);
           resolve(true);
           return;
         }
         sfx.wrong();
         kit.note(`That's ${got}. ${how}`);
-        say(`That's ${got}. ${how}`);
         draw(want);
-        await kit.wait(3800);
+        await kit.say(`That's ${got}. ${how}`, 3800);
         resolve(false);
       });
     });
@@ -231,14 +226,12 @@ function build(kit: Kit) {
     if (picked === answer) {
       sfx.cheer();
       kit.note(`Yes! ${how}`, true);
-      say(`Yes! ${how}`);
-      await kit.wait(2600);
+      await kit.say(`Yes! ${how}`, 2600);
       return true;
     }
     sfx.wrong();
     kit.note(`${p.ones} were walking, and 10 got off the bus. ${how}`);
-    say(`${p.ones} were walking, and 10 got off the bus. ${how}`);
-    await kit.wait(3800);
+    await kit.say(`${p.ones} were walking, and 10 got off the bus. ${how}`, 3800);
     return false;
   }
 
@@ -265,14 +258,12 @@ function build(kit: Kit) {
     if (picked === answer) {
       sfx.cheer();
       kit.note(`Yes! ${how}`, true);
-      say(`Yes! ${how}`);
-      await kit.wait(3000);
+      await kit.say(`Yes! ${how}`, 3000);
       return true;
     }
     sfx.wrong();
     kit.note(how);
-    say(how);
-    await kit.wait(4200);
+    await kit.say(how, 4200);
     return false;
   }
 

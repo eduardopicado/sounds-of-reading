@@ -56,6 +56,15 @@ export async function expectTapTargets(page: Page, selector: string): Promise<vo
     is how a test hears a recording) */
 export async function recordSpeech(page: Page): Promise<void> {
   await noRecordings(page);
+  await standInVoice(page);
+}
+
+/** the speech engine above alone, the recordings left as they are: a voice
+    that says at once when it has finished, as an iPad's does. A game waits
+    for the end of what is said after an answer, and the test browsers' own
+    voices do not always say (CI's WebKit never does), so a game would wait
+    out its longest pause on every answer */
+export async function standInVoice(page: Page): Promise<void> {
   await page.addInitScript(() => {
     const spoken: string[] = [];
     (window as unknown as { __said: string[] }).__said = spoken;

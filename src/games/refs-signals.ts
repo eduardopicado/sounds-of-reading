@@ -17,7 +17,7 @@ import {
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
 import { refPicture } from './bjj-art';
-import { langSwitch, speak } from './bjj-kit';
+import { langSwitch, speak, talkMs } from './bjj-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<SignalStep>({
@@ -49,8 +49,7 @@ function build(kit: Kit) {
     const show = (): void => kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${why[lang()]}`, ok);
     show();
     retext = show;
-    speak(why, lang());
-    await kit.wait(ok ? 2600 : 3800);
+    await kit.said((end) => speak(why, lang(), end), ok ? 2600 : 3800, talkMs([why]));
     return ok;
   }
 

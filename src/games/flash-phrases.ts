@@ -21,7 +21,7 @@ import { el, prefersReducedMotion } from '../lib/dom';
 import { shuffle } from '../lib/random';
 import { settings } from '../lib/settings';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import {  } from '../lib/speech';
 import type { FlashPhrase } from '../content/index';
 import { PHRASE_STEPS, difference, lookalikePhrases, phrasePool, itSaid, phraseMs, type PhraseStep } from '../content/flash-phrases';
 import { mountMaths, type Kit } from './maths-kit';
@@ -97,9 +97,8 @@ function build(kit: Kit) {
         show(phrase.text);
         sfx.cheer();
         kit.note(`Yes! “${phrase.text}”, read in a flash.`, true);
-        say(phrase.text);
         streak += 1;
-        await kit.wait(1800);
+        await kit.say(phrase.text, 1800);
         return true;
       }
       /* the word he misread, marked, and the long look back next time */
@@ -108,8 +107,7 @@ function build(kit: Kit) {
       const d = difference(phrase.text, picked);
       show(phrase.text, d ? phrase.text.split(' ').indexOf(d.right) : -1);
       kit.note(d ? `It said “${phrase.text}”: ${d.right}, not ${d.wrong}.` : `It said “${phrase.text}”.`);
-      say(itSaid(phrase.text));
-      await kit.wait(3400);
+      await kit.say(itSaid(phrase.text), 3400);
       return false;
     },
   };

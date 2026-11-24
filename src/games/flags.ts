@@ -18,7 +18,7 @@ import {
   COUNTRIES, FLAG_STEPS, country, flagQuestion, flagSays, namedIn,
   type FlagQuestion, type FlagStep,
 } from '../content/flags';
-import { findSays, place, seaSays } from '../content/world';
+import { continentsIn, findSays, place, seaSays } from '../content/world';
 import { of, type Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isPlace, isSea, worldMap } from './world-kit';
@@ -51,8 +51,11 @@ function build(kit: Kit) {
   let recent: string[] = [];
   /** redraws the words on screen in the chosen language */
   let retext: () => void = () => undefined;
-  langs.onChange(() => { map.language(lang()); retext(); });
-  map.language(lang());
+  /* the map counts its continents as the language does (src/content/world.ts):
+     Flags asks for countries, so it can change straight away */
+  const setLang = (): void => { map.language(lang()); map.continents(continentsIn(lang())); };
+  langs.onChange(() => { setLang(); retext(); });
+  setLang();
 
   /** what he tapped on the map, said and written: "That is Argentina." */
   const that = (id: string, answer: string): Both => {

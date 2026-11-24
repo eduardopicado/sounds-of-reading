@@ -16,6 +16,7 @@ import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
 import { praise } from '../lib/name';
+import { say, speakingMs, type SayOptions } from '../lib/speech';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
 import { climb, signed, type Climb, type Step } from '../content/maths';
@@ -37,6 +38,8 @@ export interface Kit {
    * voice that never says it has finished is waited for `max` ms at most.
    */
   said: (start: (end: () => void) => void, min: number, max: number) => Promise<void>;
+  /** say one line and wait until it has been said, and at least `min` ms (kit.said for one line) */
+  say: (text: string, min: number, options?: SayOptions) => Promise<void>;
   /** the number buttons under the question */
   choices: ChoiceRow;
   /** a line of feedback under the stage */
@@ -55,6 +58,10 @@ export interface Question<S extends Step> {
   /** called as each round starts, for a game whose questions build on each
       other through a round (Map Jigsaw's pieces make one puzzle) */
   begin?: () => void;
+  /** how many questions a round has, for the step it starts on, where the
+      game decides rather than the grown-up (Map Jigsaw: a puzzle's pieces,
+      seven continents in English and eight in Portuguese) */
+  size?: (step: S) => number;
 }
 
 export interface MathsGame<S extends Step> {
@@ -181,6 +188,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
       /* a breath after the last word before anything else is said */
       start(() => life.later(() => { spoken = true; check(); }, SAID_GAP_MS));
     }),
+    say: (text, min, options = {}) => kit.said((end) => say(text, { ...options, onEnd: end }), min, speakingMs(text)),
     choices,
     note: (text, good = false) => { noteEl.textContent = text; noteEl.classList.toggle('good', good); },
     us: ourTeam,
@@ -222,8 +230,9 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   let round = 0;
 
   async function play(me: number): Promise<void> {
-    const n = Number(lenSel.value);
     let c: Climb = { step: Number(stepSel.value), right: 0, wrong: 0 };
+    const n = question.size?.(game.steps[c.step]) ?? Number(lenSel.value);
+    totalEl.textContent = String(n);
     let right = 0;
     const startStep = c.step;
     question.begin?.();

@@ -30,6 +30,9 @@ async function drag(page: Page, dx: number, dy: number): Promise<void> {
   await page.mouse.down();
   for (let i = 1; i <= 10; i += 1) await page.mouse.move(b.x + (dx * i) / 10, b.y + (dy * i) / 10);
   await page.mouse.up();
+  /* the ball is drawn, and its turn written down, on the next frame: two
+     frames on, it has been (WebKit's frames can come well after the drag) */
+  await page.evaluate(() => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r()))));
 }
 
 /** turn the ball, by dragging, until a place is in the middle */

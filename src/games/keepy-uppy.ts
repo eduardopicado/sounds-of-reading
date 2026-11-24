@@ -103,16 +103,14 @@ function build(kit: Kit) {
         sfx.goal();
         juggler.classList.add('trick');
         kit.note(`Keepy-uppy! ${signed(answer)}!${fact ? ` ${fact}.` : ''}`, true);
-        say(`Yes! ${spoken(q, true)}${fact ? `. ${said(fact)}.` : ''}`);
-        await kit.wait(2400);
+        await kit.say(`Yes! ${spoken(q, true)}${fact ? `. ${said(fact)}.` : ''}`, 2400);
         juggler.classList.remove('trick');
         return true;
       }
       sfx.groan();
       steps(q, step);
       kit.note(`${how(signed)}${below}`);
-      say(said(`${how(spokenNumber)}${below.replace(/−(\d+)/, 'negative $1')}`));
-      await kit.wait(3600);
+      await kit.say(said(`${how(spokenNumber)}${below.replace(/−(\d+)/, 'negative $1')}`), 3600);
       return false;
     },
   };

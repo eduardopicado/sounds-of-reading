@@ -131,14 +131,12 @@ function build(kit: Kit) {
       if (ok) {
         sfx.goal();
         kit.note(`Yes! ${why}`, true);
-        say(`Yes! ${why}`);
-        await kit.wait(3000);
+        await kit.say(`Yes! ${why}`, 3000);
         return true;
       }
       sfx.groan();
       kit.note(why);
-      say(why);
-      await kit.wait(4200);
+      await kit.say(why, 4200);
       return false;
     },
   };

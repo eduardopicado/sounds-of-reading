@@ -2,8 +2,11 @@
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, seed, standInVoice, watchPage } from './helpers';
 import { HOW, PULL, VIEW, W, type Flick, type PlanKind } from '../../src/content/botao';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function start(page: Page, step: number): Promise<void> {
   await seed(page, { 'maths-step:futebol-de-botao': step });

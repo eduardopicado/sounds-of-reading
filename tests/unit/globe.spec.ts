@@ -82,7 +82,11 @@ describe('the ball', () => {
 
 describe('a tap on the globe', () => {
   it('finds each continent and ocean where its name goes', () => {
-    for (const p of PLACES) for (const [lon, lat] of p.labels) expect(placeAt(lon, lat), `${p.id} at ${lon}, ${lat}`).toBe(p.id);
+    for (const p of PLACES) {
+      for (const [lon, lat] of p.labels) expect(placeAt(lon, lat, { continents: p.eight ? 8 : 7 }), `${p.id} at ${lon}, ${lat}`).toBe(p.id);
+    }
+    /* Central America is North America when counting seven */
+    expect(placeAt(-85.5, 14)).toBe('north-america');
   });
 
   it('finds a country when looking for one, and its continent otherwise', () => {

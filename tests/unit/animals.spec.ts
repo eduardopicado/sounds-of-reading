@@ -5,7 +5,7 @@
  *   npm run test:unit */
 
 import { describe, expect, it } from 'vitest';
-import { ANIMALS, ANIMAL_STEPS, HABITATS, SAYS, animal, animalLines, animalQuestion, animalSays } from '../../src/content/animals';
+import { ANIMALS, ANIMAL_STEPS, HABITATS, SAYS, animal, animalLines, animalQuestion, animalSays, homesIn } from '../../src/content/animals';
 import { place } from '../../src/content/world';
 import { WORLD_ANIMALS } from '../../src/content/words';
 
@@ -23,13 +23,31 @@ describe('Animals of the World', () => {
   });
 
   it("says every continent an animal lives on in its fact, so the fact never contradicts a right tap", () => {
+    /* the English fact for seven continents, the Portuguese for eight, Central America its own */
+    const americas = (home: string): boolean => home.endsWith('-america');
     for (const a of ANIMALS) {
-      for (const home of a.homes) {
+      for (const home of homesIn(a, 7)) {
         const p = place(home);
-        const americas = home === 'north-america' || home === 'south-america';
-        expect(a.fact.en.includes(p.name) || (americas && a.fact.en.includes('Americas')), `${a.name}: ${p.name}`).toBe(true);
-        expect(a.fact.pt.includes(p.pt.name) || (americas && a.fact.pt.includes('Américas')), `${a.name}: ${p.pt.name}`).toBe(true);
+        expect(a.fact.en.includes(p.name) || (americas(home) && a.fact.en.includes('Americas')), `${a.name}: ${p.name}`).toBe(true);
       }
+      for (const home of homesIn(a, 8)) {
+        const p = place(home);
+        expect(a.fact.pt.includes(p.pt.name) || (americas(home) && a.fact.pt.includes('Américas')), `${a.name}: ${p.pt.name}`).toBe(true);
+      }
+    }
+  });
+
+  it('counting eight continents, the sloth lives in Central and South America, and the raccoon in North and Central', () => {
+    expect(homesIn(animal('sloth'), 7)).toEqual(['south-america', 'north-america']);
+    expect(homesIn(animal('sloth'), 8).sort()).toEqual(['central-america', 'south-america']);
+    expect(homesIn(animal('raccoon'), 8).sort()).toEqual(['central-america', 'north-america']);
+    expect(homesIn(animal('crocodile'), 8)).toContain('central-america');
+    expect(homesIn(animal('bison'), 8)).toEqual(homesIn(animal('bison'), 7));
+    /* a question counting eight carries those homes */
+    const home = ANIMAL_STEPS.findIndex((s) => s.task === 'home' && !s.oneHome);
+    for (let i = 0; i < 300; i += 1) {
+      const q = animalQuestion(ANIMAL_STEPS[home], [], 8);
+      expect(q.homes, q.animal.name).toEqual(homesIn(q.animal, 8));
     }
   });
 

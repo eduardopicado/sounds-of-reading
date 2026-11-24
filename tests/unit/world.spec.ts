@@ -5,7 +5,8 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  AROUND_AUSTRALIA, BETWEEN, DIRECTIONS, MAP_STEPS, PLACES, SEAS, mapClimb, mapLines, mapQuestion, place,
+  AROUND_AUSTRALIA, BETWEEN, CENTRAL_AMERICA, DIRECTIONS, MAP_STEPS, PLACES, SEAS, continentOf, continentsIn, directionsIn, mapClimb, mapLines,
+  mapQuestion, place, placesIn, type Continents,
   type PlaceId,
 } from '../../src/content/world';
 import { MAP_H, MAP_W, project } from '../../src/content/projection';
@@ -46,14 +47,22 @@ const inside = (p: Pt, ring: Pt[]): boolean => {
   return c;
 };
 
-const LAND = COUNTRY_SHAPES.map((c) => ({ continent: c.continent, rings: rings(c.d) }));
-/** the continent of the land at a point on the map, or null for the sea */
-const landAt = (p: Pt): string | null => LAND.find((c) => c.rings.some((r) => inside(p, r)))?.continent ?? null;
+const LAND = COUNTRY_SHAPES.map((c) => ({ id: c.id, continent: c.continent, rings: rings(c.d) }));
+/** the continent of the land at a point on the map, or null for the sea,
+    counting seven continents or eight */
+const landIn = (p: Pt, n: Continents): string | null => {
+  const c = LAND.find((x) => x.rings.some((r) => inside(p, r)));
+  return c ? continentOf(c.id, c.continent, n) : null;
+};
+const landAt = (p: Pt): string | null => landIn(p, 7);
 
 describe('the map', () => {
   it('has a shape for every continent and ocean, and for every sea it names', () => {
-    const continents = new Set(COUNTRY_SHAPES.map((c) => c.continent).filter(Boolean));
-    expect([...continents].sort()).toEqual(PLACES.filter((p) => p.kind === 'continent').map((p) => p.id).sort());
+    /* counting seven continents, as in English, and eight, as in Portuguese */
+    for (const n of [7, 8] as const) {
+      const continents = new Set(COUNTRY_SHAPES.map((c) => continentOf(c.id, c.continent, n)).filter(Boolean));
+      expect([...continents].sort(), `${n}`).toEqual(placesIn(n).filter((p) => p.kind === 'continent').map((p) => p.id).sort());
+    }
     expect(OCEAN_SHAPES.map((o) => o.id).sort()).toEqual(PLACES.filter((p) => p.kind === 'ocean').map((p) => p.id).sort());
     expect(SEA_SHAPES.map((s) => s.id).sort()).toEqual(SEAS.map((s) => s.id).sort());
   });
@@ -62,6 +71,7 @@ describe('the map', () => {
     for (const p of PLACES) {
       for (const [lon, lat] of p.labels) {
         const at = project(lon, lat);
+        const landAt = (q: Pt): string | null => landIn(q, p.eight ? 8 : 7);
         expect(at[0], p.id).toBeGreaterThan(0);
         expect(at[0], p.id).toBeLessThan(MAP_W);
         expect(at[1], p.id).toBeGreaterThan(0);
@@ -166,3 +176,57 @@ describe('the ladder', () => {
     expect(twoMisses(at('What is it called?'))).toBe(at('What is it called?') - 1);
   });
 });
+
+describe('the Americas in Portuguese: three continents', () => {
+  it('counts seven continents in English and eight in Portuguese', () => {
+    expect(continentsIn('en')).toBe(7);
+    expect(continentsIn('pt')).toBe(8);
+    expect(placesIn(7).filter((p) => p.kind === 'continent')).toHaveLength(7);
+    expect(placesIn(8).filter((p) => p.kind === 'continent')).toHaveLength(8);
+    expect(placesIn(7).some((p) => p.id === 'central-america')).toBe(false);
+  });
+
+  it('puts the isthmus and the Caribbean in Central America, and Mexico in North America', () => {
+    const at = (code: string, n: Continents): string => continentOf(code, COUNTRY_SHAPES.find((c) => c.id === code)!.continent, n);
+    for (const code of ['GTM', 'PAN', 'CRI', 'CUB', 'JAM', 'HTI']) {
+      expect(at(code, 7), code).toBe('north-america');
+      expect(at(code, 8), code).toBe('central-america');
+    }
+    expect(at('MEX', 8)).toBe('north-america');
+    expect(at('USA', 8)).toBe('north-america');
+    expect(at('COL', 8)).toBe('south-america');
+    /* every code is a country on the map */
+    for (const code of CENTRAL_AMERICA) expect(COUNTRY_SHAPES.some((c) => c.id === code), code).toBe(true);
+  });
+
+  it('has Central America north of South America and south of North America, when counting eight', () => {
+    const answer = (of: string, dir: string, n: Continents) => directionsIn(n).filter((d) => d.of === of && d.dir === dir).map((d) => d.answer);
+    expect(answer('south-america', 'north', 7)).toEqual(['north-america']);
+    expect(answer('south-america', 'north', 8)).toEqual(['central-america']);
+    expect(answer('north-america', 'south', 8)).toEqual(['central-america']);
+    expect(answer('central-america', 'south', 8)).toEqual(['south-america']);
+    /* one answer for each question */
+    for (const n of [7, 8] as const) {
+      const asked = directionsIn(n).map((d) => `${d.of} ${d.dir}`);
+      expect(new Set(asked).size, `${n}`).toBe(asked.length);
+    }
+  });
+
+  it('asks for Central America only when counting eight', () => {
+    const find = MAP_STEPS.find((s) => s.task === 'find' && s.of === 'continent')!;
+    const asked = (n: Continents): Set<string> => new Set(Array.from({ length: 300 }, () => mapQuestion(find, [], n).answer));
+    expect(asked(7).has('central-america')).toBe(false);
+    expect(asked(8).has('central-america')).toBe(true);
+    const name = MAP_STEPS.find((s) => s.task === 'name')!;
+    for (let i = 0; i < 200; i += 1) expect(mapQuestion(name, [], 7).options).not.toContain('central-america');
+  });
+
+  it('says Central America in Portuguese, with its fact, for the recordings', () => {
+    const c = place('central-america');
+    expect(c.pt.name).toBe('América Central');
+    expect(mapLines('pt')).toContain(c.factPt);
+    expect(mapLines('pt')).toContain('Onde fica a América Central?');
+    expect(mapLines('pt')).toContain('Qual continente fica ao norte da América do Sul?');
+  });
+});
+

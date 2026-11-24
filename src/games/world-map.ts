@@ -10,11 +10,14 @@
  * geography games share (world-kit.ts).
  *
  * In English or Portuguese, switched with the flags on the game, mid-question
- * too: the question, the names on the map and the buttons all change. */
+ * too: the question, the names on the map and the buttons all change. In
+ * Portuguese the Americas are three continents, as Brazilian schools teach
+ * them, Central America its own (src/content/world.ts), from the next
+ * question on. */
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { MAP_STEPS, findSays, mapClimb, mapQuestion, nameIn, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
+import { MAP_STEPS, continentsIn, findSays, mapClimb, mapQuestion, nameIn, place, seaSays, type MapQuestion, type MapStep, type PlaceId } from '../content/world';
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
@@ -77,7 +80,12 @@ function build(kit: Kit) {
   return {
     node,
     ask: async (step: MapStep): Promise<boolean> => {
-      const q = mapQuestion(step, recent);
+      /* seven continents in English, eight in Portuguese (Central America its
+         own); a question keeps the way it was asked if he switches mid-way,
+         since north of South America is a different continent in each */
+      const count = continentsIn(lang());
+      map.continents(count);
+      const q = mapQuestion(step, recent, count);
       recent = [q.answer, ...recent].slice(0, step.of === 'ocean' ? 3 : 4);
       map.reset();
       map.names(step.names ? step.of : null);

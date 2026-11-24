@@ -80,8 +80,7 @@ function build(kit: Kit) {
         }
         if (ok) { sfx.cheer(); board.mark('hit', [kingOf('b', after)!]); } else sfx.wrong();
         kit.note(how, ok);
-        say(how);
-        await kit.wait(ok ? 2600 : 5200);
+        await kit.say(how, ok ? 2600 : 5200);
         resolve(ok);
       });
     }),

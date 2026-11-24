@@ -1,8 +1,11 @@
 /* Ice Cream Van: Australian coins. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { noProblems, openGame, openSetup, seed, standInVoice, watchPage } from './helpers';
 import { coinOf, money } from '../../src/content/maths';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function startAt(page: Page, step: number): Promise<void> {
   await seed(page, { 'maths-step:ice-cream-van': step });

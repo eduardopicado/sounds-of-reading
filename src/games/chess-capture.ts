@@ -83,8 +83,7 @@ function build(kit: Kit) {
         }
         if (ok) sfx.cheer(); else sfx.wrong();
         kit.note(`${ok ? 'Yes! ' : ''}${how}`, ok);
-        say(`${ok ? 'Yes! ' : ''}${how}`);
-        await kit.wait(ok ? 2400 : 4200);
+        await kit.say(`${ok ? 'Yes! ' : ''}${how}`, ok ? 2400 : 4200);
         resolve(ok);
       });
     }),

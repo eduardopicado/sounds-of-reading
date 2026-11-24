@@ -2280,6 +2280,11 @@
 .wm-land[data-place="europe"] { fill: #A78AD8; }
 .wm-land[data-place="north-america"] { fill: #79BE6F; }
 .wm-land[data-place="south-america"] { fill: #45AE9F; }
+/* in Portuguese, Central America its own continent, between the green and the teal */
+.wm-land[data-place="central-america"] { fill: #F0A33A; }
+.wm-wrap[data-continents="7"] .wm-label.continent[data-place="central-america"] { display: none; }
+/* the isthmus is narrow: its name sits just west of it, in the Pacific, not over it */
+.wm-label[data-place="central-america"] { transform: translate(-108%, -20%); }
 .wm-nowhere { fill: #CFC6B4; pointer-events: none; }
 /* looking for an ocean, a tap on a little island goes through to the sea round it */
 .wm-map.wants-ocean .wm-island { pointer-events: none; }
@@ -2526,6 +2531,7 @@
 .jg-piece[data-piece="europe"] { fill: #A78AD8; }
 .jg-piece[data-piece="north-america"] { fill: #79BE6F; }
 .jg-piece[data-piece="south-america"] { fill: #45AE9F; }
+.jg-piece[data-piece="central-america"] { fill: #F0A33A; }
 .jg-piece[data-piece="WA"] { fill: #F2BC48; }
 .jg-piece[data-piece="NT"] { fill: #E9785F; }
 .jg-piece[data-piece="SA"] { fill: #A78AD8; }

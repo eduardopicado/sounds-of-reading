@@ -21,7 +21,7 @@
 import type { Step } from './maths';
 import { COUNTRY_SHAPES } from './world-shapes';
 import { STATE_SHAPES } from './australia-shapes';
-import { PLACES, factIn, place, type ContinentId } from './world';
+import { PLACES, continentOf as continentIn, factIn, place, placesIn, type ContinentId, type Continents } from './world';
 import { STATES, type StateId } from './capitals';
 import { MAP_H, MAP_W } from './projection';
 import { AUS_H, AUS_W } from './australia-projection';
@@ -100,12 +100,16 @@ const withBox = (id: string, parts: { d: string; box: Box }[], name: Both, facts
 
 const CONTINENTS = PLACES.filter((p) => p.kind === 'continent');
 
-export const CONTINENT_PIECES: Piece[] = CONTINENTS.map((p) => {
-  const parts = mainland(COUNTRY_SHAPES.filter((c) => c.continent === p.id).flatMap((c) => rings(c.d)));
+/** the continents as pieces, counting seven (English) or eight (Portuguese,
+    Central America a piece of its own, out of North America) */
+const continentPieces = (n: Continents): Piece[] => placesIn(n).filter((p) => p.kind === 'continent').map((p) => {
+  const parts = mainland(COUNTRY_SHAPES.filter((c) => continentIn(c.id, c.continent, n) === p.id).flatMap((c) => rings(c.d)));
   const name = { en: p.name, pt: p.pt.name };
   return withBox(p.id, parts, name, [{ en: factIn(p, 'en'), pt: factIn(p, 'pt') }],
     { en: `Put ${p.name} on the map.`, pt: `Coloque ${the(p.pt)} no mapa.` });
 });
+export const CONTINENT_PIECES: Piece[] = continentPieces(7);
+export const CONTINENT_PIECES_EIGHT: Piece[] = continentPieces(8);
 
 const state = (id: StateId) => STATES.find((s) => s.id === id)!;
 
@@ -147,7 +151,8 @@ export const JIGSAW_STEPS: JigsawStep[] = [
   { name: 'Which state is this?', map: 'australia', guide: 'coast', named: false },
 ];
 
-export const piecesFor = (step: JigsawStep): Piece[] => (step.map === 'world' ? CONTINENT_PIECES : STATE_PIECES);
+export const piecesFor = (step: JigsawStep, n: Continents = 7): Piece[] =>
+  (step.map === 'australia' ? STATE_PIECES : n === 8 ? CONTINENT_PIECES_EIGHT : CONTINENT_PIECES);
 
 /** how near its place a piece must be let go, in map units, to go in */
 export const SNAP = 55;
@@ -165,15 +170,16 @@ export const SAYS = {
 export const askFor = (p: Piece, step: JigsawStep): Both => (step.named ? p.ask : SAYS.which);
 
 /**
- * Where the step goes once a puzzle is done, by how many pieces went in
- * first time: up with six or seven of seven, down with two or fewer. It
- * stays put until the last piece, so a puzzle never changes under him.
+ * Where the step goes once a puzzle of `size` pieces is done, by how many
+ * went in first time: up with all but one or all of them, down with two or
+ * fewer. It stays put until the last piece, so a puzzle never changes under
+ * him.
  */
-export function jigsawClimb(c: { step: number; right: number; wrong: number }, ok: boolean, steps: number) {
+export function jigsawClimb(c: { step: number; right: number; wrong: number }, ok: boolean, steps: number, size = PIECES_A_PUZZLE) {
   const right = c.right + (ok ? 1 : 0);
   const wrong = c.wrong + (ok ? 0 : 1);
-  if (right + wrong < PIECES_A_PUZZLE) return { step: c.step, right, wrong };
-  if (right >= PIECES_A_PUZZLE - 1 && c.step < steps - 1) return { step: c.step + 1, right: 0, wrong: 0 };
+  if (right + wrong < size) return { step: c.step, right, wrong };
+  if (right >= size - 1 && c.step < steps - 1) return { step: c.step + 1, right: 0, wrong: 0 };
   if (right <= 2 && c.step > 0) return { step: c.step - 1, right: 0, wrong: 0 };
   return { step: c.step, right: 0, wrong: 0 };
 }
@@ -184,7 +190,7 @@ export const PIECES_A_PUZZLE = 7;
     (the facts are World Map's and Capital Cities') */
 export function jigsawLines(lang: Lang = 'en'): string[] {
   return [
-    ...[...CONTINENT_PIECES, ...STATE_PIECES].map((p) => p.ask[lang]),
+    ...[...CONTINENT_PIECES_EIGHT, ...STATE_PIECES].map((p) => p.ask[lang]),
     SAYS.which[lang], SAYS.tryAgain[lang], SAYS.here[lang],
   ];
 }

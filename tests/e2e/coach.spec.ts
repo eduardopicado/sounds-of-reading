@@ -1,7 +1,10 @@
 /* Pro mode and the coach: the two ways the app gets harder as he gets better. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, watchPage } from './helpers';
+import { noProblems, openGame, standInVoice, watchPage } from './helpers';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 /** start the page with these things already saved on the device.
  *

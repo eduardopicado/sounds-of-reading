@@ -24,7 +24,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, speakingMs } from '../lib/speech';
 import { SUM_STEPS, bigSumChoices, choices, crosses, lineText, sumQuestion, sumWhy, type SumQuestion, type SumStep } from '../content/maths';
 import { mountMaths, type Kit } from './maths-kit';
 import { narrate } from './narration';
@@ -142,16 +142,14 @@ function build(kit: Kit) {
         sfx.goal();
         kit.note(`Yes! ${sentence}`, true);
         /* his goal, called by the commentator, then the sum said */
-        narrate('goal', us, () => say(sentence), kit.life.later);
-        await kit.wait(3200);
+        await kit.said((end) => narrate('goal', us, () => say(sentence, { onEnd: end }), kit.life.later), 3200, 2400 + speakingMs(sentence));
         return true;
       }
       sfx.groan();
       /* every ball back on the board, to count together; to 10 000 there are too many */
       drawBalls(q, step.max === 10000 ? 'none' : crowd ? 'blocks' : season ? 'bundles' : 'all');
       kit.note(split);
-      say(season ? split : `Let's count. ${sentence}`);
-      await kit.wait(3200);
+      await kit.say(season ? split : `Let's count. ${sentence}`, 3200);
       return false;
     },
   };

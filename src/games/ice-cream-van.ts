@@ -141,8 +141,7 @@ function build(kit: Kit) {
   async function finish(ok: boolean, how: string): Promise<boolean> {
     if (ok) sfx.cheer(); else sfx.wrong();
     kit.note(`${ok ? 'Yes! ' : ''}${how}`, ok);
-    say(`${ok ? 'Yes! ' : ''}${how}`);
-    await kit.wait(ok ? 2400 : 3800);
+    await kit.say(`${ok ? 'Yes! ' : ''}${how}`, ok ? 2400 : 3800);
     return ok;
   }
 

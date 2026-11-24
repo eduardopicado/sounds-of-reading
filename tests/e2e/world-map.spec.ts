@@ -260,5 +260,38 @@ test.describe('World Map', () => {
     expect(ended).toBeGreaterThan(-1);
     expect(next).toBeGreaterThan(ended);
   });
+
+  test('in Portuguese the Americas are three continents: Central America its own, with its name and colour', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:world-map': 0, 'geo-lang': 'en' });
+    await openGame(page, 'world-map');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await wanted(page, 1);
+    /* in English, seven: Costa Rica is in North America */
+    await expect(page.locator('.wm-wrap')).toHaveAttribute('data-continents', '7');
+    await expect(page.locator('.wm-label.continent:visible')).toHaveCount(7);
+    await expect(page.locator('.wm-land[data-place="north-america"] [data-country="CRI"]')).toHaveCount(1);
+    await expect(page.locator('.wm-label[data-place="central-america"]')).toBeHidden();
+    noProblems(watch);
+  });
+
+  test('in Portuguese: eight continents, and a tap on Costa Rica is Central America', async ({ page }) => {
+    const watch = watchPage(page);
+    await seed(page, { 'maths-step:world-map': 0, 'geo-lang': 'pt' });
+    await openGame(page, 'world-map');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    const want = await wanted(page, 1);
+    await expect(page.locator('.wm-wrap')).toHaveAttribute('data-continents', '8');
+    await expect(page.locator('.wm-label.continent:visible')).toHaveCount(8);
+    await expect(page.locator('.wm-label[data-place="central-america"]')).toHaveText('América Central');
+    for (const code of ['CRI', 'PAN', 'CUB']) await expect(page.locator(`.wm-land[data-place="central-america"] [data-country="${code}"]`)).toHaveCount(1);
+    await expect(page.locator('.wm-land[data-place="north-america"] [data-country="MEX"]')).toHaveCount(1);
+    /* Costa Rica: the answer if Central America was asked for, and otherwise named */
+    const at = await spot(page, -84.2, 10);
+    await page.mouse.click(at.x, at.y);
+    if (want === 'central-america') await expect(page.locator('.mx-note')).toHaveText(`Isso! ${place('central-america').factPt}`);
+    else await expect(page.locator('.mx-note')).toContainText('Essa é a América Central.');
+    noProblems(watch);
+  });
 });
 

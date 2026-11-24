@@ -16,7 +16,7 @@ import {
   ANIMAL_STEPS, SAYS, animal, animalName, animalQuestion, animalSays, habitat,
   type AnimalQuestion, type AnimalStep, type HabitatId,
 } from '../content/animals';
-import { findSays, place, seaSays, type PlaceId } from '../content/world';
+import { continentsIn, findSays, place, seaSays, type PlaceId } from '../content/world';
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
@@ -49,6 +49,8 @@ function build(kit: Kit) {
   let retext: () => void = () => undefined;
   langs.onChange(() => { map.language(lang()); retext(); });
   map.language(lang());
+  /* seven continents in English, eight in Portuguese: a question keeps the
+     count it was asked with, so its right answers stay right */
 
   /** what he tapped, said and written: "That is Asia." */
   const that = (id: string): Both => (isSea(id)
@@ -57,7 +59,7 @@ function build(kit: Kit) {
 
   async function finish(q: AnimalQuestion, ok: boolean, picked?: string): Promise<boolean> {
     const fact = animalSays(q);
-    for (const home of q.animal.homes) map.mark(home, 'right');
+    for (const home of q.homes) map.mark(home, 'right');
     card.hidden = false;
     pic.hidden = false;
     if (ok) {
@@ -88,13 +90,13 @@ function build(kit: Kit) {
   async function tapAll(q: AnimalQuestion): Promise<boolean> {
     const found = new Set<string>();
     for (;;) {
-      const left = q.animal.homes.filter((h) => !found.has(h));
+      const left = q.homes.filter((h) => !found.has(h));
       const picked = await map.tap(left[0]);
       if (found.has(picked)) continue;
-      if (!q.animal.homes.includes(picked as never)) return finish(q, false, picked);
+      if (!q.homes.includes(picked as never)) return finish(q, false, picked);
       found.add(picked);
       map.mark(picked, 'right');
-      if (found.size === q.animal.homes.length) return finish(q, true);
+      if (found.size === q.homes.length) return finish(q, true);
       sfx.tap();
       kit.note(SAYS.moreToFind[lang()], true);
       speak(SAYS.moreToFind, lang());
@@ -104,7 +106,9 @@ function build(kit: Kit) {
   return {
     node,
     ask: async (step: AnimalStep): Promise<boolean> => {
-      const q = animalQuestion(step, recent);
+      const count = continentsIn(lang());
+      map.continents(count);
+      const q = animalQuestion(step, recent, count);
       recent = [q.animal.name, ...recent].slice(0, 4);
       map.reset();
       map.names(step.names ? 'continent' : null);
@@ -119,7 +123,7 @@ function build(kit: Kit) {
       pic.textContent = q.animal.picture;
       card.classList.toggle('words-only', q.task === 'read');
       /* what the tests look for, the way the other games' cards say it */
-      node.dataset.answer = q.pick ?? q.animal.homes.join(' ');
+      node.dataset.answer = q.pick ?? q.homes.join(' ');
       node.dataset.task = q.task;
       const label = (option: string): string => (q.task === 'habitat'
         ? `${habitat(option as HabitatId).picture} ${habitat(option as HabitatId).name[lang()]}`
@@ -139,8 +143,8 @@ function build(kit: Kit) {
       }
       kit.choices.clear();
       if (q.task === 'all') return tapAll(q);
-      const picked = await map.tap(q.animal.homes[0]);
-      return finish(q, q.animal.homes.includes(picked as never), picked);
+      const picked = await map.tap(q.homes[0]);
+      return finish(q, q.homes.includes(picked as never), picked);
     },
   };
 }

@@ -71,8 +71,7 @@ function build(kit: Kit) {
             : 'The computer wins: you have no pawn that can move.');
         if (won) sfx.cheer(); else sfx.wrong();
         kit.note(text, won);
-        say(text);
-        await kit.wait(3200);
+        await kit.say(text, 3200);
         resolve(won);
       };
 

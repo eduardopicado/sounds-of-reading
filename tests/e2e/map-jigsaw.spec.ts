@@ -138,10 +138,23 @@ test.describe('Map Jigsaw', () => {
     test(`the map and the tray are both on the screen, ${map}: a piece never has to scroll to its place`, async ({ page }) => {
       await startAt(page, step);
       await waiting(page, 1);
+      /* measured in the app's own fonts: in the fallback a line can wrap and push the tray down */
+      await page.evaluate(() => document.fonts.ready);
       const tray = (await page.locator('.jg-tray').boundingBox())!;
       const view = page.viewportSize()!;
       expect(tray.y + tray.height).toBeLessThanOrEqual(view.height);
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(view.width);
     });
   }
+
+  test('in Portuguese the world is eight pieces, Central America one of them', async ({ page }) => {
+    await seed(page, { 'maths-step:map-jigsaw': 0, 'geo-lang': 'pt' });
+    await openGame(page, 'map-jigsaw');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await waiting(page, 1);
+    await expect(page.locator('.score')).toContainText('Piece 1 of 8');
+    await expect(page.locator('.jg-hole')).toHaveCount(8);
+    await expect(page.locator('.jg-hole[data-piece="central-america"]')).toHaveCount(1);
+  });
 });
+

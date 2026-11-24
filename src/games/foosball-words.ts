@@ -23,7 +23,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say, soundOut } from '../lib/speech';
+import { say, soundOut, speakingMs } from '../lib/speech';
 import { soundsOf } from '../content/graphemes';
 import { settings } from '../lib/settings';
 import { read, write } from '../lib/storage';
@@ -191,8 +191,7 @@ function build(kit: Kit) {
       if (right) {
         sfx.goal();
         kit.note(`GOAL! ${target.parts.join(' · ')}: ${word}.`, true);
-        say(word);
-        await kit.wait(2400);
+        await kit.say(word, 2400);
         resolve(misses === 0);
         return;
       }
@@ -216,8 +215,9 @@ function build(kit: Kit) {
       kit.note(`Here it is: ${target.parts.join(' · ')}, ${word}.`);
       /* sound by sound in the recorded sounds; the device voice would read
          the letters' names, so without them it is just the word */
-      if (!soundOut(soundsOf(target.word), word)) say(word);
-      await kit.wait(3600);
+      const sounds = soundsOf(target.word);
+      await kit.said((end) => { if (!soundOut(sounds, word, { onEnd: end })) say(word, { onEnd: end }); },
+        3600, speakingMs(word) + 900 * (sounds?.length ?? 0));
       resolve(false);
     };
   });
@@ -272,8 +272,7 @@ function build(kit: Kit) {
         sfx.goal();
         const all = !notFound();
         kit.note(`GOAL! ${made.parts.join(' · ')}: ${made.word.text}.${all ? ' You found every word on this table!' : ''}`, true);
-        say(made.word.text);
-        await kit.wait(all ? 3200 : 2400);
+        await kit.say(made.word.text, all ? 3200 : 2400);
         resolve(misses === 0);
         return;
       }
@@ -302,8 +301,7 @@ function build(kit: Kit) {
       board.found.set(one.word.text, 'shown');
       drawFound();
       kit.note(`Here is one you can make: ${one.parts.join(' · ')}, ${one.word.text}.`);
-      say(`Here is one: ${one.parts.join(', ')}. ${one.word.text}.`);
-      await kit.wait(3600);
+      await kit.say(`Here is one: ${one.parts.join(', ')}. ${one.word.text}.`, 3600);
       resolve(false);
     };
   });
