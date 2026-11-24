@@ -16,7 +16,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import { say, speakingMs } from '../lib/speech';
 import {
   LINE_STEPS, belowZero, lineQuestion, lineText, onTarget, roundOnTarget, roundQuestion, roundWhy, spokenNumber, valueAt,
   type LineStep, type RoundQuestion,
@@ -123,8 +123,8 @@ function build(kit: Kit) {
       if (ok) {
         sfx.goal();
         kit.note(`GOAL! ${q.n} is nearer ${q.answer}.`, true);
-        narrate('goal', kit.us(), () => say(`${q.n} is nearer ${q.answer}`), kit.life.later);
-        await kit.wait(3000);
+        const nearer = `${q.n} is nearer ${q.answer}`;
+        await kit.said((end) => narrate('goal', kit.us(), () => say(nearer, { onEnd: end }), kit.life.later), 3000, 2400 + speakingMs(nearer));
         resolve(true);
         return;
       }
@@ -132,8 +132,7 @@ function build(kit: Kit) {
       mark(view, q.answer, 'mx-answer', '🚩');
       const why = roundWhy(q);
       kit.note(`Saved! ${why}`);
-      narrate('save', kit.rival(), () => say(why), kit.life.later);
-      await kit.wait(4200);
+      await kit.said((end) => narrate('save', kit.rival(), () => say(why, { onEnd: end }), kit.life.later), 4200, 2400 + speakingMs(why));
       resolve(false);
     };
     goal.addEventListener('pointerdown', tap);
@@ -171,8 +170,8 @@ function build(kit: Kit) {
         if (ok) {
           sfx.goal();
           kit.note(`GOAL! ${shown} is right there.`, true);
-          narrate('goal', kit.us(), () => say(step.per ? shown : spokenNumber(n)), kit.life.later);
-          await kit.wait(3000);
+          const at = step.per ? shown : spokenNumber(n);
+          await kit.said((end) => narrate('goal', kit.us(), () => say(at, { onEnd: end }), kit.life.later), 3000, 2400 + speakingMs(at));
           resolve(true);
           return;
         }
@@ -180,8 +179,8 @@ function build(kit: Kit) {
         mark(step, n, 'mx-answer', '🚩');
         /* below zero: how far below it is */
         kit.note(`Saved! ${shown} lives here, by the flag.${n < 0 ? ` ${belowZero(n)}` : ''}`);
-        narrate('save', kit.rival(), () => say(`${step.per ? shown : spokenNumber(n)} is here${n < 0 ? `, ${-n} below zero` : ''}`), kit.life.later);
-        await kit.wait(3200);
+        const here = `${step.per ? shown : spokenNumber(n)} is here${n < 0 ? `, ${-n} below zero` : ''}`;
+        await kit.said((end) => narrate('save', kit.rival(), () => say(here, { onEnd: end }), kit.life.later), 3200, 2400 + speakingMs(here));
         resolve(false);
       };
       goal.addEventListener('pointerdown', tap);

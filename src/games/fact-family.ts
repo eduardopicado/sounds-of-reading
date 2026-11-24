@@ -74,15 +74,13 @@ function build(kit: Kit) {
       if (picked === q.answer) {
         sfx.cheer();
         kit.note(`Yes! ${factText(q.asked)}`, true);
-        say(`Yes! ${spoken(factText(q.asked)).replace('equals', 'is')}`);
-        await kit.wait(2400);
+        await kit.say(`Yes! ${spoken(factText(q.asked)).replace('equals', 'is')}`, 2400);
         return true;
       }
       sfx.wrong();
       formation.classList.add('explain');
       kit.note(how);
-      say(spoken(how).replace(/equals/g, 'is'));
-      await kit.wait(3800);
+      await kit.say(spoken(how).replace(/equals/g, 'is'), 3800);
       formation.classList.remove('explain');
       return false;
     },

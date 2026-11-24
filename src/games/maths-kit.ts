@@ -16,6 +16,7 @@ import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import { sfx } from '../lib/sfx';
 import { praise } from '../lib/name';
+import { say, speakingMs, type SayOptions } from '../lib/speech';
 import { awardFace } from '../lib/stickers';
 import { markPlayed } from '../lib/played';
 import { climb, signed, type Climb, type Step } from '../content/maths';
@@ -37,6 +38,8 @@ export interface Kit {
    * voice that never says it has finished is waited for `max` ms at most.
    */
   said: (start: (end: () => void) => void, min: number, max: number) => Promise<void>;
+  /** say one line and wait until it has been said, and at least `min` ms (kit.said for one line) */
+  say: (text: string, min: number, options?: SayOptions) => Promise<void>;
   /** the number buttons under the question */
   choices: ChoiceRow;
   /** a line of feedback under the stage */
@@ -181,6 +184,7 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
       /* a breath after the last word before anything else is said */
       start(() => life.later(() => { spoken = true; check(); }, SAID_GAP_MS));
     }),
+    say: (text, min, options = {}) => kit.said((end) => say(text, { ...options, onEnd: end }), min, speakingMs(text)),
     choices,
     note: (text, good = false) => { noteEl.textContent = text; noteEl.classList.toggle('good', good); },
     us: ourTeam,

@@ -26,7 +26,7 @@ import {
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
 import { beltBadge, movePicture, BELTS } from './bjj-art';
-import { beltSelect, blueGi, langSwitch, speak } from './bjj-kit';
+import { beltSelect, blueGi, langSwitch, speak, talkMs } from './bjj-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<MatchStep>({
@@ -128,8 +128,7 @@ function build(kit: Kit) {
     const show = (): void => kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${how[lang()]}`, ok);
     show();
     retext = () => { nameCards(); nameBoard(); show(); };
-    speak(said(how), lang());
-    await kit.wait(ok ? 2800 : 4000);
+    await kit.said((end) => speak(said(how), lang(), end), ok ? 2800 : 4000, talkMs([said(how)]));
     return ok;
   }
 

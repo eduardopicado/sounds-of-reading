@@ -49,8 +49,7 @@ function build(kit: Kit) {
     word.replaceChildren(el('span', { class: 'bw-part one', text: a }), el('span', { class: 'bw-dot', text: '·' }),
       el('span', { class: 'bw-part two', text: b }));
     kit.note(`${ok ? 'Yes! ' : ''}${a} · ${b}: ${q.word.text}`, ok);
-    say(bigSaid(q.word));
-    await kit.wait(ok ? 2400 : 3600);
+    await kit.say(bigSaid(q.word), ok ? 2400 : 3600);
     return ok;
   }
 

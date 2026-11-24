@@ -110,8 +110,7 @@ function build(kit: Kit) {
       sfx.whistle();
       fillThousand();
       kit.note(`Yes! ${q.on} and ${q.need} make 1000.`, true);
-      say(`Yes! ${q.on} and ${q.need} make 1000.`);
-      await kit.wait(1900);
+      await kit.say(`Yes! ${q.on} and ${q.need} make 1000.`, 1900);
       return true;
     }
     sfx.groan();
@@ -124,8 +123,7 @@ function build(kit: Kit) {
       stand.append(el('span', { class: 'ob-label', text: '100' }));
     }
     kit.note(how.text);
-    say(`${how.text} ${q.on} and ${q.need} make 1000.`);
-    await kit.wait(5200);
+    await kit.say(`${how.text} ${q.on} and ${q.need} make 1000.`, 5200);
     return false;
   }
 
@@ -194,16 +192,14 @@ function build(kit: Kit) {
         sfx.whistle();
         for (const g of gaps) { g.classList.remove('gap', 'hidden-gap'); g.classList.add('arrived'); arrive(g, q); }
         kit.note(`Yes! ${q.on} and ${q.need} make ${q.target}.`, true);
-        say(`Yes! ${q.on} and ${q.need} make ${q.target}.`);
-        await kit.wait(1700);
+        await kit.say(`Yes! ${q.on} and ${q.need} make ${q.target}.`, 1700);
         return true;
       }
       sfx.groan();
       if (stadium(q)) {
         const how = countSeats(q, gaps);
-        say(`${how} ${q.on} and ${q.need} make 100.`);
         kit.note(`${q.on} and ${q.need} make 100.`);
-        await kit.wait(4200);
+        await kit.say(`${how} ${q.on} and ${q.need} make 100.`, 4200);
         return false;
       }
       /* count the gaps with him, one by one */
@@ -213,9 +209,8 @@ function build(kit: Kit) {
         g.classList.add('gap', 'counted');
         g.textContent = String(i + 1);
       }
-      say(`Let's count the gaps. ${gaps.map((_, i) => i + 1).join(', ')}. ${q.on} and ${q.need} make ${q.target}.`);
       kit.note(`${q.on} and ${q.need} make ${q.target}.`);
-      await kit.wait(3200);
+      await kit.say(`Let's count the gaps. ${gaps.map((_, i) => i + 1).join(', ')}. ${q.on} and ${q.need} make ${q.target}.`, 3200);
       return false;
     },
   };

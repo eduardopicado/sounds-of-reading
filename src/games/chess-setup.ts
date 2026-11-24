@@ -59,8 +59,7 @@ function build(kit: Kit) {
         const how = `${HOME_RULE[q.man.kind]} The ${name} goes on ${squareName(q.answer)}.`;
         if (ok) sfx.cheer(); else sfx.wrong();
         kit.note(`${ok ? 'Yes! ' : ''}${how}`, ok);
-        say(`${ok ? 'Yes! ' : ''}${how}`);
-        await kit.wait(ok ? 2000 : 4000);
+        await kit.say(`${ok ? 'Yes! ' : ''}${how}`, ok ? 2000 : 4000);
         resolve(ok);
       });
     }),

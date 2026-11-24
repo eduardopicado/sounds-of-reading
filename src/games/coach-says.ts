@@ -20,7 +20,7 @@
 
 import { el } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say, sayInTurn } from '../lib/speech';
+import { sayInTurn, speakingMs } from '../lib/speech';
 import { pro, settings } from '../lib/settings';
 import { TOP_LEVEL } from '../content/index';
 import {
@@ -90,8 +90,7 @@ function build(kit: Kit) {
           if (a.kind === 'put') placeBtns[a.place].classList.add('meant');
         }
         kit.note(`The coach said: ${q.text}`);
-        sayInTurn(q.said);
-        await kit.wait(4200);
+        await kit.said((end) => sayInTurn(q.said, { onEnd: end }), 4200, speakingMs(q.said.join(' ')));
         resolve(false);
       }
 
@@ -118,8 +117,7 @@ function build(kit: Kit) {
         const first = !wrong && !helped;
         sfx.cheer();
         kit.note(first ? 'Yes! Just what the coach said.' : 'That is it!', true);
-        say(first ? 'Yes!' : 'That is it!');
-        await kit.wait(1800);
+        await kit.say(first ? 'Yes!' : 'That is it!', 1800);
         resolve(first);
       }
 

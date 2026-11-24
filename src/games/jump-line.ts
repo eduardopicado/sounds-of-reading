@@ -187,8 +187,7 @@ function build(kit: Kit) {
         if (ok) {
           sfx.cheer();
           kit.note(`Yes! ${how}`, true);
-          say(`Yes! ${how}`);
-          await kit.wait(2600);
+          await kit.say(`Yes! ${how}`, 2600);
           resolve(true);
           return;
         }
@@ -200,8 +199,7 @@ function build(kit: Kit) {
         line.append(ball);
         const landed = at === q.answer ? '' : `You landed on ${lineText(at)}. `;
         kit.note(`${landed}${how}`);
-        say(`${landed}${how}`);
-        await kit.wait(4200);
+        await kit.say(`${landed}${how}`, 4200);
         resolve(false);
       });
 

@@ -7,7 +7,7 @@ import { read, write } from '../lib/storage';
 import { langSwitch as langSwitchFor, type LangSwitch } from './lang-kit';
 import { BELTS, type Gi } from './bjj-art';
 
-export { speak, type LangSwitch } from './lang-kit';
+export { speak, talkMs, type LangSwitch } from './lang-kit';
 
 const BELT_KEY = 'bjj-belt';
 
