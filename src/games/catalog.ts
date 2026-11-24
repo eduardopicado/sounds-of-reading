@@ -32,6 +32,7 @@ import { JIGSAW_STEPS } from '../content/jigsaw';
 import { ANIMAL_STEPS } from '../content/animals';
 import { FOOTBALL_STEPS } from '../content/football-rules';
 import { SPACE_STEPS } from '../content/space';
+import { CALENDAR_STEPS } from '../content/calendar';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'space' | 'bjj' | 'football' | 'chess';
 
@@ -139,6 +140,8 @@ export const GAMES: Game[] = [
     load: () => import('./jump-line') },
   { path: 'match-clock', name: 'Match Clock', emoji: '⏰', what: 'What time is kick-off?', tone: '#7A8CC4', section: 'maths', ladder: CLOCK_STEPS,
     load: () => import('./match-clock') },
+  { path: 'fixture-calendar', name: 'Fixture Calendar', emoji: '📅', what: 'Days, months, and how long until the match', tone: '#B5523B', section: 'maths', ladder: CALENDAR_STEPS,
+    load: () => import('./fixture-calendar') },
   { path: 'clock-trainer', name: 'Short Hand, Long Hand', emoji: '🕰️', what: 'Move the hands, read the time', tone: '#D25A44', section: 'maths', ladder: HANDS_STEPS,
     load: () => import('./clock-trainer') },
   { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths', ladder: SURVEY_STEPS,

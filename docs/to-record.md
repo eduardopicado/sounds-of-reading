@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1807 clips, about 48149 characters.**
+**1925 clips, about 51610 characters.**
 
-## English (Stuart, Australian): 1128
+## English (Stuart, Australian): 1246
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A dangerous tackle is a red card: he has to leave the game.
@@ -73,7 +73,14 @@ exactly these, with the voices in public/audio/README.md.
 - and the whale.
 - and the zebra,
 - and the zebra.
+- April comes after March.
+- April comes before May.
+- April has 30 days.
 - Arguing with the referee is a yellow card.
+- August comes after July.
+- August comes before September.
+- August has 31 days.
+- Autumn is March, April and May.
 - bath, tub, bathtub
 - bathtub
 - Bison live in North America, and a smaller kind lives in the forests of Europe.
@@ -100,6 +107,9 @@ exactly these, with the voices in public/audio/README.md.
 - Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
 - Crocodiles live in rivers.
 - Day! The house is on the side facing the Sun.
+- December comes after November.
+- December comes before January.
+- December has 31 days.
 - den, tist, dentist
 - dentist
 - Do people live there? No.
@@ -134,6 +144,12 @@ exactly these, with the voices in public/audio/README.md.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
+- February comes after January.
+- February comes before March.
+- February has 28 days, or 29 in a leap year. This year it has 28.
+- February has 28 days, or 29 in a leap year. This year it has 29.
+- Friday comes after Thursday.
+- Friday comes before Saturday.
 - Giraffes live in Africa, and they are the tallest animals in the world.
 - Giraffes live on the grassland.
 - Go 1 square east,
@@ -168,6 +184,7 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Good calendar reading!
 - Good reading! Try again.
 - Good refereeing!
 - Good space exploring!
@@ -209,6 +226,18 @@ exactly these, with the voices in public/audio/README.md.
 - How far is it to the swing?
 - How far is it to the tent?
 - How far is it to the tree?
+- How many days are in April?
+- How many days are in August?
+- How many days are in December?
+- How many days are in February?
+- How many days are in January?
+- How many days are in July?
+- How many days are in June?
+- How many days are in March?
+- How many days are in May?
+- How many days are in November?
+- How many days are in October?
+- How many days are in September?
 - I am thinking of a planet. Ask me questions to find it!
 - in the bag,
 - in the bag.
@@ -310,6 +339,15 @@ exactly these, with the voices in public/audio/README.md.
 - It went over the side line: throw-in.
 - jack, et, jacket
 - jacket
+- January comes after December.
+- January comes before February.
+- January has 31 days.
+- July comes after June.
+- July comes before August.
+- July has 31 days.
+- June comes after May.
+- June comes before July.
+- June has 30 days.
 - Jupiter comes after Mars.
 - Jupiter could still be it. Look at the answer again.
 - Jupiter is bigger than Earth.
@@ -347,6 +385,9 @@ exactly these, with the voices in public/audio/README.md.
 - lobster
 - mag, net, magnet
 - magnet
+- March comes after February.
+- March comes before April.
+- March has 31 days.
 - Mars comes after Earth.
 - Mars could still be it. Look at the answer again.
 - Mars is bigger than Mercury.
@@ -358,6 +399,9 @@ exactly these, with the voices in public/audio/README.md.
 - Mars is the red planet. Its dust is red with rust.
 - match, box, matchbox
 - matchbox
+- May comes after April.
+- May comes before June.
+- May has 31 days.
 - mel, on, melon
 - melon
 - Mercury could still be it. Look at the answer again.
@@ -374,6 +418,8 @@ exactly these, with the voices in public/audio/README.md.
 - mit, ten, mitten
 - mitten
 - mon, ster, monster
+- Monday comes after Sunday.
+- Monday comes before Tuesday.
 - monster
 - Most lions live in Africa, and a few live in a forest in India, in Asia.
 - mush, room, mushroom
@@ -391,9 +437,15 @@ exactly these, with the voices in public/audio/README.md.
 - Night! The house is on the side away from the Sun. The Earth turns, so it will be day there soon.
 - North America is north of Central America.
 - Not there. Try again.
+- November comes after October.
+- November comes before December.
+- November has 30 days.
 - Now read it again. Can you beat your time?
 - oat, meal, oatmeal
 - oatmeal
+- October comes after September.
+- October comes before November.
+- October has 31 days.
 - Octopuses live in the ocean, and have eight arms.
 - Octopuses live in the ocean.
 - on the bed,
@@ -496,6 +548,8 @@ exactly these, with the voices in public/audio/README.md.
 - sailboat
 - sand, wich, sandwich
 - sandwich
+- Saturday comes after Friday.
+- Saturday comes before Sunday.
 - Saturn comes after Jupiter.
 - Saturn could still be it. Look at the answer again.
 - Saturn has big, bright rings, made of ice and rock.
@@ -511,6 +565,9 @@ exactly these, with the voices in public/audio/README.md.
 - sea, weed, seaweed
 - seaweed
 - see, saw, seesaw
+- September comes after August.
+- September comes before October.
+- September has 30 days.
 - Sharks live in every ocean, and there were sharks before there were dinosaurs.
 - Sharks live in the ocean.
 - Sloths live in the rainforest.
@@ -518,6 +575,7 @@ exactly these, with the voices in public/audio/README.md.
 - snow, man, snowman
 - snowman
 - South America is south of Central America.
+- Spring is September, October and November.
 - Square A1 is here.
 - Square A2 is here.
 - Square A3 is here.
@@ -561,7 +619,10 @@ exactly these, with the voices in public/audio/README.md.
 - Stopping a goal with your hand is a red card, and a penalty.
 - Stopping an attack on purpose is a yellow card: a warning.
 - sum, mer, summer
+- Summer is January, February and December.
 - sun, set, sunset
+- Sunday comes after Saturday.
+- Sunday comes before Monday.
 - sunset
 - Taking your shirt off is a yellow card, even after a goal.
 - Tap every continent where bison live.
@@ -921,12 +982,16 @@ exactly these, with the voices in public/audio/README.md.
 - Three reads! Look how much faster you got.
 - thun, der, thunder
 - thunder
+- Thursday comes after Wednesday.
+- Thursday comes before Friday.
 - tick, et, ticket
 - ticket
 - Tigers live in Asia, and they are the biggest cats in the world.
 - Tigers live in the forest.
 - tooth, brush, toothbrush
 - toothbrush
+- Tuesday comes after Monday.
+- Tuesday comes before Wednesday.
 - Turn over the planets it cannot be.
 - Two yellow cards make a red card.
 - up, set, upset
@@ -953,10 +1018,26 @@ exactly these, with the voices in public/audio/README.md.
 - Venus is nearer to the Sun than Saturn.
 - Venus is nearer to the Sun than Uranus.
 - Venus is the hottest planet, even hotter than Mercury.
+- Wednesday comes after Tuesday.
+- Wednesday comes before Thursday.
 - week, end, weekend
 - weekend
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
 - Whales live in the ocean.
+- What day comes after Friday?
+- What day comes after Monday?
+- What day comes after Saturday?
+- What day comes after Sunday?
+- What day comes after Thursday?
+- What day comes after Tuesday?
+- What day comes after Wednesday?
+- What day comes before Friday?
+- What day comes before Monday?
+- What day comes before Saturday?
+- What day comes before Sunday?
+- What day comes before Thursday?
+- What day comes before Tuesday?
+- What day comes before Wednesday?
 - What does the referee do?
 - What is above the bench?
 - What is above the boat?
@@ -1041,6 +1122,42 @@ exactly these, with the voices in public/audio/README.md.
 - What kind of place does the tiger live in?
 - What kind of place does the whale live in?
 - What kind of place does the zebra live in?
+- What month comes after April?
+- What month comes after August?
+- What month comes after December?
+- What month comes after February?
+- What month comes after January?
+- What month comes after July?
+- What month comes after June?
+- What month comes after March?
+- What month comes after May?
+- What month comes after November?
+- What month comes after October?
+- What month comes after September?
+- What month comes before April?
+- What month comes before August?
+- What month comes before December?
+- What month comes before February?
+- What month comes before January?
+- What month comes before July?
+- What month comes before June?
+- What month comes before March?
+- What month comes before May?
+- What month comes before November?
+- What month comes before October?
+- What month comes before September?
+- What season is April in?
+- What season is August in?
+- What season is December in?
+- What season is February in?
+- What season is January in?
+- What season is July in?
+- What season is June in?
+- What season is March in?
+- What season is May in?
+- What season is November in?
+- What season is October in?
+- What season is September in?
 - Where does the bison live?
 - Where does the camel live?
 - Where does the crocodile live?
@@ -1122,6 +1239,7 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the tent?
 - Which way is the tree?
 - win, ter, winter
+- Winter is June, July and August.
 - Yes! Find another one.
 - Yes! It is Earth!
 - Yes! It is Jupiter!
