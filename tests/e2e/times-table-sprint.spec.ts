@@ -2,8 +2,11 @@
  * quick or not, with each fact remembered. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, seed, standInVoice, watchPage } from './helpers';
 import { KNOWN_BOX, TIMES_STEPS, timesFacts } from '../../src/content/maths';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function start(page: Page): Promise<void> {
   await openGame(page, 'times-table-sprint');

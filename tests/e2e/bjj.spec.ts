@@ -1,7 +1,10 @@
 /* The jiu-jitsu games, in English and in Portuguese. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, noRecordings, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, openSetup, plays, recordPlays, seed, standInVoice, watchPage } from './helpers';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 type Said = { text: string; lang: string };
 

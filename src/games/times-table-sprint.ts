@@ -203,13 +203,11 @@ function build(kit: Kit) {
         entry.classList.add('right');
         if (quick) {
           kit.note(`Yes! ${fact}`, true);
-          say(spoken(fact));
-          await kit.wait(900);
+          await kit.say(spoken(fact), 900);
           return true;
         }
         kit.note(`Right! ${fact}. It will come back, to get quicker.`, true);
-        say(`Right! ${spoken(fact)}.`);
-        await kit.wait(1800);
+        await kit.say(`Right! ${spoken(fact)}.`, 1800);
         return false;
       }
 
@@ -219,8 +217,7 @@ function build(kit: Kit) {
       const how = timesHelp(q);
       help.replaceChildren(rows(q, how.parts));
       kit.note(how.text);
-      say(spoken(how.text));
-      await kit.wait(5200);
+      await kit.say(spoken(how.text), 5200);
       return false;
     },
   };

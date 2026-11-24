@@ -21,7 +21,7 @@
 
 import { el, prefersReducedMotion } from '../lib/dom';
 import { sfx } from '../lib/sfx';
-import { say } from '../lib/speech';
+import {  } from '../lib/speech';
 import { pro } from '../lib/settings';
 import { read, write } from '../lib/storage';
 import {
@@ -145,9 +145,8 @@ function build(kit: Kit) {
         sfx.cheer();
         const yes = facts ? `Yes! ${rows} rows of ${cols} make ${q.n}.` : `Yes, ${q.n}!`;
         kit.note(yes, true);
-        say(facts ? yes : String(q.n));
         streak += 1;
-        await kit.wait(facts ? 1800 : 1300);
+        await kit.say(facts ? yes : String(q.n), facts ? 1800 : 1300);
         return true;
       }
       sfx.wrong();
@@ -158,16 +157,14 @@ function build(kit: Kit) {
         const help = timesHelp({ a: rows, b: cols, op: '×', answer: q.n, table: cols, lots: rows, fact: factKey(rows, cols) }, 'rows');
         show(q, step, help.parts[1] ? help.parts[0] : rows);
         kit.note(help.text);
-        say(help.text.replace(/×/g, 'times').replace(/=/g, 'is'));
-        await kit.wait(5000);
+        await kit.say(help.text.replace(/×/g, 'times').replace(/=/g, 'is'), 5000);
         return false;
       }
       const how = step.look === 'two-dice' ? `${q.parts[0]} and ${q.parts[1]} make ${q.n}.`
         : step.look === 'array' ? `${q.parts[0]} rows of ${q.parts[1]} make ${q.n}.`
           : `There were ${q.n}.`;
       kit.note(how);
-      say(how);
-      await kit.wait(2600);
+      await kit.say(how, 2600);
       return false;
     },
   };

@@ -96,8 +96,7 @@ function build(kit: Kit) {
         const text = ok ? `Every ball in ${plural(used, 'move')}: the fewest there are!`
           : `Every ball in ${plural(used, 'move')}. It can be done in ${q.best}.`;
         kit.note(ok ? `Yes! ${text}` : text, ok);
-        say(text);
-        await kit.wait(ok ? 2200 : 3200);
+        await kit.say(text, ok ? 2200 : 3200);
         resolve(ok);
       });
     }),

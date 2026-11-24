@@ -1,8 +1,11 @@
 /* Foosball Words: slide the rods until the lane spells the word, then shoot. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, openSetup, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, seed, standInVoice, watchPage } from './helpers';
 import { FOOS_STEPS, wordOf } from '../../src/content/foosball';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function startAt(page: Page, step: number, extra: Record<string, unknown> = {}): Promise<void> {
   await seed(page, { 'maths-step:foosball-words': step, ...extra });

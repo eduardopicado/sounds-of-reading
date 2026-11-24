@@ -1,8 +1,11 @@
 /* The maths games, played through by reading the screen the way he does. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, openSetup, plays, recordPlays, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, openSetup, plays, recordPlays, seed, standInVoice, watchPage } from './helpers';
 import { GAMES } from '../../src/games/catalog';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 /** open a maths game and tap Start, as he does */
 async function startGame(page: Page, id: string): Promise<void> {

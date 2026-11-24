@@ -22,7 +22,7 @@ import {
 } from '../content/bjj';
 import { mountMaths, type Kit } from './maths-kit';
 import { movePicture } from './bjj-art';
-import { beltSelect, blueGi, langSwitch, speak } from './bjj-kit';
+import { beltSelect, blueGi, langSwitch, speak, talkMs } from './bjj-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<RefStep>({
@@ -63,8 +63,7 @@ function build(kit: Kit) {
     const show = (): void => kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${said[lang()]}`, ok);
     show();
     retext = show;
-    speak(said, lang());
-    await kit.wait(ok ? 2600 : 3800);
+    await kit.said((end) => speak(said, lang(), end), ok ? 2600 : 3800, talkMs([said]));
     return ok;
   }
 
