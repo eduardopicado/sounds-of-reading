@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1807 clips, about 48149 characters.**
+**1826 clips, about 49131 characters.**
 
-## English (Stuart, Australian): 1128
+## English (Stuart, Australian): 1147
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A dangerous tackle is a red card: he has to leave the game.
@@ -81,6 +81,7 @@ exactly these, with the voices in public/audio/README.md.
 - Both arms forward: play on. The team that was fouled keeps the ball.
 - buck, et, bucket
 - bucket
+- Bump! The player hit a cone. Fix the program and try again.
 - cac, tus, cactus
 - cactus
 - cam, el, camel
@@ -134,6 +135,9 @@ exactly these, with the voices in public/audio/README.md.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
+- Get the ball, then take it into the goal!
+- Get the player to the ball. You will need to turn a corner!
+- Get to the ball, but do not bump into the cones!
 - Giraffes live in Africa, and they are the tallest animals in the world.
 - Giraffes live on the grassland.
 - Go 1 square east,
@@ -168,11 +172,14 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Goal! The program worked.
+- Good coding!
 - Good reading! Try again.
 - Good refereeing!
 - Good space exploring!
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
+- Got it! The program worked.
 - ham, ster, hamster
 - hamster
 - He argued with the referee.
@@ -190,6 +197,7 @@ exactly these, with the voices in public/audio/README.md.
 - Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.
 - hel, met, helmet
 - helmet
+- Here is a program that works. Watch!
 - Hippos live in Africa, and spend their days in rivers and lakes.
 - Hippos live in rivers.
 - hot, dog, hotdog
@@ -347,6 +355,7 @@ exactly these, with the voices in public/audio/README.md.
 - lobster
 - mag, net, magnet
 - magnet
+- Make a program to get the player to the ball. Then press Go!
 - Mars comes after Earth.
 - Mars could still be it. Look at the answer again.
 - Mars is bigger than Mercury.
@@ -405,6 +414,7 @@ exactly these, with the voices in public/audio/README.md.
 - on the ship,
 - on the ship.
 - One arm out, the way the kick goes: free kick.
+- Oops, off the pitch! Fix the program and try again.
 - Orangutans live in the rainforest.
 - Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
 - pad, lock, padlock
@@ -435,6 +445,7 @@ exactly these, with the voices in public/audio/README.md.
 - Put New South Wales on the map.
 - Put North America on the map.
 - Put Queensland on the map.
+- Put some arrow cards in the program first.
 - Put South America on the map.
 - Put South Australia on the map.
 - Put Tasmania on the map.
@@ -853,6 +864,11 @@ exactly these, with the voices in public/audio/README.md.
 - The hut is here.
 - The log is here.
 - The nest is here.
+- The player has the ball, but he stopped before the goal. Add some more cards.
+- The player missed the ball on the way. Fix the program and try again.
+- The player stopped before the ball. Add some more cards.
+- The player went past it. The player has to stop on the ball. Try again.
+- The player went past the goal. The player has to stop in it. Try again.
 - The referee points at the corner flag: corner.
 - The referee points at the goal area: goal kick.
 - The referee points at the penalty spot: penalty.
@@ -917,6 +933,7 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the whale.
 - then tap the zebra.
 - This is Central America.
+- This program has a bug. Fix it, then press Go!
 - Three reads! Great reading.
 - Three reads! Look how much faster you got.
 - thun, der, thunder
@@ -925,6 +942,7 @@ exactly these, with the voices in public/audio/README.md.
 - ticket
 - Tigers live in Asia, and they are the biggest cats in the world.
 - Tigers live in the forest.
+- Too many cards! Use repeat to make them shorter.
 - tooth, brush, toothbrush
 - toothbrush
 - Turn over the planets it cannot be.
@@ -941,6 +959,7 @@ exactly these, with the voices in public/audio/README.md.
 - Uranus is here.
 - Uranus is nearer to the Sun than Neptune.
 - Uranus spins on its side, like a ball rolling around the Sun.
+- Use repeat to make one card go further. You can only use 2 cards!
 - Venus comes after Mercury.
 - Venus could still be it. Look at the answer again.
 - Venus is bigger than Mars.
