@@ -23,7 +23,7 @@ import {
 import { country } from '../content/flags';
 import { of, type Both, type Lang } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
-import { GEO_LANG, langSwitch, speak } from './lang-kit';
+import { GEO_LANG, langSwitch, speak, talkMs } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<CapitalStep>({
@@ -172,8 +172,7 @@ function build(kit: Kit) {
       sfx.cheer();
       retext = () => kit.note(`${lang() === 'pt' ? 'Isso!' : 'Yes!'} ${why[lang()]}`, true);
       retext();
-      speak(why, lang());
-      await kit.wait(2600);
+      await kit.said((end) => speak(why, lang(), end), 2600, talkMs([why]));
       return true;
     }
     sfx.wrong();
@@ -199,9 +198,7 @@ function build(kit: Kit) {
     retext = () => kit.note(said ? `${said[lang()]} ${then[lang()]}` : then[lang()]);
     retext();
     const now = lang();
-    if (said) speak(said, now, () => speak(then, now));
-    else speak(then, now);
-    await kit.wait(5200);
+    await kit.said((end) => (said ? speak(said, now, () => speak(then, now, end)) : speak(then, now, end)), 5200, talkMs(said ? [said, then] : [then]));
     return false;
   }
 

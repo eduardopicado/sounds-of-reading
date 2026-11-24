@@ -67,6 +67,12 @@ export function speak(text: Both, lang: Lang, onEnd?: () => void): void {
   else say(text.en, { onEnd });
 }
 
+/** about as long as saying these takes, at the slowest voice, for waiting on
+    a voice that never says it has finished: the longer language of each */
+export function talkMs(lines: readonly Both[]): number {
+  return lines.reduce((ms, l) => ms + 1500 + 95 * Math.max(l.en.length, l.pt.length), 0);
+}
+
 /** several phrases, one after another, in the chosen language: Portuguese
     where every phrase is recorded or there is a Portuguese voice, English
     otherwise (sayInTurn: never two voices in one sentence) */

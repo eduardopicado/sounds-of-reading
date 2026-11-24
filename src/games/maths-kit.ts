@@ -23,10 +23,20 @@ import { confetti, counter, scoreLine, topbar } from '../ui/components';
 import { narrationSelect } from './narration';
 import { ourTeam, rivalFor, type Team } from './teams';
 
+/** the pause after something said before the next thing */
+const SAID_GAP_MS = 400;
+
 export interface Kit {
   life: Life;
   /** wait, cancelled if he leaves the game */
   wait: (ms: number) => Promise<void>;
+  /**
+   * say something and wait until it has been said, and at least `min` ms,
+   * so the next question never talks over the end of this one's answer.
+   * `start` begins the speech and calls its end when it has finished; a
+   * voice that never says it has finished is waited for `max` ms at most.
+   */
+  said: (start: (end: () => void) => void, min: number, max: number) => Promise<void>;
   /** the number buttons under the question */
   choices: ChoiceRow;
   /** a line of feedback under the stage */
@@ -160,6 +170,17 @@ export function mountMaths<S extends Step>(game: MathsGame<S>, root: HTMLElement
   const kit: Kit = {
     life,
     wait: (ms) => new Promise((resolve) => life.later(resolve, ms)),
+    said: (start, min, max) => new Promise((resolve) => {
+      let spoken = false;
+      let waited = false;
+      let done = false;
+      const finish = (): void => { if (!done) { done = true; resolve(); } };
+      const check = (): void => { if (spoken && waited) finish(); };
+      life.later(() => { waited = true; check(); }, min);
+      life.later(finish, Math.max(min, max));
+      /* a breath after the last word before anything else is said */
+      start(() => life.later(() => { spoken = true; check(); }, SAID_GAP_MS));
+    }),
     choices,
     note: (text, good = false) => { noteEl.textContent = text; noteEl.classList.toggle('good', good); },
     us: ourTeam,

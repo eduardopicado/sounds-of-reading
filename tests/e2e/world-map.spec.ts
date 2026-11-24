@@ -1,7 +1,7 @@
 /* World Map: find the continents and the oceans, name them, and say where they are. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, seed, watchPage } from './helpers';
 import { MAP_H, MAP_W, project } from '../../src/content/projection';
 import { place, type PlaceId } from '../../src/content/world';
 
@@ -208,6 +208,53 @@ test.describe('World Map', () => {
     await page.getByRole('button', { name: 'Português' }).click();
     await expect(compass).toHaveText('NO✦LS');
     noProblems(watch);
+  });
+
+  test('the fact after a right answer is said to the end before the next question starts', async ({ page }) => {
+    /* a voice as slow as a real one: 70 ms a letter, so a fact takes
+       several seconds, more than the pause after a right answer */
+    await noRecordings(page);
+    await page.addInitScript(() => {
+      const log: string[] = [];
+      (window as unknown as { __log: string[] }).__log = log;
+      class FakeUtterance {
+        text: string; lang = ''; rate = 1; pitch = 1; volume = 1; voice: unknown = null;
+        onend: (() => void) | null = null; onerror: (() => void) | null = null;
+        constructor(text: string) { this.text = text; }
+      }
+      Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance });
+      let current: { u: FakeUtterance; t: number } | null = null;
+      Object.defineProperty(window, 'speechSynthesis', {
+        configurable: true,
+        value: {
+          getVoices: () => [{ name: 'Karen', lang: 'en-AU', localService: true, default: true, voiceURI: 'karen' }],
+          speak: (u: FakeUtterance) => {
+            log.push(`start ${u.text}`);
+            const t = window.setTimeout(() => { if (current?.u === u) { current = null; log.push(`end ${u.text}`); u.onend?.(); } }, 70 * u.text.length);
+            current = { u, t };
+          },
+          cancel: () => {
+            const c = current;
+            current = null;
+            if (c) { window.clearTimeout(c.t); log.push(`cut ${c.u.text}`); window.setTimeout(() => c.u.onerror?.(), 0); }
+          },
+          addEventListener: () => undefined,
+        },
+      });
+    });
+    await startAt(page, 0);
+    const want = await wanted(page, 1);
+    await tap(page, want);
+    const fact = place(want).fact;
+    await expect(page.locator('.mx-note')).toHaveText(`Yes! ${fact}`);
+    await wanted(page, 2);
+    const log = await page.evaluate(() => (window as unknown as { __log: string[] }).__log);
+    /* the fact was said to the end, and only then the next question */
+    expect(log, log.join('\n')).not.toContain(`cut ${fact}`);
+    const ended = log.indexOf(`end ${fact}`);
+    const next = log.findIndex((l, i) => i > log.indexOf(`start ${fact}`) && l.startsWith('start Where is'));
+    expect(ended).toBeGreaterThan(-1);
+    expect(next).toBeGreaterThan(ended);
   });
 });
 

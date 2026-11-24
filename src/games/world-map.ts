@@ -18,7 +18,7 @@ import { MAP_STEPS, findSays, mapClimb, mapQuestion, nameIn, place, seaSays, typ
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
 import { isSea, worldMap } from './world-kit';
-import { GEO_LANG, langSwitch, speak } from './lang-kit';
+import { GEO_LANG, langSwitch, speak, talkMs } from './lang-kit';
 
 export function mount(root: HTMLElement): () => void {
   return mountMaths<MapStep>({
@@ -58,8 +58,7 @@ function build(kit: Kit) {
       sfx.cheer();
       retext = () => kit.note(`${lang() === 'pt' ? 'Isso!' : 'Yes!'} ${why[lang()]}`, true);
       retext();
-      speak(why, lang());
-      await kit.wait(2600);
+      await kit.said((end) => speak(why, lang(), end), 2600, talkMs([why]));
       return true;
     }
     sfx.wrong();
@@ -71,8 +70,7 @@ function build(kit: Kit) {
     retext = () => kit.note(`${first[lang()]} ${right[lang()]}`);
     retext();
     const now = lang();
-    speak(first, now, () => speak(right, now));
-    await kit.wait(4600);
+    await kit.said((end) => speak(first, now, () => speak(right, now, end)), 4600, talkMs([first, right]));
     return false;
   }
 
