@@ -21,13 +21,17 @@ async function question(page: Page, n: number): Promise<Call> {
 test.describe('Football Ref', () => {
   test.beforeEach(async ({ page }) => { await recordSpeech(page); });
 
-  test('a whole round of the ball going out, every one right, to the sticker', async ({ page }) => {
+  test('a whole round, every one right, climbing from the ball going out, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);
     for (let n = 1; n <= 8; n += 1) {
       const answer = await question(page, n);
-      await expect(page.locator('.fr-pitch')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Throw-in', exact: true })).toBeVisible();
+      /* three right in a row climb a step: first the ball going out, then fouls */
+      if (n === 1) {
+        await expect(page.locator('.fr-pitch')).toBeVisible();
+        for (const c of ['Throw-in', 'Corner', 'Goal kick']) await expect(page.getByRole('button', { name: c, exact: true })).toBeVisible();
+      }
+      if (n === 4) await expect(page.locator('.score')).toContainText('Free kick or penalty?');
       await page.getByRole('button', { name: CALLS[answer].en, exact: true }).click();
       await expect(page.locator('.mx-note')).toContainText('Yes! ');
     }

@@ -2616,7 +2616,8 @@
 /* ── Football Ref ──────────────────────────────────────────────────────── */
 
 .fr-card { display: flex; justify-content: center; width: 100%; }
-.fr-pitch { display: block; width: min(100%, 760px, calc((100svh - 330px) * 1.45)); height: auto; border-radius: 10px; }
+/* the pitch, as big as leaves room for the question and its answers under it */
+.fr-pitch { display: block; width: min(100%, 760px, calc((100svh - 390px) * 1.45)); height: auto; border-radius: 10px; }
 .fr-grass { fill: #3E9B4F; stroke: none; }
 .fr-grass.dark { fill: #378C47; }
 .fr-mark { fill: none; stroke: rgba(255, 255, 255, .9); stroke-width: .45; }
