@@ -12,6 +12,14 @@
  * Ocean is south of Australia, from its coast, the way Australian maps draw
  * it (src/content/seas.ts has the lines between the oceans).
  *
+ * In Portuguese the Americas are three: Brazilian schools teach América do
+ * Norte, América Central and América do Sul as three continents. So the
+ * map in Portuguese has eight continents, Central America (the isthmus from
+ * Guatemala to Panama, and the Caribbean islands) its own, and English the
+ * seven of the Australian classroom, Central America in North America. Mexico
+ * is North America in both. The questions are made for one way of counting
+ * or the other (`Continents`), and so are the map's colours.
+ *
  * Every question here has one answer that a map can show: "which ocean is
  * west of Australia?" is the Indian, and nothing else is. A direction that
  * a second place would also fit is left out rather than argued over: Asia
@@ -21,9 +29,24 @@
 import { climb, type Climb, type Step } from './maths';
 import { The, of, pt, the, thatIs, thisIs, whereIs, isHere, type Both, type Lang, type PtName } from './pt';
 
-export type ContinentId = 'africa' | 'antarctica' | 'asia' | 'australia' | 'europe' | 'north-america' | 'south-america';
+export type ContinentId = 'africa' | 'antarctica' | 'asia' | 'australia' | 'europe' | 'north-america' | 'central-america' | 'south-america';
 export type OceanId = 'pacific' | 'atlantic' | 'indian' | 'southern' | 'arctic';
 export type PlaceId = ContinentId | OceanId;
+
+/** how many continents: seven in English, eight in Portuguese, with Central America its own */
+export type Continents = 7 | 8;
+export const continentsIn = (lang: Lang): Continents => (lang === 'pt' ? 8 : 7);
+
+/** the countries of Central America (Natural Earth's codes): the isthmus,
+    and the islands of the Caribbean. In English they are North America */
+export const CENTRAL_AMERICA: ReadonlySet<string> = new Set([
+  'GTM', 'BLZ', 'SLV', 'HND', 'NIC', 'CRI', 'PAN',
+  'CUB', 'HTI', 'DOM', 'JAM', 'BHS', 'PRI', 'TTO',
+]);
+
+/** the continent a country is on, counting seven or eight */
+export const continentOf = (code: string, continent: string, n: Continents): string =>
+  (n === 8 && CENTRAL_AMERICA.has(code) ? 'central-america' : continent);
 
 export interface Place {
   id: PlaceId;
@@ -38,6 +61,8 @@ export interface Place {
   /** its name in Portuguese, and the fact */
   pt: PtName;
   factPt: string;
+  /** only when counting eight continents: Central America */
+  eight?: true;
 }
 
 export const PLACES: Place[] = [
@@ -59,6 +84,9 @@ export const PLACES: Place[] = [
   { id: 'north-america', kind: 'continent', name: 'North America', labels: [[-102, 47]],
     fact: 'North America has Canada, the United States and Mexico in it.',
     pt: pt('América do Norte', 'f'), factPt: 'Na América do Norte ficam o Canadá, os Estados Unidos e o México.' },
+  { id: 'central-america', kind: 'continent', name: 'Central America', labels: [[-85.5, 14]], eight: true,
+    fact: 'Central America joins North America to South America, and the Panama Canal goes across it.',
+    pt: pt('América Central', 'f'), factPt: 'A América Central liga a América do Norte à América do Sul, e o Canal do Panamá a atravessa.' },
   { id: 'south-america', kind: 'continent', name: 'South America', labels: [[-60, -12]],
     fact: 'Brazil is the biggest country in South America.',
     pt: pt('América do Sul', 'f'), factPt: 'O Brasil é o maior país da América do Sul.' },
@@ -80,6 +108,8 @@ export const PLACES: Place[] = [
 ];
 
 export const place = (id: PlaceId): Place => PLACES.find((p) => p.id === id)!;
+/** the continents and oceans, counting seven continents or eight */
+export const placesIn = (n: Continents): Place[] => PLACES.filter((p) => n === 8 || !p.eight);
 
 /** how a place is said in a sentence: "Africa", "the Pacific Ocean" */
 export const called = (p: Place): string => (p.kind === 'ocean' ? `the ${p.name}` : p.name);
@@ -118,6 +148,18 @@ export const DIRECTIONS: Direction[] = [
   { of: 'africa', dir: 'east', answer: 'indian' },
   { of: 'asia', dir: 'south', answer: 'indian' },
 ];
+
+/** the directions, counting seven continents or eight: with Central America
+    its own, it is what is north of South America and south of North America */
+export function directionsIn(n: Continents): Direction[] {
+  if (n === 7) return DIRECTIONS;
+  return [
+    ...DIRECTIONS.map((d) => ((d.of === 'south-america' && d.dir === 'north') || (d.of === 'north-america' && d.dir === 'south')
+      ? { ...d, answer: 'central-america' as const } : d)),
+    { of: 'central-america', dir: 'north', answer: 'north-america' },
+    { of: 'central-america', dir: 'south', answer: 'south-america' },
+  ];
+}
 
 /** "Which ocean is between Africa and Australia?": the Indian */
 export interface Between { a: PlaceId; b: PlaceId; answer: PlaceId }
@@ -262,10 +304,11 @@ const pickOf = <T>(list: T[], avoid: (x: T) => boolean): T => {
  * One question at this step, avoiding the places in `recent` (the last few
  * answers), so a round does not keep asking for the same continent.
  */
-export function mapQuestion(step: MapStep, recent: PlaceId[] = []): MapQuestion {
+export function mapQuestion(step: MapStep, recent: PlaceId[] = [], n: Continents = 7): MapQuestion {
   const seen = (id: PlaceId): boolean => recent.includes(id);
+  const places = placesIn(n);
   if (step.task === 'around' || step.task === 'direction') {
-    const d = pickOf(step.task === 'around' ? AROUND_AUSTRALIA : DIRECTIONS, (x) => seen(x.answer));
+    const d = pickOf(step.task === 'around' ? AROUND_AUSTRALIA : directionsIn(n), (x) => seen(x.answer));
     const says = directionSays(d);
     const pts = directionSays(d, 'pt');
     return { task: step.task, answer: d.answer, ask: says.ask, why: says.answer, pt: { ask: pts.ask, why: pts.answer }, given: [d.of] };
@@ -276,11 +319,11 @@ export function mapQuestion(step: MapStep, recent: PlaceId[] = []): MapQuestion 
     const pts = betweenSays(b, 'pt');
     return { task: 'between', answer: b.answer, ask: says.ask, why: says.answer, pt: { ask: pts.ask, why: pts.answer }, given: [b.a, b.b] };
   }
-  const pool = PLACES.filter((p) => step.of === 'both' || p.kind === step.of);
+  const pool = places.filter((p) => step.of === 'both' || p.kind === step.of);
   const p = pickOf(pool, (x) => seen(x.id));
   if (step.task === 'name') {
     /* two other names of the same kind, so "ocean" in the name is no clue */
-    const others = PLACES.filter((x) => x.kind === p.kind && x.id !== p.id).sort(() => Math.random() - 0.5).slice(0, 2);
+    const others = places.filter((x) => x.kind === p.kind && x.id !== p.id).sort(() => Math.random() - 0.5).slice(0, 2);
     const options = [p, ...others].map((x) => x.id).sort(() => Math.random() - 0.5);
     return { task: 'name', answer: p.id, ask: NAME_IT.en, why: p.fact, pt: { ask: NAME_IT.pt, why: p.factPt }, options };
   }
@@ -293,7 +336,7 @@ export function mapLines(lang: Lang = 'en'): string[] {
     NAME_IT[lang],
     ...PLACES.flatMap((p) => [factIn(p, lang), ...Object.values(findSays(p, lang))]),
     ...SEAS.map((x) => seaSays(x.id, lang).that),
-    ...[...AROUND_AUSTRALIA, ...DIRECTIONS].flatMap((d) => Object.values(directionSays(d, lang))),
+    ...[...AROUND_AUSTRALIA, ...directionsIn(7), ...directionsIn(8)].flatMap((d) => Object.values(directionSays(d, lang))),
     ...BETWEEN.flatMap((b) => Object.values(betweenSays(b, lang))),
   ];
 }

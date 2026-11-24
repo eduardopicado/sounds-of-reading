@@ -5,8 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  BOARDS, CONTINENT_PIECES, HOP, JIGSAW_STEPS, PIECES_A_PUZZLE, SAYS, SNAP, STATE_PIECES, askFor, fits, jigsawClimb, jigsawLines,
-  mainland, rings,
+  BOARDS, CONTINENT_PIECES, HOP, JIGSAW_STEPS, PIECES_A_PUZZLE, SAYS, SNAP, STATE_PIECES, askFor, fits, jigsawClimb, jigsawLines, mainland, rings, CONTINENT_PIECES_EIGHT, piecesFor,
 } from '../../src/content/jigsaw';
 import { STATE_SHAPES } from '../../src/content/australia-shapes';
 import { findSays, place } from '../../src/content/world';
@@ -98,3 +97,33 @@ describe('Map Jigsaw', () => {
     }
   });
 });
+
+describe('in Portuguese, eight continents', () => {
+  it('has a piece for Central America, out of North America', () => {
+    expect(CONTINENT_PIECES_EIGHT.map((p) => p.id).sort()).toEqual([...CONTINENT_PIECES.map((p) => p.id), 'central-america'].sort());
+    const central = CONTINENT_PIECES_EIGHT.find((p) => p.id === 'central-america')!;
+    expect(central.name.pt).toBe('América Central');
+    const north7 = CONTINENT_PIECES.find((p) => p.id === 'north-america')!;
+    const north8 = CONTINENT_PIECES_EIGHT.find((p) => p.id === 'north-america')!;
+    /* North America gets smaller: its south end is Mexico now, not Panama */
+    expect(north8.box.y1).toBeLessThan(north7.box.y1);
+    /* Central America is between the two, on the map */
+    const south = CONTINENT_PIECES_EIGHT.find((p) => p.id === 'south-america')!;
+    expect(central.cy).toBeGreaterThan(north8.cy);
+    expect(central.cy).toBeLessThan(south.cy);
+  });
+
+  it('makes the world puzzle eight pieces, and moves the step only once all eight are in', () => {
+    const world = JIGSAW_STEPS.find((s) => s.map === 'world')!;
+    const states = JIGSAW_STEPS.find((s) => s.map === 'australia')!;
+    expect(piecesFor(world, 8)).toHaveLength(8);
+    expect(piecesFor(world, 7)).toHaveLength(7);
+    expect(piecesFor(states, 8)).toHaveLength(7);
+    let c = { step: 0, right: 0, wrong: 0 };
+    for (let i = 0; i < 7; i += 1) c = jigsawClimb(c, true, JIGSAW_STEPS.length, 8);
+    expect(c.step).toBe(0);
+    c = jigsawClimb(c, true, JIGSAW_STEPS.length, 8);
+    expect(c.step).toBe(1);
+  });
+});
+

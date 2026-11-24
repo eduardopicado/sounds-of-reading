@@ -101,7 +101,9 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
 src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
                        and the first chess games' questions
 src/content/world.ts   World Map: the continents and oceans, a fact for each,
-                       and the direction and "between" questions;
+                       and the direction and "between" questions; seven
+                       continents in English, eight in Portuguese (Central
+                       America its own, as Brazilian schools count them);
                        world-shapes.ts is the map itself (made by
                        tools/make-world.ts from Natural Earth, never edited),
                        projection.ts puts a longitude and latitude on it, and

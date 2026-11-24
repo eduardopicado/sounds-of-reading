@@ -13,7 +13,7 @@ import { read, write } from '../lib/storage';
 import { svg } from '../ui/writing';
 import { MAP_H, MAP_W, project } from '../content/projection';
 import { COUNTRY_SHAPES, OCEAN_SHAPES, OUTLINE, SEA_SHAPES } from '../content/world-shapes';
-import { PLACES, SEAS, nameIn, place, type MapStep, type PlaceId, type SeaId } from '../content/world';
+import { CENTRAL_AMERICA, PLACES, SEAS, nameIn, place, type Continents, type MapStep, type PlaceId, type SeaId } from '../content/world';
 import type { Lang } from '../content/pt';
 import { dirName, type Dir } from '../content/treasure';
 import { COUNTRIES, SEA_PARTS, isIsland, middle, middleOf, placeAt } from '../content/globe';
@@ -35,15 +35,20 @@ export function worldMap() {
   for (const o of OCEAN_SHAPES) map.append(svg('path', { class: 'wm-ocean', d: o.d, 'data-place': o.id }));
   for (const s of SEA_SHAPES) map.append(svg('path', { class: 'wm-sea', d: s.d, 'data-sea': s.id }));
   const lands = new Map<string, SVGGElement>();
-  for (const c of COUNTRY_SHAPES) {
-    let g = lands.get(c.continent);
+  const land = (continent: string): SVGGElement => {
+    let g = lands.get(continent);
     if (!g) {
-      g = svg('g', c.continent ? { class: 'wm-land', 'data-place': c.continent } : { class: 'wm-land wm-nowhere' });
-      lands.set(c.continent, g);
+      g = svg('g', continent ? { class: 'wm-land', 'data-place': continent } : { class: 'wm-land wm-nowhere' });
+      lands.set(continent, g);
       map.append(g);
     }
-    g.append(svg('path', { d: c.d, 'data-country': c.id }));
-  }
+    return g;
+  };
+  for (const c of COUNTRY_SHAPES) land(c.continent).append(svg('path', { d: c.d, 'data-country': c.id }));
+  /* Central America, its own continent when counting eight (in Portuguese):
+     its countries move into it from North America, and back */
+  const central = land('central-america');
+  const middleAmericas = [...map.querySelectorAll<SVGPathElement>('[data-country]')].filter((n) => CENTRAL_AMERICA.has(n.dataset.country ?? ''));
   map.append(svg('path', { class: 'wm-rim', d: OUTLINE }));
 
   const labels = el('div', { class: 'wm-labels', 'aria-hidden': 'true' });
@@ -67,7 +72,8 @@ export function worldMap() {
     );
   };
   drawRose('en');
-  const node = el('div', { class: 'wm-wrap' }, map, labels, rose);
+  const node = el('div', { class: 'wm-wrap', dataset: { continents: '7' } }, map, labels, rose);
+  let continents: Continents = 7;
 
   /* a country smaller than this, in map units, is an island a tap goes
      through when an ocean is asked for (the sum is the globe's, so it is
@@ -136,7 +142,7 @@ export function worldMap() {
   const idAt = (x: number, y: number): string | null => {
     if (onGlobe && ball) {
       const at = ball.at(x, y);
-      return at ? placeAt(at[0], at[1], { byCountry, wantsOcean: want !== null && kindOf(want) === 'ocean' }) : null;
+      return at ? placeAt(at[0], at[1], { byCountry, wantsOcean: want !== null && kindOf(want) === 'ocean', continents }) : null;
     }
     const hit = document.elementFromPoint(x, y);
     if (!hit || !map.contains(hit)) return null;
@@ -184,6 +190,17 @@ export function worldMap() {
       for (const n of labels.querySelectorAll<HTMLElement>('[data-place]')) n.textContent = nameIn(place(n.dataset.place as PlaceId), to);
       ball?.language(to);
       drawRose(to);
+    },
+    /** seven continents, as in English, or eight, as in Portuguese: Central
+        America's countries go into a continent of their own, and its name
+        is on the map with the others */
+    continents: (n: Continents) => {
+      if (n === continents) return;
+      continents = n;
+      node.dataset.continents = String(n);
+      const to = n === 8 ? central : land('north-america');
+      for (const path of middleAmericas) to.append(path);
+      repaint();
     },
     /** the compass on the map, or not */
     compass: (on: boolean) => { rose.hidden = !on; },

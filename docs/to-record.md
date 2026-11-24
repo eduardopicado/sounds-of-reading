@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1380 clips, about 32925 characters.**
+**1408 clips, about 34138 characters.**
 
-## English (Stuart, Australian): 913
+## English (Stuart, Australian): 927
 
 - and the crab,
 - and the crab.
@@ -80,6 +80,10 @@ exactly these, with the voices in public/audio/README.md.
 - cam, el, camel
 - Camels live in the desert.
 - Camels live in the deserts of Africa and Asia, and can go for days without water.
+- Central America is here.
+- Central America is north of South America.
+- Central America is south of North America.
+- Central America joins North America to South America, and the Panama Canal goes across it.
 - chick, en, chicken
 - chicken
 - chip, munk, chipmunk
@@ -271,6 +275,7 @@ exactly these, with the voices in public/audio/README.md.
 - mushroom
 - nap, kin, napkin
 - napkin
+- North America is north of Central America.
 - Not there. Try again.
 - Now read it again. Can you beat your time?
 - oat, meal, oatmeal
@@ -310,6 +315,7 @@ exactly these, with the voices in public/audio/README.md.
 - Put Antarctica on the map.
 - Put Asia on the map.
 - Put Australia on the map.
+- Put Central America on the map.
 - Put Europe on the map.
 - Put New South Wales on the map.
 - Put North America on the map.
@@ -384,6 +390,7 @@ exactly these, with the voices in public/audio/README.md.
 - Sloths live in the rainforests of South America and the south of North America, and move very slowly.
 - snow, man, snowman
 - snowman
+- South America is south of Central America.
 - Square A1 is here.
 - Square A2 is here.
 - Square A3 is here.
@@ -435,6 +442,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap every continent where lions live.
 - Tap every continent where penguins live.
 - Tap every continent where polar bears live.
+- Tap every continent where raccoons live.
 - Tap every continent where sloths live.
 - Tap square A1.
 - Tap square A2.
@@ -638,6 +646,7 @@ exactly these, with the voices in public/audio/README.md.
 - teapot
 - ten, nis, tennis
 - tennis
+- That is Central America.
 - That is it!
 - That is square A1.
 - That is square A2.
@@ -758,6 +767,7 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the tiger.
 - then tap the whale.
 - then tap the zebra.
+- This is Central America.
 - Three reads! Great reading.
 - Three reads! Look how much faster you got.
 - thun, der, thunder
@@ -877,13 +887,17 @@ exactly these, with the voices in public/audio/README.md.
 - Where does the tiger live?
 - Where does the zebra live?
 - Where does this piece go?
+- Where is Central America?
 - Which animal lives in Africa?
 - Which animal lives in Antarctica?
 - Which animal lives in Asia?
 - Which animal lives in Australia?
+- Which animal lives in Central America?
 - Which animal lives in Europe?
 - Which animal lives in North America?
 - Which animal lives in South America?
+- Which continent is north of Central America?
+- Which continent is south of Central America?
 - Which square is the bench in?
 - Which square is the boat in?
 - Which square is the crab in?
@@ -923,8 +937,14 @@ exactly these, with the voices in public/audio/README.md.
 - Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 467
+## Portuguese (Roberto Valença, Brazilian): 481
 
+- A América Central fica ao norte da América do Sul.
+- A América Central fica ao sul da América do Norte.
+- A América Central fica aqui.
+- A América Central liga a América do Norte à América do Sul, e o Canal do Panamá a atravessa.
+- A América do Norte fica ao norte da América Central.
+- A América do Sul fica ao sul da América Central.
 - A árvore está aqui.
 - A bandeira está aqui.
 - A barraca está aqui.
@@ -977,6 +997,7 @@ exactly these, with the voices in public/audio/README.md.
 - Cada quadrado tem 2 metros.
 - Cada quadrado tem 5 metros.
 - Coloque a África no mapa.
+- Coloque a América Central no mapa.
 - Coloque a América do Norte no mapa.
 - Coloque a América do Sul no mapa.
 - Coloque a Antártida no mapa.
@@ -1054,6 +1075,7 @@ exactly these, with the voices in public/audio/README.md.
 - Em que tipo de lugar vive o tigre?
 - Em que tipo de lugar vive o tubarão?
 - Em que tipo de lugar vive o urso-polar?
+- Essa é a América Central.
 - Essa é a árvore.
 - Essa é a bandeira.
 - Essa é a barraca.
@@ -1105,6 +1127,7 @@ exactly these, with the voices in public/audio/README.md.
 - Esse é o quadrado F5.
 - Esse é o quadrado F6.
 - Esse é o tronco.
+- Esta é a América Central.
 - Está no A1.
 - Está no A2.
 - Está no A3.
@@ -1235,6 +1258,7 @@ exactly these, with the voices in public/audio/README.md.
 - O que tem lá?
 - O tesouro está aqui.
 - O tronco está aqui.
+- Onde fica a América Central?
 - Onde vai esta peça?
 - Onde vive a girafa?
 - Onde vive a lhama?
@@ -1257,7 +1281,7 @@ exactly these, with the voices in public/audio/README.md.
 - Onde vive o tigre?
 - Onde vive o urso-polar?
 - Os bichos-preguiça vivem na floresta tropical.
-- Os bichos-preguiça vivem nas florestas tropicais da América do Sul e no sul da América do Norte, e se mexem bem devagar.
+- Os bichos-preguiça vivem nas florestas tropicais da América do Sul e da América Central, e se mexem bem devagar.
 - Os bisões vivem na América do Norte, e um tipo menor vive nas florestas da Europa.
 - Os bisões vivem no campo.
 - Os camelos vivem no deserto.
@@ -1273,7 +1297,7 @@ exactly these, with the voices in public/audio/README.md.
 - Os golfinhos vivem no oceano.
 - Os gorilas vivem na floresta tropical.
 - Os gorilas vivem nas florestas tropicais da África, e são os maiores primatas.
-- Os guaxinins vêm da América do Norte, e lavam a comida com as patas da frente.
+- Os guaxinins vivem na América do Norte e na América Central, e lavam a comida com as patas da frente.
 - Os guaxinins vivem na floresta.
 - Os hipopótamos vivem na África, e passam o dia nos rios e lagos.
 - Os hipopótamos vivem nos rios.
@@ -1308,12 +1332,15 @@ exactly these, with the voices in public/audio/README.md.
 - Para que lado fica o pato?
 - Para que lado fica o tronco?
 - Qual animal vive na África?
+- Qual animal vive na América Central?
 - Qual animal vive na América do Norte?
 - Qual animal vive na América do Sul?
 - Qual animal vive na Antártida?
 - Qual animal vive na Ásia?
 - Qual animal vive na Austrália?
 - Qual animal vive na Europa?
+- Qual continente fica ao norte da América Central?
+- Qual continente fica ao sul da América Central?
 - Qual é a distância até a árvore?
 - Qual é a distância até a bandeira?
 - Qual é a distância até a barraca?
@@ -1346,6 +1373,7 @@ exactly these, with the voices in public/audio/README.md.
 - Toque em todos os continentes onde vivem os camelos.
 - Toque em todos os continentes onde vivem os crocodilos.
 - Toque em todos os continentes onde vivem os elefantes.
+- Toque em todos os continentes onde vivem os guaxinins.
 - Toque em todos os continentes onde vivem os leões.
 - Toque em todos os continentes onde vivem os ouriços.
 - Toque em todos os continentes onde vivem os pinguins.

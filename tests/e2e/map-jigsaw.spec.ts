@@ -144,4 +144,15 @@ test.describe('Map Jigsaw', () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(view.width);
     });
   }
+
+  test('in Portuguese the world is eight pieces, Central America one of them', async ({ page }) => {
+    await seed(page, { 'maths-step:map-jigsaw': 0, 'geo-lang': 'pt' });
+    await openGame(page, 'map-jigsaw');
+    await page.getByRole('button', { name: '▶ Start' }).click();
+    await waiting(page, 1);
+    await expect(page.locator('.score')).toContainText('Piece 1 of 8');
+    await expect(page.locator('.jg-hole')).toHaveCount(8);
+    await expect(page.locator('.jg-hole[data-piece="central-america"]')).toHaveCount(1);
+  });
 });
+
