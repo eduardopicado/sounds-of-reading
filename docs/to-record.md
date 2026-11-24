@@ -5,10 +5,14 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1380 clips, about 32925 characters.**
+**1459 clips, about 36830 characters.**
 
-## English (Stuart, Australian): 913
+## English (Stuart, Australian): 953
 
+- A ball that hits a hand by accident is not a foul: no card.
+- A dangerous tackle is a red card: he has to leave the game.
+- A foul! Free kick or penalty?
+- An accident is a free kick, with no card.
 - and the crab,
 - and the crab.
 - and the cup,
@@ -69,10 +73,12 @@ exactly these, with the voices in public/audio/README.md.
 - and the whale.
 - and the zebra,
 - and the zebra.
+- Arguing with the referee is a yellow card.
 - bath, tub, bathtub
 - bathtub
 - Bison live in North America, and a smaller kind lives in the forests of Europe.
 - Bison live on the grassland.
+- Both arms forward: play on. The team that was fouled keeps the ball.
 - buck, et, bucket
 - bucket
 - cac, tus, cactus
@@ -138,10 +144,23 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares west,
 - Go 3 squares west.
 - Good reading! Try again.
+- Good refereeing!
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
 - ham, ster, hamster
 - hamster
+- He argued with the referee.
+- He got his second yellow card.
+- He made a dangerous tackle that could badly hurt someone.
+- He pulled a shirt to stop a fast attack.
+- He stopped a goal with his hand, on the goal line.
+- He took his shirt off to celebrate a goal.
+- He tripped a player by accident.
+- He was behind the ball when it was passed: not offside.
+- He was in his own half. You can never be offside in your own half.
+- He was level with the last defender. Level is not offside.
+- He was not past the last defender when the ball was passed: not offside.
+- He was past the last defender when the ball was passed: offside!
 - Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.
 - hel, met, helmet
 - helmet
@@ -234,8 +253,12 @@ exactly these, with the voices in public/audio/README.md.
 - It is north.
 - It is south.
 - It is west.
+- It went over the goal line, and a defender touched it last: corner.
+- It went over the goal line, and an attacker touched it last: goal kick.
+- It went over the side line: throw-in.
 - jack, et, jacket
 - jacket
+- Just a little past the last defender is still offside.
 - Just the same! Try again.
 - Kangaroos live on the grassland.
 - Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.
@@ -285,6 +308,7 @@ exactly these, with the voices in public/audio/README.md.
 - on the log.
 - on the ship,
 - on the ship.
+- One arm out, the way the kick goes: free kick.
 - Orangutans live in the rainforest.
 - Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
 - pad, lock, padlock
@@ -424,9 +448,12 @@ exactly these, with the voices in public/audio/README.md.
 - Start at the swing.
 - Start at the tent.
 - Start at the tree.
+- Stopping a goal with your hand is a red card, and a penalty.
+- Stopping an attack on purpose is a yellow card: a warning.
 - sum, mer, summer
 - sun, set, sunset
 - sunset
+- Taking your shirt off is a yellow card, even after a goal.
 - Tap every continent where bison live.
 - Tap every continent where camels live.
 - Tap every continent where crocodiles live.
@@ -690,15 +717,25 @@ exactly these, with the voices in public/audio/README.md.
 - That is the swing.
 - That is the tent.
 - That is the tree.
+- The assistant holds the flag straight up: offside.
+- The ball came from a throw-in. There is no offside from a throw-in.
+- The ball hit his hand by accident.
+- The ball is passed now. Is he offside?
+- The ball went out. What happens now?
 - The bench is here.
 - The boat is here.
 - The crab is here.
 - The duck is here.
 - The flag is here.
+- The foul was inside the box: penalty!
+- The foul was outside the box: free kick.
 - The hill is here.
 - The hut is here.
 - The log is here.
 - The nest is here.
+- The referee points at the corner flag: corner.
+- The referee points at the goal area: goal kick.
+- The referee points at the penalty spot: penalty.
 - The rock is here.
 - The shell is here.
 - The ship is here.
@@ -768,12 +805,14 @@ exactly these, with the voices in public/audio/README.md.
 - Tigers live in the forest.
 - tooth, brush, toothbrush
 - toothbrush
+- Two yellow cards make a red card.
 - up, set, upset
 - upset
 - week, end, weekend
 - weekend
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
 - Whales live in the ocean.
+- What does the referee do?
 - What is above the bench?
 - What is above the boat?
 - What is above the crab?
@@ -804,6 +843,7 @@ exactly these, with the voices in public/audio/README.md.
 - What is below the swing?
 - What is below the tent?
 - What is below the tree?
+- What is the referee saying?
 - What is there?
 - What is to the left of the bench?
 - What is to the left of the boat?
@@ -923,13 +963,19 @@ exactly these, with the voices in public/audio/README.md.
 - Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 467
+## Portuguese (Roberto Valença, Brazilian): 506
 
 - A árvore está aqui.
 - A bandeira está aqui.
 - A barraca está aqui.
+- A bola bateu na mão dele sem querer.
+- A bola foi passada agora. Ele está impedido?
+- A bola saiu. E agora?
+- A bola veio de um lateral. Em lateral não tem impedimento.
 - A cabana está aqui.
 - A concha está aqui.
+- A falta foi dentro da área: pênalti!
+- A falta foi fora da área: é falta.
 - A maioria dos leões vive na África, e alguns vivem numa floresta da Índia, na Ásia.
 - A pedra está aqui.
 - Aí não. Tente de novo.
@@ -973,6 +1019,7 @@ exactly these, with the voices in public/audio/README.md.
 - As lhamas vivem nas montanhas.
 - As zebras vivem na África, e cada zebra tem listras só dela.
 - As zebras vivem no campo.
+- Bola na mão sem querer não é falta: sem cartão.
 - Cada quadrado tem 10 metros.
 - Cada quadrado tem 2 metros.
 - Cada quadrado tem 5 metros.
@@ -1017,7 +1064,21 @@ exactly these, with the voices in public/audio/README.md.
 - depois 3 quadrados para o norte.
 - depois 3 quadrados para o oeste.
 - depois 3 quadrados para o sul.
+- Discutir com o árbitro é cartão amarelo.
+- Dois cartões amarelos viram um vermelho.
 - Ela vai aqui.
+- Ele derrubou um jogador sem querer.
+- Ele deu uma entrada perigosa, que podia machucar feio.
+- Ele discutiu com o árbitro.
+- Ele estava atrás da bola quando ela foi passada: não é impedimento.
+- Ele estava na frente do último defensor quando a bola foi passada: impedimento!
+- Ele estava na mesma linha do último defensor. Na mesma linha não é impedimento.
+- Ele estava no campo dele. No próprio campo nunca é impedimento.
+- Ele levou o segundo cartão amarelo.
+- Ele não estava na frente do último defensor quando a bola foi passada: não é impedimento.
+- Ele puxou a camisa para parar um contra-ataque.
+- Ele tirou a camisa para comemorar o gol.
+- Ele tirou com a mão uma bola que ia entrar no gol.
 - Em que quadrado está a árvore?
 - Em que quadrado está a bandeira?
 - Em que quadrado está a barraca?
@@ -1054,6 +1115,7 @@ exactly these, with the voices in public/audio/README.md.
 - Em que tipo de lugar vive o tigre?
 - Em que tipo de lugar vive o tubarão?
 - Em que tipo de lugar vive o urso-polar?
+- Entrada perigosa é cartão vermelho: ele tem que sair do jogo.
 - Essa é a árvore.
 - Essa é a bandeira.
 - Essa é a barraca.
@@ -1134,11 +1196,17 @@ exactly these, with the voices in public/audio/README.md.
 - Fica para o norte.
 - Fica para o oeste.
 - Fica para o sul.
+- Foi falta! É falta ou pênalti?
+- Impedir um gol com a mão é cartão vermelho, e pênalti.
 - Isso!
 - Isso! Ache outro.
 - Leia o nome. Onde vive esse animal?
 - Lucas
 - Luquinhas
+- O árbitro aponta para a bandeirinha de escanteio: escanteio.
+- O árbitro aponta para a marca do pênalti: pênalti.
+- O árbitro aponta para a pequena área: tiro de meta.
+- O assistente levanta a bandeira: impedimento.
 - O balanço está aqui.
 - O banco está aqui.
 - O barco está aqui.
@@ -1232,6 +1300,8 @@ exactly these, with the voices in public/audio/README.md.
 - O que está acima do ninho?
 - O que está acima do pato?
 - O que está acima do tronco?
+- O que o árbitro está dizendo?
+- O que o árbitro faz?
 - O que tem lá?
 - O tesouro está aqui.
 - O tronco está aqui.
@@ -1268,6 +1338,7 @@ exactly these, with the voices in public/audio/README.md.
 - Os coalas vivem nos eucaliptos da Austrália, e comem as folhas deles.
 - Os crocodilos vivem em rios e pântanos da África, da Ásia, da Austrália e das Américas.
 - Os crocodilos vivem nos rios.
+- Os dois braços para a frente: vantagem. O time que sofreu a falta continua com a bola.
 - Os elefantes vivem na África e na Ásia, e os elefantes africanos têm as orelhas maiores.
 - Os golfinhos vivem no oceano, e respiram por um buraco no alto da cabeça.
 - Os golfinhos vivem no oceano.
@@ -1307,6 +1378,7 @@ exactly these, with the voices in public/audio/README.md.
 - Para que lado fica o ninho?
 - Para que lado fica o pato?
 - Para que lado fica o tronco?
+- Parar um ataque de propósito é cartão amarelo: um aviso.
 - Qual animal vive na África?
 - Qual animal vive na América do Norte?
 - Qual animal vive na América do Sul?
@@ -1329,6 +1401,9 @@ exactly these, with the voices in public/audio/README.md.
 - Qual é a distância até o ninho?
 - Qual é a distância até o pato?
 - Qual é a distância até o tronco?
+- Saiu pela lateral: é lateral.
+- Saiu pela linha de fundo, e um atacante tocou por último: tiro de meta.
+- Saiu pela linha de fundo, e um defensor tocou por último: escanteio.
 - São 10 metros.
 - São 15 metros.
 - São 2 metros.
@@ -1341,6 +1416,9 @@ exactly these, with the voices in public/audio/README.md.
 - São 50 metros.
 - São 6 metros.
 - São 8 metros.
+- Sem querer é só falta, sem cartão.
+- Só um pouquinho na frente do último defensor já é impedimento.
+- Tirar a camisa é cartão amarelo, mesmo depois de um gol.
 - Toque em todos os continentes onde vivem os bichos-preguiça.
 - Toque em todos os continentes onde vivem os bisões.
 - Toque em todos os continentes onde vivem os camelos.
@@ -1391,6 +1469,7 @@ exactly these, with the voices in public/audio/README.md.
 - Toque no quadrado E5.
 - Toque no tronco.
 - Toque onde está o tesouro.
+- Um braço esticado, para o lado de quem vai cobrar: falta.
 - Você achou o tesouro!
 
 ## To improve: recorded, but worth doing again

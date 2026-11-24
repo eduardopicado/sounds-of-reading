@@ -121,6 +121,11 @@ src/content/botao.ts   Futebol de Botão: the table, the physics of a flick (onl
 src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJJ
                        games ask and say (Weigh-In's things and weight classes
                        too), every word in English and Portuguese
+src/content/football-rules.ts Football Ref: the Laws of the Game cut down to what a
+                       child sees (throw-in, corner, goal kick, free kick or
+                       penalty, cards, the referee's signals, offside and the
+                       cases that look like it), each picture's players
+                       placed so the Laws give one answer
 src/content/commentary.ts what the football commentator shouts, both languages
 src/content/pt.ts      Portuguese names in sentences: each name's article, joined
                        to "de" ("da Austrália", "de Portugal", "dos Estados
@@ -154,6 +159,7 @@ src/games/             one file per game, plus home.ts (tiles by section, the
                        chess-kit.ts draws the board and the pieces the chess
                        games share (src/content/chess.ts has the rules);
                        bjj-art.ts draws the moves and the referee's signals;
+                       football-art.ts the pitch and the football referee;
                        lang-kit.ts is the 🇦🇺/🇧🇷 language switch and speech
                        the BJJ and geography games share; bjj-kit.ts adds
                        the belt

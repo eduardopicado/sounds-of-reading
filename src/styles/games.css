@@ -2612,3 +2612,36 @@
 @media (prefers-reduced-motion: reduce) {
   .bt-race .bt-runner, .bt-runner.ghost { transition: none; }
 }
+
+/* ── Football Ref ──────────────────────────────────────────────────────── */
+
+.fr-card { display: flex; justify-content: center; width: 100%; }
+.fr-pitch { display: block; width: min(100%, 760px, calc((100svh - 330px) * 1.45)); height: auto; border-radius: 10px; }
+.fr-grass { fill: #3E9B4F; stroke: none; }
+.fr-grass.dark { fill: #378C47; }
+.fr-mark { fill: none; stroke: rgba(255, 255, 255, .9); stroke-width: .45; }
+.fr-spot { fill: #fff; }
+.fr-goal { fill: rgba(255, 255, 255, .85); stroke: #fff; stroke-width: .3; }
+.fr-ball { fill: #fff; stroke: #14312F; stroke-width: .45; }
+.fr-path { fill: none; stroke: #FFF6E7; stroke-width: .7; stroke-dasharray: 1.6 1.1; stroke-linecap: round; }
+.fr-path.head { stroke-dasharray: none; stroke-linejoin: round; }
+.fr-foul { fill: rgba(243, 178, 41, .35); stroke: #F3B229; stroke-width: .8; }
+.fr-him { fill: none; stroke: #FFF6E7; stroke-width: .7; stroke-dasharray: 1.2 .8; }
+.fr-player.runner circle, .fr-player.passer circle { stroke-width: 1.1; }
+/* once he has answered: the line that decides offside */
+.fr-line { stroke: #F3B229; stroke-width: .7; stroke-dasharray: 2 1.2; }
+.fr-line.halfway { stroke: #FFF6E7; stroke-width: 1; }
+.fr-what { margin: 2px 0 6px; text-align: center; font: 700 clamp(20px, 4.6vw, 28px) var(--reading); color: var(--on-deep); }
+.fr-what[hidden] { display: none; }
+.fr-cards { font-size: 72px; line-height: 1; padding: 8px 0; }
+/* the referee */
+.fr-signal { display: block; width: min(100%, 360px); height: auto; background: #CFE9F8; border-radius: 14px; }
+.fr-ref.skin { fill: #E8B48A; }
+.fr-ref.shirt { fill: #1E1E1E; }
+.fr-ref.limb { stroke: #1E1E1E; stroke-width: 5; stroke-linecap: round; }
+.fr-signal .fr-grass { fill: #3E9B4F; }
+.fr-signal .fr-mark { stroke-width: 1.4; }
+.fr-flag-stick { stroke: #5A4632; stroke-width: 2; stroke-linecap: round; }
+.fr-flag { fill: #F3B229; stroke: #C98F14; stroke-width: 1; }
+.fr-flag.corner { fill: #E4572E; stroke: #B23D1B; }
+.fr-go { fill: none; stroke: #F3B229; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
