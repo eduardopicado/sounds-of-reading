@@ -1,7 +1,7 @@
 /* Treasure Map: the key, the squares, the compass, and the treasure. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { THINGS } from '../../src/content/treasure';
 
 async function startAt(page: Page, step: number): Promise<void> {
@@ -25,6 +25,10 @@ async function answer(page: Page, q: { answer: string; task: string }): Promise<
 }
 
 test.describe('Treasure Map', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('a whole round finding things with the key, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

@@ -1,7 +1,7 @@
 /* World Map: find the continents and the oceans, name them, and say where they are. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, noRecordings, openGame, seed, watchPage } from './helpers';
+import { noProblems, noRecordings, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { MAP_H, MAP_W, project } from '../../src/content/projection';
 import { place, type PlaceId } from '../../src/content/world';
 
@@ -32,6 +32,10 @@ async function tap(page: Page, id: PlaceId, which = 0): Promise<void> {
 }
 
 test.describe('World Map', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('a whole round finding the continents by their names, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

@@ -1,7 +1,7 @@
 /* Animals of the World: who lives where, on the world map. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { expectTapTargets, noProblems, openGame, seed, watchPage } from './helpers';
+import { expectTapTargets, noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { MAP_H, MAP_W, project } from '../../src/content/projection';
 import { place, type PlaceId } from '../../src/content/world';
 import { ANIMALS, animal, habitat, type HabitatId } from '../../src/content/animals';
@@ -33,6 +33,10 @@ const shownText = async (page: Page): Promise<string> => (await page.locator('.a
 const shown = shownText;
 
 test.describe('Animals of the World', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('a whole round putting animals on their continents, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

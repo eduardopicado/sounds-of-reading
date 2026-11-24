@@ -2,7 +2,7 @@
  * Flags and Animals of the World alike (world-kit.ts). */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { COUNTRIES, HOME, middle, toScreen, wrapLon, type View } from '../../src/content/globe';
 import { place, type PlaceId } from '../../src/content/world';
 
@@ -54,6 +54,10 @@ const wanted = async (page: Page, n: number): Promise<PlaceId> => {
 };
 
 test.describe('the globe', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('switched on with the button and remembered; a drag turns it; names only on the side facing him', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0, false);

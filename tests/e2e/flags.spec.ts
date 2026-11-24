@@ -1,7 +1,7 @@
 /* Flags of the World: which flag is which country, and where it is. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, recordSpeech, seed, watchPage } from './helpers';
 import { COUNTRIES, LOOKALIKES, country } from '../../src/content/flags';
 
 async function startAt(page: Page, step: number): Promise<void> {
@@ -51,6 +51,10 @@ async function inside(page: Page, id: string): Promise<{ x: number; y: number }>
 }
 
 test.describe('Flags of the World', () => {
+  /* a voice that says at once when it has finished, as an iPad's does: the
+     game waits for the end of what is said before the next question */
+  test.beforeEach(async ({ page }) => { await recordSpeech(page); });
+
   test('a whole round, from picking the flag to naming it, to the sticker', async ({ page }) => {
     const watch = watchPage(page);
     await startAt(page, 0);

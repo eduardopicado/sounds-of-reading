@@ -258,6 +258,11 @@ export function cancelSpeech(): void {
   }
 }
 
+/** about as long as a voice takes to say this, at the app's rate (a little
+    over 12 letters a second) with a moment to start: what a game waits for at
+    most when a voice never says it has finished. An iPad's voices always do */
+export const speakingMs = (text: string): number => 600 + 80 * text.length;
+
 export interface SayOptions {
   /** slower, for "sound it out for me" */
   slow?: boolean;
