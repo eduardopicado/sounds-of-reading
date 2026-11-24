@@ -30,8 +30,9 @@ import { CAPITAL_STEPS } from '../content/capitals';
 import { TREASURE_STEPS } from '../content/treasure';
 import { JIGSAW_STEPS } from '../content/jigsaw';
 import { ANIMAL_STEPS } from '../content/animals';
+import { FOOTBALL_STEPS } from '../content/football-rules';
 
-export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'chess';
+export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'bjj' | 'football' | 'chess';
 
 export const SECTIONS: { id: Section; title: string }[] = [
   { id: 'reading', title: 'Reading and spelling' },
@@ -39,6 +40,7 @@ export const SECTIONS: { id: Section; title: string }[] = [
   { id: 'maths', title: 'Maths' },
   { id: 'geography', title: 'Geography 🌏' },
   { id: 'bjj', title: 'Jiu-jitsu 🥋' },
+  { id: 'football', title: 'Football ⚽' },
   { id: 'chess', title: 'Chess ♟️' },
 ];
 
@@ -169,6 +171,8 @@ export const GAMES: Game[] = [
     load: () => import('./weigh-in') },
   { path: 'refs-signals', name: "Ref's Signals", emoji: '🙌', what: "Read the referee's hands", tone: '#5A6FB8', section: 'bjj', ladder: SIGNAL_STEPS,
     load: () => import('./refs-signals') },
+  { path: 'football-ref', name: 'Football Ref', emoji: '🟨', what: 'Throw-in, penalty or offside?', tone: '#2E8F52', section: 'football', ladder: FOOTBALL_STEPS,
+    load: () => import('./football-ref') },
   { path: 'chess-pieces', name: 'Meet the Pieces', emoji: '♟️', what: 'How each chess piece moves', tone: '#769656', section: 'chess', ladder: PIECE_STEPS,
     load: () => import('./chess-pieces') },
   { path: 'chess-balls', name: 'Collect the Balls', emoji: '🐴', what: 'One piece, every ball, fewest moves', tone: '#5E7F45', section: 'chess', ladder: BALL_STEPS,
