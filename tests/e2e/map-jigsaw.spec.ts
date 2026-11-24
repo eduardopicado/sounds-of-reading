@@ -138,6 +138,8 @@ test.describe('Map Jigsaw', () => {
     test(`the map and the tray are both on the screen, ${map}: a piece never has to scroll to its place`, async ({ page }) => {
       await startAt(page, step);
       await waiting(page, 1);
+      /* measured in the app's own fonts: in the fallback a line can wrap and push the tray down */
+      await page.evaluate(() => document.fonts.ready);
       const tray = (await page.locator('.jg-tray').boundingBox())!;
       const view = page.viewportSize()!;
       expect(tray.y + tray.height).toBeLessThanOrEqual(view.height);

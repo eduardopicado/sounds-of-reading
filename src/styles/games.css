@@ -2282,7 +2282,7 @@
 .wm-land[data-place="south-america"] { fill: #45AE9F; }
 /* in Portuguese, Central America its own continent, between the green and the teal */
 .wm-land[data-place="central-america"] { fill: #F0A33A; }
-.wm-wrap[data-continents="7"] .wm-label[data-place="central-america"] { display: none; }
+.wm-wrap[data-continents="7"] .wm-label.continent[data-place="central-america"] { display: none; }
 /* the isthmus is narrow: its name sits just west of it, in the Pacific, not over it */
 .wm-label[data-place="central-america"] { transform: translate(-108%, -20%); }
 .wm-nowhere { fill: #CFC6B4; pointer-events: none; }
