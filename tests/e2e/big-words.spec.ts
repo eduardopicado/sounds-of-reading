@@ -1,8 +1,11 @@
 /* Big Words: two-syllable words, read a part at a time. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, seed, standInVoice, watchPage } from './helpers';
 import { ALL_BIG_WORDS } from '../../src/content/big-words';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 async function startAt(page: Page, step: number, extra: Record<string, unknown> = {}): Promise<void> {
   await seed(page, { 'maths-step:big-words': step, ...extra });

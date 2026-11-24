@@ -1,7 +1,10 @@
 /* Coach Says, played by reading the coach's instruction and doing it. */
 
 import { expect, test, type Page } from '@playwright/test';
-import { noProblems, openGame, seed, watchPage } from './helpers';
+import { noProblems, openGame, seed, standInVoice, watchPage } from './helpers';
+
+/* a voice that says when it has finished, as an iPad's does: each game waits for the end of what it says */
+test.beforeEach(async ({ page }) => { await standInVoice(page); });
 
 const thing = (page: Page, word: string, size = '') => page.locator(`.cs-thing${size}[data-word="${word}"]`);
 const place = (page: Page, word: string) => page.locator(`.cs-place[data-word="${word}"]`);
