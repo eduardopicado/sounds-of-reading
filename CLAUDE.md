@@ -86,6 +86,9 @@ src/content/coach-says.ts Coach Says: the things, places and instructions from
 src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his levels
                        (FLASH_PHRASES in words.ts), lookalikes one letter off, and
                        how long a phrase shows
+src/content/punctuation.ts Punctuation Ref: the sentences (PUNCTUATION_SENTENCES
+                       and the lists, short words and owners in words.ts, written
+                       right) with one mistake taken out, and the rule for each
 src/content/word-parts.ts Word Parts: the spelling rules that put an ending on
                        (hop → hopping, smile → smiling, cry → cried), what -ed
                        says, and the fronts and endings that change a meaning

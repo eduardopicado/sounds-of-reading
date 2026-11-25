@@ -2789,3 +2789,35 @@
   .cs-runner, .cs-ball { transition: none; }
   .cs-runner.bump { animation: none; }
 }
+
+/* ── Punctuation Ref ───────────────────────────────────────────────────── */
+
+.pr-stage { display: grid; gap: 14px; justify-items: center; width: 100%; }
+.pr-sentence {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 6px; min-height: 76px;
+  width: min(100%, 640px); padding: 14px 16px; border-radius: 16px; background: var(--paper); color: var(--ink);
+  font-family: var(--reading); font-size: 34px; line-height: 1.3;
+}
+.pr-sentence:empty { display: none; }
+.pr-word {
+  padding: 2px 8px; min-height: 48px; border: 2px dashed rgba(20, 49, 47, .35); border-radius: 10px; background: #FFF;
+  color: var(--ink); font: inherit; cursor: pointer;
+}
+.pr-word.right, .pr-gap.right { background: var(--mint); border-color: var(--green); }
+.pr-word.wrong, .pr-gap.wrong { background: #F6C6B8; border-color: var(--tomato); }
+.pr-gap {
+  width: 26px; min-height: 48px; padding: 0; border: 2px solid transparent; border-radius: 8px;
+  background: rgba(243, 178, 41, .28); cursor: pointer; margin: 0 -2px;
+}
+.pr-end { margin-left: -4px; }
+.pr-box { display: inline-block; width: 30px; height: 40px; margin-left: -2px; border: 3px solid var(--mustard-dark); border-radius: 6px; }
+.pr-right.good { text-decoration: underline 3px var(--mint-dark); text-underline-offset: 6px; }
+/* the sentences and words he picks from, as he reads them: their capitals kept */
+.wrap[data-game="punctuation-ref"] .mx-choice.word { font-family: var(--reading); text-transform: none; }
+.wrap[data-game="punctuation-ref"] .pr-stage[data-task="check"] ~ .mx-choices .mx-choice.word { font-size: clamp(18px, 4.6vw, 26px); }
+
+@media (max-width: 560px) {
+  .pr-sentence { font-size: 26px; padding: 10px; gap: 4px; }
+  .pr-word { padding: 2px 5px; min-height: 44px; }
+  .pr-gap { width: 22px; min-height: 44px; }
+}

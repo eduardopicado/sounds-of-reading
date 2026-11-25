@@ -1039,3 +1039,48 @@ export const NOT_SOUNDED_OUT: string[] = [
   'blues', 'toes', 'weighs', 'knees', 'cries', 'clues', 'goes', 'crumbs',
   /* two vowel sounds in one spelling */ 'quiet',
 ];
+
+/*  Punctuation Ref — he is the referee, and the sentences break the rules.
+ *
+ *  Every word is one he can read (the content test checks), apart from the
+ *  names, which are short and spelt as they sound. A sentence is written
+ *  here correctly, with its capitals and its mark at the end; the game takes
+ *  the mistake out of it, so each question has exactly one right answer:
+ *  one word without its capital, the mark at the end missing, or the comma
+ *  in a list. Calm sentences end with a full stop, questions with a question
+ *  mark, and only shouts and surprises with an exclamation mark.  */
+export const PUNCTUATION_NAMES: string[] = ['Sam', 'Tom', 'Ben', 'Max', 'Meg', 'Kim', 'Jack', 'Ted', 'Dan', 'Pat'];
+
+export const PUNCTUATION_SENTENCES: string[] = [
+  /* telling: a full stop */
+  'The dog is in the mud.', 'It is a hot day.', 'Sam has a red hat.', 'We play on Monday.', 'Tom can run fast.',
+  'The fish swim in the pond.', 'I have a big box.', 'The bus is late.', 'Meg got a kite.', 'The sun is hot.',
+  'Ben and I play in the park.', 'The frog sat on a log.', 'The hen is in the shed.', 'Max and Kim got the cake.',
+  'I kick the ball to Jack.', 'Dan has a bike.',
+  /* asking: a question mark */
+  'Can you kick the ball?', 'Where is my hat?', 'Did we win the match?', 'Will you come with me?', 'Is it hot?',
+  'Can Max play?', 'Where is the bus?', 'Did Ted get a goal?', 'Is the cake for me?', 'Can I have a hot dog?',
+  'Where did the ball go?', 'Is Pat at school?',
+  /* a shout or a surprise: an exclamation mark */
+  'Goal!', 'Stop!', 'Look out!', 'What a shot!', 'What a big cake!', 'Oh no, the ball is in the pond!', 'Help!',
+  'What a good goal!', 'Yum!',
+];
+
+/* lists of three: a comma between the first two, "and" before the last */
+export const LIST_SENTENCES: string[] = [
+  'We have a hat, a cup and a bag.', 'Sam has a dog, a cat and a pig.', 'In the box is a ball, a net and a bell.',
+  'The fox, the hen and the duck sat in the sun.', 'We got jam, cake and milk.', 'Pack a hat, a cup and a ball.',
+  'Tom can kick, run and jump.', 'Meg, Ben and I play in the park.', 'I have a red, a blue and a green kite.',
+  'The pig, the cow and the duck are on the farm.',
+];
+
+/* the long way = the short way, the apostrophe where the letters were */
+export const CONTRACTIONS: string[] = [
+  "do not = don't", "can not = can't", "it is = it's", "is not = isn't", "did not = didn't", "will not = won't",
+  "he is = he's", "she is = she's", "we are = we're", "they are = they're", "I will = I'll", "you are = you're",
+  "was not = wasn't", "has not = hasn't", "we will = we'll",
+];
+
+/* who has what, for "It is Sam's hat" */
+export const POSSESSIONS: string[] = ['hat', 'cup', 'bag', 'ball', 'kite', 'bike', 'box', 'bed'];
+export const ANIMAL_OWNERS: string[] = ['dog:bone', 'cat:bed', 'pig:mud', 'hen:egg', 'fox:box', 'duck:pond'];

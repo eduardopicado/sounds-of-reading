@@ -33,6 +33,7 @@ import { ANIMAL_STEPS } from '../content/animals';
 import { FOOTBALL_STEPS } from '../content/football-rules';
 import { SPACE_STEPS } from '../content/space';
 import { CODE_STEPS } from '../content/coding';
+import { PUNCTUATION_STEPS } from '../content/punctuation';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'space' | 'coding' | 'bjj' | 'football' | 'chess';
 
@@ -113,6 +114,8 @@ export const GAMES: Game[] = [
     load: () => import('./flash-phrases') },
   { path: 'word-parts', name: 'Word Parts', emoji: '🧩', what: 'Endings and fronts: jump·ing, un·happy', tone: '#C0679A', section: 'reading', ladder: PART_STEPS,
     load: () => import('./word-parts') },
+  { path: 'punctuation-ref', name: 'Punctuation Ref', emoji: '🟨', what: 'Capitals, full stops, ? and !, commas', tone: '#C9A227', section: 'reading', ladder: PUNCTUATION_STEPS,
+    load: () => import('./punctuation-ref') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',
