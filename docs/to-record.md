@@ -5,13 +5,15 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1925 clips, about 51610 characters.**
+**2012 clips, about 54842 characters.**
 
-## English (Stuart, Australian): 1246
+## English (Stuart, Australian): 1333
 
 - A ball that hits a hand by accident is not a foul: no card.
+- A comma goes between the things in a list. Before the last one, "and" does the job.
 - A dangerous tackle is a red card: he has to leave the game.
 - A foul! Free kick or penalty?
+- A sentence starts with a capital letter.
 - An accident is a free kick, with no card.
 - and the crab,
 - and the crab.
@@ -83,6 +85,7 @@ exactly these, with the voices in public/audio/README.md.
 - Autumn is March, April and May.
 - bath, tub, bathtub
 - bathtub
+- Ben and I play in the park.
 - Bison live in North America, and a smaller kind lives in the forests of Europe.
 - Bison live on the grassland.
 - Both arms forward: play on. The team that was fouled keeps the ball.
@@ -93,6 +96,9 @@ exactly these, with the voices in public/audio/README.md.
 - cam, el, camel
 - Camels live in the desert.
 - Camels live in the deserts of Africa and Asia, and can go for days without water.
+- Can I have a hot dog?
+- Can Max play?
+- Can you kick the ball?
 - Central America is here.
 - Central America is north of South America.
 - Central America is south of North America.
@@ -106,12 +112,15 @@ exactly these, with the voices in public/audio/README.md.
 - cow, boy, cowboy
 - Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
 - Crocodiles live in rivers.
+- Dan has a bike.
 - Day! The house is on the side facing the Sun.
 - December comes after November.
 - December comes before January.
 - December has 31 days.
 - den, tist, dentist
 - dentist
+- Did Ted get a goal?
+- Did we win the match?
 - Do people live there? No.
 - Do people live there? Yes!
 - Does it have a moon? No.
@@ -184,6 +193,7 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Goal!
 - Good calendar reading!
 - Good reading! Try again.
 - Good refereeing!
@@ -207,6 +217,7 @@ exactly these, with the voices in public/audio/README.md.
 - Hedgehogs live in Europe, Asia and Africa, and roll into a prickly ball to stay safe.
 - hel, met, helmet
 - helmet
+- Help!
 - Hippos live in Africa, and spend their days in rivers and lakes.
 - Hippos live in rivers.
 - hot, dog, hotdog
@@ -239,6 +250,9 @@ exactly these, with the voices in public/audio/README.md.
 - How many days are in October?
 - How many days are in September?
 - I am thinking of a planet. Ask me questions to find it!
+- I have a red, a blue and a green kite.
+- I is always a capital letter.
+- I kick the ball to Jack.
 - in the bag,
 - in the bag.
 - in the bath,
@@ -247,6 +261,7 @@ exactly these, with the voices in public/audio/README.md.
 - in the bin.
 - in the boat,
 - in the boat.
+- In the box is a ball, a net and a bell.
 - in the box,
 - in the box.
 - in the car,
@@ -270,6 +285,7 @@ exactly these, with the voices in public/audio/README.md.
 - Is it bigger than Earth? No.
 - Is it bigger than Earth? Yes!
 - Is it day or night at the house?
+- Is it hot?
 - Is it made of rock? No.
 - Is it made of rock? Yes!
 - Is it nearer the Sun than Earth? No.
@@ -284,6 +300,9 @@ exactly these, with the voices in public/audio/README.md.
 - Is it the hottest planet? Yes!
 - Is it the smallest planet? No.
 - Is it the smallest planet? Yes!
+- Is Pat at school?
+- Is the cake for me?
+- It asks something, so it ends with a question mark.
 - It goes here.
 - It is 10 metres.
 - It is 15 metres.
@@ -297,6 +316,8 @@ exactly these, with the voices in public/audio/README.md.
 - It is 50 metres.
 - It is 6 metres.
 - It is 8 metres.
+- It is a hot day.
+- It is a shout or a surprise, so it ends with an exclamation mark.
 - It is east.
 - It is in A1.
 - It is in A2.
@@ -334,6 +355,7 @@ exactly these, with the voices in public/audio/README.md.
 - It is not Venus.
 - It is south.
 - It is west.
+- It tells you something, so it ends with a full stop.
 - It went over the goal line, and a defender touched it last: corner.
 - It went over the goal line, and an attacker touched it last: goal kick.
 - It went over the side line: throw-in.
@@ -383,6 +405,7 @@ exactly these, with the voices in public/audio/README.md.
 - Llamas live in the mountains.
 - lob, ster, lobster
 - lobster
+- Look out!
 - mag, net, magnet
 - magnet
 - March comes after February.
@@ -399,9 +422,12 @@ exactly these, with the voices in public/audio/README.md.
 - Mars is the red planet. Its dust is red with rust.
 - match, box, matchbox
 - matchbox
+- Max and Kim got the cake.
 - May comes after April.
 - May comes before June.
 - May has 31 days.
+- Meg got a kite.
+- Meg, Ben and I play in the park.
 - mel, on, melon
 - melon
 - Mercury could still be it. Look at the answer again.
@@ -424,6 +450,7 @@ exactly these, with the voices in public/audio/README.md.
 - Most lions live in Africa, and a few live in a forest in India, in Asia.
 - mush, room, mushroom
 - mushroom
+- Names start with a capital letter.
 - nap, kin, napkin
 - napkin
 - Neptune comes after Uranus.
@@ -448,6 +475,7 @@ exactly these, with the voices in public/audio/README.md.
 - October has 31 days.
 - Octopuses live in the ocean, and have eight arms.
 - Octopuses live in the ocean.
+- Oh no, the ball is in the pond!
 - on the bed,
 - on the bed.
 - on the bench,
@@ -459,6 +487,7 @@ exactly these, with the voices in public/audio/README.md.
 - One arm out, the way the kick goes: free kick.
 - Orangutans live in the rainforest.
 - Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
+- Pack a hat, a cup and a ball.
 - pad, lock, padlock
 - padlock
 - Pandas live in the forest.
@@ -546,6 +575,8 @@ exactly these, with the voices in public/audio/README.md.
 - rubbish
 - sail, boat, sailboat
 - sailboat
+- Sam has a dog, a cat and a pig.
+- Sam has a red hat.
 - sand, wich, sandwich
 - sandwich
 - Saturday comes after Friday.
@@ -616,6 +647,7 @@ exactly these, with the voices in public/audio/README.md.
 - Start at the swing.
 - Start at the tent.
 - Start at the tree.
+- Stop!
 - Stopping a goal with your hand is a red card, and a penalty.
 - Stopping an attack on purpose is a yellow card: a warning.
 - sum, mer, summer
@@ -898,6 +930,21 @@ exactly these, with the voices in public/audio/README.md.
 - That is the tree.
 - That is Uranus.
 - That is Venus.
+- The apostrophe goes where the letters were taken out: can not, can't.
+- The apostrophe goes where the letters were taken out: did not, didn't.
+- The apostrophe goes where the letters were taken out: do not, don't.
+- The apostrophe goes where the letters were taken out: has not, hasn't.
+- The apostrophe goes where the letters were taken out: he is, he's.
+- The apostrophe goes where the letters were taken out: I will, I'll.
+- The apostrophe goes where the letters were taken out: is not, isn't.
+- The apostrophe goes where the letters were taken out: it is, it's.
+- The apostrophe goes where the letters were taken out: she is, she's.
+- The apostrophe goes where the letters were taken out: they are, they're.
+- The apostrophe goes where the letters were taken out: was not, wasn't.
+- The apostrophe goes where the letters were taken out: we are, we're.
+- The apostrophe goes where the letters were taken out: we will, we'll.
+- The apostrophe goes where the letters were taken out: will not, won't.
+- The apostrophe goes where the letters were taken out: you are, you're.
 - The assistant holds the flag straight up: offside.
 - The ball came from a throw-in. There is no offside from a throw-in.
 - The ball hit his hand by accident.
@@ -905,15 +952,24 @@ exactly these, with the voices in public/audio/README.md.
 - The ball went out. What happens now?
 - The bench is here.
 - The boat is here.
+- The bus is late.
 - The crab is here.
+- The days of the week start with a capital letter.
+- The dog is in the mud.
 - The duck is here.
+- The fish swim in the pond.
 - The flag is here.
 - The foul was inside the box: penalty!
 - The foul was outside the box: free kick.
+- The fox, the hen and the duck sat in the sun.
+- The frog sat on a log.
+- The hen is in the shed.
 - The hill is here.
 - The hut is here.
 - The log is here.
 - The nest is here.
+- The pig, the cow and the duck are on the farm.
+- The ref checks the sentences. Which one is right?
 - The referee points at the corner flag: corner.
 - The referee points at the goal area: goal kick.
 - The referee points at the penalty spot: penalty.
@@ -921,6 +977,7 @@ exactly these, with the voices in public/audio/README.md.
 - The shell is here.
 - The ship is here.
 - The Sun is a star. It gives us light and keeps us warm.
+- The sun is hot.
 - The swing is here.
 - The tent is here.
 - The treasure is here.
@@ -988,6 +1045,8 @@ exactly these, with the voices in public/audio/README.md.
 - ticket
 - Tigers live in Asia, and they are the biggest cats in the world.
 - Tigers live in the forest.
+- Tom can kick, run and jump.
+- Tom can run fast.
 - tooth, brush, toothbrush
 - toothbrush
 - Tuesday comes after Monday.
@@ -1018,12 +1077,17 @@ exactly these, with the voices in public/audio/README.md.
 - Venus is nearer to the Sun than Saturn.
 - Venus is nearer to the Sun than Uranus.
 - Venus is the hottest planet, even hotter than Mercury.
+- We got jam, cake and milk.
+- We have a hat, a cup and a bag.
+- We play on Monday.
 - Wednesday comes after Tuesday.
 - Wednesday comes before Thursday.
 - week, end, weekend
 - weekend
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
 - Whales live in the ocean.
+- What a big cake!
+- What a good goal!
 - What day comes after Friday?
 - What day comes after Monday?
 - What day comes after Saturday?
@@ -1039,6 +1103,7 @@ exactly these, with the voices in public/audio/README.md.
 - What day comes before Tuesday?
 - What day comes before Wednesday?
 - What does the referee do?
+- What goes at the end?
 - What is above the bench?
 - What is above the boat?
 - What is above the crab?
@@ -1070,6 +1135,21 @@ exactly these, with the voices in public/audio/README.md.
 - What is below the tent?
 - What is below the tree?
 - What is the referee saying?
+- What is the short way to write "can not"?
+- What is the short way to write "did not"?
+- What is the short way to write "do not"?
+- What is the short way to write "has not"?
+- What is the short way to write "he is"?
+- What is the short way to write "I will"?
+- What is the short way to write "is not"?
+- What is the short way to write "it is"?
+- What is the short way to write "she is"?
+- What is the short way to write "they are"?
+- What is the short way to write "was not"?
+- What is the short way to write "we are"?
+- What is the short way to write "we will"?
+- What is the short way to write "will not"?
+- What is the short way to write "you are"?
 - What is there?
 - What is to the left of the bench?
 - What is to the left of the boat?
@@ -1158,8 +1238,10 @@ exactly these, with the voices in public/audio/README.md.
 - What season is November in?
 - What season is October in?
 - What season is September in?
+- Where did the ball go?
 - Where does the bison live?
 - Where does the camel live?
+- Where does the comma go? Tap the gap.
 - Where does the crocodile live?
 - Where does the elephant live?
 - Where does the giraffe live?
@@ -1184,8 +1266,10 @@ exactly these, with the voices in public/audio/README.md.
 - Where is Jupiter?
 - Where is Mars?
 - Where is Mercury?
+- Where is my hat?
 - Where is Neptune?
 - Where is Saturn?
+- Where is the bus?
 - Where is Uranus?
 - Where is Venus?
 - Which animal lives in Africa?
@@ -1238,6 +1322,8 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the swing?
 - Which way is the tent?
 - Which way is the tree?
+- Which word needs a capital letter? Tap it.
+- Will you come with me?
 - win, ter, winter
 - Winter is June, July and August.
 - Yes! Find another one.
@@ -1252,6 +1338,7 @@ exactly these, with the voices in public/audio/README.md.
 - You beat your time!
 - You found the treasure!
 - Your fastest read ever!
+- Yum!
 - Zebras live in Africa, and every zebra has its own pattern of stripes.
 - Zebras live on the grassland.
 - zig, zag, zigzag
