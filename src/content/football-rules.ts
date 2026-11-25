@@ -72,7 +72,9 @@ export const CALLS: Record<Call, Both> = {
 
 export const ASK = {
   restart: { en: 'The ball went out. What happens now?', pt: 'A bola saiu. E agora?' },
-  foul: { en: 'A foul! Free kick or penalty?', pt: 'Foi falta! É falta ou pênalti?' },
+  /* who fouled is said, and the picture marks him: it decides the call */
+  foul: { en: 'A defender fouled an attacker. Free kick or penalty?', pt: 'Um defensor fez falta num atacante. É falta ou pênalti?' },
+  attackerFoul: { en: 'An attacker fouled a defender. Free kick or penalty?', pt: 'Um atacante fez falta num defensor. É falta ou pênalti?' },
   offside: { en: 'The ball is passed now. Is he offside?', pt: 'A bola foi passada agora. Ele está impedido?' },
   card: { en: 'What does the referee do?', pt: 'O que o árbitro faz?' },
   signal: { en: 'What is the referee saying?', pt: 'O que o árbitro está dizendo?' },
@@ -82,8 +84,12 @@ export const WHY = {
   side: { en: 'It went over the side line: throw-in.', pt: 'Saiu pela lateral: é lateral.' },
   goalKick: { en: 'It went over the goal line, and an attacker touched it last: goal kick.', pt: 'Saiu pela linha de fundo, e um atacante tocou por último: tiro de meta.' },
   corner: { en: 'It went over the goal line, and a defender touched it last: corner.', pt: 'Saiu pela linha de fundo, e um defensor tocou por último: escanteio.' },
-  inBox: { en: 'The foul was inside the box: penalty!', pt: 'A falta foi dentro da área: pênalti!' },
+  inBox: { en: 'A defender fouled inside his own box: penalty!', pt: 'O defensor fez falta dentro da própria área: pênalti!' },
   outBox: { en: 'The foul was outside the box: free kick.', pt: 'A falta foi fora da área: é falta.' },
+  attackerFoul: {
+    en: 'The attacker made the foul, so the defending team gets a free kick, even inside the box. A penalty is only for a foul by the defenders.',
+    pt: 'Quem fez a falta foi o atacante, então o time que defende cobra a falta, mesmo dentro da área. Pênalti é só para falta de quem defende.',
+  },
   past: { en: 'He was past the last defender when the ball was passed: offside!', pt: 'Ele estava na frente do último defensor quando a bola foi passada: impedimento!' },
   notPast: { en: 'He was not past the last defender when the ball was passed: not offside.', pt: 'Ele não estava na frente do último defensor quando a bola foi passada: não é impedimento.' },
   justPast: { en: 'Just a little past the last defender is still offside.', pt: 'Só um pouquinho na frente do último defensor já é impedimento.' },
@@ -211,16 +217,36 @@ function restart(r: Rand): FootballQuestion {
   };
 }
 
+/** a point inside the box at the right-hand goal, clear of its edges */
+const inTheBox = (r: Rand): Pt => [between(r, PITCH.w - BOX.depth + 2, PITCH.w - 4), PITCH.h / 2 + between(r, -BOX.width / 2 + 3, BOX.width / 2 - 3)];
+
+/**
+ * A foul. His team attacks the goal on the right; the other team defends it.
+ * A defender's foul in his own box is a penalty, and outside it a free kick.
+ * An attacker's foul is a free kick to the defenders wherever it is, the box
+ * included: the case that looks like a penalty and is not.
+ */
 function foul(r: Rand): FootballQuestion {
-  const inside = r() < 0.5;
+  const kind = r() < 0.25 ? 'attacker-in-box' : r() < 0.5 ? 'in-box' : 'out-box';
+  if (kind === 'attacker-in-box') {
+    const at = inTheBox(r);
+    return {
+      task: 'foul', kind, ask: ASK.attackerFoul, options: ['free-kick', 'penalty'], answer: 'free-kick', why: WHY.attackerFoul,
+      scene: {
+        players: [{ at, side: 'them', mark: 'fouled' }, { at: [at[0] - 3, at[1] + 2.4], side: 'us', mark: 'fouler' }, keeper(r)],
+        ball: [at[0] + 3.4, at[1] - 2.2], foul: at,
+      },
+    };
+  }
+  const inside = kind === 'in-box';
   const at: Pt = inside
-    ? [between(r, PITCH.w - BOX.depth + 2, PITCH.w - 4), PITCH.h / 2 + between(r, -BOX.width / 2 + 3, BOX.width / 2 - 3)]
+    ? inTheBox(r)
     /* outside: in front of the box, or beside it, where it is easy to think it is in */
     : r() < 0.5
       ? [between(r, 62, PITCH.w - BOX.depth - 3), PITCH.h / 2 + between(r, -18, 18)]
       : [between(r, PITCH.w - 14, PITCH.w - 4), r() < 0.5 ? between(r, 3, 10) : between(r, PITCH.h - 10, PITCH.h - 3)];
   return {
-    task: 'foul', kind: inside ? 'in-box' : 'out-box', ask: ASK.foul, options: ['free-kick', 'penalty'],
+    task: 'foul', kind, ask: ASK.foul, options: ['free-kick', 'penalty'],
     answer: inside ? 'penalty' : 'free-kick', why: inside ? WHY.inBox : WHY.outBox,
     scene: {
       players: [{ at, side: 'us', mark: 'fouled' }, { at: [at[0] + 3, at[1] - 2.4], side: 'them', mark: 'fouler' }, keeper(r)],
