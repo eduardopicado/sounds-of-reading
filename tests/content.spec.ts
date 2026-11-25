@@ -28,6 +28,7 @@ import { clipId } from '../src/lib/clip-id';
 import { toRecord, wanted } from '../tools/make-audio';
 import { SURVEY_STEPS, surveyAsk, surveyQuestion, surveySaid } from '../src/content/maths';
 import { flagCountries } from '../src/games/teams';
+import { ANIMAL_OWNERS, CONTRACTIONS, LIST_SENTENCES, POSSESSIONS, PUNCTUATION_NAMES, PUNCTUATION_SENTENCES } from '../src/content/words';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
 import { NOT_BY_CHANCE, NOT_SOUNDED_OUT, PHONEMES } from '../src/content/words';
@@ -1264,5 +1265,46 @@ describe('sounding a word out', () => {
     const cut = uniqueWords(REAL_WORDS).filter((w) => pieces(w));
     const told = cut.filter((w) => soundsOf(w));
     expect(told.length / cut.length).toBeGreaterThan(0.6);
+  });
+});
+
+/* ── Punctuation Ref ────────────────────────────────────────────────────── */
+
+describe('punctuation sentences', () => {
+  const readable = new Set([...REAL_WORDS, ...ALL_SIGHT_WORDS].map((w) => w.text.toLowerCase()));
+  const names = new Set(PUNCTUATION_NAMES.map((n) => n.toLowerCase()));
+  /* the short words are what the game teaches; their long forms must be readable */
+  const longs = CONTRACTIONS.map((c) => c.split(' = ')[0]);
+  const animals = ANIMAL_OWNERS.flatMap((a) => a.split(':'));
+  const texts = [...PUNCTUATION_SENTENCES, ...LIST_SENTENCES, ...longs, ...POSSESSIONS, ...animals];
+
+  it('uses only words he can read, and short names', () => {
+    const unknown = texts.flatMap((t) => (t.toLowerCase().match(/[a-z]+/g) ?? []).filter((w) => !readable.has(w) && !names.has(w)).map((w) => `${w} in "${t}"`));
+    expect(unknown).toEqual([]);
+    for (const n of PUNCTUATION_NAMES) expect(n, n).toMatch(/^[A-Z][a-z]{2,3}$/);
+    expect(texts.filter((t) => (t.toLowerCase().match(/[a-z]+/g) ?? []).some((w) => blocked(w)))).toEqual([]);
+  });
+
+  it('writes each sentence right: a capital first, one mark at the end, names with capitals', () => {
+    for (const t of [...PUNCTUATION_SENTENCES, ...LIST_SENTENCES]) {
+      expect(t, t).toMatch(/^[A-Z][^.?!]*[.?!]$/);
+      for (const w of t.match(/[A-Za-z]+/g) ?? []) {
+        if (names.has(w.toLowerCase())) expect(w, t).toBe(w[0].toUpperCase() + w.slice(1));
+      }
+    }
+  });
+
+  it('gives each list one comma, before the two last things joined by "and"', () => {
+    for (const t of LIST_SENTENCES) {
+      expect(t.split(',').length, t).toBe(2);
+      expect(t.split(',')[1], t).toMatch(/ and /);
+    }
+  });
+
+  it('has enough of each kind for a round', () => {
+    for (const mark of ['.', '?', '!']) expect(PUNCTUATION_SENTENCES.filter((t) => t.endsWith(mark)).length, mark).toBeGreaterThanOrEqual(8);
+    expect(LIST_SENTENCES.length).toBeGreaterThanOrEqual(8);
+    expect(CONTRACTIONS.length).toBeGreaterThanOrEqual(8);
+    for (const c of CONTRACTIONS) expect(c, c).toMatch(/^[A-Za-z]+ [a-z]+ = [A-Za-z]+'[a-z]+$/);
   });
 });
