@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**1894 clips, about 51381 characters.**
+**2014 clips, about 58748 characters.**
 
-## English (Stuart, Australian): 1215
+## English (Stuart, Australian): 1275
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
@@ -119,6 +119,7 @@ exactly these, with the voices in public/audio/README.md.
 - Does it have big, bright rings? Yes!
 - Does it spin on its side? No.
 - Does it spin on its side? Yes!
+- Does the Moon make its own light?
 - Dolphins live in the ocean, and breathe air through a hole on top of their heads.
 - Dolphins live in the ocean.
 - drag, on, dragon
@@ -130,6 +131,9 @@ exactly these, with the voices in public/audio/README.md.
 - Each square is 5 metres.
 - Earth comes after Venus.
 - Earth could still be it. Look at the answer again.
+- Earth goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Earth goes round slowest. The further from the Sun, the slower a planet goes round.
+- Earth is between Venus and Mars.
 - Earth is bigger than Mars.
 - Earth is bigger than Mercury.
 - Earth is bigger than Venus.
@@ -143,6 +147,7 @@ exactly these, with the voices in public/audio/README.md.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
+- From the side, we see half of its lit half: a half moon.
 - Giraffes live in Africa, and they are the tallest animals in the world.
 - Giraffes live on the grassland.
 - Go 1 square east,
@@ -220,6 +225,11 @@ exactly these, with the voices in public/audio/README.md.
 - How far is it to the swing?
 - How far is it to the tent?
 - How far is it to the tree?
+- How long does the Earth take to go round the Sun?
+- How long does the Earth take to spin round once?
+- How long does the Moon take to go round the Earth?
+- How many days does the Earth take to go round the Sun?
+- How many moons does the Earth have?
 - I am thinking of a planet. Ask me questions to find it!
 - I have a red, a blue and a green kite.
 - I is always a capital letter.
@@ -334,6 +344,10 @@ exactly these, with the voices in public/audio/README.md.
 - jacket
 - Jupiter comes after Mars.
 - Jupiter could still be it. Look at the answer again.
+- Jupiter goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Jupiter goes round slowest. The further from the Sun, the slower a planet goes round.
+- Jupiter is about 5 times as far from the Sun as the Earth.
+- Jupiter is between Mars and Saturn.
 - Jupiter is bigger than Earth.
 - Jupiter is bigger than Mars.
 - Jupiter is bigger than Mercury.
@@ -372,6 +386,9 @@ exactly these, with the voices in public/audio/README.md.
 - magnet
 - Mars comes after Earth.
 - Mars could still be it. Look at the answer again.
+- Mars goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Mars goes round slowest. The further from the Sun, the slower a planet goes round.
+- Mars is between Earth and Jupiter.
 - Mars is bigger than Mercury.
 - Mars is here.
 - Mars is nearer to the Sun than Jupiter.
@@ -387,7 +404,10 @@ exactly these, with the voices in public/audio/README.md.
 - mel, on, melon
 - melon
 - Mercury could still be it. Look at the answer again.
+- Mercury goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Mercury goes round slowest. The further from the Sun, the slower a planet goes round.
 - Mercury is here.
+- Mercury is nearer the Sun than the Earth, so its year is shorter.
 - Mercury is nearer to the Sun than Earth.
 - Mercury is nearer to the Sun than Jupiter.
 - Mercury is nearer to the Sun than Mars.
@@ -409,6 +429,9 @@ exactly these, with the voices in public/audio/README.md.
 - napkin
 - Neptune comes after Uranus.
 - Neptune could still be it. Look at the answer again.
+- Neptune goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Neptune goes round slowest. The further from the Sun, the slower a planet goes round.
+- Neptune is about 30 times as far from the Sun as the Earth.
 - Neptune is bigger than Earth.
 - Neptune is bigger than Mars.
 - Neptune is bigger than Mercury.
@@ -416,6 +439,7 @@ exactly these, with the voices in public/audio/README.md.
 - Neptune is here.
 - Neptune is the farthest planet from the Sun, and the windiest.
 - Night! The house is on the side away from the Sun. The Earth turns, so it will be day there soon.
+- No. The Moon shines because the Sun lights it up.
 - North America is north of Central America.
 - Not there. Try again.
 - Now read it again. Can you beat your time?
@@ -529,7 +553,12 @@ exactly these, with the voices in public/audio/README.md.
 - sandwich
 - Saturn comes after Jupiter.
 - Saturn could still be it. Look at the answer again.
+- Saturn goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Saturn goes round slowest. The further from the Sun, the slower a planet goes round.
 - Saturn has big, bright rings, made of ice and rock.
+- Saturn has the most moons: 146 that we know of.
+- Saturn is about 10 times as far from the Sun as the Earth.
+- Saturn is between Jupiter and Uranus.
 - Saturn is bigger than Earth.
 - Saturn is bigger than Mars.
 - Saturn is bigger than Mercury.
@@ -896,6 +925,13 @@ exactly these, with the voices in public/audio/README.md.
 - The days of the week start with a capital letter.
 - The dog is in the mud.
 - The duck is here.
+- The Earth goes round the Sun once a year: 365 days.
+- The Earth has one moon: the Moon.
+- The Earth is 1 step from the Sun. About how many steps away is Jupiter?
+- The Earth is 1 step from the Sun. About how many steps away is Neptune?
+- The Earth is 1 step from the Sun. About how many steps away is Saturn?
+- The Earth is 1 step from the Sun. About how many steps away is Uranus?
+- The Earth spins round once a day. That makes day and night.
 - The fish swim in the pond.
 - The flag is here.
 - The foul was inside the box: penalty!
@@ -906,6 +942,10 @@ exactly these, with the voices in public/audio/README.md.
 - The hill is here.
 - The hut is here.
 - The log is here.
+- The Moon goes round the Earth about once a month.
+- The Moon goes round the Earth, and the Earth goes round the Sun.
+- The Moon is between the Earth and the Sun. Its lit half faces away from us, so we cannot see it: a new moon.
+- The Moon is on the far side of the Earth from the Sun, so we see all of its lit half: a full moon.
 - The nest is here.
 - The pig, the cow and the duck are on the farm.
 - The ref checks the sentences. Which one is right?
@@ -992,6 +1032,10 @@ exactly these, with the voices in public/audio/README.md.
 - upset
 - Uranus comes after Saturn.
 - Uranus could still be it. Look at the answer again.
+- Uranus goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Uranus goes round slowest. The further from the Sun, the slower a planet goes round.
+- Uranus is about 20 times as far from the Sun as the Earth.
+- Uranus is between Saturn and Neptune.
 - Uranus is bigger than Earth.
 - Uranus is bigger than Mars.
 - Uranus is bigger than Mercury.
@@ -1002,9 +1046,13 @@ exactly these, with the voices in public/audio/README.md.
 - Uranus spins on its side, like a ball rolling around the Sun.
 - Venus comes after Mercury.
 - Venus could still be it. Look at the answer again.
+- Venus goes round fastest. The nearer the Sun, the faster a planet goes round.
+- Venus goes round slowest. The further from the Sun, the slower a planet goes round.
+- Venus is between Mercury and Earth.
 - Venus is bigger than Mars.
 - Venus is bigger than Mercury.
 - Venus is here.
+- Venus is nearer the Sun than the Earth, so its year is shorter.
 - Venus is nearer to the Sun than Earth.
 - Venus is nearer to the Sun than Jupiter.
 - Venus is nearer to the Sun than Mars.
@@ -1021,6 +1069,7 @@ exactly these, with the voices in public/audio/README.md.
 - Whales live in the ocean.
 - What a big cake!
 - What a good goal!
+- What does the Moon go round?
 - What does the referee do?
 - What goes at the end?
 - What is above the bench?
@@ -1165,6 +1214,8 @@ exactly these, with the voices in public/audio/README.md.
 - Which animal lives in South America?
 - Which continent is north of Central America?
 - Which continent is south of Central America?
+- Which of these goes round the Sun fastest?
+- Which of these goes round the Sun slowest?
 - Which planet comes after Earth?
 - Which planet comes after Jupiter?
 - Which planet comes after Mars?
@@ -1172,9 +1223,17 @@ exactly these, with the voices in public/audio/README.md.
 - Which planet comes after Saturn?
 - Which planet comes after Uranus?
 - Which planet comes after Venus?
+- Which planet has the most moons?
+- Which planet is between Earth and Jupiter?
+- Which planet is between Jupiter and Uranus?
+- Which planet is between Mars and Saturn?
+- Which planet is between Mercury and Earth?
+- Which planet is between Saturn and Neptune?
+- Which planet is between Venus and Mars?
 - Which planet is bigger?
 - Which planet is nearer to the Sun?
 - Which planet is nearest to the Sun?
+- Which planet takes less than a year to go round the Sun?
 - Which square is the bench in?
 - Which square is the boat in?
 - Which square is the crab in?
@@ -1208,6 +1267,7 @@ exactly these, with the voices in public/audio/README.md.
 - Which word needs a capital letter? Tap it.
 - Will you come with me?
 - win, ter, winter
+- With the Moon here, what shape do we see from the Earth?
 - Yes! Find another one.
 - Yes! It is Earth!
 - Yes! It is Jupiter!
@@ -1225,7 +1285,7 @@ exactly these, with the voices in public/audio/README.md.
 - Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 679
+## Portuguese (Roberto Valença, Brazilian): 739
 
 - A América Central fica ao norte da América do Sul.
 - A América Central fica ao sul da América do Norte.
@@ -1244,18 +1304,33 @@ exactly these, with the voices in public/audio/README.md.
 - A concha está aqui.
 - A falta foi dentro da área: pênalti!
 - A falta foi fora da área: é falta.
+- A Lua dá a volta na Terra mais ou menos uma vez por mês.
+- A Lua está do outro lado da Terra, longe do Sol, então vemos toda a metade iluminada: lua cheia.
+- A Lua está entre a Terra e o Sol. A metade iluminada está virada para longe de nós, então não a vemos: lua nova.
+- A Lua gira em volta da Terra, e a Terra gira em volta do Sol.
+- A Lua tem luz própria?
 - A maioria dos leões vive na África, e alguns vivem numa floresta da Índia, na Ásia.
 - A pedra está aqui.
+- A Terra dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- A Terra dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
+- A Terra dá a volta no Sol uma vez por ano: 365 dias.
 - A Terra é a nossa casa, o único planeta que conhecemos com seres vivos.
 - A Terra é maior que Marte.
 - A Terra é maior que Mercúrio.
 - A Terra é maior que Vênus.
+- A Terra está a 1 passo do Sol. Mais ou menos a quantos passos está Júpiter?
+- A Terra está a 1 passo do Sol. Mais ou menos a quantos passos está Netuno?
+- A Terra está a 1 passo do Sol. Mais ou menos a quantos passos está Saturno?
+- A Terra está a 1 passo do Sol. Mais ou menos a quantos passos está Urano?
 - A Terra está aqui.
+- A Terra fica entre Vênus e Marte.
 - A Terra fica mais perto do Sol que Júpiter.
 - A Terra fica mais perto do Sol que Marte.
 - A Terra fica mais perto do Sol que Netuno.
 - A Terra fica mais perto do Sol que Saturno.
 - A Terra fica mais perto do Sol que Urano.
+- A Terra gira uma vez por dia. Isso faz o dia e a noite.
+- A Terra tem uma lua: a Lua.
 - A Terra vem depois de Vênus.
 - Aí não. Tente de novo.
 - Ainda pode ser a Terra. Olhe a resposta de novo.
@@ -1325,6 +1400,7 @@ exactly these, with the voices in public/audio/README.md.
 - Coloque o Território do Norte no mapa.
 - Coloque Queensland no mapa.
 - Coloque Vitória no mapa.
+- Com a Lua aqui, que forma a gente vê da Terra?
 - Comece na árvore.
 - Comece na bandeira.
 - Comece na barraca.
@@ -1340,6 +1416,7 @@ exactly these, with the voices in public/audio/README.md.
 - Comece no ninho.
 - Comece no pato.
 - Comece no tronco.
+- De lado, vemos metade da parte iluminada: meia-lua.
 - depois 1 quadrado para o leste.
 - depois 1 quadrado para o norte.
 - depois 1 quadrado para o oeste.
@@ -1421,6 +1498,7 @@ exactly these, with the voices in public/audio/README.md.
 - Em que tipo de lugar vive o tigre?
 - Em que tipo de lugar vive o tubarão?
 - Em que tipo de lugar vive o urso-polar?
+- Em volta de quê a Lua gira?
 - Entrada perigosa é cartão vermelho: ele tem que sair do jogo.
 - Essa é a América Central.
 - Essa é a árvore.
@@ -1527,6 +1605,8 @@ exactly these, with the voices in public/audio/README.md.
 - Isso! É Saturno!
 - Isso! É Urano!
 - Isso! É Vênus!
+- Júpiter dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Júpiter dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Júpiter é maior que a Terra.
 - Júpiter é maior que Marte.
 - Júpiter é maior que Mercúrio.
@@ -1536,6 +1616,8 @@ exactly these, with the voices in public/audio/README.md.
 - Júpiter é maior que Vênus.
 - Júpiter é o maior planeta. Todos os outros caberiam dentro dele.
 - Júpiter está aqui.
+- Júpiter está mais ou menos 5 vezes mais longe do Sol que a Terra.
+- Júpiter fica entre Marte e Saturno.
 - Júpiter fica mais perto do Sol que Netuno.
 - Júpiter fica mais perto do Sol que Saturno.
 - Júpiter fica mais perto do Sol que Urano.
@@ -1543,17 +1625,23 @@ exactly these, with the voices in public/audio/README.md.
 - Leia o nome. Onde vive esse animal?
 - Lucas
 - Luquinhas
+- Marte dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Marte dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Marte é maior que Mercúrio.
 - Marte é o planeta vermelho. A poeira dele é vermelha de ferrugem.
 - Marte está aqui.
+- Marte fica entre a Terra e Júpiter.
 - Marte fica mais perto do Sol que Júpiter.
 - Marte fica mais perto do Sol que Netuno.
 - Marte fica mais perto do Sol que Saturno.
 - Marte fica mais perto do Sol que Urano.
 - Marte vem depois da Terra.
+- Mercúrio dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Mercúrio dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Mercúrio é o mais perto do Sol.
 - Mercúrio é o menor planeta, e o mais perto do Sol.
 - Mercúrio está aqui.
+- Mercúrio está mais perto do Sol que a Terra, então o ano de Mercúrio é mais curto.
 - Mercúrio fica mais perto do Sol que a Terra.
 - Mercúrio fica mais perto do Sol que Júpiter.
 - Mercúrio fica mais perto do Sol que Marte.
@@ -1571,12 +1659,16 @@ exactly these, with the voices in public/audio/README.md.
 - Não é Saturno.
 - Não é Urano.
 - Não é Vênus.
+- Não. A Lua brilha porque o Sol ilumina ela.
+- Netuno dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Netuno dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Netuno é maior que a Terra.
 - Netuno é maior que Marte.
 - Netuno é maior que Mercúrio.
 - Netuno é maior que Vênus.
 - Netuno é o planeta mais longe do Sol, e o que tem mais vento.
 - Netuno está aqui.
+- Netuno está mais ou menos 30 vezes mais longe do Sol que a Terra.
 - Netuno vem depois de Urano.
 - Noite! A casa está do lado de costas para o Sol. A Terra gira, então logo vai ser dia lá.
 - O árbitro aponta para a bandeirinha de escanteio: escanteio.
@@ -1775,6 +1867,8 @@ exactly these, with the voices in public/audio/README.md.
 - Qual animal vive na Europa?
 - Qual continente fica ao norte da América Central?
 - Qual continente fica ao sul da América Central?
+- Qual destes dá a volta no Sol mais devagar?
+- Qual destes dá a volta no Sol mais rápido?
 - Qual é a distância até a árvore?
 - Qual é a distância até a bandeira?
 - Qual é a distância até a barraca?
@@ -1791,7 +1885,15 @@ exactly these, with the voices in public/audio/README.md.
 - Qual é a distância até o pato?
 - Qual é a distância até o tronco?
 - Qual planeta é maior?
+- Qual planeta fica entre a Terra e Júpiter?
+- Qual planeta fica entre Júpiter e Urano?
+- Qual planeta fica entre Marte e Saturno?
+- Qual planeta fica entre Mercúrio e a Terra?
+- Qual planeta fica entre Saturno e Netuno?
+- Qual planeta fica entre Vênus e Marte?
 - Qual planeta fica mais perto do Sol?
+- Qual planeta leva menos de um ano para dar a volta no Sol?
+- Qual planeta tem mais luas?
 - Qual planeta vem depois da Terra?
 - Qual planeta vem depois de Júpiter?
 - Qual planeta vem depois de Marte?
@@ -1799,6 +1901,11 @@ exactly these, with the voices in public/audio/README.md.
 - Qual planeta vem depois de Saturno?
 - Qual planeta vem depois de Urano?
 - Qual planeta vem depois de Vênus?
+- Quantas luas a Terra tem?
+- Quanto tempo a Lua leva para dar a volta na Terra?
+- Quanto tempo a Terra leva para dar a volta no Sol?
+- Quanto tempo a Terra leva para girar uma vez?
+- Quantos dias a Terra leva para dar a volta no Sol?
 - Saiu pela lateral: é lateral.
 - Saiu pela linha de fundo, e um atacante tocou por último: tiro de meta.
 - Saiu pela linha de fundo, e um defensor tocou por último: escanteio.
@@ -1814,6 +1921,8 @@ exactly these, with the voices in public/audio/README.md.
 - São 50 metros.
 - São 6 metros.
 - São 8 metros.
+- Saturno dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Saturno dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Saturno é maior que a Terra.
 - Saturno é maior que Marte.
 - Saturno é maior que Mercúrio.
@@ -1821,9 +1930,12 @@ exactly these, with the voices in public/audio/README.md.
 - Saturno é maior que Urano.
 - Saturno é maior que Vênus.
 - Saturno está aqui.
+- Saturno está mais ou menos 10 vezes mais longe do Sol que a Terra.
+- Saturno fica entre Júpiter e Urano.
 - Saturno fica mais perto do Sol que Netuno.
 - Saturno fica mais perto do Sol que Urano.
 - Saturno tem anéis grandes e brilhantes, feitos de gelo e pedra.
+- Saturno tem mais luas: 146 que a gente conhece.
 - Saturno vem depois de Júpiter.
 - Sem querer é só falta, sem cartão.
 - Só um pouquinho na frente do último defensor já é impedimento.
@@ -1884,19 +1996,27 @@ exactly these, with the voices in public/audio/README.md.
 - Toque no tronco.
 - Toque onde está o tesouro.
 - Um braço esticado, para o lado de quem vai cobrar: falta.
+- Urano dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Urano dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Urano é maior que a Terra.
 - Urano é maior que Marte.
 - Urano é maior que Mercúrio.
 - Urano é maior que Netuno.
 - Urano é maior que Vênus.
 - Urano está aqui.
+- Urano está mais ou menos 20 vezes mais longe do Sol que a Terra.
+- Urano fica entre Saturno e Netuno.
 - Urano fica mais perto do Sol que Netuno.
 - Urano gira deitado, como uma bola rolando em volta do Sol.
 - Urano vem depois de Saturno.
+- Vênus dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
+- Vênus dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Vênus é maior que Marte.
 - Vênus é maior que Mercúrio.
 - Vênus é o planeta mais quente, mais quente até que Mercúrio.
 - Vênus está aqui.
+- Vênus está mais perto do Sol que a Terra, então o ano de Vênus é mais curto.
+- Vênus fica entre Mercúrio e a Terra.
 - Vênus fica mais perto do Sol que a Terra.
 - Vênus fica mais perto do Sol que Júpiter.
 - Vênus fica mais perto do Sol que Marte.
