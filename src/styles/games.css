@@ -2826,3 +2826,24 @@
   .pr-word { padding: 2px 5px; min-height: 44px; }
   .pr-gap { width: 22px; min-height: 44px; }
 }
+
+/* ── Orbits ────────────────────────────────────────────────────────────── */
+
+.ob-stage { display: grid; gap: 10px; justify-items: center; width: 100%; }
+.ob-sky { display: flex; justify-content: center; width: 100%; }
+.ob-picture {
+  display: block; width: min(100%, 520px, calc(100svh - 400px)); min-width: min(100%, 220px); height: auto; aspect-ratio: 1;
+  border-radius: 18px; background: radial-gradient(circle at 50% 50%, #18254F, #0B132E 70%);
+}
+.ob-picture.wide { aspect-ratio: 520 / 300; width: min(100%, 620px); }
+.ob-sun { fill: #FBD14B; stroke: #F7B733; stroke-width: 3; }
+.ob-orbit { fill: none; stroke: rgba(255, 246, 231, .28); stroke-width: 1; }
+.ob-orbit.marked { stroke: #F3B229; stroke-width: 2; }
+.ob-orbit.earth { stroke: #7FB2F0; stroke-width: 1.5; stroke-dasharray: 3 3; }
+.ob-ring { fill: none; stroke: #CDB27A; stroke-width: 2; }
+.ob-name { fill: #FFF6E7; font: 700 15px var(--reading); paint-order: stroke; stroke: #0B132E; stroke-width: 3px; }
+.ob-step { fill: #7FB2F0; font: 700 14px var(--reading); }
+.ob-edge { stroke: rgba(255, 255, 255, .35); stroke-width: 1; }
+.ob-home { font-size: 18px; }
+.ob-ray { stroke: rgba(251, 209, 75, .45); stroke-width: 2; stroke-dasharray: 5 5; }
+.ob-look { stroke: rgba(255, 246, 231, .5); stroke-width: 2; stroke-dasharray: 4 4; }

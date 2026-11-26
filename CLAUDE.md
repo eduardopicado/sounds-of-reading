@@ -132,6 +132,9 @@ src/content/space.ts   Solar System: the eight planets (size, moons, a fact each
 src/content/coding.ts  Code the Striker: the pitch, the arrow cards, running a
                        program square by square and saying what went wrong, and
                        puzzles made at random and checked to be solvable
+src/content/orbits.ts  Planet Orbits: how far out each planet is and how long its
+                       year, the Earth's day and year, the Moon's month and where
+                       it is for each shape, both languages
 src/content/football-rules.ts Football Ref: the Laws of the Game cut down to what a
                        child sees (throw-in, corner, goal kick, free kick or
                        penalty, cards, the referee's signals, offside and the

@@ -33,6 +33,7 @@ import { ANIMAL_STEPS } from '../content/animals';
 import { FOOTBALL_STEPS } from '../content/football-rules';
 import { SPACE_STEPS } from '../content/space';
 import { CODE_STEPS } from '../content/coding';
+import { ORBIT_STEPS } from '../content/orbits';
 import { PUNCTUATION_STEPS } from '../content/punctuation';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'space' | 'coding' | 'bjj' | 'football' | 'chess';
@@ -174,6 +175,8 @@ export const GAMES: Game[] = [
     load: () => import('./solar-system') },
   { path: 'code-the-striker', name: 'Code the Striker', emoji: '🤖', what: 'Line up the arrows, then press Go', tone: '#2F7D5B', section: 'coding', ladder: CODE_STEPS,
     load: () => import('./code-the-striker') },
+  { path: 'orbits', name: 'Orbits', emoji: '🌙', what: 'Round the Sun, and the Moon round the Earth', tone: '#2E3F7F', section: 'space', ladder: ORBIT_STEPS,
+    load: () => import('./orbits') },
   { path: 'refs-call', name: "Ref's Call", emoji: '🥋', what: 'Jiu-jitsu points', tone: '#3E6FB0', section: 'bjj', ladder: REF_STEPS,
     load: () => import('./refs-call') },
   { path: 'match-maths', name: 'Match Maths', emoji: '🏅', what: 'Add up the jiu-jitsu match', tone: '#2F6FC4', section: 'bjj', ladder: MATCH_STEPS,
