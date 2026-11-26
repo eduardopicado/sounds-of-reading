@@ -71,6 +71,7 @@ import { animalLines } from '../src/content/animals';
 import { footballLines } from '../src/content/football-rules';
 import { spaceLines } from '../src/content/space';
 import { calendarLines } from '../src/content/calendar';
+import { orbitLines } from '../src/content/orbits';
 import { punctuationLines } from '../src/content/punctuation';
 import {
   EN_CLOSE, EN_OWN_GOALS, EN_POSTS, EN_SAVES, PT_CHAMPIONS, PT_CLOSE, PT_OWN_GOALS, PT_POSTS, PT_SAVES, enChampion, enGoal, ptGoals,
@@ -180,6 +181,8 @@ export function clips(): Clip[] {
   for (const line of spaceLines()) add(line);
   for (const line of spaceLines('pt')) add(line, 'pt');
   for (const line of calendarLines()) add(line);
+  for (const line of orbitLines()) add(line);
+  for (const line of orbitLines('pt')) add(line, 'pt');
   for (const line of punctuationLines()) add(line);
   /* and the three in Portuguese, said by the teacher */
   for (const line of [...mapLines('pt'), ...flagLines('pt'), ...capitalLines((code) => country(code).name, (code) => country(code).pt)]) add(line, 'pt');
