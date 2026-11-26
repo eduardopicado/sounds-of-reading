@@ -129,6 +129,9 @@ src/content/bjj.ts     jiu-jitsu: the moves, their IBJJF points, and what the BJ
 src/content/space.ts   Solar System: the eight planets (size, moons, a fact each),
                        the Mystery Planet questions, which planets each says yes
                        to and when to offer it, and day and night, both languages
+src/content/orbits.ts  Planet Orbits: how far out each planet is and how long its
+                       year, the Earth's day and year, the Moon's month and where
+                       it is for each shape, both languages
 src/content/football-rules.ts Football Ref: the Laws of the Game cut down to what a
                        child sees (throw-in, corner, goal kick, free kick or
                        penalty, cards, the referee's signals, offside and the
