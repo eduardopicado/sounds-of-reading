@@ -42,6 +42,12 @@ jobs:
   e2e:
     name: e2e (${{ matrix.name }})
     runs-on: ubuntu-latest
+    # Playwright's own image, with the browsers and everything they need
+    # already in it. Installing them on a bare runner went through apt, which
+    # now and then hung until the job timed out. Its version must match
+    # @playwright/test in package-lock.json: bump the two together.
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
     # a healthy job takes about five minutes; this only catches a genuine hang
     timeout-minutes: 30
     strategy:
@@ -71,8 +77,9 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Install the browser
-        run: npx playwright install --with-deps ${{ matrix.browser }}
+      # the image only works with the Playwright it was made for
+      - name: Check the image matches Playwright
+        run: test "$(node -p "require('@playwright/test/package.json').version")" = 1.64.1
 
       - name: End to end
         run: npx playwright test --project ${{ matrix.project }} --shard ${{ matrix.shard }}
