@@ -45,9 +45,22 @@ test.describe('Football Ref', () => {
     const answer = await question(page, 1);
     const wrong = answer === 'penalty' ? 'free-kick' : 'penalty';
     await page.getByRole('button', { name: CALLS[wrong].en, exact: true }).click();
-    const why = answer === 'penalty' ? WHY.inBox : WHY.outBox;
+    const kind = await page.locator('.fr-card').getAttribute('data-kind');
+    const why = kind === 'attacker-in-box' ? WHY.attackerFoul : answer === 'penalty' ? WHY.inBox : WHY.outBox;
     await expect(page.locator('.mx-note')).toHaveText(why.en);
     expect(await said(page)).toContain(why.en);
+  });
+
+  test('says who attacks and who defends, and rings the player who fouled', async ({ page }) => {
+    await startAt(page, 1);
+    await question(page, 1);
+    await expect(page.locator('.fr-key [data-side="us"]')).toContainText('attack ➜');
+    await expect(page.locator('.fr-key [data-side="them"]')).toContainText('defend');
+    await expect(page.locator('.fr-fouler')).toHaveCount(1);
+    await expect(page.locator('.mx-ask')).toHaveText(/^(A defender fouled an attacker|An attacker fouled a defender)\. Free kick or penalty\?$/);
+    /* in Portuguese too */
+    await page.getByRole('button', { name: /Português|🇧🇷/ }).first().click();
+    await expect(page.locator('.fr-key [data-side="us"]')).toContainText('ataca ➜');
   });
 
   test('offside: once he has answered, the last defender\'s line is drawn', async ({ page }) => {

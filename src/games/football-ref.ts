@@ -15,7 +15,7 @@ import { sfx } from '../lib/sfx';
 import { CALLS, FOOTBALL_STEPS, footballQuestion, type Call, type FootballQuestion, type FootballStep } from '../content/football-rules';
 import type { Both } from '../content/pt';
 import { mountMaths, type Kit } from './maths-kit';
-import { pitchPicture, signalPicture } from './football-art';
+import { pitchPicture, sidesKey, signalPicture } from './football-art';
 import { langSwitch, speak, speakTurn, talkMs } from './lang-kit';
 
 export const REF_LANG = 'football-lang';
@@ -55,7 +55,7 @@ function build(kit: Kit) {
       card.dataset.kind = q.kind;
       card.dataset.task = q.task;
       const draw = (answered: boolean): void => {
-        if (q.scene) card.replaceChildren(pitchPicture(q.scene, kit.us(), kit.rival(), answered));
+        if (q.scene) card.replaceChildren(pitchPicture(q.scene, kit.us(), kit.rival(), answered), sidesKey(kit.us(), kit.rival(), lang()));
         else if (q.signal) card.replaceChildren(signalPicture(q.signal));
         else card.replaceChildren(el('div', { class: 'fr-cards', 'aria-hidden': 'true', text: '🟨 🟥' }));
       };
@@ -66,6 +66,8 @@ function build(kit: Kit) {
         ask.textContent = q.ask[lang()];
         if (q.what) what.textContent = q.what[lang()];
         kit.choices.relabel(label);
+        /* the key under the pitch says who attacks in the chosen language */
+        if (q.scene) draw(false);
       };
       const lines: Both[] = q.what ? [q.what, q.ask] : [q.ask];
       speakTurn(lines, lang());
@@ -82,6 +84,7 @@ function build(kit: Kit) {
         if (q.what) what.textContent = q.what[lang()];
         kit.choices.relabel(label);
         kit.note(`${ok ? (lang() === 'pt' ? 'Isso! ' : 'Yes! ') : ''}${q.why[lang()]}`, ok);
+        if (q.scene) draw(true);
       };
       retext();
       await kit.said((end) => speak(q.why, lang(), end), ok ? 2600 : 4200, talkMs([q.why]));
