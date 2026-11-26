@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**2037 clips, about 60185 characters.**
+**2155 clips, about 63646 characters.**
 
-## English (Stuart, Australian): 1296
+## English (Stuart, Australian): 1414
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
@@ -77,7 +77,14 @@ exactly these, with the voices in public/audio/README.md.
 - and the whale.
 - and the zebra,
 - and the zebra.
+- April comes after March.
+- April comes before May.
+- April has 30 days.
 - Arguing with the referee is a yellow card.
+- August comes after July.
+- August comes before September.
+- August has 31 days.
+- Autumn is March, April and May.
 - bath, tub, bathtub
 - bathtub
 - Ben and I play in the park.
@@ -110,6 +117,9 @@ exactly these, with the voices in public/audio/README.md.
 - Crocodiles live in rivers.
 - Dan has a bike.
 - Day! The house is on the side facing the Sun.
+- December comes after November.
+- December comes before January.
+- December has 31 days.
 - den, tist, dentist
 - dentist
 - Did Ted get a goal?
@@ -150,6 +160,12 @@ exactly these, with the voices in public/audio/README.md.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
 - farm, er, farmer
 - farmer
+- February comes after January.
+- February comes before March.
+- February has 28 days, or 29 in a leap year. This year it has 28.
+- February has 28 days, or 29 in a leap year. This year it has 29.
+- Friday comes after Thursday.
+- Friday comes before Saturday.
 - From the side, we see half of its lit half: a half moon.
 - Get the ball, then take it into the goal!
 - Get the player to the ball. You will need to turn a corner!
@@ -190,6 +206,7 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares west.
 - Goal!
 - Goal! The program worked.
+- Good calendar reading!
 - Good coding!
 - Good reading! Try again.
 - Good refereeing!
@@ -238,6 +255,18 @@ exactly these, with the voices in public/audio/README.md.
 - How long does the Earth take to go round the Sun?
 - How long does the Earth take to spin round once?
 - How long does the Moon take to go round the Earth?
+- How many days are in April?
+- How many days are in August?
+- How many days are in December?
+- How many days are in February?
+- How many days are in January?
+- How many days are in July?
+- How many days are in June?
+- How many days are in March?
+- How many days are in May?
+- How many days are in November?
+- How many days are in October?
+- How many days are in September?
 - How many days does the Earth take to go round the Sun?
 - How many moons does the Earth have?
 - I am thinking of a planet. Ask me questions to find it!
@@ -352,6 +381,15 @@ exactly these, with the voices in public/audio/README.md.
 - It went over the side line: throw-in.
 - jack, et, jacket
 - jacket
+- January comes after December.
+- January comes before February.
+- January has 31 days.
+- July comes after June.
+- July comes before August.
+- July has 31 days.
+- June comes after May.
+- June comes before July.
+- June has 30 days.
 - Jupiter comes after Mars.
 - Jupiter could still be it. Look at the answer again.
 - Jupiter goes round fastest. The nearer the Sun, the faster a planet goes round.
@@ -395,6 +433,9 @@ exactly these, with the voices in public/audio/README.md.
 - mag, net, magnet
 - magnet
 - Make a program to get the player to the ball. Then press Go!
+- March comes after February.
+- March comes before April.
+- March has 31 days.
 - Mars comes after Earth.
 - Mars could still be it. Look at the answer again.
 - Mars goes round fastest. The nearer the Sun, the faster a planet goes round.
@@ -410,6 +451,9 @@ exactly these, with the voices in public/audio/README.md.
 - match, box, matchbox
 - matchbox
 - Max and Kim got the cake.
+- May comes after April.
+- May comes before June.
+- May has 31 days.
 - Meg got a kite.
 - Meg, Ben and I play in the park.
 - mel, on, melon
@@ -431,6 +475,8 @@ exactly these, with the voices in public/audio/README.md.
 - mit, ten, mitten
 - mitten
 - mon, ster, monster
+- Monday comes after Sunday.
+- Monday comes before Tuesday.
 - monster
 - Most lions live in Africa, and a few live in a forest in India, in Asia.
 - mush, room, mushroom
@@ -453,9 +499,15 @@ exactly these, with the voices in public/audio/README.md.
 - No. The Moon shines because the Sun lights it up.
 - North America is north of Central America.
 - Not there. Try again.
+- November comes after October.
+- November comes before December.
+- November has 30 days.
 - Now read it again. Can you beat your time?
 - oat, meal, oatmeal
 - oatmeal
+- October comes after September.
+- October comes before November.
+- October has 31 days.
 - Octopuses live in the ocean, and have eight arms.
 - Octopuses live in the ocean.
 - Oh no, the ball is in the pond!
@@ -564,6 +616,8 @@ exactly these, with the voices in public/audio/README.md.
 - Sam has a red hat.
 - sand, wich, sandwich
 - sandwich
+- Saturday comes after Friday.
+- Saturday comes before Sunday.
 - Saturn comes after Jupiter.
 - Saturn could still be it. Look at the answer again.
 - Saturn goes round fastest. The nearer the Sun, the faster a planet goes round.
@@ -584,6 +638,9 @@ exactly these, with the voices in public/audio/README.md.
 - sea, weed, seaweed
 - seaweed
 - see, saw, seesaw
+- September comes after August.
+- September comes before October.
+- September has 30 days.
 - Sharks live in every ocean, and there were sharks before there were dinosaurs.
 - Sharks live in the ocean.
 - Sloths live in the rainforest.
@@ -591,6 +648,7 @@ exactly these, with the voices in public/audio/README.md.
 - snow, man, snowman
 - snowman
 - South America is south of Central America.
+- Spring is September, October and November.
 - Square A1 is here.
 - Square A2 is here.
 - Square A3 is here.
@@ -635,7 +693,10 @@ exactly these, with the voices in public/audio/README.md.
 - Stopping a goal with your hand is a red card, and a penalty.
 - Stopping an attack on purpose is a yellow card: a warning.
 - sum, mer, summer
+- Summer is January, February and December.
 - sun, set, sunset
+- Sunday comes after Saturday.
+- Sunday comes before Monday.
 - sunset
 - Taking your shirt off is a yellow card, even after a goal.
 - Tap every continent where bison live.
@@ -1037,6 +1098,8 @@ exactly these, with the voices in public/audio/README.md.
 - Three reads! Look how much faster you got.
 - thun, der, thunder
 - thunder
+- Thursday comes after Wednesday.
+- Thursday comes before Friday.
 - tick, et, ticket
 - ticket
 - Tigers live in Asia, and they are the biggest cats in the world.
@@ -1046,6 +1109,8 @@ exactly these, with the voices in public/audio/README.md.
 - Too many cards! Use repeat to make them shorter.
 - tooth, brush, toothbrush
 - toothbrush
+- Tuesday comes after Monday.
+- Tuesday comes before Wednesday.
 - Turn over the planets it cannot be.
 - Two yellow cards make a red card.
 - up, set, upset
@@ -1084,12 +1149,28 @@ exactly these, with the voices in public/audio/README.md.
 - We got jam, cake and milk.
 - We have a hat, a cup and a bag.
 - We play on Monday.
+- Wednesday comes after Tuesday.
+- Wednesday comes before Thursday.
 - week, end, weekend
 - weekend
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
 - Whales live in the ocean.
 - What a big cake!
 - What a good goal!
+- What day comes after Friday?
+- What day comes after Monday?
+- What day comes after Saturday?
+- What day comes after Sunday?
+- What day comes after Thursday?
+- What day comes after Tuesday?
+- What day comes after Wednesday?
+- What day comes before Friday?
+- What day comes before Monday?
+- What day comes before Saturday?
+- What day comes before Sunday?
+- What day comes before Thursday?
+- What day comes before Tuesday?
+- What day comes before Wednesday?
 - What does the Moon go round?
 - What does the referee do?
 - What goes at the end?
@@ -1191,6 +1272,42 @@ exactly these, with the voices in public/audio/README.md.
 - What kind of place does the tiger live in?
 - What kind of place does the whale live in?
 - What kind of place does the zebra live in?
+- What month comes after April?
+- What month comes after August?
+- What month comes after December?
+- What month comes after February?
+- What month comes after January?
+- What month comes after July?
+- What month comes after June?
+- What month comes after March?
+- What month comes after May?
+- What month comes after November?
+- What month comes after October?
+- What month comes after September?
+- What month comes before April?
+- What month comes before August?
+- What month comes before December?
+- What month comes before February?
+- What month comes before January?
+- What month comes before July?
+- What month comes before June?
+- What month comes before March?
+- What month comes before May?
+- What month comes before November?
+- What month comes before October?
+- What month comes before September?
+- What season is April in?
+- What season is August in?
+- What season is December in?
+- What season is February in?
+- What season is January in?
+- What season is July in?
+- What season is June in?
+- What season is March in?
+- What season is May in?
+- What season is November in?
+- What season is October in?
+- What season is September in?
 - Where did the ball go?
 - Where does the bison live?
 - Where does the camel live?
@@ -1288,6 +1405,7 @@ exactly these, with the voices in public/audio/README.md.
 - Which word needs a capital letter? Tap it.
 - Will you come with me?
 - win, ter, winter
+- Winter is June, July and August.
 - With the Moon here, what shape do we see from the Earth?
 - Yes! Find another one.
 - Yes! It is Earth!

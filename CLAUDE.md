@@ -101,6 +101,8 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
                        Year 2 steps sit at the top of each game's ladder; Times
                        Table Sprint goes on to 12 × 12, Years 3–4), and
                        timeWords(), the one way the app says a time
+src/content/calendar.ts Fixture Calendar: the days, months and seasons, real
+                       calendars (Monday first), and the questions about them
 src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
                        and the first chess games' questions
 src/content/world.ts   World Map: the continents and oceans, a fact for each,
