@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest';
 import {
-  CALLS, CARD_CASES, FOOTBALL_STEPS, GOAL_WIDTH, HALFWAY, PITCH, SIGNALS, footballLines, footballQuestion, inRightBox,
+  ASK, CALLS, CARD_CASES, FOOTBALL_STEPS, GOAL_WIDTH, HALFWAY, PITCH, SIGNALS, footballLines, footballQuestion, inRightBox,
   type FootballQuestion, type Scene,
 } from '../../src/content/football-rules';
 
@@ -46,13 +46,20 @@ describe('Football Ref', () => {
     }
   });
 
-  it('gives a penalty for a foul inside the box, and a free kick outside it', () => {
-    const answers = new Set<string>();
+  it('gives a penalty only for a defender\'s foul inside his box; an attacker\'s foul is a free kick anywhere', () => {
+    const kinds = new Set<string>();
     for (const q of many('foul')) {
-      expect(q.answer, `${q.scene!.foul}`).toBe(inRightBox(q.scene!.foul!) ? 'penalty' : 'free-kick');
-      answers.add(q.answer);
+      const fouler = q.scene!.players.find((p) => p.mark === 'fouler')!;
+      const fouled = q.scene!.players.find((p) => p.mark === 'fouled')!;
+      /* his team attacks the right-hand goal: the other team are the defenders */
+      const byDefender = fouler.side === 'them';
+      expect(fouled.side).not.toBe(fouler.side);
+      expect(q.answer, `${q.kind} ${q.scene!.foul}`).toBe(byDefender && inRightBox(q.scene!.foul!) ? 'penalty' : 'free-kick');
+      /* the question says who fouled */
+      expect(q.ask).toBe(byDefender ? ASK.foul : ASK.attackerFoul);
+      kinds.add(q.kind);
     }
-    expect(answers).toEqual(new Set(['penalty', 'free-kick']));
+    expect(kinds).toEqual(new Set(['in-box', 'out-box', 'attacker-in-box']));
   });
 
   it('calls offside exactly when the Laws do, from where everyone stands', () => {
