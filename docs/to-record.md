@@ -5,16 +5,18 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**2014 clips, about 58748 characters.**
+**2018 clips, about 59203 characters.**
 
-## English (Stuart, Australian): 1275
+## English (Stuart, Australian): 1277
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
 - A dangerous tackle is a red card: he has to leave the game.
-- A foul! Free kick or penalty?
+- A defender fouled an attacker. Free kick or penalty?
+- A defender fouled inside his own box: penalty!
 - A sentence starts with a capital letter.
 - An accident is a free kick, with no card.
+- An attacker fouled a defender. Free kick or penalty?
 - and the crab,
 - and the crab.
 - and the cup,
@@ -914,6 +916,7 @@ exactly these, with the voices in public/audio/README.md.
 - The apostrophe goes where the letters were taken out: will not, won't.
 - The apostrophe goes where the letters were taken out: you are, you're.
 - The assistant holds the flag straight up: offside.
+- The attacker made the foul, so the defending team gets a free kick, even inside the box. A penalty is only for a foul by the defenders.
 - The ball came from a throw-in. There is no offside from a throw-in.
 - The ball hit his hand by accident.
 - The ball is passed now. Is he offside?
@@ -934,7 +937,6 @@ exactly these, with the voices in public/audio/README.md.
 - The Earth spins round once a day. That makes day and night.
 - The fish swim in the pond.
 - The flag is here.
-- The foul was inside the box: penalty!
 - The foul was outside the box: free kick.
 - The fox, the hen and the duck sat in the sun.
 - The frog sat on a log.
@@ -1285,7 +1287,7 @@ exactly these, with the voices in public/audio/README.md.
 - Zebras live on the grassland.
 - zig, zag, zigzag
 
-## Portuguese (Roberto Valença, Brazilian): 739
+## Portuguese (Roberto Valença, Brazilian): 741
 
 - A América Central fica ao norte da América do Sul.
 - A América Central fica ao sul da América do Norte.
@@ -1302,7 +1304,6 @@ exactly these, with the voices in public/audio/README.md.
 - A bola veio de um lateral. Em lateral não tem impedimento.
 - A cabana está aqui.
 - A concha está aqui.
-- A falta foi dentro da área: pênalti!
 - A falta foi fora da área: é falta.
 - A Lua dá a volta na Terra mais ou menos uma vez por mês.
 - A Lua está do outro lado da Terra, longe do Sol, então vemos toda a metade iluminada: lua cheia.
@@ -1593,7 +1594,6 @@ exactly these, with the voices in public/audio/README.md.
 - Fica para o norte.
 - Fica para o oeste.
 - Fica para o sul.
-- Foi falta! É falta ou pênalti?
 - Impedir um gol com a mão é cartão vermelho, e pênalti.
 - Isso!
 - Isso! Ache outro.
@@ -1679,6 +1679,7 @@ exactly these, with the voices in public/audio/README.md.
 - O banco está aqui.
 - O barco está aqui.
 - O caranguejo está aqui.
+- O defensor fez falta dentro da própria área: pênalti!
 - O morro está aqui.
 - O navio está aqui.
 - O ninho está aqui.
@@ -1906,6 +1907,7 @@ exactly these, with the voices in public/audio/README.md.
 - Quanto tempo a Terra leva para dar a volta no Sol?
 - Quanto tempo a Terra leva para girar uma vez?
 - Quantos dias a Terra leva para dar a volta no Sol?
+- Quem fez a falta foi o atacante, então o time que defende cobra a falta, mesmo dentro da área. Pênalti é só para falta de quem defende.
 - Saiu pela lateral: é lateral.
 - Saiu pela linha de fundo, e um atacante tocou por último: tiro de meta.
 - Saiu pela linha de fundo, e um defensor tocou por último: escanteio.
@@ -1995,7 +1997,9 @@ exactly these, with the voices in public/audio/README.md.
 - Toque no quadrado E5.
 - Toque no tronco.
 - Toque onde está o tesouro.
+- Um atacante fez falta num defensor. É falta ou pênalti?
 - Um braço esticado, para o lado de quem vai cobrar: falta.
+- Um defensor fez falta num atacante. É falta ou pênalti?
 - Urano dá a volta mais devagar. Quanto mais longe do Sol, mais devagar o planeta dá a volta.
 - Urano dá a volta mais rápido. Quanto mais perto do Sol, mais rápido o planeta dá a volta.
 - Urano é maior que a Terra.
