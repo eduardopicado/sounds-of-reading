@@ -70,6 +70,7 @@ import { jigsawLines } from '../src/content/jigsaw';
 import { animalLines } from '../src/content/animals';
 import { footballLines } from '../src/content/football-rules';
 import { spaceLines } from '../src/content/space';
+import { codeLines } from '../src/content/coding';
 import { calendarLines } from '../src/content/calendar';
 import { orbitLines } from '../src/content/orbits';
 import { punctuationLines } from '../src/content/punctuation';
@@ -180,6 +181,7 @@ export function clips(): Clip[] {
   /* Solar System, both ways */
   for (const line of spaceLines()) add(line);
   for (const line of spaceLines('pt')) add(line, 'pt');
+  for (const line of codeLines()) add(line);
   for (const line of calendarLines()) add(line);
   for (const line of orbitLines()) add(line);
   for (const line of orbitLines('pt')) add(line, 'pt');

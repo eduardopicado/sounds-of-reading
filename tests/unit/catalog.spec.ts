@@ -22,7 +22,7 @@ describe('the games', () => {
   });
 
   it('every maths, geography and jiu-jitsu game has the steps it climbs, for the progress card', () => {
-    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj' || x.section === 'football' || x.section === 'space')) {
+    for (const g of GAMES.filter((x) => x.section === 'maths' || x.section === 'geography' || x.section === 'bjj' || x.section === 'football' || x.section === 'space' || x.section === 'coding')) {
       expect(g.ladder?.length, g.path).toBeGreaterThan(1);
     }
   });

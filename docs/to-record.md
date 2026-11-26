@@ -5,9 +5,9 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**2136 clips, about 62664 characters.**
+**2155 clips, about 63646 characters.**
 
-## English (Stuart, Australian): 1395
+## English (Stuart, Australian): 1414
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
@@ -93,6 +93,7 @@ exactly these, with the voices in public/audio/README.md.
 - Both arms forward: play on. The team that was fouled keeps the ball.
 - buck, et, bucket
 - bucket
+- Bump! The player hit a cone. Fix the program and try again.
 - cac, tus, cactus
 - cactus
 - cam, el, camel
@@ -166,6 +167,9 @@ exactly these, with the voices in public/audio/README.md.
 - Friday comes after Thursday.
 - Friday comes before Saturday.
 - From the side, we see half of its lit half: a half moon.
+- Get the ball, then take it into the goal!
+- Get the player to the ball. You will need to turn a corner!
+- Get to the ball, but do not bump into the cones!
 - Giraffes live in Africa, and they are the tallest animals in the world.
 - Giraffes live on the grassland.
 - Go 1 square east,
@@ -201,12 +205,15 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares west,
 - Go 3 squares west.
 - Goal!
+- Goal! The program worked.
 - Good calendar reading!
+- Good coding!
 - Good reading! Try again.
 - Good refereeing!
 - Good space exploring!
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
+- Got it! The program worked.
 - ham, ster, hamster
 - hamster
 - He argued with the referee.
@@ -225,6 +232,7 @@ exactly these, with the voices in public/audio/README.md.
 - hel, met, helmet
 - helmet
 - Help!
+- Here is a program that works. Watch!
 - Hippos live in Africa, and spend their days in rivers and lakes.
 - Hippos live in rivers.
 - hot, dog, hotdog
@@ -424,6 +432,7 @@ exactly these, with the voices in public/audio/README.md.
 - Look out!
 - mag, net, magnet
 - magnet
+- Make a program to get the player to the ball. Then press Go!
 - March comes after February.
 - March comes before April.
 - March has 31 days.
@@ -511,6 +520,7 @@ exactly these, with the voices in public/audio/README.md.
 - on the ship,
 - on the ship.
 - One arm out, the way the kick goes: free kick.
+- Oops, off the pitch! Fix the program and try again.
 - Orangutans live in the rainforest.
 - Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
 - Pack a hat, a cup and a ball.
@@ -542,6 +552,7 @@ exactly these, with the voices in public/audio/README.md.
 - Put New South Wales on the map.
 - Put North America on the map.
 - Put Queensland on the map.
+- Put some arrow cards in the program first.
 - Put South America on the map.
 - Put South Australia on the map.
 - Put Tasmania on the map.
@@ -1011,6 +1022,11 @@ exactly these, with the voices in public/audio/README.md.
 - The Moon is on the far side of the Earth from the Sun, so we see all of its lit half: a full moon.
 - The nest is here.
 - The pig, the cow and the duck are on the farm.
+- The player has the ball, but he stopped before the goal. Add some more cards.
+- The player missed the ball on the way. Fix the program and try again.
+- The player stopped before the ball. Add some more cards.
+- The player went past it. The player has to stop on the ball. Try again.
+- The player went past the goal. The player has to stop in it. Try again.
 - The ref checks the sentences. Which one is right?
 - The referee points at the corner flag: corner.
 - The referee points at the goal area: goal kick.
@@ -1077,6 +1093,7 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the whale.
 - then tap the zebra.
 - This is Central America.
+- This program has a bug. Fix it, then press Go!
 - Three reads! Great reading.
 - Three reads! Look how much faster you got.
 - thun, der, thunder
@@ -1089,6 +1106,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tigers live in the forest.
 - Tom can kick, run and jump.
 - Tom can run fast.
+- Too many cards! Use repeat to make them shorter.
 - tooth, brush, toothbrush
 - toothbrush
 - Tuesday comes after Monday.
@@ -1111,6 +1129,7 @@ exactly these, with the voices in public/audio/README.md.
 - Uranus is here.
 - Uranus is nearer to the Sun than Neptune.
 - Uranus spins on its side, like a ball rolling around the Sun.
+- Use repeat to make one card go further. You can only use 2 cards!
 - Venus comes after Mercury.
 - Venus could still be it. Look at the answer again.
 - Venus goes round fastest. The nearer the Sun, the faster a planet goes round.
