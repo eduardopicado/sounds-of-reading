@@ -10,6 +10,7 @@ import {
   BOX, GOAL_AREA, GOAL_WIDTH, HALFWAY, PENALTY_SPOT, PITCH, type Player, type Pt, type Scene, type Signal,
 } from '../content/football-rules';
 import type { Team } from './teams';
+import { el } from '../lib/dom';
 
 const M = 4;
 const PR = 1.9;
@@ -71,6 +72,8 @@ export function pitchPicture(scene: Scene, us: Team, them: Team, answered = fals
   }
   /* the player the question is about: the one the pass goes to */
   for (const p of scene.players) if (p.mark === 'runner') root.append(svg('circle', { cx: p.at[0], cy: p.at[1], r: PR + 1.6, class: 'fr-him' }));
+  /* the player who made the foul: attacker or defender decides the call */
+  for (const p of scene.players) if (p.mark === 'fouler') root.append(svg('circle', { cx: p.at[0], cy: p.at[1], r: PR + 1.6, class: 'fr-fouler' }));
   for (const p of scene.players) root.append(player(p, us, them));
   const [bx, by] = scene.ball;
   root.append(svg('circle', { cx: bx, cy: by, r: 1.15, class: `fr-ball${scene.throwIn ? ' thrown' : ''}` }));
@@ -132,4 +135,17 @@ export function signalPicture(s: Signal): SVGSVGElement {
       break;
   }
   return root;
+}
+
+/** which team is which: his attacks the goal on the right, the other defends it */
+export function sidesKey(us: Team, them: Team, lang: 'en' | 'pt'): HTMLElement {
+  const chip = (t: Team, words: string, side: string): HTMLElement => {
+    const dot = el('span', { class: 'fr-dot', 'aria-hidden': 'true' });
+    dot.style.background = t.colours[0];
+    dot.style.borderColor = t.colours[1];
+    return el('span', { class: 'fr-side', dataset: { side } }, dot, el('span', { text: words }));
+  };
+  return el('div', { class: 'fr-key' },
+    chip(us, lang === 'pt' ? `${us.short} ataca ➜` : `${us.short} attack ➜`, 'us'),
+    chip(them, lang === 'pt' ? `${them.short} defende` : `${them.short} defend`, 'them'));
 }

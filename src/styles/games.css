@@ -2621,7 +2621,7 @@
 
 /* ── Football Ref ──────────────────────────────────────────────────────── */
 
-.fr-card { display: flex; justify-content: center; width: 100%; }
+.fr-card { display: flex; flex-direction: column; align-items: center; width: 100%; }
 /* the pitch, as big as leaves room for the question and its answers under it */
 .fr-pitch { display: block; width: min(100%, 760px, calc((100svh - 390px) * 1.45)); height: auto; border-radius: 10px; }
 .fr-grass { fill: #3E9B4F; stroke: none; }
@@ -2634,6 +2634,11 @@
 .fr-path.head { stroke-dasharray: none; stroke-linejoin: round; }
 .fr-foul { fill: rgba(243, 178, 41, .35); stroke: #F3B229; stroke-width: .8; }
 .fr-him { fill: none; stroke: #FFF6E7; stroke-width: .7; stroke-dasharray: 1.2 .8; }
+.fr-fouler { fill: none; stroke: #E4572E; stroke-width: .9; }
+/* which team attacks, which defends: under the pitch, in their colours */
+.fr-key { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px; margin-top: 6px; font: 700 clamp(15px, 3.6vw, 19px) var(--reading); color: var(--on-deep); }
+.fr-side { display: inline-flex; align-items: center; gap: 6px; }
+.fr-dot { width: 16px; height: 16px; border-radius: 50%; border: 3px solid; }
 .fr-player.runner circle, .fr-player.passer circle { stroke-width: 1.1; }
 /* once he has answered: the line that decides offside */
 .fr-line { stroke: #F3B229; stroke-width: .7; stroke-dasharray: 2 1.2; }
