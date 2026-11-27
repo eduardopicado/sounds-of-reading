@@ -32,6 +32,8 @@ import { JIGSAW_STEPS } from '../content/jigsaw';
 import { ANIMAL_STEPS } from '../content/animals';
 import { FOOTBALL_STEPS } from '../content/football-rules';
 import { SPACE_STEPS } from '../content/space';
+import { MEASURE_STEPS } from '../content/measure';
+import { CHANCE_STEPS } from '../content/chance';
 import { CODE_STEPS } from '../content/coding';
 import { CALENDAR_STEPS } from '../content/calendar';
 import { ORBIT_STEPS } from '../content/orbits';
@@ -148,6 +150,10 @@ export const GAMES: Game[] = [
     load: () => import('./match-clock') },
   { path: 'fixture-calendar', name: 'Fixture Calendar', emoji: '📅', what: 'Days, months, and how long until the match', tone: '#B5523B', section: 'maths', ladder: CALENDAR_STEPS,
     load: () => import('./fixture-calendar') },
+  { path: 'measure-the-pitch', name: 'Measure the Pitch', emoji: '📏', what: 'Boots, rulers, squares and cups', tone: '#3E8E5A', section: 'maths', ladder: MEASURE_STEPS,
+    load: () => import('./measure-the-pitch') },
+  { path: 'pick-a-bib', name: 'Pick a Bib', emoji: '🎽', what: 'Certain, likely, unlikely, impossible', tone: '#C98F14', section: 'maths', ladder: CHANCE_STEPS,
+    load: () => import('./pick-a-bib') },
   { path: 'clock-trainer', name: 'Short Hand, Long Hand', emoji: '🕰️', what: 'Move the hands, read the time', tone: '#D25A44', section: 'maths', ladder: HANDS_STEPS,
     load: () => import('./clock-trainer') },
   { path: 'fan-survey', name: 'Fan Survey', emoji: '📊', what: 'Count the votes, read the graph', tone: '#C46AA0', section: 'maths', ladder: SURVEY_STEPS,

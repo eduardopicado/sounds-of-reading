@@ -5,16 +5,40 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**2155 clips, about 63646 characters.**
+**2244 clips, about 68364 characters.**
 
-## English (Stuart, Australian): 1414
+## English (Stuart, Australian): 1503
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
 - A dangerous tackle is a red card: he has to leave the game.
 - A defender fouled an attacker. Free kick or penalty?
 - A defender fouled inside his own box: penalty!
+- A drink bottle is about 25 centimetres tall.
+- A drink bottle is small: centimetres. A centimetre is about as wide as your finger.
+- A football boot is about 20 centimetres long.
+- A football boot is small: centimetres. A centimetre is about as wide as your finger.
+- A football pitch is about 100 metres long.
+- A football pitch is big: metres. A metre is 100 centimetres, about one big step.
+- A goal is about 7 metres wide.
+- A goal is big: metres. A metre is 100 centimetres, about one big step.
+- A pencil is about 15 centimetres long.
+- A pencil is small: centimetres. A centimetre is about as wide as your finger.
+- A school bus is about 12 metres long.
+- A school bus is big: metres. A metre is 100 centimetres, about one big step.
 - A sentence starts with a capital letter.
+- A shin pad is about 18 centimetres long.
+- A shin pad is small: centimetres. A centimetre is about as wide as your finger.
+- A swimming pool is about 25 metres long.
+- A swimming pool is big: metres. A metre is 100 centimetres, about one big step.
+- About how long is a football boot?
+- About how long is a football pitch?
+- About how long is a pencil?
+- About how long is a school bus?
+- About how long is a shin pad?
+- About how long is a swimming pool?
+- About how tall is a drink bottle?
+- About how wide is a goal?
 - An accident is a free kick, with no card.
 - An attacker fouled a defender. Free kick or penalty?
 - and the crab,
@@ -158,6 +182,10 @@ exactly these, with the voices in public/audio/README.md.
 - Earth is nearer to the Sun than Uranus.
 - Earth is our home, the only planet we know with living things.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
+- Every bib in the bag is blue, so you will pick blue for sure: certain.
+- Every bib in the bag is green, so you will pick green for sure: certain.
+- Every bib in the bag is red, so you will pick red for sure: certain.
+- Every bib in the bag is yellow, so you will pick yellow for sure: certain.
 - farm, er, farmer
 - farmer
 - February comes after January.
@@ -208,6 +236,8 @@ exactly these, with the voices in public/audio/README.md.
 - Goal! The program worked.
 - Good calendar reading!
 - Good coding!
+- Good guessing!
+- Good measuring!
 - Good reading! Try again.
 - Good refereeing!
 - Good space exploring!
@@ -255,6 +285,19 @@ exactly these, with the voices in public/audio/README.md.
 - How long does the Earth take to go round the Sun?
 - How long does the Earth take to spin round once?
 - How long does the Moon take to go round the Earth?
+- How many boots long is the banner?
+- How many boots long is the bench?
+- How many boots long is the goal?
+- How many boots long is the hurdle?
+- How many boots long is the mat?
+- How many boots long is the skipping rope?
+- How many centimetres long is the banner?
+- How many centimetres long is the bench?
+- How many centimetres long is the goal?
+- How many centimetres long is the hurdle?
+- How many centimetres long is the mat?
+- How many centimetres long is the skipping rope?
+- How many cups of water fill the bottle?
 - How many days are in April?
 - How many days are in August?
 - How many days are in December?
@@ -269,6 +312,7 @@ exactly these, with the voices in public/audio/README.md.
 - How many days are in September?
 - How many days does the Earth take to go round the Sun?
 - How many moons does the Earth have?
+- How many squares does the shape cover?
 - I am thinking of a planet. Ask me questions to find it!
 - I have a red, a blue and a green kite.
 - I is always a capital letter.
@@ -909,6 +953,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap where the treasure is.
 - tea, pot, teapot
 - teapot
+- Ten bibs were picked, each put back before the next. Which colour came up most?
 - ten, nis, tennis
 - tennis
 - That is Central America.
@@ -1092,6 +1137,18 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the tiger.
 - then tap the whale.
 - then tap the zebra.
+- There are blue bibs and other colours too, so blue could happen, or not: possible.
+- There are green bibs and other colours too, so green could happen, or not: possible.
+- There are no blue bibs in the bag, so it cannot happen: impossible.
+- There are no blue bibs in the bag: impossible.
+- There are no green bibs in the bag, so it cannot happen: impossible.
+- There are no green bibs in the bag: impossible.
+- There are no red bibs in the bag, so it cannot happen: impossible.
+- There are no red bibs in the bag: impossible.
+- There are no yellow bibs in the bag, so it cannot happen: impossible.
+- There are no yellow bibs in the bag: impossible.
+- There are red bibs and other colours too, so red could happen, or not: possible.
+- There are yellow bibs and other colours too, so yellow could happen, or not: possible.
 - This is Central America.
 - This program has a bug. Fix it, then press Go!
 - Three reads! Great reading.
@@ -1112,6 +1169,12 @@ exactly these, with the voices in public/audio/README.md.
 - Tuesday comes after Monday.
 - Tuesday comes before Wednesday.
 - Turn over the planets it cannot be.
+- Two teams measured the banner in boots. Which team did it the right way?
+- Two teams measured the bench in boots. Which team did it the right way?
+- Two teams measured the goal in boots. Which team did it the right way?
+- Two teams measured the hurdle in boots. Which team did it the right way?
+- Two teams measured the mat in boots. Which team did it the right way?
+- Two teams measured the skipping rope in boots. Which team did it the right way?
 - Two yellow cards make a red card.
 - up, set, upset
 - upset
@@ -1340,6 +1403,8 @@ exactly these, with the voices in public/audio/README.md.
 - Where is Neptune?
 - Where is Saturn?
 - Where is the bus?
+- Where is the spinner least likely to stop?
+- Where is the spinner most likely to stop?
 - Where is Uranus?
 - Where is Venus?
 - Which animal lives in Africa?
@@ -1350,8 +1415,12 @@ exactly these, with the voices in public/audio/README.md.
 - Which animal lives in Europe?
 - Which animal lives in North America?
 - Which animal lives in South America?
+- Which colour are you least likely to pick?
+- Which colour are you most likely to pick?
 - Which continent is north of Central America?
 - Which continent is south of Central America?
+- Which is longer?
+- Which is shorter?
 - Which of these goes round the Sun fastest?
 - Which of these goes round the Sun slowest?
 - Which planet comes after Earth?
@@ -1407,6 +1476,14 @@ exactly these, with the voices in public/audio/README.md.
 - win, ter, winter
 - Winter is June, July and August.
 - With the Moon here, what shape do we see from the Earth?
+- Would you measure a drink bottle in metres or centimetres?
+- Would you measure a football boot in metres or centimetres?
+- Would you measure a football pitch in metres or centimetres?
+- Would you measure a goal in metres or centimetres?
+- Would you measure a pencil in metres or centimetres?
+- Would you measure a school bus in metres or centimetres?
+- Would you measure a shin pad in metres or centimetres?
+- Would you measure a swimming pool in metres or centimetres?
 - Yes! Find another one.
 - Yes! It is Earth!
 - Yes! It is Jupiter!
@@ -1418,6 +1495,18 @@ exactly these, with the voices in public/audio/README.md.
 - Yes! It is Venus!
 - You beat your time!
 - You found the treasure!
+- You pick one bib without looking. Could it be blue?
+- You pick one bib without looking. Could it be green?
+- You pick one bib without looking. Could it be red?
+- You pick one bib without looking. Could it be yellow?
+- You pick one bib without looking. Is blue likely or unlikely?
+- You pick one bib without looking. Is green likely or unlikely?
+- You pick one bib without looking. Is red likely or unlikely?
+- You pick one bib without looking. Is yellow likely or unlikely?
+- You pick one bib without looking. Will it be blue?
+- You pick one bib without looking. Will it be green?
+- You pick one bib without looking. Will it be red?
+- You pick one bib without looking. Will it be yellow?
 - Your fastest read ever!
 - Yum!
 - Zebras live in Africa, and every zebra has its own pattern of stripes.

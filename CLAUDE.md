@@ -103,6 +103,11 @@ src/content/maths.ts   the maths games' questions and levels (NSW K–Year 2; th
                        timeWords(), the one way the app says a time
 src/content/calendar.ts Fixture Calendar: the days, months and seasons, real
                        calendars (Monday first), and the questions about them
+src/content/measure.ts Measure the Pitch: comparing lengths, boots end to end (and
+                       the gaps or overlaps that make it wrong), a ruler, metres
+                       or centimetres, squares covering a shape, cups in a bottle
+src/content/chance.ts  Pick a Bib: bibs in a see-through bag, certain, possible,
+                       impossible, likely and unlikely, a spinner, ten picks
 src/content/chess.ts   chess: how each piece moves, the fewest moves to a square,
                        and the first chess games' questions
 src/content/world.ts   World Map: the continents and oceans, a fact for each,

@@ -2881,3 +2881,37 @@
 .ob-home { font-size: 18px; }
 .ob-ray { stroke: rgba(251, 209, 75, .45); stroke-width: 2; stroke-dasharray: 5 5; }
 .ob-look { stroke: rgba(255, 246, 231, .5); stroke-width: 2; stroke-dasharray: 4 4; }
+
+/* ── Measure the Pitch ─────────────────────────────────────────────────── */
+
+.mt-stage { display: grid; gap: 10px; justify-items: center; width: 100%; }
+.mt-board { display: flex; justify-content: center; width: 100%; }
+.mt-board:empty { display: none; }
+.mt-pic { display: block; width: min(100%, 620px); height: auto; padding: 8px; border-radius: 16px; background: #3E9B4F; box-sizing: border-box; }
+.mt-pic.mt-mat { width: min(100%, 300px, calc(100svh - 420px)); min-width: min(100%, 220px); background: #E9E2D2; }
+.mt-pic.mt-bottle { width: min(100%, 300px, calc(100svh - 420px)); min-width: min(100%, 200px); background: #DCEFF7; }
+.mt-start { stroke: #FFF6E7; stroke-width: 2; stroke-dasharray: 5 4; }
+.mt-label { font: 700 15px var(--reading); fill: #14312F; paint-order: stroke; stroke: rgba(255, 255, 255, .7); stroke-width: 3px; }
+.mt-team { font: 700 14px var(--reading); fill: #FFF6E7; }
+.mt-ruler { fill: #F6E3A8; stroke: #1E2B2A; stroke-width: 2; }
+.mt-tick { stroke: #1E2B2A; stroke-width: 1.5; }
+.mt-tick.half { stroke-width: 1; }
+.mt-cm { font: 700 12px var(--reading); fill: #1E2B2A; }
+.mt-drop { stroke: #FFF6E7; stroke-width: 1.5; stroke-dasharray: 3 3; }
+.mt-square { fill: none; stroke: rgba(20, 49, 47, .3); stroke-width: 1; }
+.mt-cell { fill: #E4572E; stroke: #9A3418; stroke-width: 1.5; }
+.mt-water { fill: #7FC3E8; }
+.mt-mark { stroke: #14312F; stroke-width: 2.5; }
+.mt-cup { fill: #F3B229; stroke: #1E2B2A; stroke-width: 2; }
+
+/* ── Pick a Bib ────────────────────────────────────────────────────────── */
+
+.pb-stage { display: grid; gap: 10px; justify-items: center; width: 100%; }
+.pb-board { display: grid; gap: 8px; justify-items: center; width: 100%; }
+.pb-pic { display: block; width: min(100%, 420px, calc((100svh - 400px) * 1.36)); min-width: min(100%, 240px); height: auto; }
+.pb-pic.pb-spin { width: min(100%, 300px, calc(100svh - 420px)); min-width: min(100%, 200px); }
+.pb-bag { fill: rgba(220, 240, 250, .35); stroke: #DCEFF7; stroke-width: 4; }
+.pb-rim { fill: none; stroke: #DCEFF7; stroke-width: 4; }
+.pb-picks { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 40px; }
+.pb-picked { width: 34px; height: 34px; }
+.pb-tally { margin: 0; font: 700 clamp(17px, 4.4vw, 22px) var(--reading); color: var(--on-deep); white-space: pre-wrap; text-align: center; }
