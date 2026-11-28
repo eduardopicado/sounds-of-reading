@@ -38,6 +38,7 @@ import { CODE_STEPS } from '../content/coding';
 import { CALENDAR_STEPS } from '../content/calendar';
 import { ORBIT_STEPS } from '../content/orbits';
 import { PUNCTUATION_STEPS } from '../content/punctuation';
+import { STORY_STEPS, WORDS_STEPS, WORD_STEPS } from '../content/english';
 
 export type Section = 'reading' | 'writing' | 'maths' | 'geography' | 'space' | 'coding' | 'bjj' | 'football' | 'chess';
 
@@ -120,6 +121,12 @@ export const GAMES: Game[] = [
     load: () => import('./word-parts') },
   { path: 'punctuation-ref', name: 'Punctuation Ref', emoji: '🟨', what: 'Capitals, full stops, ? and !, commas', tone: '#C9A227', section: 'reading', ladder: PUNCTUATION_STEPS,
     load: () => import('./punctuation-ref') },
+  { path: 'word-positions', name: 'Word Positions', emoji: '🧱', what: 'Naming, doing and describing words', tone: '#5B6FB5', section: 'reading', ladder: WORD_STEPS,
+    load: () => import('./word-positions') },
+  { path: 'opposites', name: 'Opposites and Same', emoji: '🔁', what: 'Hot and cold, fast and quick, foot + ball', tone: '#B5527A', section: 'reading', ladder: WORDS_STEPS,
+    load: () => import('./opposites') },
+  { path: 'story-order', name: 'Story Order', emoji: '📚', what: 'First, next, last; who and where', tone: '#7A8C3E', section: 'reading', ladder: STORY_STEPS,
+    load: () => import('./story-order') },
   { path: 'trace-it', name: 'Trace It', emoji: '✏️', what: 'Start at the dot, follow the arrow', tone: '#4FB0C6', section: 'writing',
     load: () => import('./trace-it') },
   { path: 'tall-small-tail', name: 'Tall, Small, Tail', emoji: '🦒', what: 'Where does it sit on the lines?', tone: '#B5895A', section: 'writing',

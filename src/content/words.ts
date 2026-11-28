@@ -1084,3 +1084,83 @@ export const CONTRACTIONS: string[] = [
 /* who has what, for "It is Sam's hat" */
 export const POSSESSIONS: string[] = ['hat', 'cup', 'bag', 'ball', 'kite', 'bike', 'box', 'bed'];
 export const ANIMAL_OWNERS: string[] = ['dog:bone', 'cat:bed', 'pig:mud', 'hen:egg', 'fox:box', 'duck:pond'];
+
+/*  Word Positions — naming words (n), doing words (v) and describing words (d),
+ *  each tagged in a sentence where only that reading makes sense ("the dog
+ *  ran": dog names, ran does). The words left untagged (the, a, to) are none
+ *  of the three. Every word is one he can read, or one with an ending he has
+ *  learnt (jumps, kicked): the content test checks.  */
+export const WORD_KIND_SENTENCES: string[] = [
+  'The big:d dog:n sat:v.', 'A red:d bus:n stops:v.', 'The fast:d fox:n jumps:v.', 'My old:d hat:n fell:v.',
+  'The wet:d duck:n swims:v.', 'The hot:d sun:n shines:v.', 'The sad:d cat:n sat:v on the mat:n.',
+  'The long:d train:n went:v by.', 'The happy:d kid:n kicks:v the ball:n.', 'A thick:d book:n fell:v off the bed:n.',
+  'The quick:d frog:n hops:v on the log:n.', 'The new:d ball:n went:v in the net:n.', 'A cold:d wind:n blows:v.',
+  'The green:d frog:n sat:v on a rock:n.', 'A brown:d cow:n sat:v in the grass:n.', 'The bright:d star:n shines:v.',
+  'The black:d pig:n digs:v in the mud:n.', 'The red:d hen:n sat:v on her eggs:n.', 'A loud:d bell:n rings:v.',
+  'The dark:d storm:n hit:v the town:n.', 'The quiet:d fish:n swims:v.', 'The white:d boat:n rocks:v on the sea:n.',
+  'My best:d friend:n kicked:v the ball:n.', 'The thin:d cat:n jumped:v up.',
+];
+
+/*  Opposites and Same — pairs he can read. A word can be in more than one
+ *  pair; the game never offers a wrong choice that is also right (close is
+ *  the same as shut, so it is never beside shut as the opposite of open).  */
+export const OPPOSITES: string[] = [
+  'hot cold', 'up down', 'fast slow', 'in out', 'open shut', 'wet dry', 'day night', 'long short', 'happy sad',
+  'light dark', 'old new', 'push pull', 'start end', 'high low', 'thick thin', 'loud quiet', 'first last',
+  'left right', 'yes no', 'come go', 'front back', 'under over', 'boy girl', 'king queen',
+];
+export const SAME_MEANING: string[] = [
+  'fast quick', 'shut close', 'start begin', 'big large', 'shout yell', 'smile grin', 'sleep nap', 'rock stone',
+  'shop store', 'kid child',
+];
+/* two words he can read that make one: foot + ball = football */
+export const COMPOUND_WORDS: string[] = [
+  'foot ball', 'sun shine', 'bed room', 'play ground', 'snow man', 'cup cake', 'pan cake', 'hand bag', 'back pack',
+  'goal post', 'star fish', 'hill top', 'farm yard', 'dust bin', 'in side', 'out side', 'some thing', 'tooth brush',
+  'bed time', 'gold fish', 'home work', 'week end', 'rain coat', 'moon light', 'sun light', 'light house',
+];
+
+/*  Story Order — what happened first, next and last.
+ *
+ *  Pictures that come in one order (an egg, a chick, a hen), each named for
+ *  saying aloud; then little stories of three or four sentences that can
+ *  only go one way; then a question about who or where in each Read and
+ *  Point story (the right answer first, then two that are wrong).  */
+export const PICTURE_ORDERS: string[] = [
+  '🥚 egg, 🐣 chick, 🐔 hen', '🌱 seed, 🌿 plant, 🌳 tree', '🥚 egg, 🐛 caterpillar, 🦋 butterfly',
+  '🌅 morning, ☀️ day, 🌙 night', '☁️ clouds, 🌧️ rain, 🌈 rainbow', '👶 baby, 🧒 child, 🧓 grandad',
+  '❄️ snow, ⛄ snowman, 💧 water', '🐄 cow, 🥛 milk, 🧀 cheese', '🌾 wheat, 🍞 bread, 🥪 sandwich',
+  '🌑 no moon, 🌓 half moon, 🌕 full moon',
+];
+export const STORY_ORDERS: string[] = [
+  'I put on my boots. | I go to the park. | I kick the ball in the net.',
+  'We got in the car. | We went to the beach. | We had a swim in the sea.',
+  'The rain fell all day. | The pond got big. | The ducks had a swim in it.',
+  'It got dark. | I got in bed. | I went to sleep.',
+  'The ball went up. | It hit the post. | It fell in the net!',
+  'We went to the shop. | We got some milk. | We went home with it.',
+  'I fell off my bike. | I cut my leg. | Mother hugged me.',
+  'The dog jumped in the pond. | The dog got wet. | The dog shook, and we got wet too!',
+  'I was hot. | I got a cup of water. | I had a sip. | Then I was not hot.',
+  'The cat saw a mouse. | The cat jumped at it. | The mouse hid in a hole. | The cat sat and was sad.',
+  'We took the kite to the hill. | The wind took it up. | It went up and up. | Then it fell in a tree.',
+  'The snow fell all night. | In the morning it was white. | We had fun in the snow. | Then the sun was out, and the snow went away.',
+  'We got to the match. | The match started. | Our team got a goal. | We won the match!',
+  'I got my bag. | I went to school. | I sat at my desk all day. | At three I went home.',
+];
+export const STORY_QUESTIONS: string[] = [
+  'Ants | Where did the ants sit? | In a tin | In a hat | On a pan',
+  'I Spin | What did I sit on? | The ants | The dog | The mat',
+  'The Big Kick | Where did the ball go? | In the net | In the pond | Up a tree',
+  'The Duck | Where did the duck sit? | On a rock | On a log | In the mud',
+  'The Fox and the Frog | Who fell in the pond? | The frog | The fox | The duck',
+  'My Big Box | What did I hit the bell with? | The bat | The hat | The box',
+  'Lunch at the Shop | Where did we go for lunch? | The shop | The park | The beach',
+  'The Goal | When do we play? | At three | At night | At ten',
+  'The Night Train | Where did we sit? | By the window | On the roof | In the boat',
+  'Football at the Park | Who took the football? | A dog | My brother | A cat',
+  'The Storm | What did we do in the storm? | We read a book | We went to the park | We had a swim',
+  'The Bike Race | How many of us were in the race? | Five | Two | Ten',
+  'The Kite | Where did the kite end up? | In a tree | On the roof | In the pond',
+  'Draw with Me | Where was the hare? | At the farm | At the park | At the beach',
+];

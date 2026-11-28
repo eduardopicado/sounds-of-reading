@@ -89,6 +89,11 @@ src/content/flash-phrases.ts Flash Phrases: the steps, the phrases for his level
 src/content/punctuation.ts Punctuation Ref: the sentences (PUNCTUATION_SENTENCES
                        and the lists, short words and owners in words.ts, written
                        right) with one mistake taken out, and the rule for each
+src/content/english.ts Word Positions (naming, doing, describing words tagged in
+                       WORD_KIND_SENTENCES), Opposites and Same (OPPOSITES,
+                       SAME_MEANING, COMPOUND_WORDS; never a wrong choice that is
+                       also right) and Story Order (PICTURE_ORDERS, STORY_ORDERS,
+                       STORY_QUESTIONS on the Read and Point stories), from words.ts
 src/content/word-parts.ts Word Parts: the spelling rules that put an ending on
                        (hop → hopping, smile → smiling, cry → cried), what -ed
                        says, and the fronts and endings that change a meaning

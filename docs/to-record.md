@@ -5,15 +5,16 @@ Until a line is recorded the app says it in the device voice (and Coach Says say
 in the device voice until every phrase of it is recorded). With credit, `npm run make:audio` records
 exactly these, with the voices in public/audio/README.md.
 
-**2244 clips, about 68364 characters.**
+**2566 clips, about 77806 characters.**
 
-## English (Stuart, Australian): 1503
+## English (Stuart, Australian): 1825
 
 - A ball that hits a hand by accident is not a foul: no card.
 - A comma goes between the things in a list. Before the last one, "and" does the job.
 - A dangerous tackle is a red card: he has to leave the game.
 - A defender fouled an attacker. Free kick or penalty?
 - A defender fouled inside his own box: penalty!
+- A dog.
 - A drink bottle is about 25 centimetres tall.
 - A drink bottle is small: centimetres. A centimetre is about as wide as your finger.
 - A football boot is about 20 centimetres long.
@@ -105,19 +106,33 @@ exactly these, with the voices in public/audio/README.md.
 - April comes before May.
 - April has 30 days.
 - Arguing with the referee is a yellow card.
+- At the farm.
+- At three I went home.
+- At three.
 - August comes after July.
 - August comes before September.
 - August has 31 days.
 - Autumn is March, April and May.
+- Back and front are opposites.
+- Back and pack make backpack.
+- Backpack is back and pack.
 - bath, tub, bathtub
 - bathtub
+- Bed and room make bedroom.
+- Bed and time make bedtime.
+- Bedroom is bed and room.
+- Bedtime is bed and time.
+- Begin and start mean the same.
 - Ben and I play in the park.
+- Big and large mean the same.
 - Bison live in North America, and a smaller kind lives in the forests of Europe.
 - Bison live on the grassland.
 - Both arms forward: play on. The team that was fouled keeps the ball.
+- Boy and girl are opposites.
 - buck, et, bucket
 - bucket
 - Bump! The player hit a cone. Fix the program and try again.
+- By the window.
 - cac, tus, cactus
 - cactus
 - cam, el, camel
@@ -132,14 +147,22 @@ exactly these, with the voices in public/audio/README.md.
 - Central America joins North America to South America, and the Panama Canal goes across it.
 - chick, en, chicken
 - chicken
+- Child and kid mean the same.
 - chip, munk, chipmunk
 - chipmunk
+- Close and shut mean the same.
 - cob, web, cobweb
 - cobweb
+- Cold and hot are opposites.
+- Come and go are opposites.
 - cow, boy, cowboy
 - Crocodiles live in rivers and swamps in Africa, Asia, Australia and the Americas.
 - Crocodiles live in rivers.
+- Cup and cake make cupcake.
+- Cupcake is cup and cake.
 - Dan has a bike.
+- Dark and light are opposites.
+- Day and night are opposites.
 - Day! The house is on the side facing the Sun.
 - December comes after November.
 - December comes before January.
@@ -159,10 +182,14 @@ exactly these, with the voices in public/audio/README.md.
 - Does the Moon make its own light?
 - Dolphins live in the ocean, and breathe air through a hole on top of their heads.
 - Dolphins live in the ocean.
+- Down and up are opposites.
 - drag, on, dragon
 - dragon
 - drum, stick, drumstick
 - drumstick
+- Dry and wet are opposites.
+- Dust and bin make dustbin.
+- Dustbin is dust and bin.
 - Each square is 10 metres.
 - Each square is 2 metres.
 - Each square is 5 metres.
@@ -182,24 +209,35 @@ exactly these, with the voices in public/audio/README.md.
 - Earth is nearer to the Sun than Uranus.
 - Earth is our home, the only planet we know with living things.
 - Elephants live in Africa and Asia, and African elephants have the bigger ears.
+- End and start are opposites.
 - Every bib in the bag is blue, so you will pick blue for sure: certain.
 - Every bib in the bag is green, so you will pick green for sure: certain.
 - Every bib in the bag is red, so you will pick red for sure: certain.
 - Every bib in the bag is yellow, so you will pick yellow for sure: certain.
+- Farm and yard make farmyard.
 - farm, er, farmer
 - farmer
+- Farmyard is farm and yard.
+- Fast and quick mean the same.
+- Fast and slow are opposites.
 - February comes after January.
 - February comes before March.
 - February has 28 days, or 29 in a leap year. This year it has 28.
 - February has 28 days, or 29 in a leap year. This year it has 29.
+- First and last are opposites.
+- Five.
+- Foot and ball make football.
+- Football is foot and ball.
 - Friday comes after Thursday.
 - Friday comes before Saturday.
 - From the side, we see half of its lit half: a half moon.
+- Front and back are opposites.
 - Get the ball, then take it into the goal!
 - Get the player to the ball. You will need to turn a corner!
 - Get to the ball, but do not bump into the cones!
 - Giraffes live in Africa, and they are the tallest animals in the world.
 - Giraffes live on the grassland.
+- Girl and boy are opposites.
 - Go 1 square east,
 - Go 1 square east.
 - Go 1 square north-east.
@@ -232,8 +270,13 @@ exactly these, with the voices in public/audio/README.md.
 - Go 3 squares south.
 - Go 3 squares west,
 - Go 3 squares west.
+- Go and come are opposites.
+- Goal and post make goalpost.
 - Goal!
 - Goal! The program worked.
+- Goalpost is goal and post.
+- Gold and fish make goldfish.
+- Goldfish is gold and fish.
 - Good calendar reading!
 - Good coding!
 - Good guessing!
@@ -241,11 +284,18 @@ exactly these, with the voices in public/audio/README.md.
 - Good reading! Try again.
 - Good refereeing!
 - Good space exploring!
+- Good story reading!
+- Good word sorting!
+- Good word work!
 - Gorillas live in the rainforest.
 - Gorillas live in the rainforests of Africa, and they are the biggest apes.
 - Got it! The program worked.
+- Grin and smile mean the same.
 - ham, ster, hamster
 - hamster
+- Hand and bag make handbag.
+- Handbag is hand and bag.
+- Happy and sad are opposites.
 - He argued with the referee.
 - He got his second yellow card.
 - He made a dangerous tackle that could badly hurt someone.
@@ -263,8 +313,14 @@ exactly these, with the voices in public/audio/README.md.
 - helmet
 - Help!
 - Here is a program that works. Watch!
+- High and low are opposites.
+- Hill and top make hilltop.
+- Hilltop is hill and top.
 - Hippos live in Africa, and spend their days in rivers and lakes.
 - Hippos live in rivers.
+- Home and work make homework.
+- Homework is home and work.
+- Hot and cold are opposites.
 - hot, dog, hotdog
 - hotdog
 - How far is it to the bench?
@@ -312,11 +368,29 @@ exactly these, with the voices in public/audio/README.md.
 - How many days are in September?
 - How many days does the Earth take to go round the Sun?
 - How many moons does the Earth have?
+- How many of us were in the race?
 - How many squares does the shape cover?
 - I am thinking of a planet. Ask me questions to find it!
+- I cut my leg.
+- I fell off my bike.
+- I go to the park.
+- I got a cup of water.
+- I got in bed.
+- I got my bag.
+- I had a sip.
 - I have a red, a blue and a green kite.
 - I is always a capital letter.
+- I kick the ball in the net.
 - I kick the ball to Jack.
+- I put on my boots.
+- I sat at my desk all day.
+- I was hot.
+- I went to school.
+- I went to sleep.
+- In a tin.
+- In a tree.
+- In and out are opposites.
+- In and side make inside.
 - in the bag,
 - in the bag.
 - in the bath,
@@ -334,10 +408,11 @@ exactly these, with the voices in public/audio/README.md.
 - in the house.
 - in the hut,
 - in the hut.
+- In the morning it was white.
 - in the nest,
 - in the nest.
 - in the net,
-- in the net.
+- In the net.
 - in the tree,
 - in the tree.
 - in the truck,
@@ -346,6 +421,7 @@ exactly these, with the voices in public/audio/README.md.
 - in the van.
 - in, sect, insect
 - insect
+- Inside is in and side.
 - Is it bigger than Earth? No.
 - Is it bigger than Earth? Yes!
 - Is it day or night at the house?
@@ -367,7 +443,10 @@ exactly these, with the voices in public/audio/README.md.
 - Is Pat at school?
 - Is the cake for me?
 - It asks something, so it ends with a question mark.
+- It fell in the net!
 - It goes here.
+- It got dark.
+- It hit the post.
 - It is 10 metres.
 - It is 15 metres.
 - It is 2 metres.
@@ -423,6 +502,7 @@ exactly these, with the voices in public/audio/README.md.
 - It went over the goal line, and a defender touched it last: corner.
 - It went over the goal line, and an attacker touched it last: goal kick.
 - It went over the side line: throw-in.
+- It went up and up.
 - jack, et, jacket
 - jacket
 - January comes after December.
@@ -458,14 +538,22 @@ exactly these, with the voices in public/audio/README.md.
 - Kangaroos live only in Australia, and carry their babies, called joeys, in a pouch.
 - ketch, up, ketchup
 - ketchup
+- Kid and child mean the same.
+- King and queen are opposites.
 - kit, ten, kitten
 - kitten
 - Koalas live in Australia's gum trees, and eat their leaves.
 - Koalas live in the forest.
 - lap, top, laptop
 - laptop
+- Large and big mean the same.
+- Last and first are opposites.
+- Left and right are opposites.
 - lem, on, lemon
 - lemon
+- Light and dark are opposites.
+- Light and house make lighthouse.
+- Lighthouse is light and house.
 - Lions live on the grassland.
 - lip, stick, lipstick
 - lipstick
@@ -473,7 +561,10 @@ exactly these, with the voices in public/audio/README.md.
 - Llamas live in the mountains.
 - lob, ster, lobster
 - lobster
+- Long and short are opposites.
 - Look out!
+- Loud and quiet are opposites.
+- Low and high are opposites.
 - mag, net, magnet
 - magnet
 - Make a program to get the player to the ball. Then press Go!
@@ -522,10 +613,14 @@ exactly these, with the voices in public/audio/README.md.
 - Monday comes after Sunday.
 - Monday comes before Tuesday.
 - monster
+- Moon and light make moonlight.
+- Moonlight is moon and light.
 - Most lions live in Africa, and a few live in a forest in India, in Asia.
+- Mother hugged me.
 - mush, room, mushroom
 - mushroom
 - Names start with a capital letter.
+- Nap and sleep mean the same.
 - nap, kin, napkin
 - napkin
 - Neptune comes after Uranus.
@@ -539,7 +634,10 @@ exactly these, with the voices in public/audio/README.md.
 - Neptune is bigger than Venus.
 - Neptune is here.
 - Neptune is the farthest planet from the Sun, and the windiest.
+- New and old are opposites.
+- Night and day are opposites.
 - Night! The house is on the side away from the Sun. The Earth turns, so it will be day there soon.
+- No and yes are opposites.
 - No. The Moon shines because the Sun lights it up.
 - North America is north of Central America.
 - Not there. Try again.
@@ -555,6 +653,8 @@ exactly these, with the voices in public/audio/README.md.
 - Octopuses live in the ocean, and have eight arms.
 - Octopuses live in the ocean.
 - Oh no, the ball is in the pond!
+- Old and new are opposites.
+- On a rock.
 - on the bed,
 - on the bed.
 - on the bench,
@@ -565,11 +665,19 @@ exactly these, with the voices in public/audio/README.md.
 - on the ship.
 - One arm out, the way the kick goes: free kick.
 - Oops, off the pitch! Fix the program and try again.
+- Open and shut are opposites.
 - Orangutans live in the rainforest.
 - Orangutans live in the rainforests of two islands in Asia, Borneo and Sumatra.
+- Our team got a goal.
+- Out and in are opposites.
+- Out and side make outside.
+- Outside is out and side.
+- Over and under are opposites.
 - Pack a hat, a cup and a ball.
 - pad, lock, padlock
 - padlock
+- Pan and cake make pancake.
+- Pancake is pan and cake.
 - Pandas live in the forest.
 - Pandas live in the mountain forests of China, in Asia, and eat bamboo nearly all day.
 - pea, cock, peacock
@@ -579,14 +687,18 @@ exactly these, with the voices in public/audio/README.md.
 - Penguins live in the south: in Antarctica, and on the coasts of Australia, Africa and South America.
 - pic, nic, picnic
 - picnic
+- Play and ground make playground.
+- Playground is play and ground.
 - Polar bears live on the Arctic ice, in the far north of North America, Europe and Asia.
 - Polar bears live on the ice.
 - pop, corn, popcorn
 - popcorn
 - pud, ding, pudding
 - pudding
+- Pull and push are opposites.
 - pump, kin, pumpkin
 - pumpkin
+- Push and pull are opposites.
 - Put Africa on the map.
 - Put Antarctica on the map.
 - Put Asia on the map.
@@ -643,17 +755,25 @@ exactly these, with the voices in public/audio/README.md.
 - Put the zebra,
 - Put Victoria on the map.
 - Put Western Australia on the map.
+- Queen and king are opposites.
+- Quick and fast mean the same.
+- Quiet and loud are opposites.
 - rab, bit, rabbit
 - Raccoons come from North America, and wash their food with their front paws.
 - Raccoons live in the forest.
 - rail, way, railway
 - railway
+- Rain and coat make raincoat.
 - rain, bow, rainbow
+- Raincoat is rain and coat.
 - Read the name. Where does this animal live?
 - Ready, set, go!
+- Right and left are opposites.
+- Rock and stone mean the same.
 - rock, et, rocket
 - rub, bish, rubbish
 - rubbish
+- Sad and happy are opposites.
 - sail, boat, sailboat
 - sailboat
 - Sam has a dog, a cat and a pig.
@@ -687,10 +807,22 @@ exactly these, with the voices in public/audio/README.md.
 - September has 30 days.
 - Sharks live in every ocean, and there were sharks before there were dinosaurs.
 - Sharks live in the ocean.
+- Shop and store mean the same.
+- Short and long are opposites.
+- Shout and yell mean the same.
+- Shut and close mean the same.
+- Shut and open are opposites.
+- Sleep and nap mean the same.
 - Sloths live in the rainforest.
 - Sloths live in the rainforests of South America and the south of North America, and move very slowly.
+- Slow and fast are opposites.
+- Smile and grin mean the same.
+- Snow and man make snowman.
 - snow, man, snowman
 - snowman
+- Snowman is snow and man.
+- Some and thing make something.
+- Something is some and thing.
 - South America is south of Central America.
 - Spring is September, October and November.
 - Square A1 is here.
@@ -718,6 +850,10 @@ exactly these, with the voices in public/audio/README.md.
 - Square E3 is here.
 - Square E4 is here.
 - Square E5 is here.
+- Star and fish make starfish.
+- Starfish is star and fish.
+- Start and begin mean the same.
+- Start and end are opposites.
 - Start at the bench.
 - Start at the boat.
 - Start at the crab.
@@ -733,15 +869,21 @@ exactly these, with the voices in public/audio/README.md.
 - Start at the swing.
 - Start at the tent.
 - Start at the tree.
+- Stone and rock mean the same.
 - Stop!
 - Stopping a goal with your hand is a red card, and a penalty.
 - Stopping an attack on purpose is a yellow card: a warning.
+- Store and shop mean the same.
 - sum, mer, summer
 - Summer is January, February and December.
+- Sun and light make sunlight.
+- Sun and shine make sunshine.
 - sun, set, sunset
 - Sunday comes after Saturday.
 - Sunday comes before Monday.
+- Sunlight is sun and light.
 - sunset
+- Sunshine is sun and shine.
 - Taking your shirt off is a yellow card, even after a goal.
 - Tap every continent where bison live.
 - Tap every continent where camels live.
@@ -753,6 +895,7 @@ exactly these, with the voices in public/audio/README.md.
 - Tap every continent where polar bears live.
 - Tap every continent where raccoons live.
 - Tap every continent where sloths live.
+- Tap every naming word, then press Done.
 - Tap square A1.
 - Tap square A2.
 - Tap square A3.
@@ -859,9 +1002,11 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the deer that is not big.
 - Tap the deer,
 - Tap the deer.
+- Tap the describing word.
 - Tap the dog that is not big.
 - Tap the dog,
 - Tap the dog.
+- Tap the doing word.
 - Tap the drum that is not big.
 - Tap the drum,
 - Tap the drum.
@@ -905,14 +1050,17 @@ exactly these, with the voices in public/audio/README.md.
 - Tap the mouse that is not big.
 - Tap the mouse,
 - Tap the mouse.
+- Tap the naming word.
 - Tap the nest.
 - Tap the owl that is not big.
 - Tap the owl,
 - Tap the owl.
+- Tap the pictures in order: first, next, last.
 - Tap the pig that is not big.
 - Tap the pig,
 - Tap the pig.
 - Tap the rock.
+- Tap the sentences in order: what happened first?
 - Tap the shark that is not big.
 - Tap the shark,
 - Tap the shark.
@@ -1017,6 +1165,7 @@ exactly these, with the voices in public/audio/README.md.
 - That is the tree.
 - That is Uranus.
 - That is Venus.
+- The ants.
 - The apostrophe goes where the letters were taken out: can not, can't.
 - The apostrophe goes where the letters were taken out: did not, didn't.
 - The apostrophe goes where the letters were taken out: do not, don't.
@@ -1038,13 +1187,22 @@ exactly these, with the voices in public/audio/README.md.
 - The ball hit his hand by accident.
 - The ball is passed now. Is he offside?
 - The ball went out. What happens now?
+- The ball went up.
+- The bat.
 - The bench is here.
 - The boat is here.
 - The bus is late.
+- The cat jumped at it.
+- The cat sat and was sad.
+- The cat saw a mouse.
 - The crab is here.
 - The days of the week start with a capital letter.
+- The dog got wet.
 - The dog is in the mud.
+- The dog jumped in the pond.
+- The dog shook, and we got wet too!
 - The duck is here.
+- The ducks had a swim in it.
 - The Earth goes round the Sun once a year: 365 days.
 - The Earth has one moon: the Moon.
 - The Earth is 1 step from the Sun. About how many steps away is Jupiter?
@@ -1057,14 +1215,17 @@ exactly these, with the voices in public/audio/README.md.
 - The foul was outside the box: free kick.
 - The fox, the hen and the duck sat in the sun.
 - The frog sat on a log.
+- The frog.
 - The hen is in the shed.
 - The hill is here.
 - The hut is here.
 - The log is here.
+- The match started.
 - The Moon goes round the Earth about once a month.
 - The Moon goes round the Earth, and the Earth goes round the Sun.
 - The Moon is between the Earth and the Sun. Its lit half faces away from us, so we cannot see it: a new moon.
 - The Moon is on the far side of the Earth from the Sun, so we see all of its lit half: a full moon.
+- The mouse hid in a hole.
 - The nest is here.
 - The pig, the cow and the duck are on the farm.
 - The player has the ball, but he stopped before the goal. Add some more cards.
@@ -1072,6 +1233,8 @@ exactly these, with the voices in public/audio/README.md.
 - The player stopped before the ball. Add some more cards.
 - The player went past it. The player has to stop on the ball. Try again.
 - The player went past the goal. The player has to stop in it. Try again.
+- The pond got big.
+- The rain fell all day.
 - The ref checks the sentences. Which one is right?
 - The referee points at the corner flag: corner.
 - The referee points at the goal area: goal kick.
@@ -1079,12 +1242,15 @@ exactly these, with the voices in public/audio/README.md.
 - The rock is here.
 - The shell is here.
 - The ship is here.
+- The shop.
+- The snow fell all night.
 - The Sun is a star. It gives us light and keeps us warm.
 - The sun is hot.
 - The swing is here.
 - The tent is here.
 - The treasure is here.
 - The tree is here.
+- The wind took it up.
 - then 1 square east.
 - then 1 square north.
 - then 1 square south.
@@ -1097,6 +1263,8 @@ exactly these, with the voices in public/audio/README.md.
 - then 3 squares north.
 - then 3 squares south.
 - then 3 squares west.
+- Then I was not hot.
+- Then it fell in a tree.
 - then tap the bat.
 - then tap the bear.
 - then tap the bee.
@@ -1137,6 +1305,7 @@ exactly these, with the voices in public/audio/README.md.
 - then tap the tiger.
 - then tap the whale.
 - then tap the zebra.
+- Then the sun was out, and the snow went away.
 - There are blue bibs and other colours too, so blue could happen, or not: possible.
 - There are green bibs and other colours too, so green could happen, or not: possible.
 - There are no blue bibs in the bag, so it cannot happen: impossible.
@@ -1149,6 +1318,8 @@ exactly these, with the voices in public/audio/README.md.
 - There are no yellow bibs in the bag: impossible.
 - There are red bibs and other colours too, so red could happen, or not: possible.
 - There are yellow bibs and other colours too, so yellow could happen, or not: possible.
+- Thick and thin are opposites.
+- Thin and thick are opposites.
 - This is Central America.
 - This program has a bug. Fix it, then press Go!
 - Three reads! Great reading.
@@ -1164,8 +1335,10 @@ exactly these, with the voices in public/audio/README.md.
 - Tom can kick, run and jump.
 - Tom can run fast.
 - Too many cards! Use repeat to make them shorter.
+- Tooth and brush make toothbrush.
 - tooth, brush, toothbrush
 - toothbrush
+- Toothbrush is tooth and brush.
 - Tuesday comes after Monday.
 - Tuesday comes before Wednesday.
 - Turn over the planets it cannot be.
@@ -1176,6 +1349,8 @@ exactly these, with the voices in public/audio/README.md.
 - Two teams measured the mat in boots. Which team did it the right way?
 - Two teams measured the skipping rope in boots. Which team did it the right way?
 - Two yellow cards make a red card.
+- Under and over are opposites.
+- Up and down are opposites.
 - up, set, upset
 - upset
 - Uranus comes after Saturn.
@@ -1209,17 +1384,32 @@ exactly these, with the voices in public/audio/README.md.
 - Venus is nearer to the Sun than Saturn.
 - Venus is nearer to the Sun than Uranus.
 - Venus is the hottest planet, even hotter than Mercury.
+- We got in the car.
 - We got jam, cake and milk.
+- We got some milk.
+- We got to the match.
+- We had a swim in the sea.
+- We had fun in the snow.
 - We have a hat, a cup and a bag.
 - We play on Monday.
+- We read a book.
+- We took the kite to the hill.
+- We went home with it.
+- We went to the beach.
+- We went to the shop.
+- We won the match!
 - Wednesday comes after Tuesday.
 - Wednesday comes before Thursday.
+- Week and end make weekend.
 - week, end, weekend
 - weekend
+- Weekend is week and end.
+- Wet and dry are opposites.
 - Whales live in every ocean, and the blue whale is the biggest animal there has ever been.
 - Whales live in the ocean.
 - What a big cake!
 - What a good goal!
+- What comes next?
 - What day comes after Friday?
 - What day comes after Monday?
 - What day comes after Saturday?
@@ -1234,6 +1424,9 @@ exactly these, with the voices in public/audio/README.md.
 - What day comes before Thursday?
 - What day comes before Tuesday?
 - What day comes before Wednesday?
+- What did I hit the bell with?
+- What did I sit on?
+- What did we do in the storm?
 - What does the Moon go round?
 - What does the referee do?
 - What goes at the end?
@@ -1267,6 +1460,54 @@ exactly these, with the voices in public/audio/README.md.
 - What is below the swing?
 - What is below the tent?
 - What is below the tree?
+- What is the opposite of "back"?
+- What is the opposite of "boy"?
+- What is the opposite of "cold"?
+- What is the opposite of "come"?
+- What is the opposite of "dark"?
+- What is the opposite of "day"?
+- What is the opposite of "down"?
+- What is the opposite of "dry"?
+- What is the opposite of "end"?
+- What is the opposite of "fast"?
+- What is the opposite of "first"?
+- What is the opposite of "front"?
+- What is the opposite of "girl"?
+- What is the opposite of "go"?
+- What is the opposite of "happy"?
+- What is the opposite of "high"?
+- What is the opposite of "hot"?
+- What is the opposite of "in"?
+- What is the opposite of "king"?
+- What is the opposite of "last"?
+- What is the opposite of "left"?
+- What is the opposite of "light"?
+- What is the opposite of "long"?
+- What is the opposite of "loud"?
+- What is the opposite of "low"?
+- What is the opposite of "new"?
+- What is the opposite of "night"?
+- What is the opposite of "no"?
+- What is the opposite of "old"?
+- What is the opposite of "open"?
+- What is the opposite of "out"?
+- What is the opposite of "over"?
+- What is the opposite of "pull"?
+- What is the opposite of "push"?
+- What is the opposite of "queen"?
+- What is the opposite of "quiet"?
+- What is the opposite of "right"?
+- What is the opposite of "sad"?
+- What is the opposite of "short"?
+- What is the opposite of "shut"?
+- What is the opposite of "slow"?
+- What is the opposite of "start"?
+- What is the opposite of "thick"?
+- What is the opposite of "thin"?
+- What is the opposite of "under"?
+- What is the opposite of "up"?
+- What is the opposite of "wet"?
+- What is the opposite of "yes"?
 - What is the referee saying?
 - What is the short way to write "can not"?
 - What is the short way to write "did not"?
@@ -1371,7 +1612,13 @@ exactly these, with the voices in public/audio/README.md.
 - What season is November in?
 - What season is October in?
 - What season is September in?
+- When do we play?
+- Where did the ants sit?
 - Where did the ball go?
+- Where did the duck sit?
+- Where did the kite end up?
+- Where did we go for lunch?
+- Where did we sit?
 - Where does the bison live?
 - Where does the camel live?
 - Where does the comma go? Tap the gap.
@@ -1407,6 +1654,7 @@ exactly these, with the voices in public/audio/README.md.
 - Where is the spinner most likely to stop?
 - Where is Uranus?
 - Where is Venus?
+- Where was the hare?
 - Which animal lives in Africa?
 - Which animal lives in Antarctica?
 - Which animal lives in Asia?
@@ -1456,6 +1704,32 @@ exactly these, with the voices in public/audio/README.md.
 - Which square is the swing in?
 - Which square is the tent in?
 - Which square is the tree in?
+- Which two words make "backpack"?
+- Which two words make "bedroom"?
+- Which two words make "bedtime"?
+- Which two words make "cupcake"?
+- Which two words make "dustbin"?
+- Which two words make "farmyard"?
+- Which two words make "football"?
+- Which two words make "goalpost"?
+- Which two words make "goldfish"?
+- Which two words make "handbag"?
+- Which two words make "hilltop"?
+- Which two words make "homework"?
+- Which two words make "inside"?
+- Which two words make "lighthouse"?
+- Which two words make "moonlight"?
+- Which two words make "outside"?
+- Which two words make "pancake"?
+- Which two words make "playground"?
+- Which two words make "raincoat"?
+- Which two words make "snowman"?
+- Which two words make "something"?
+- Which two words make "starfish"?
+- Which two words make "sunlight"?
+- Which two words make "sunshine"?
+- Which two words make "toothbrush"?
+- Which two words make "weekend"?
 - Which way is the bench?
 - Which way is the boat?
 - Which way is the crab?
@@ -1471,7 +1745,53 @@ exactly these, with the voices in public/audio/README.md.
 - Which way is the swing?
 - Which way is the tent?
 - Which way is the tree?
+- Which word goes with "back" to make a new word?
+- Which word goes with "bed" to make a new word?
+- Which word goes with "cup" to make a new word?
+- Which word goes with "dust" to make a new word?
+- Which word goes with "farm" to make a new word?
+- Which word goes with "foot" to make a new word?
+- Which word goes with "goal" to make a new word?
+- Which word goes with "gold" to make a new word?
+- Which word goes with "hand" to make a new word?
+- Which word goes with "hill" to make a new word?
+- Which word goes with "home" to make a new word?
+- Which word goes with "in" to make a new word?
+- Which word goes with "light" to make a new word?
+- Which word goes with "moon" to make a new word?
+- Which word goes with "out" to make a new word?
+- Which word goes with "pan" to make a new word?
+- Which word goes with "play" to make a new word?
+- Which word goes with "rain" to make a new word?
+- Which word goes with "snow" to make a new word?
+- Which word goes with "some" to make a new word?
+- Which word goes with "star" to make a new word?
+- Which word goes with "sun" to make a new word?
+- Which word goes with "tooth" to make a new word?
+- Which word goes with "week" to make a new word?
+- Which word means the same as "begin"?
+- Which word means the same as "big"?
+- Which word means the same as "child"?
+- Which word means the same as "close"?
+- Which word means the same as "fast"?
+- Which word means the same as "grin"?
+- Which word means the same as "kid"?
+- Which word means the same as "large"?
+- Which word means the same as "nap"?
+- Which word means the same as "quick"?
+- Which word means the same as "rock"?
+- Which word means the same as "shop"?
+- Which word means the same as "shout"?
+- Which word means the same as "shut"?
+- Which word means the same as "sleep"?
+- Which word means the same as "smile"?
+- Which word means the same as "start"?
+- Which word means the same as "stone"?
+- Which word means the same as "store"?
+- Which word means the same as "yell"?
 - Which word needs a capital letter? Tap it.
+- Who fell in the pond?
+- Who took the football?
 - Will you come with me?
 - win, ter, winter
 - Winter is June, July and August.
@@ -1484,6 +1804,8 @@ exactly these, with the voices in public/audio/README.md.
 - Would you measure a school bus in metres or centimetres?
 - Would you measure a shin pad in metres or centimetres?
 - Would you measure a swimming pool in metres or centimetres?
+- Yell and shout mean the same.
+- Yes and no are opposites.
 - Yes! Find another one.
 - Yes! It is Earth!
 - Yes! It is Jupiter!

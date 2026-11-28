@@ -28,7 +28,8 @@ import { clipId } from '../src/lib/clip-id';
 import { toRecord, wanted } from '../tools/make-audio';
 import { SURVEY_STEPS, surveyAsk, surveyQuestion, surveySaid } from '../src/content/maths';
 import { flagCountries } from '../src/games/teams';
-import { ANIMAL_OWNERS, CONTRACTIONS, LIST_SENTENCES, POSSESSIONS, PUNCTUATION_NAMES, PUNCTUATION_SENTENCES } from '../src/content/words';
+import { ANIMAL_OWNERS, CONTRACTIONS, LIST_SENTENCES, POSSESSIONS, PUNCTUATION_NAMES, PUNCTUATION_SENTENCES, WORD_KIND_SENTENCES, OPPOSITES, SAME_MEANING, COMPOUND_WORDS, STORY_ORDERS, STORY_QUESTIONS } from '../src/content/words';
+import { readableAt as readableWithEnding } from '../src/content/word-parts';
 import { contrast, INK, PAPER } from '../src/lib/colour';
 import { MAX_SIZE, MIN_LENGTH, SEARCH_STEPS, THEMES, pickWords } from '../src/content/word-search';
 import { NOT_BY_CHANCE, NOT_SOUNDED_OUT, PHONEMES } from '../src/content/words';
@@ -1306,5 +1307,42 @@ describe('punctuation sentences', () => {
     expect(LIST_SENTENCES.length).toBeGreaterThanOrEqual(8);
     expect(CONTRACTIONS.length).toBeGreaterThanOrEqual(8);
     for (const c of CONTRACTIONS) expect(c, c).toMatch(/^[A-Za-z]+ [a-z]+ = [A-Za-z]+'[a-z]+$/);
+  });
+});
+
+/* ── Word Positions, Opposites and Same, Story Order ───────────────────── */
+
+describe('the English games\' words', () => {
+  const wordsIn = (t: string): string[] => t.replace(/:[nvd]\b/g, '').toLowerCase().match(/[a-z]+/g) ?? [];
+  /* a word he can read, or one with an ending he has learnt (jumps, kicked) */
+  const unreadable = (texts: string[]): string[] => texts.flatMap((t) => wordsIn(t).filter((w) => readableWithEnding(w) === undefined).map((w) => `${w} in "${t}"`));
+
+  it('uses only words he can read', () => {
+    const questions = STORY_QUESTIONS.map((q) => q.split(' | ').slice(1).join(' '));
+    expect(unreadable([...WORD_KIND_SENTENCES, ...OPPOSITES, ...SAME_MEANING, ...COMPOUND_WORDS, ...STORY_ORDERS, ...questions])).toEqual([]);
+  });
+
+  it('shows no blocked word, and every compound is a real word', () => {
+    const all = [...WORD_KIND_SENTENCES, ...OPPOSITES, ...SAME_MEANING, ...COMPOUND_WORDS, ...STORY_ORDERS, ...STORY_QUESTIONS];
+    expect(all.filter((t) => wordsIn(t).some((w) => blocked(w)))).toEqual([]);
+    expect(COMPOUND_WORDS.map((c) => c.replace(' ', '')).filter((w) => !CMU[w])).toEqual([]);
+  });
+
+  it('tags every sentence with one doing word, and at least one naming and one describing word', () => {
+    for (const s of WORD_KIND_SENTENCES) {
+      expect(s, s).toMatch(/^[A-Z].*[.!?]$/);
+      expect((s.match(/:v\b/g) ?? []).length, s).toBe(1);
+      expect((s.match(/:n\b/g) ?? []).length, s).toBeGreaterThanOrEqual(1);
+      expect((s.match(/:d\b/g) ?? []).length, s).toBeGreaterThanOrEqual(1);
+    }
+  });
+
+  it('writes the pairs as two words, and each story in three or four sentences', () => {
+    for (const p of [...OPPOSITES, ...SAME_MEANING, ...COMPOUND_WORDS]) expect(p, p).toMatch(/^[a-z]+ [a-z]+$/);
+    for (const s of STORY_ORDERS) {
+      const n = s.split(' | ').length;
+      expect([3, 4], s).toContain(n);
+      for (const line of s.split(' | ')) expect(line, s).toMatch(/^[A-Z].*[.!?]$/);
+    }
   });
 });

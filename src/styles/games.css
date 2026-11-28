@@ -2915,3 +2915,60 @@
 .pb-picks { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px; min-height: 40px; }
 .pb-picked { width: 34px; height: 34px; }
 .pb-tally { margin: 0; font: 700 clamp(17px, 4.4vw, 22px) var(--reading); color: var(--on-deep); white-space: pre-wrap; text-align: center; }
+
+/* ── Word Positions, Opposites and Same ────────────────────────────────── */
+
+.ew-stage { display: grid; gap: 12px; justify-items: center; width: 100%; }
+.ew-team { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font: 700 clamp(13px, 3.4vw, 16px) var(--reading); color: var(--on-deep-soft); }
+.ew-sentence {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 8px; width: min(100%, 640px);
+  padding: 14px 16px; border-radius: 16px; background: var(--paper); color: var(--ink); font: 400 clamp(26px, 6.4vw, 34px)/1.3 var(--reading);
+}
+.ew-word { min-height: 48px; padding: 2px 10px; border: 2px dashed rgba(20, 49, 47, .35); border-radius: 10px; background: #FFF; color: var(--ink); font: inherit; cursor: pointer; }
+.ew-word.still { border-color: transparent; background: none; cursor: default; padding: 2px 2px; }
+.ew-word.marked { background: #FFE08A; box-shadow: inset 0 -.12em 0 var(--mustard); border-radius: 8px; padding: 2px 8px; }
+.ew-word.on { background: #CFE3F7; border-style: solid; border-color: #3B7DD8; }
+.ew-word.right { background: var(--mint); border-style: solid; border-color: var(--green); }
+.ew-word.wrong { background: #F6C6B8; border-style: solid; border-color: var(--tomato); }
+.ew-end { margin-left: -6px; }
+.ew-done-row { flex-basis: 100%; display: flex; justify-content: center; }
+.ew-done { min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: var(--green); color: #FFF; font: 700 22px var(--display); cursor: pointer; }
+.ew-shown { margin: 0; min-height: 1em; font: 700 clamp(34px, 9vw, 48px) var(--reading); color: var(--on-deep); text-align: center; white-space: pre-wrap; }
+.wrap[data-game="opposites"] .mx-choice.word, .wrap[data-game="story-order"] .mx-choice.word { font-family: var(--reading); text-transform: none; }
+
+/* ── Story Order ───────────────────────────────────────────────────────── */
+
+.so-stage { display: grid; gap: 12px; justify-items: center; width: 100%; }
+.so-board { display: grid; gap: 12px; justify-items: center; width: 100%; }
+.so-row { display: flex; align-items: center; gap: 10px; font-size: clamp(48px, 12vw, 72px); }
+.so-pic.gap { display: inline-grid; place-items: center; width: 1.3em; height: 1.3em; border: 3px dashed var(--mustard); border-radius: 14px; font: 700 .6em var(--display); color: var(--mustard); }
+.so-arrow { font-size: .5em; color: var(--on-deep-soft); }
+.so-slots { display: grid; gap: 8px; width: min(100%, 620px); margin: 0; padding: 0; list-style: none; counter-reset: so; color: var(--on-deep); }
+.so-slot { counter-increment: so; }
+.so-slot::before { content: counter(so); flex: none; width: 34px; text-align: center; font: 700 20px var(--display); color: var(--mustard); }
+.so-slots.pictures { display: flex; gap: 12px; padding: 0; list-style: none; justify-content: center; }
+.so-slot { min-height: 52px; border: 2px dashed rgba(255, 246, 231, .35); border-radius: 12px; display: flex; align-items: center; }
+.so-slots.pictures .so-slot { width: 84px; height: 84px; justify-content: center; position: relative; }
+.so-slots.pictures .so-slot::before { position: absolute; top: 2px; left: 2px; width: auto; font-size: 15px; }
+.so-placed { padding: 8px 12px; font: 400 clamp(18px, 4.6vw, 24px)/1.3 var(--reading); color: var(--on-deep); }
+.so-slots.pictures .so-placed { font-size: 52px; padding: 0; }
+.so-tray { display: grid; gap: 8px; width: min(100%, 620px); }
+.so-tray.pictures { display: flex; justify-content: center; gap: 12px; }
+.so-card {
+  min-height: 52px; padding: 8px 14px; border: 0; border-radius: 12px; background: var(--paper); color: var(--ink); text-align: left;
+  font: 400 clamp(18px, 4.6vw, 24px)/1.3 var(--reading); cursor: pointer; box-shadow: 0 4px 0 rgba(0, 0, 0, .2);
+}
+.so-card.picture { width: 84px; height: 84px; padding: 0; text-align: center; font-size: 52px; }
+.so-card.nope { animation: so-nope .4s ease; }
+@keyframes so-nope { 0%, 100% { translate: 0 0; } 25% { translate: -6px 0; } 75% { translate: 6px 0; } }
+.so-story { width: min(100%, 640px); padding: 12px 16px; border-radius: 16px; background: var(--paper); color: var(--ink); }
+.so-title { margin: 0 0 6px; font: 700 22px var(--reading); }
+.so-text { margin: 0; font: 400 clamp(18px, 4.4vw, 22px)/1.45 var(--reading); }
+/* What comes next: the pictures to pick from, as big as the ones above */
+.wrap[data-game="story-order"]:has(.so-stage[data-task="next"]) .mx-choice.word { font-size: 52px; min-width: 96px; }
+@media (max-width: 560px) {
+  .so-slots, .so-tray { gap: 6px; }
+  .so-slot, .so-card { min-height: 44px; }
+  .so-card { padding: 6px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .so-card.nope { animation: none; } }
